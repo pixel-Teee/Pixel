@@ -4,6 +4,9 @@
     <Filter Include="Pixel">
       <UniqueIdentifier>{2748E20D-935C-0ABF-5CDE-AD1EC8B106F0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pixel\Events">
+      <UniqueIdentifier>{2B62FEA8-17C5-8D4D-C04A-C603AC8C59D0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pixel.h" />
@@ -16,9 +19,15 @@
     <ClInclude Include="src\Pixel\EntryPoint.h">
       <Filter>Pixel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pixel\Events\Event.h">
+      <Filter>Pixel\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\Pixel\Log.h">
       <Filter>Pixel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pixel\Events\ApplicationEvent.h" />
+    <ClInclude Include="src\Pixel\Events\KeyEvent.h" />
+    <ClInclude Include="src\Pixel\Events\MouseEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">

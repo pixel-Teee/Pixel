@@ -3,7 +3,8 @@
 #include <memory>
 
 #include "Core.h"
-#include <spdlog/spdlog.h>
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 
 namespace Pixel {
 	class PIXEL_API Log
