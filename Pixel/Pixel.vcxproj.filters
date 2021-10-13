@@ -19,15 +19,22 @@
     <ClInclude Include="src\Pixel\EntryPoint.h">
       <Filter>Pixel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pixel\Events\ApplicationEvent.h">
+      <Filter>Pixel\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\Pixel\Events\Event.h">
+      <Filter>Pixel\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Events\KeyEvent.h">
+      <Filter>Pixel\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Events\MouseEvent.h">
       <Filter>Pixel\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Log.h">
       <Filter>Pixel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pixel\Events\ApplicationEvent.h" />
-    <ClInclude Include="src\Pixel\Events\KeyEvent.h" />
-    <ClInclude Include="src\Pixel\Events\MouseEvent.h" />
+    <ClInclude Include="src\pxpch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">
@@ -36,5 +43,6 @@
     <ClCompile Include="src\Pixel\Log.cpp">
       <Filter>Pixel</Filter>
     </ClCompile>
+    <ClCompile Include="src\pxpch.cpp" />
   </ItemGroup>
 </Project>

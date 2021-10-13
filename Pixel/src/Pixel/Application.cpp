@@ -1,3 +1,4 @@
+#include "pxpch.h"
 #include "Application.h"
 
 #include "Pixel/Events/ApplicationEvent.h"

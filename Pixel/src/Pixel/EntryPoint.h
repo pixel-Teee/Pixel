@@ -10,7 +10,7 @@ int main()
 	PIXEL_CORE_WARN("Initialized Log!");
 	int a = 5;
 	PIXEL_INFO("Hello! Var = {0}", a);
-	printf("Pixel Engine");
+	printf("Pixel Engine\n");
 	auto app = Pixel::CreateApplication();
 	app->Run();
 	delete app;

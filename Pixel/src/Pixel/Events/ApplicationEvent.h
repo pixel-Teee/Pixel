@@ -2,8 +2,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
 namespace Pixel {
 	class PIXEL_API WindowResizeEvent : public Event
 	{

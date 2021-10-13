@@ -1,9 +1,6 @@
 #pragma once
-
+#include "pxpch.h"
 #include "Pixel/Core.h"
-
-#include <string.h>
-#include <functional>
 
 namespace Pixel {
 
