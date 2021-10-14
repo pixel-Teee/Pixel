@@ -10,6 +10,12 @@ workspace "Pixel"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+--Include directories relative to root folder(solution directory)
+IncludeDir = {}
+IncludeDir["GLFW"] = "Pixel/vendor/GLFW/include"
+
+include "Pixel/vendor/GLFW"
+
 project "Pixel"
 	location "Pixel"
 	kind "SharedLib"
@@ -30,7 +36,14 @@ project "Pixel"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include"
+		"%{prj.name}/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}"
+	}
+
+	links
+	{
+		"GLFW",
+		"opengl32.lib"
 	}
 
 	filter "system:windows"
@@ -60,6 +73,11 @@ project "Pixel"
 	filter "configurations:Dist"
 		defines "PX_DIST"
 		optimize "On"
+
+	filter "system:windows"
+        buildoptions { "-std=c11", "-lgdi32" }
+        systemversion "latest"
+        staticruntime "On"
 
 project "SandBox"
 	location "SandBox"
