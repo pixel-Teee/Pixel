@@ -2,7 +2,7 @@
 
 #include "Pixel/Window.h"
 
-struct GLFWwindow;
+#include <GLFW/glfw3.h>
 
 namespace Pixel {
 	class WindowsWindow : public Window

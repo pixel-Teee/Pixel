@@ -6,7 +6,6 @@
 #include "Pixel/Events/KeyEvent.h"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 namespace Pixel {
 	static bool s_GLFWInitialized = false;
@@ -49,6 +48,7 @@ namespace Pixel {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+		//glad¼ÓÔØOpenGLµÄº¯Êý
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 		PX_CORE_ASSERT(status, "Failed to initialize Glad!");

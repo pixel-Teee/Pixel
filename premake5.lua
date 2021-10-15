@@ -58,7 +58,8 @@ project "Pixel"
 		defines
 		{
 			"PX_PLATFORM_WINDOWS",
-			"PX_BUILD_DLL"
+			"PX_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands
