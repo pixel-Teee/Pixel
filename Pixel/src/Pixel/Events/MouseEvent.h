@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-namespace Hazel {
+namespace Pixel {
 
 	class PIXEL_API MouseMovedEvent : public Event
 	{
