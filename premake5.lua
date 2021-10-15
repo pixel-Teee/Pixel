@@ -14,9 +14,11 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["GLFW"] = "Pixel/vendor/GLFW/include"
 IncludeDir["Glad"] = "Pixel/vendor/Glad/include"
+IncludeDir["ImGui"] = "Pixel/vendor/imgui"
 
 include "Pixel/vendor/GLFW"
 include "Pixel/vendor/Glad"
+include "Pixel/vendor/imgui"
 
 project "Pixel"
 	location "Pixel"
@@ -40,13 +42,15 @@ project "Pixel"
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.Glad}"
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}"
 	}
 
 	links
 	{
 		"GLFW",
 		"Glad",
+		"ImGui",
 		"opengl32.lib"
 	}
 
@@ -59,7 +63,8 @@ project "Pixel"
 		{
 			"PX_PLATFORM_WINDOWS",
 			"PX_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
+			"GLFW_INCLUDE_NONE",
+			"IMGUI_IMPL_OPENGL_LOADER_CUSTOM"
 		}
 
 		postbuildcommands

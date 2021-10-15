@@ -22,6 +22,7 @@ public:
 	SandBox()
 	{
 		PushLayer(new ExampleLayer());
+		PushLayer(new Pixel::ImGuiLayer());
 	}
 
 	~SandBox()
