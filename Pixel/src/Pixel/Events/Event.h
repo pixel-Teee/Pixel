@@ -40,8 +40,7 @@ namespace Pixel {
 		{
 			return GetCategoryFlags() & category;
 		}
-	protected:
-		bool m_Handled = false;
+		bool Handled = false;
 	};
 
 	class EventDispatcher
@@ -60,7 +59,7 @@ namespace Pixel {
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
 				//先调用，再赋值，表示是否处理完函数对象func。
-				m_Event.m_Handled = func(*(T*)&m_Event);
+				m_Event.Handled = func(*(T*)&m_Event);
 				return true;
 			}
 		}

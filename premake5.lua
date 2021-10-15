@@ -64,14 +64,17 @@ project "Pixel"
 
 	filter "configurations:Debug"
 		defines "PX_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "PX_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "PX_DIST"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "system:windows"
@@ -116,12 +119,15 @@ project "SandBox"
 
 		filter "configurations:Debug"
 			defines "PX_DEBUG"
+			buildoptions "/MDd"
 			symbols "On"
 
 		filter "configurations:Release"
 			defines "PX_RELEASE"
+			buildoptions "/MD"
 			optimize "On"
 
 		filter "configurations:Dist"
 			defines "PX_DIST"
+			buildoptions "/MD"
 			optimize "On"
