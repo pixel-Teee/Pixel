@@ -13,8 +13,10 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 --Include directories relative to root folder(solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Pixel/vendor/GLFW/include"
+IncludeDir["Glad"] = "Pixel/vendor/Glad/include"
 
 include "Pixel/vendor/GLFW"
+include "Pixel/vendor/Glad"
 
 project "Pixel"
 	location "Pixel"
@@ -37,12 +39,14 @@ project "Pixel"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}"
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}"
 	}
 
 	links
 	{
 		"GLFW",
+		"Glad",
 		"opengl32.lib"
 	}
 
