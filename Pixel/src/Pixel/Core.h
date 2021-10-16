@@ -19,3 +19,5 @@
 	#define PX_ASSERT(x, ...)
 	#define PX_CORE_ASSERT(x, ...)
 #endif
+
+#define PX_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
