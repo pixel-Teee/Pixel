@@ -12,7 +12,7 @@ namespace Pixel {
 	Application* Application::s_Instance = nullptr;
 	Application::Application()
 	{
-		PX_CORE_ASSERT(!s_Instance, "Application already exist!")
+		PX_CORE_ASSERT(!s_Instance, "Application already exists!")
 		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
@@ -50,6 +50,7 @@ namespace Pixel {
 	void Application::PushOverlay(Layer* layer)
 	{
 		m_LayerStack.PushOverlay(layer);
+		layer->OnAttach();
 	}
 	
 	void Application::Run()
