@@ -149,8 +149,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="KeyCodes.h" />
-    <ClInclude Include="MouseButtonCodes.h" />
     <ClInclude Include="src\Pixel.h" />
     <ClInclude Include="src\Pixel\Application.h" />
     <ClInclude Include="src\Pixel\Core.h" />
@@ -161,9 +159,11 @@
     <ClInclude Include="src\Pixel\Events\MouseEvent.h" />
     <ClInclude Include="src\Pixel\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Pixel\Input.h" />
+    <ClInclude Include="src\Pixel\KeyCodes.h" />
     <ClInclude Include="src\Pixel\Layer.h" />
     <ClInclude Include="src\Pixel\LayerStack.h" />
     <ClInclude Include="src\Pixel\Log.h" />
+    <ClInclude Include="src\Pixel\MouseButtonCodes.h" />
     <ClInclude Include="src\Pixel\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />

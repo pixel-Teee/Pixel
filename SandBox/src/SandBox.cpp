@@ -13,7 +13,11 @@ public:
 
 	void OnEvent(Pixel::Event& event)override
 	{
-		//PIXEL_TRACE("{0}", event);
+		if (event.GetEventType() == Pixel::EventType::KeyPressed)
+		{
+			Pixel::KeyPressedEvent& KeyEvent = (Pixel::KeyPressedEvent&)event;
+			PIXEL_TRACE("{0}", (char)KeyEvent.GetKeyCode());
+		}
 	}
 };
 

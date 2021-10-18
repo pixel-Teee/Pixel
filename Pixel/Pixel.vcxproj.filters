@@ -49,6 +49,9 @@
     <ClInclude Include="src\Pixel\Input.h">
       <Filter>Pixel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pixel\KeyCodes.h">
+      <Filter>Pixel</Filter>
+    </ClInclude>
     <ClInclude Include="src\Pixel\Layer.h">
       <Filter>Pixel</Filter>
     </ClInclude>
@@ -56,6 +59,9 @@
       <Filter>Pixel</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Log.h">
+      <Filter>Pixel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\MouseButtonCodes.h">
       <Filter>Pixel</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Window.h">
@@ -71,12 +77,6 @@
       <Filter>Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\pxpch.h" />
-    <ClInclude Include="KeyCodes.h">
-      <Filter>Pixel</Filter>
-    </ClInclude>
-    <ClInclude Include="MouseButtonCodes.h">
-      <Filter>Pixel</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">
