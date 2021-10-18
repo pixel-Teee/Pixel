@@ -7,12 +7,13 @@ public:
 
 	void OnUpdate()override
 	{
-		PIXEL_INFO("ExampleLayer::Update");
+		if(Pixel::Input::IsKeyPressed(PX_KEY_TAB))
+			PIXEL_CORE_TRACE("Tab Key is Pressed!");
 	}
 
 	void OnEvent(Pixel::Event& event)override
 	{
-		PIXEL_TRACE("{0}", event);
+		//PIXEL_TRACE("{0}", event);
 	}
 };
 

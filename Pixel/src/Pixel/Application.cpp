@@ -66,7 +66,9 @@ namespace Pixel {
 				layer->OnUpdate();
 
 			auto[x, y] = Input::GetMousePosition();
-			PIXEL_CORE_TRACE("{0}, {1}", x, y);
+			//PIXEL_CORE_TRACE("{0}, {1}", x, y);
+
+			//Input::IsKeyPressed();
 
 			m_Window->OnUpdate();
 		}

@@ -149,6 +149,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="KeyCodes.h" />
+    <ClInclude Include="MouseButtonCodes.h" />
     <ClInclude Include="src\Pixel.h" />
     <ClInclude Include="src\Pixel\Application.h" />
     <ClInclude Include="src\Pixel\Core.h" />
