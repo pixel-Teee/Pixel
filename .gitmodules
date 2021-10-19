@@ -7,3 +7,6 @@
 [submodule "Pixel/vendor/imgui"]
 	path = Pixel/vendor/imgui
 	url = https://github.com/TheCherno/imgui
+[submodule "Pixel/vendor/glm"]
+	path = Pixel/vendor/glm
+	url = https://github.com/g-truc/glm

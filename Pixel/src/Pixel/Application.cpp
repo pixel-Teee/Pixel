@@ -7,6 +7,8 @@
 
 #include "Input.h"
 
+#include "glm/glm.hpp"
+
 namespace Pixel {
 
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -66,7 +68,9 @@ namespace Pixel {
 				layer->OnUpdate();
 
 			auto[x, y] = Input::GetMousePosition();
-			PIXEL_CORE_TRACE("{0}, {1}", x, y);
+			//PIXEL_CORE_TRACE("{0}, {1}", x, y);
+
+			//Input::IsKeyPressed();
 
 			m_Window->OnUpdate();
 		}
