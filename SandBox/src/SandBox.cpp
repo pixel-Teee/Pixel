@@ -3,7 +3,10 @@
 class ExampleLayer : public Pixel::Layer
 {
 public:
-	ExampleLayer():Layer("Example"){}
+	ExampleLayer():Layer("Example"){
+	
+		
+	}
 
 	void OnUpdate()override
 	{
