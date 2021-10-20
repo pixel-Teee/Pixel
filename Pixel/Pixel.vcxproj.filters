@@ -93,9 +93,6 @@
     <ClInclude Include="src\Pixel\Window.h">
       <Filter>src\Pixel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsInput.h">
       <Filter>src\Platform\Windows</Filter>
     </ClInclude>
@@ -1367,9 +1364,6 @@
     <ClCompile Include="src\Pixel\Log.cpp">
       <Filter>src\Pixel</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1379,5 +1373,6 @@
     <ClCompile Include="src\pxpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Pixel\ImGui\ImGuiBuild.cpp" />
   </ItemGroup>
 </Project>

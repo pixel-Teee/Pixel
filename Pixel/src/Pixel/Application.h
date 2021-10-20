@@ -7,6 +7,8 @@
 #include "Pixel/Events/Event.h"
 #include "Pixel/Events/ApplicationEvent.h"
 
+#include "Pixel/ImGui/ImGuiLayer.h"
+
 namespace Pixel {
 	class PIXEL_API Application
 	{
@@ -27,6 +29,7 @@ namespace Pixel {
 		inline Window& GetWindow(){ return *m_Window; }
 	private:
 		std::unique_ptr<Window> m_Window;
+		std::unique_ptr<ImGuiLayer> m_ImGuiLayer;
 		bool m_Running = true;
 
 		LayerStack m_LayerStack;
