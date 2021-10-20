@@ -1,11 +1,20 @@
 #include <Pixel.h>
 
+#include "imgui/imgui.h"
+
 class ExampleLayer : public Pixel::Layer
 {
 public:
 	ExampleLayer():Layer("Example"){
 	
-		auto cam = camera(5.0f, {2.0f, 1.0f});
+		
+	}
+
+	void OnImGuiRender() override
+	{
+		ImGui::Begin("Test");
+		ImGui::Text("Hello World!");
+		ImGui::End();
 	}
 
 	void OnUpdate()override
