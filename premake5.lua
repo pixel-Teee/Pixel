@@ -111,6 +111,7 @@ project "SandBox"
 	{
 		"Pixel/vendor/spdlog/include",
 		"Pixel/src",
+		"Pixel/vendor",
 		"%{IncludeDir.glm}"
 	}
 

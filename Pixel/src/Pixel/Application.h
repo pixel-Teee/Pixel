@@ -29,7 +29,7 @@ namespace Pixel {
 		inline Window& GetWindow(){ return *m_Window; }
 	private:
 		std::unique_ptr<Window> m_Window;
-		std::unique_ptr<ImGuiLayer> m_ImGuiLayer;
+		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 
 		LayerStack m_LayerStack;
