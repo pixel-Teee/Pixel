@@ -1346,6 +1346,10 @@
     </ClInclude>
     <ClInclude Include="src\Pixel\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\Pixel\Renderer\Shader.h" />
+    <ClInclude Include="src\Pixel\Renderer\Buffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
+    <ClInclude Include="src\Pixel\Renderer\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">
@@ -1376,5 +1380,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\Pixel\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Pixel\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
+    <ClCompile Include="src\Pixel\Renderer\Renderer.cpp" />
   </ItemGroup>
 </Project>
