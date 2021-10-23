@@ -18,6 +18,11 @@ namespace Pixel {
 		//glad¼ÓÔØOpenGLµÄº¯Êý
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		PX_CORE_ASSERT(status, "Failed to initialize Glad!");
+
+		PIXEL_CORE_INFO("OpenGL Info:");
+		PIXEL_CORE_INFO("Vendor : {0}", glGetString(GL_VENDOR));
+		PIXEL_CORE_INFO("Renderer : {0}", glGetString(GL_RENDERER));
+		PIXEL_CORE_INFO("Version : {0}", glGetString(GL_VERSION));
 	}
 
 	void OpenGLContext::SwapBuffers()
