@@ -155,7 +155,9 @@
     <ClInclude Include="src\Pixel\LayerStack.h" />
     <ClInclude Include="src\Pixel\Log.h" />
     <ClInclude Include="src\Pixel\MouseButtonCodes.h" />
+    <ClInclude Include="src\Pixel\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Pixel\Window.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\pxpch.h" />
@@ -582,6 +584,7 @@
     <ClCompile Include="src\Pixel\Layer.cpp" />
     <ClCompile Include="src\Pixel\LayerStack.cpp" />
     <ClCompile Include="src\Pixel\Log.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\pxpch.cpp">

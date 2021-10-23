@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pixel/Window.h"
+#include "Pixel/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
 
@@ -27,6 +28,7 @@ namespace Pixel {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{
