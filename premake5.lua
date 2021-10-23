@@ -24,9 +24,10 @@ include "Pixel/vendor/imgui"
 
 project "Pixel"
 	location "Pixel"
-	kind "SharedLib"
+	kind "StaticLib"
+	cppdialect "C++17"
 	language "C++"
-	staticruntime "off"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -40,6 +41,11 @@ project "Pixel"
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
+	}
+
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
 	}
 
 	includedirs
@@ -61,7 +67,6 @@ project "Pixel"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "10.0"
 
 		defines
@@ -72,31 +77,27 @@ project "Pixel"
 			"IMGUI_IMPL_OPENGL_LOADER_CUSTOM"
 		}
 
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
-		}
-
 	filter "configurations:Debug"
 		defines "PX_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "PX_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "PX_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 project "SandBox"
 	location "SandBox"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/"..outputdir.."/%{prj.name}")
 	objdir("bin-int/"..outputdir.."/%{prj.name}")
@@ -121,7 +122,6 @@ project "SandBox"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 
 		defines
@@ -132,14 +132,14 @@ project "SandBox"
 		filter "configurations:Debug"
 			defines "PX_DEBUG"
 			runtime "Debug"
-			symbols "On"
+			symbols "on"
 
 		filter "configurations:Release"
 			defines "PX_RELEASE"
 			runtime "Release"
-			optimize "On"
+			optimize "on"
 
 		filter "configurations:Dist"
 			defines "PX_DIST"
 			runtime "Release"
-			optimize "On"
+			optimize "on"
