@@ -15,27 +15,6 @@ namespace Pixel {
 
 	Application* Application::s_Instance = nullptr;
 
-	static GLenum ShaderDataTypeToOpenGLBasetype(ShaderDataType type)
-	{
-		switch (type)
-		{
-			case Pixel::ShaderDataType::None:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Float:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Float2:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Float3:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Float4:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Mat3:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Mat4:	return GL_FLOAT;
-			case Pixel::ShaderDataType::Int:	return GL_INT;
-			case Pixel::ShaderDataType::Int2:	return GL_INT;
-			case Pixel::ShaderDataType::Int3:	return GL_INT;
-			case Pixel::ShaderDataType::Int4:	return GL_INT;
-			case Pixel::ShaderDataType::Bool:	return GL_BOOL;
-		}
-		PX_CORE_ASSERT(false, "Unknown ShaderDataType!");
-		return 0;
-	}
-
 	Application::Application()
 	{
 		PX_CORE_ASSERT(!s_Instance, "Application already exists!")
@@ -47,40 +26,29 @@ namespace Pixel {
 		PushOverlay(m_ImGuiLayer);
 
 		//Vertex Array
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
+		m_VertexArray.reset(VertexArray::Create());
 
+		//Vertex Buffer
 		float vertices[3 * 7] = {
 			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 			 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
 		};
+		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 
 		BufferLayout layout = {
 			{ShaderDataType::Float3,  "a_Position"},
 			{ShaderDataType::Float4,  "a_Color"}
 		};
 
-		//Vertex Buffer
-		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 		m_VertexBuffer->SetLayout(layout);
 
-		uint32_t index = 0;
-		for (const auto& element : m_VertexBuffer->GetLayout())
-		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, 
-			element.GetComponentCount(), 
-			ShaderDataTypeToOpenGLBasetype(element.Type),
-			element.Normalized? GL_TRUE : GL_FALSE,
-			layout.GetStride(),
-			(const void*)element.Offset);
-			++index;
-		}
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
 		//Index Buffer
 		uint32_t indices[3] = {0, 1, 2};
 		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 		//Shader
 
 		std::string vertexSrc = R"(
@@ -155,8 +123,8 @@ namespace Pixel {
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			m_Shader->Bind();
-			glBindVertexArray(m_VertexArray);
-			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+			m_VertexArray->Bind();
+			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for(Layer* layer : m_LayerStack)
 				layer->OnUpdate();
