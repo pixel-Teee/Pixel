@@ -14,6 +14,28 @@ namespace Pixel {
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
+
+	static GLenum ShaderDataTypeToOpenGLBasetype(ShaderDataType type)
+	{
+		switch (type)
+		{
+			case Pixel::ShaderDataType::None:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Float:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Float2:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Float3:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Float4:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Mat3:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Mat4:	return GL_FLOAT;
+			case Pixel::ShaderDataType::Int:	return GL_INT;
+			case Pixel::ShaderDataType::Int2:	return GL_INT;
+			case Pixel::ShaderDataType::Int3:	return GL_INT;
+			case Pixel::ShaderDataType::Int4:	return GL_INT;
+			case Pixel::ShaderDataType::Bool:	return GL_BOOL;
+		}
+		PX_CORE_ASSERT(false, "Unknown ShaderDataType!");
+		return 0;
+	}
+
 	Application::Application()
 	{
 		PX_CORE_ASSERT(!s_Instance, "Application already exists!")
@@ -28,19 +50,34 @@ namespace Pixel {
 		glGenVertexArrays(1, &m_VertexArray);
 		glBindVertexArray(m_VertexArray);
 
-		float vertices[3 * 3] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f, 0.5f, 0.0f
+		float vertices[3 * 7] = {
+			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+			 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
+		};
+
+		BufferLayout layout = {
+			{ShaderDataType::Float3,  "a_Position"},
+			{ShaderDataType::Float4,  "a_Color"}
 		};
 
 		//Vertex Buffer
 		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
+		m_VertexBuffer->SetLayout(layout);
 
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		uint32_t index = 0;
+		for (const auto& element : m_VertexBuffer->GetLayout())
+		{
+			glEnableVertexAttribArray(index);
+			glVertexAttribPointer(index, 
+			element.GetComponentCount(), 
+			ShaderDataTypeToOpenGLBasetype(element.Type),
+			element.Normalized? GL_TRUE : GL_FALSE,
+			layout.GetStride(),
+			(const void*)element.Offset);
+			++index;
+		}
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 		//Index Buffer
 		uint32_t indices[3] = {0, 1, 2};
 		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
@@ -49,11 +86,13 @@ namespace Pixel {
 		std::string vertexSrc = R"(
 			#version 330 core
 			layout(location = 0) in vec3 a_Position;
-
+			layout(location = 1) in vec4 a_Color;
 			out vec3 v_Position;
+			out vec4 v_Color;
 			void main()
 			{
 				v_Position = a_Position;
+				v_Color = a_Color;
 				gl_Position = vec4(a_Position, 1.0f);
 			}
 		)";
@@ -63,9 +102,10 @@ namespace Pixel {
 			out vec4 color;
 
 			in vec3 v_Position;
+			in vec4 v_Color;
 			void main()
 			{
-				color = vec4(v_Position * 0.5f + 0.5f, 1.0f);
+				color = v_Color;
 			}
 		)";
 
