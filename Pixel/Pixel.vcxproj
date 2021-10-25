@@ -140,7 +140,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="RendererAPI.h" />
     <ClInclude Include="src\Pixel.h" />
     <ClInclude Include="src\Pixel\Application.h" />
     <ClInclude Include="src\Pixel\Core.h" />
@@ -160,6 +159,7 @@
     <ClInclude Include="src\Pixel\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Pixel\Renderer\RenderCommand.h" />
     <ClInclude Include="src\Pixel\Renderer\Renderer.h" />
+    <ClInclude Include="src\Pixel\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Pixel\Renderer\Shader.h" />
     <ClInclude Include="src\Pixel\Renderer\VertexArray.h" />
     <ClInclude Include="src\Pixel\Window.h" />

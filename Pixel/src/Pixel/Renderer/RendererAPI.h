@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Pixel/Renderer/VertexArray.h"
+#include "VertexArray.h"
 
 namespace Pixel {
 

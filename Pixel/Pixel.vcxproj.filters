@@ -1374,14 +1374,14 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="RendererAPI.h">
-      <Filter>src\Pixel\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Pixel\Renderer\RenderCommand.h">
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h">
       <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Renderer\RendererAPI.h">
+      <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
