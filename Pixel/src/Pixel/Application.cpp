@@ -4,6 +4,7 @@
 #include "Pixel/Log.h"
 
 #include <glad/glad.h>
+#include "Pixel/Renderer/Renderer.h"
 
 #include "Input.h"
 
@@ -78,6 +79,61 @@ namespace Pixel {
 		)";
 
 		m_Shader.reset(new Shader(vertexSrc, fragmentSrc));
+
+		//VertexArray
+		m_VertexArray2.reset(VertexArray::Create());
+
+		//VertexBuffer
+		float vertices2[4 * 3] = {
+		-0.75f, -0.75f, 0.0f,
+		 0.75f, -0.75f, 0.0f,
+		 0.75f, 0.75f, 0.0f,
+		-0.75f, 0.75f, 0.0f
+		};
+
+		std::shared_ptr<VertexBuffer> VertexBuffer2;
+		VertexBuffer2.reset(VertexBuffer::Create(vertices2, sizeof(vertices2)));
+		//IndexBuffer
+
+		uint32_t indices2[6] = {
+		0, 1, 2, 2, 3, 0		
+		};
+
+		BufferLayout layout2 = {
+			{ShaderDataType::Float3,  "a_Position"}
+		};
+
+		std::shared_ptr<IndexBuffer> IndexBuffer2;
+		IndexBuffer2.reset(IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
+		VertexBuffer2->SetLayout(layout2);
+
+		m_VertexArray2->AddVertexBuffer(VertexBuffer2);
+		m_VertexArray2->SetIndexBuffer(IndexBuffer2);
+
+		//Shader
+		std::string vertexSrc2 = R"(
+			#version 330 core
+			layout(location = 0) in vec3 a_Position;
+			out vec3 v_Position;
+			void main()
+			{
+				v_Position = a_Position;
+				gl_Position = vec4(a_Position, 1.0f);
+			}
+		)";
+
+		std::string fragmentSrc2 = R"(
+			#version 330 core
+			out vec4 color;
+
+			in vec3 v_Position;
+			void main()
+			{
+				 color = vec4(0.3f, 0.2f, 0.4f, 1.0f);
+			}
+		)";
+
+		m_Shader2.reset(new Shader(vertexSrc2, fragmentSrc2));
 	}
 	Application::~Application()
 	{
@@ -119,12 +175,20 @@ namespace Pixel {
 	{
 		while (m_Running)
 		{
-			glClearColor(0.2f, 0.2f, 0.2f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			RenderCommand::SetClearColor({0.1f, 0.2f, 0.3f, 1.0f});
+			RenderCommand::Clear();
+
+			Renderer::BeginScene();
+
+			m_Shader2->Bind();
+			m_VertexArray2->Bind();
+			glDrawElements(GL_TRIANGLES, m_VertexArray2->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			m_Shader->Bind();
 			m_VertexArray->Bind();
 			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+
+			Renderer::EndScene();
 
 			for(Layer* layer : m_LayerStack)
 				layer->OnUpdate();
