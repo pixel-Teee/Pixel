@@ -16,7 +16,7 @@ namespace Pixel {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application()
+	Application::Application():m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		PX_CORE_ASSERT(!s_Instance, "Application already exists!")
 		s_Instance = this;
@@ -56,13 +56,16 @@ namespace Pixel {
 			#version 330 core
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
+
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_Position;
 			out vec4 v_Color;
 			void main()
 			{
 				v_Position = a_Position;
 				v_Color = a_Color;
-				gl_Position = vec4(a_Position, 1.0f);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
 			}
 		)";
 
@@ -114,11 +117,14 @@ namespace Pixel {
 		std::string vertexSrc2 = R"(
 			#version 330 core
 			layout(location = 0) in vec3 a_Position;
+
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_Position;
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = vec4(a_Position, 1.0f);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
 			}
 		)";
 
@@ -178,15 +184,12 @@ namespace Pixel {
 			RenderCommand::SetClearColor({0.1f, 0.2f, 0.3f, 1.0f});
 			RenderCommand::Clear();
 
-			Renderer::BeginScene();
+			Renderer::BeginScene(m_Camera);
+			m_Camera.SetPosition({0.5f, 0.5f, 0.0f});
+			m_Camera.SetRotation(45.0f);
 
-			m_Shader2->Bind();
-			m_VertexArray2->Bind();
-			glDrawElements(GL_TRIANGLES, m_VertexArray2->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-
-			m_Shader->Bind();
-			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::Submit(m_Shader2, m_VertexArray2);
+			Renderer::Submit(m_Shader, m_VertexArray);
 
 			Renderer::EndScene();
 

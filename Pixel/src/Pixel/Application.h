@@ -13,6 +13,8 @@
 #include "Pixel/Renderer/Buffer.h"
 #include "Pixel/Renderer/VertexArray.h"
 
+#include "Pixel/Renderer/OrthographicCamera.h"
+
 namespace Pixel {
 	class PIXEL_API Application
 	{
@@ -45,6 +47,8 @@ namespace Pixel {
 
 		std::shared_ptr<Shader> m_Shader2;
 		std::shared_ptr<VertexArray> m_VertexArray2;
+
+		OrthographicCamera m_Camera;
 	private:
 		static Application* s_Instance;
 	};

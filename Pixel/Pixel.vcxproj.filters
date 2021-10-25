@@ -1383,6 +1383,9 @@
     <ClInclude Include="src\Pixel\Renderer\RendererAPI.h">
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pixel\Renderer\OrthographicCamera.h">
+      <Filter>src\Pixel\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">
@@ -1440,6 +1443,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Pixel\Renderer\RendererAPI.cpp">
+      <Filter>src\Pixel\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pixel\Renderer\OrthographicCamera.cpp">
       <Filter>src\Pixel\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
