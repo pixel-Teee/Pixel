@@ -1387,6 +1387,7 @@
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Core\Timestep.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">
@@ -1449,5 +1450,6 @@
     <ClCompile Include="src\Pixel\Renderer\OrthographicCamera.cpp">
       <Filter>src\Pixel\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
   </ItemGroup>
 </Project>

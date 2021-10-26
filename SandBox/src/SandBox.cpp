@@ -1,8 +1,11 @@
 #include <Pixel.h>
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 #include "imgui/imgui.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class ExampleLayer : public Pixel::Layer
 {
@@ -65,7 +68,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(new Pixel::Shader(vertexSrc, fragmentSrc));
+		m_Shader.reset(Pixel::Shader::Create(vertexSrc, fragmentSrc));
 
 		//VertexArray
 		m_VertexArray2.reset(Pixel::VertexArray::Create());
@@ -119,20 +122,22 @@ public:
 
 			in vec3 v_Position;
 
-			uniform vec4 u_Color;
+			uniform vec3 u_Color;
 
 			void main()
 			{
-				 color = u_Color;
+				 color = vec4(u_Color, 1.0f);
 			}
 		)";
 
-		m_Shader2.reset(new Pixel::Shader(vertexSrc2, fragmentSrc2));
+		m_Shader2.reset(Pixel::Shader::Create(vertexSrc2, fragmentSrc2));
 	}
 
 	void OnImGuiRender() override
 	{
-
+		ImGui::Begin("Settings");
+		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+		ImGui::End();
 	}
 
 	void OnUpdate(Pixel::Timestep ts)override
@@ -174,16 +179,15 @@ public:
 		glm::vec4 redColor(0.7f, 0.2f, 0.2f, 1.0f);
 		glm::vec4 blueColor(0.2f, 0.3f, 0.8f, 1.0f);
 
+		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_Shader2)->Bind();
+		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_Shader2)->UploadUniformFloat3("u_Color", m_SquareColor);
+
 		for (int y = 0; y < 20; ++y)
 		{
 			for (int x = 0; x < 20; ++x)
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				if(x % 2 == 1) 
-					m_Shader2->UploadUniformFloat4("u_Color", redColor);
-				else
-					m_Shader2->UploadUniformFloat4("u_Color", blueColor);
 				Pixel::Renderer::Submit(m_Shader2, m_VertexArray2, transform);
 			}
 		}
@@ -219,6 +223,8 @@ private:
 
 	glm::vec3 m_SquarePosition;
 	float m_SquareMoveSpeed = 0.5f;
+
+	glm::vec3 m_SquareColor;
 };
 
 class SandBox : public Pixel::Application

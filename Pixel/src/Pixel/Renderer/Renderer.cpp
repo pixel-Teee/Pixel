@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "Renderer.h"
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 namespace Pixel {
 
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
@@ -16,9 +18,9 @@ namespace Pixel {
 	{
 		shader->Bind();
 		//其实ViewProjectionMatrix只要调用一次
-		shader->UploadUniformMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);
+		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);
 		//transform每个物体都不一样
-		shader->UploadUniformMat4("u_Transform", transform);
+		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
 
 		vertexArray->Bind();
 		RenderCommand::DrawIndexed(vertexArray);
