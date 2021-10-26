@@ -192,7 +192,7 @@ public:
 			}
 		}
 		
-		//Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
+		Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
 
 		Pixel::Renderer::EndScene();
 	}
@@ -224,7 +224,7 @@ private:
 	glm::vec3 m_SquarePosition;
 	float m_SquareMoveSpeed = 0.5f;
 
-	glm::vec3 m_SquareColor;
+	glm::vec3 m_SquareColor = glm::vec3(1.0f);
 };
 
 class SandBox : public Pixel::Application
