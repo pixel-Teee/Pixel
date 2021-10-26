@@ -10,6 +10,8 @@
 
 #include "glm/glm.hpp"
 
+#include "GLFW/glfw3.h"
+
 namespace Pixel {
 
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -68,8 +70,12 @@ namespace Pixel {
 	{
 		while (m_Running)
 		{
+			float time = (float)glfwGetTime();//这是平台相关的获取Time的函数，未来会换掉
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+			
 			for(Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+				layer->OnUpdate(timestep);
 
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)

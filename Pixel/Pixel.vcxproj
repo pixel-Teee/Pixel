@@ -143,6 +143,7 @@
     <ClInclude Include="src\Pixel.h" />
     <ClInclude Include="src\Pixel\Application.h" />
     <ClInclude Include="src\Pixel\Core.h" />
+    <ClInclude Include="src\Pixel\Core\Timestep.h" />
     <ClInclude Include="src\Pixel\EntryPoint.h" />
     <ClInclude Include="src\Pixel\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Pixel\Events\Event.h" />

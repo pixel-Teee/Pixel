@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pixel/Core.h"
+#include "Pixel/Core/Timestep.h"
 #include "Pixel/Events/Event.h"
 
 namespace Pixel
@@ -13,7 +14,7 @@ namespace Pixel
 
 		virtual void OnAttach(){}
 		virtual void OnDetach(){}
-		virtual void OnUpdate(){}
+		virtual void OnUpdate(Timestep ts){}
 		virtual void OnImGuiRender(){}
 		virtual void OnEvent(Event& event){}
 

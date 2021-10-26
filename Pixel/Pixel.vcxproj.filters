@@ -1386,6 +1386,7 @@
     <ClInclude Include="src\Pixel\Renderer\OrthographicCamera.h">
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Pixel\Core\Timestep.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pixel\Application.cpp">

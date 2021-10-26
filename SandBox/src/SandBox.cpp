@@ -128,8 +128,20 @@ public:
 
 	}
 
-	void OnUpdate()override
+	void OnUpdate(Pixel::Timestep ts)override
 	{
+		//PIXEL_TRACE("Delta time: {0}s ({1}ms)", ts.GetSeconds(), ts.GetMilliseconds());
+
+		if(Pixel::Input::IsKeyPressed(PX_KEY_LEFT))
+			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
+		else if(Pixel::Input::IsKeyPressed(PX_KEY_RIGHT))
+			m_CameraPosition.x += m_CameraMoveSpeed * ts;
+
+		if (Pixel::Input::IsKeyPressed(PX_KEY_UP))
+			m_CameraPosition.y += m_CameraMoveSpeed * ts;
+		else if (Pixel::Input::IsKeyPressed(PX_KEY_DOWN))
+			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
+
 		Pixel::RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
 		Pixel::RenderCommand::Clear();
 
@@ -151,14 +163,6 @@ public:
 
 	bool OnPressed(Pixel::KeyPressedEvent& event)
 	{
-		if(event.GetKeyCode() == PX_KEY_LEFT)
-			m_CameraPosition.x -= m_CameraMoveSpeed;
-		if(event.GetKeyCode() == PX_KEY_RIGHT)
-			m_CameraPosition.x += m_CameraMoveSpeed;
-		if (event.GetKeyCode() == PX_KEY_UP)
-			m_CameraPosition.y += m_CameraMoveSpeed;
-		if (event.GetKeyCode() == PX_KEY_DOWN)
-			m_CameraPosition.y -= m_CameraMoveSpeed;
 		return false;
 	}
 

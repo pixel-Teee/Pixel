@@ -7,13 +7,10 @@
 #include "Pixel/Events/Event.h"
 #include "Pixel/Events/ApplicationEvent.h"
 
+#include "Pixel/Core/Timestep.h"
+
 #include "Pixel/ImGui/ImGuiLayer.h"
 
-#include "Pixel/Renderer/Shader.h"
-#include "Pixel/Renderer/Buffer.h"
-#include "Pixel/Renderer/VertexArray.h"
-
-#include "Pixel/Renderer/OrthographicCamera.h"
 
 namespace Pixel {
 	class PIXEL_API Application
@@ -39,6 +36,9 @@ namespace Pixel {
 		bool m_Running = true;
 
 		LayerStack m_LayerStack;
+
+		Timestep m_Timestep;
+		float m_LastFrameTime = 0.0f;
 	private:
 		static Application* s_Instance;
 	};
