@@ -5,7 +5,7 @@
 class ExampleLayer : public Pixel::Layer
 {
 public:
-	ExampleLayer():Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
+	ExampleLayer():Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
 	{
 		//Vertex Array
 		m_VertexArray.reset(Pixel::VertexArray::Create());
@@ -134,8 +134,8 @@ public:
 		Pixel::RenderCommand::Clear();
 
 		Pixel::Renderer::BeginScene(m_Camera);
-		m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
-		m_Camera.SetRotation(45.0f);
+		m_Camera.SetPosition(m_CameraPosition);
+		m_Camera.SetRotation(0.0f);
 
 		Pixel::Renderer::Submit(m_Shader2, m_VertexArray2);
 		Pixel::Renderer::Submit(m_Shader, m_VertexArray);
@@ -145,8 +145,23 @@ public:
 
 	void OnEvent(Pixel::Event& event)override
 	{
-
+		Pixel::EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<Pixel::KeyPressedEvent>(PX_BIND_EVENT_FN(ExampleLayer::OnPressed));
 	}
+
+	bool OnPressed(Pixel::KeyPressedEvent& event)
+	{
+		if(event.GetKeyCode() == PX_KEY_LEFT)
+			m_CameraPosition.x -= m_CameraMoveSpeed;
+		if(event.GetKeyCode() == PX_KEY_RIGHT)
+			m_CameraPosition.x += m_CameraMoveSpeed;
+		if (event.GetKeyCode() == PX_KEY_UP)
+			m_CameraPosition.y += m_CameraMoveSpeed;
+		if (event.GetKeyCode() == PX_KEY_DOWN)
+			m_CameraPosition.y -= m_CameraMoveSpeed;
+		return false;
+	}
+
 private:
 	std::shared_ptr<Pixel::Shader> m_Shader;
 	std::shared_ptr<Pixel::VertexArray>  m_VertexArray;
@@ -157,6 +172,8 @@ private:
 	std::shared_ptr<Pixel::VertexArray> m_VertexArray2;
 
 	Pixel::OrthographicCamera m_Camera;
+	glm::vec3 m_CameraPosition;
+	float m_CameraMoveSpeed = 0.05f;
 };
 
 class SandBox : public Pixel::Application
