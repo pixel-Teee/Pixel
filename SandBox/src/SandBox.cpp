@@ -74,11 +74,11 @@ public:
 		m_VertexArray2.reset(Pixel::VertexArray::Create());
 
 		//VertexBuffer
-		float vertices2[4 * 3] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.5f, 0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f
+		float vertices2[4 * 5] = {
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		 0.5f, 0.5f, 0.0f,	1.0f, 1.0f,
+		-0.5f, 0.5f, 0.0f,	0.0f, 1.0f	
 		};
 
 		Pixel::Ref<Pixel::VertexBuffer> VertexBuffer2;
@@ -90,7 +90,8 @@ public:
 		};
 
 		Pixel::BufferLayout layout2 = {
-			{Pixel::ShaderDataType::Float3,  "a_Position"}
+			{Pixel::ShaderDataType::Float3,  "a_Position"},
+			{Pixel::ShaderDataType::Float2,  "a_TexCoord"}
 		};
 
 		Pixel::Ref<Pixel::IndexBuffer> IndexBuffer2;
@@ -131,6 +132,47 @@ public:
 		)";
 
 		m_Shader2.reset(Pixel::Shader::Create(vertexSrc2, fragmentSrc2));
+
+		//Texture Shader
+		std::string textureShaderVertexSrc = R"(
+			#version 330 core
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0f);
+			}
+		)";
+
+		std::string textureShaderfragmentSrc = R"(
+			#version 330 core
+			out vec4 color;
+
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+
+			void main()
+			{
+				 //color = vec4(v_TexCoord, 0.0f, 1.0f);
+				 color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+
+		m_TextureShader.reset(Pixel::Shader::Create(textureShaderVertexSrc, textureShaderfragmentSrc));
+
+		//texture
+		m_Texture = Pixel::Texture2D::Create("assets/textures/Checkerboard.png");
+
+		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_TextureShader)->Bind();
+		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnImGuiRender() override
@@ -191,8 +233,12 @@ public:
 				Pixel::Renderer::Submit(m_Shader2, m_VertexArray2, transform);
 			}
 		}
-		
-		Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
+	
+		m_Texture->Bind();
+		Pixel::Renderer::Submit(m_TextureShader, m_VertexArray2, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+
+		//Triangle
+		//Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
 
 		Pixel::Renderer::EndScene();
 	}
@@ -214,8 +260,10 @@ private:
 	Pixel::Ref<Pixel::VertexBuffer> m_VertexBuffer;
 	Pixel::Ref<Pixel::IndexBuffer>  m_IndexBuffer;
 
-	Pixel::Ref<Pixel::Shader> m_Shader2;
+	Pixel::Ref<Pixel::Shader> m_Shader2, m_TextureShader;
 	Pixel::Ref<Pixel::VertexArray> m_VertexArray2;
+
+	Pixel::Ref<Pixel::Texture2D> m_Texture;
 
 	Pixel::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;

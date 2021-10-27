@@ -20,6 +20,7 @@
 
 #include "Pixel/Renderer/Shader.h"
 #include "Pixel/Renderer/Buffer.h"
+#include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/VertexArray.h"
 
 #include "Pixel/Renderer/OrthographicCamera.h"

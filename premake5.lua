@@ -17,6 +17,7 @@ IncludeDir["GLFW"] = "Pixel/vendor/GLFW/include"
 IncludeDir["Glad"] = "Pixel/vendor/Glad/include"
 IncludeDir["ImGui"] = "Pixel/vendor/imgui"
 IncludeDir["glm"] = "Pixel/vendor/glm"
+IncludeDir["stb_image"] = "Pixel/vendor/stb_image"
 
 include "Pixel/vendor/GLFW"
 include "Pixel/vendor/Glad"
@@ -39,6 +40,8 @@ project "Pixel"
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/stb_image/**.h",
+		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
@@ -55,7 +58,8 @@ project "Pixel"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.stb_image}"
 	}
 
 	links
