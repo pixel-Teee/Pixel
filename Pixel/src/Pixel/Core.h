@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #ifdef PX_PLATFORM_WINDOWS
 #if PX_DYNAMIC_LINK
 	#ifdef PX_BUILD_DLL
@@ -29,3 +31,15 @@
 #endif
 
 #define PX_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+namespace Pixel {
+
+	template<typename T>
+	using Scope = std::unique_ptr<T>;
+
+	template<typename T>
+	using Ref = std::shared_ptr<T>;
+
+	//Ref<Shader>
+	//using ShaderRef = Ref<Shader>;
+}

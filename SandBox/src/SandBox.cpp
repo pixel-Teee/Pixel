@@ -81,7 +81,7 @@ public:
 		-0.5f, 0.5f, 0.0f
 		};
 
-		std::shared_ptr<Pixel::VertexBuffer> VertexBuffer2;
+		Pixel::Ref<Pixel::VertexBuffer> VertexBuffer2;
 		VertexBuffer2.reset(Pixel::VertexBuffer::Create(vertices2, sizeof(vertices2)));
 		//IndexBuffer
 
@@ -93,7 +93,7 @@ public:
 			{Pixel::ShaderDataType::Float3,  "a_Position"}
 		};
 
-		std::shared_ptr<Pixel::IndexBuffer> IndexBuffer2;
+		Pixel::Ref<Pixel::IndexBuffer> IndexBuffer2;
 		IndexBuffer2.reset(Pixel::IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
 		VertexBuffer2->SetLayout(layout2);
 
@@ -209,13 +209,13 @@ public:
 	}
 
 private:
-	std::shared_ptr<Pixel::Shader> m_Shader;
-	std::shared_ptr<Pixel::VertexArray>  m_VertexArray;
-	std::shared_ptr<Pixel::VertexBuffer> m_VertexBuffer;
-	std::shared_ptr<Pixel::IndexBuffer>  m_IndexBuffer;
+	Pixel::Ref<Pixel::Shader> m_Shader;
+	Pixel::Ref<Pixel::VertexArray>  m_VertexArray;
+	Pixel::Ref<Pixel::VertexBuffer> m_VertexBuffer;
+	Pixel::Ref<Pixel::IndexBuffer>  m_IndexBuffer;
 
-	std::shared_ptr<Pixel::Shader> m_Shader2;
-	std::shared_ptr<Pixel::VertexArray> m_VertexArray2;
+	Pixel::Ref<Pixel::Shader> m_Shader2;
+	Pixel::Ref<Pixel::VertexArray> m_VertexArray2;
 
 	Pixel::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
