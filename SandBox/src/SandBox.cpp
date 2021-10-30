@@ -133,43 +133,10 @@ public:
 
 		m_Shader2.reset(Pixel::Shader::Create(vertexSrc2, fragmentSrc2));
 
-		//Texture Shader
-		std::string textureShaderVertexSrc = R"(
-			#version 330 core
-			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec2 a_TexCoord;
-
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
-
-			out vec2 v_TexCoord;
-
-			void main()
-			{
-				v_TexCoord = a_TexCoord;
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0f);
-			}
-		)";
-
-		std::string textureShaderfragmentSrc = R"(
-			#version 330 core
-			out vec4 color;
-
-			in vec2 v_TexCoord;
-
-			uniform sampler2D u_Texture;
-
-			void main()
-			{
-				 //color = vec4(v_TexCoord, 0.0f, 1.0f);
-				 color = texture(u_Texture, v_TexCoord);
-			}
-		)";
-
-		m_TextureShader.reset(Pixel::Shader::Create(textureShaderVertexSrc, textureShaderfragmentSrc));
+		m_TextureShader.reset(Pixel::Shader::Create("assets/shaders/Texture.glsl"));
 
 		//texture
-		m_Texture = Pixel::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_Texture = Pixel::Texture2D::Create("assets/textures/test2.png");
 
 		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_TextureShader)->Bind();
 		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
