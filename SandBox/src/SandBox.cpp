@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Pixel/Renderer/Shader.h"
 class ExampleLayer : public Pixel::Layer
 {
 public:
@@ -68,7 +69,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(Pixel::Shader::Create(vertexSrc, fragmentSrc));
+		m_Shader = Pixel::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
 		//VertexArray
 		m_VertexArray2.reset(Pixel::VertexArray::Create());
@@ -131,15 +132,15 @@ public:
 			}
 		)";
 
-		m_Shader2.reset(Pixel::Shader::Create(vertexSrc2, fragmentSrc2));
+		m_Shader2 = Pixel::Shader::Create("FlatColor", vertexSrc2, fragmentSrc2);
 
-		m_TextureShader.reset(Pixel::Shader::Create("assets/shaders/Texture.glsl"));
+		m_ShaderLibrary.Add(Pixel::Shader::Create("assets/shaders/Texture.glsl"));
 
 		//texture
 		m_Texture = Pixel::Texture2D::Create("assets/textures/test2.png");
 
-		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_TextureShader)->Bind();
-		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
+		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_ShaderLibrary.Get("Texture"))->Bind();
+		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_ShaderLibrary.Get("Texture"))->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnImGuiRender() override
@@ -200,9 +201,11 @@ public:
 				Pixel::Renderer::Submit(m_Shader2, m_VertexArray2, transform);
 			}
 		}
+
+		auto& textureShader = m_ShaderLibrary.Get("Texture");
 	
 		m_Texture->Bind();
-		Pixel::Renderer::Submit(m_TextureShader, m_VertexArray2, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Pixel::Renderer::Submit(textureShader, m_VertexArray2, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		//Triangle
 		//Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
@@ -222,12 +225,13 @@ public:
 	}
 
 private:
+	Pixel::ShaderLibrary m_ShaderLibrary;
 	Pixel::Ref<Pixel::Shader> m_Shader;
 	Pixel::Ref<Pixel::VertexArray>  m_VertexArray;
 	Pixel::Ref<Pixel::VertexBuffer> m_VertexBuffer;
 	Pixel::Ref<Pixel::IndexBuffer>  m_IndexBuffer;
 
-	Pixel::Ref<Pixel::Shader> m_Shader2, m_TextureShader;
+	Pixel::Ref<Pixel::Shader> m_Shader2;
 	Pixel::Ref<Pixel::VertexArray> m_VertexArray2;
 
 	Pixel::Ref<Pixel::Texture2D> m_Texture;
