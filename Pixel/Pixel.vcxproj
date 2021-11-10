@@ -156,6 +156,7 @@
     <ClInclude Include="src\Pixel\LayerStack.h" />
     <ClInclude Include="src\Pixel\Log.h" />
     <ClInclude Include="src\Pixel\MouseButtonCodes.h" />
+    <ClInclude Include="src\Pixel\OrthographicCameraController.h" />
     <ClInclude Include="src\Pixel\Renderer\Buffer.h" />
     <ClInclude Include="src\Pixel\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Pixel\Renderer\OrthographicCamera.h" />
@@ -599,6 +600,7 @@
     <ClCompile Include="src\Pixel\Layer.cpp" />
     <ClCompile Include="src\Pixel\LayerStack.cpp" />
     <ClCompile Include="src\Pixel\Log.cpp" />
+    <ClCompile Include="src\Pixel\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Pixel\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Pixel\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Pixel\Renderer\RenderCommand.cpp" />

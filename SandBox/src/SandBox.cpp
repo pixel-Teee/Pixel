@@ -11,7 +11,7 @@
 class ExampleLayer : public Pixel::Layer
 {
 public:
-	ExampleLayer():Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f), m_SquarePosition(0.0f)
+	ExampleLayer():Layer("Example"), m_CameraController(1280.0f / 720.0f)
 	{
 		//Vertex Array
 		m_VertexArray.reset(Pixel::VertexArray::Create());
@@ -152,37 +152,14 @@ public:
 
 	void OnUpdate(Pixel::Timestep ts)override
 	{
-		//PIXEL_TRACE("Delta time: {0}s ({1}ms)", ts.GetSeconds(), ts.GetMilliseconds());
+		//Update
+		m_CameraController.OnUpdate(ts);
 
-		if(Pixel::Input::IsKeyPressed(PX_KEY_LEFT))
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-		else if(Pixel::Input::IsKeyPressed(PX_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-
-		if (Pixel::Input::IsKeyPressed(PX_KEY_UP))
-			m_CameraPosition.y += m_CameraMoveSpeed * ts;
-		else if (Pixel::Input::IsKeyPressed(PX_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-
-		if (Pixel::Input::IsKeyPressed(PX_KEY_J))		
-			m_SquarePosition.x -= m_SquareMoveSpeed * ts;
-		else if (Pixel::Input::IsKeyPressed(PX_KEY_L))
-			m_SquarePosition.x += m_SquareMoveSpeed * ts;
-
-		if (Pixel::Input::IsKeyPressed(PX_KEY_I))
-			m_SquarePosition.y += m_SquareMoveSpeed * ts;
-		else if (Pixel::Input::IsKeyPressed(PX_KEY_K))
-			m_SquarePosition.y -= m_SquareMoveSpeed * ts;
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_SquarePosition);
-
+		//Render
 		Pixel::RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
 		Pixel::RenderCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(0.0f);
-
-		Pixel::Renderer::BeginScene(m_Camera);
+		Pixel::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -213,10 +190,12 @@ public:
 		Pixel::Renderer::EndScene();
 	}
 
-	void OnEvent(Pixel::Event& event)override
+	void OnEvent(Pixel::Event& e)override
 	{
-		Pixel::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Pixel::KeyPressedEvent>(PX_BIND_EVENT_FN(ExampleLayer::OnPressed));
+		//Pixel::EventDispatcher dispatcher(e);
+		//dispatcher.Dispatch<Pixel::KeyPressedEvent>(PX_BIND_EVENT_FN(ExampleLayer::OnPressed));
+
+		m_CameraController.OnEvent(e);
 	}
 
 	bool OnPressed(Pixel::KeyPressedEvent& event)
@@ -236,12 +215,7 @@ private:
 
 	Pixel::Ref<Pixel::Texture2D> m_Texture;
 
-	Pixel::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 0.5f;
-
-	glm::vec3 m_SquarePosition;
-	float m_SquareMoveSpeed = 0.5f;
+	Pixel::OrthographicCameraController m_CameraController;
 
 	glm::vec3 m_SquareColor = glm::vec3(1.0f);
 };

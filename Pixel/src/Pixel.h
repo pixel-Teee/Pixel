@@ -11,6 +11,7 @@
 #include "Pixel/Input.h"
 #include "Pixel/KeyCodes.h"
 #include "Pixel/MouseButtonCodes.h"
+#include "Pixel/OrthographicCameraController.h"
 
 #include "Pixel/ImGui/ImGuiLayer.h"
 
