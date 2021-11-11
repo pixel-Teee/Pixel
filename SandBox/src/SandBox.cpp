@@ -196,6 +196,15 @@ public:
 		//dispatcher.Dispatch<Pixel::KeyPressedEvent>(PX_BIND_EVENT_FN(ExampleLayer::OnPressed));
 
 		m_CameraController.OnEvent(e);
+
+		if (e.GetEventType() == Pixel::EventType::WindowResize)
+		{
+			auto& res = (Pixel::WindowResizeEvent&)e;
+
+			float zoom = (float)res.GetWidth() / 1280.0f;
+			
+			m_CameraController.SetZoomLevel(zoom);
+		}
 	}
 
 	bool OnPressed(Pixel::KeyPressedEvent& event)

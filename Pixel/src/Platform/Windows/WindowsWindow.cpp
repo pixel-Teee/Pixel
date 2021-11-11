@@ -62,6 +62,7 @@ namespace Pixel {
 				WindowResizeEvent event(width, height);
 				data.Width = width;
 				data.Height = height;
+				PX_CORE_ASSERT("{0}, {1}", width, height);
 				data.EventCallback(event);				
 			}
 		);
