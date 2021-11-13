@@ -1,7 +1,7 @@
 #include "pxpch.h"
 #include "Application.h"
 
-#include "Pixel/Log.h"
+#include "Pixel/Core/Log.h"
 
 #include <glad/glad.h>
 #include "Pixel/Renderer/Renderer.h"

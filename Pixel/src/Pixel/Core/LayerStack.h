@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pixel/Core.h"
+#include "Pixel/Core/Core.h"
 #include "Layer.h"
 
 #include <vector>

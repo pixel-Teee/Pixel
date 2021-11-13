@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pixel/Window.h"
+#include "Pixel/Core/Window.h"
 #include "Pixel/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>

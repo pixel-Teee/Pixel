@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pixel/Input.h"
+#include "Pixel/Core/Input.h"
 
 namespace Pixel {
 	class WindowsInput : public Input

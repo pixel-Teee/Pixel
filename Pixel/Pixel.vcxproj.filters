@@ -57,17 +57,38 @@
     <ClInclude Include="src\Pixel.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pixel\Application.h">
-      <Filter>src\Pixel</Filter>
+    <ClInclude Include="src\Pixel\Core\Application.h">
+      <Filter>src\Pixel\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pixel\Core.h">
-      <Filter>src\Pixel</Filter>
+    <ClInclude Include="src\Pixel\Core\Core.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\EntryPoint.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\Input.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\KeyCodes.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\Layer.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\LayerStack.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\Log.h">
+      <Filter>src\Pixel\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Core\MouseButtonCodes.h">
+      <Filter>src\Pixel\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Core\Timestep.h">
       <Filter>src\Pixel\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pixel\EntryPoint.h">
-      <Filter>src\Pixel</Filter>
+    <ClInclude Include="src\Pixel\Core\Window.h">
+      <Filter>src\Pixel\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Events\ApplicationEvent.h">
       <Filter>src\Pixel\Events</Filter>
@@ -84,24 +105,6 @@
     <ClInclude Include="src\Pixel\ImGui\ImGuiLayer.h">
       <Filter>src\Pixel\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pixel\Input.h">
-      <Filter>src\Pixel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Pixel\KeyCodes.h">
-      <Filter>src\Pixel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Pixel\Layer.h">
-      <Filter>src\Pixel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Pixel\LayerStack.h">
-      <Filter>src\Pixel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Pixel\Log.h">
-      <Filter>src\Pixel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Pixel\MouseButtonCodes.h">
-      <Filter>src\Pixel</Filter>
-    </ClInclude>
     <ClInclude Include="src\Pixel\Renderer\Buffer.h">
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
@@ -109,6 +112,9 @@
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Renderer\OrthographicCamera.h">
+      <Filter>src\Pixel\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pixel\Renderer\OrthographicCameraController.h">
       <Filter>src\Pixel\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Pixel\Renderer\RenderCommand.h">
@@ -128,9 +134,6 @@
     </ClInclude>
     <ClInclude Include="src\Pixel\Renderer\VertexArray.h">
       <Filter>src\Pixel\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Pixel\Window.h">
-      <Filter>src\Pixel</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1407,11 +1410,19 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pixel\OrthographicCameraController.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Pixel\Application.cpp">
-      <Filter>src\Pixel</Filter>
+    <ClCompile Include="src\Pixel\Core\Application.cpp">
+      <Filter>src\Pixel\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pixel\Core\Layer.cpp">
+      <Filter>src\Pixel\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pixel\Core\LayerStack.cpp">
+      <Filter>src\Pixel\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pixel\Core\Log.cpp">
+      <Filter>src\Pixel\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Pixel\ImGui\ImGuiBuild.cpp">
       <Filter>src\Pixel\ImGui</Filter>
@@ -1419,19 +1430,13 @@
     <ClCompile Include="src\Pixel\ImGui\ImGuiLayer.cpp">
       <Filter>src\Pixel\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="src\Pixel\Layer.cpp">
-      <Filter>src\Pixel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Pixel\LayerStack.cpp">
-      <Filter>src\Pixel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Pixel\Log.cpp">
-      <Filter>src\Pixel</Filter>
-    </ClCompile>
     <ClCompile Include="src\Pixel\Renderer\Buffer.cpp">
       <Filter>src\Pixel\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Pixel\Renderer\OrthographicCamera.cpp">
+      <Filter>src\Pixel\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pixel\Renderer\OrthographicCameraController.cpp">
       <Filter>src\Pixel\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Pixel\Renderer\RenderCommand.cpp">
@@ -1482,6 +1487,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Pixel\OrthographicCameraController.cpp" />
   </ItemGroup>
 </Project>

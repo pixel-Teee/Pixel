@@ -2,7 +2,7 @@
 
 #include "pxpch.h"
 
-#include "Pixel/Core.h"
+#include "Pixel/Core/Core.h"
 #include "Pixel/Events/Event.h"
 
 namespace Pixel {

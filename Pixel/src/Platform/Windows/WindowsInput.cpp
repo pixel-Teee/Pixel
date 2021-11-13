@@ -2,7 +2,7 @@
 #include "WindowsInput.h"
 
 #include <GLFW/glfw3.h>
-#include "Pixel/Application.h"
+#include "Pixel/Core/Application.h"
 
 namespace Pixel {
 	

@@ -2,16 +2,16 @@
 
 // For use by Pixel applications
 
-#include "Pixel/Application.h"
-#include "Pixel/Layer.h"
-#include "Pixel/Log.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Core/Layer.h"
+#include "Pixel/Core/Log.h"
 
 #include "Pixel/Core/Timestep.h"
 
-#include "Pixel/Input.h"
-#include "Pixel/KeyCodes.h"
-#include "Pixel/MouseButtonCodes.h"
-#include "Pixel/OrthographicCameraController.h"
+#include "Pixel/Core/Input.h"
+#include "Pixel/Core/KeyCodes.h"
+#include "Pixel/Core/MouseButtonCodes.h"
+#include "Pixel/Renderer/OrthographicCameraController.h"
 
 #include "Pixel/ImGui/ImGuiLayer.h"
 
@@ -28,5 +28,5 @@
 //-----------------
 
 //---Entry Point---
-#include "Pixel/EntryPoint.h"
+#include "Pixel/Core/EntryPoint.h"
 //-----------------

@@ -1,9 +1,9 @@
 #include "pxpch.h"
-#include "Application.h"
+#include "Pixel/Core/Application.h"
 #include "OrthographicCameraController.h"
 
-#include "Pixel/Input.h"
-#include "Pixel/KeyCodes.h"
+#include "Pixel/Core/Input.h"
+#include "Pixel/Core/KeyCodes.h"
 
 namespace Pixel {
 
