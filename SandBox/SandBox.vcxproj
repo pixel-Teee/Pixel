@@ -132,11 +132,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\SandBox.cpp" />
+    <ClCompile Include="src\Sandbox2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pixel\Pixel.vcxproj">
       <Project>{2748E20D-935C-0ABF-5CDE-AD1EC8B106F0}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Sandbox2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

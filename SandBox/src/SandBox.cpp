@@ -1,4 +1,5 @@
 #include <Pixel.h>
+#include <Pixel/Core/EntryPoint.h>
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -8,13 +9,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Pixel/Renderer/Shader.h"
+#include "Sandbox2D.h"
 class ExampleLayer : public Pixel::Layer
 {
 public:
 	ExampleLayer():Layer("Example"), m_CameraController(1280.0f / 720.0f)
 	{
 		//Vertex Array
-		m_VertexArray.reset(Pixel::VertexArray::Create());
+		m_VertexArray = Pixel::VertexArray::Create();
 
 		//Vertex Buffer
 		float vertices[3 * 7] = {
@@ -72,7 +74,7 @@ public:
 		m_Shader = Pixel::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
 		//VertexArray
-		m_VertexArray2.reset(Pixel::VertexArray::Create());
+		m_VertexArray2 = Pixel::VertexArray::Create();
 
 		//VertexBuffer
 		float vertices2[4 * 5] = {
@@ -234,7 +236,8 @@ class SandBox : public Pixel::Application
 public:
 	SandBox()
 	{
-		PushLayer(new ExampleLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 		//PushOverlay(new Pixel::ImGuiLayer());
 	}
 

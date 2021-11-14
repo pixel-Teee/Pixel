@@ -27,6 +27,3 @@
 #include "Pixel/Renderer/OrthographicCamera.h"
 //-----------------
 
-//---Entry Point---
-#include "Pixel/Core/EntryPoint.h"
-//-----------------
