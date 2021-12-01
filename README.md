@@ -1,5 +1,5 @@
 # Pixel
-Pixel Engine
+Pixel Game Engine
 
 # Build and Run
 `git clone https://github.com/pixel-Teee/Pixel.git`
