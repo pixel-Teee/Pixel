@@ -1,12 +1,12 @@
 [submodule "Pixel/vendor/spdlog"]
 	path = Pixel/vendor/spdlog
-	url = https://github.com/gabime/spdlog
+	url = https://github.com/pixel-Teee/spdlog.git
 [submodule "Pixel/vendor/GLFW"]
 	path = Pixel/vendor/GLFW
-	url = https://github.com/TheCherno/glfw.git
+	url = https://github.com/pixel-Teee/glfw.git
 [submodule "Pixel/vendor/imgui"]
 	path = Pixel/vendor/imgui
-	url = https://github.com/TheCherno/imgui
+	url = https://github.com/pixel-Teee/imgui.git
 [submodule "Pixel/vendor/glm"]
 	path = Pixel/vendor/glm
-	url = https://github.com/g-truc/glm
+	url = https://github.com/pixel-Teee/glm.git
