@@ -4,9 +4,7 @@
 [submodule "Pixel/vendor/GLFW"]
 	path = Pixel/vendor/GLFW
 	url = https://github.com/pixel-Teee/glfw.git
-[submodule "Pixel/vendor/imgui"]
-	path = Pixel/vendor/imgui
-	url = https://github.com/pixel-Teee/imgui.git
+
 [submodule "Pixel/vendor/glm"]
 	path = Pixel/vendor/glm
 	url = https://github.com/pixel-Teee/glm.git
