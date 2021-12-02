@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 project(Pixel)
 
 file(GLOB PixelSrc
+"src/*.h"
+"src/*.cpp"
 "src/Pixel/Core/*.h"
 "src/Pixel/Events/*.h"
 "src/Pixel/ImGui/*.h"
@@ -21,6 +23,9 @@ file(GLOB PixelSrc
 "vendor/glm/glm/*.inl"
 )
 
+source_group(TREE ${CMAKE_SOURCE_DIR}/Pixel FILES ${PixelSrc})
+#message(${CMAKE_SOURCE_DIR})
+#message(${PixelSrc})
 add_library(Pixel STATIC ${PixelSrc})
 
 #链接了Pixel的模块，不会包含这些文件
