@@ -4,9 +4,9 @@ Pixel Game Engine
 # Build and Run
 `git clone https://github.com/pixel-Teee/Pixel.git`
 
-`git submodule update --init --recursive`
-
 `cd Pixel`
+
+`git submodule update --init --recursive`
 
 `mkdir build`
 
