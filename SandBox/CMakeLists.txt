@@ -24,6 +24,7 @@ PRIVATE
 target_compile_definitions(SandBox PRIVATE
 PX_PLATFORM_WINDOWS
 PX_DEBUG
+_CRT_SECURE_NO_WARNINGS
 )
 
 target_compile_features(SandBox
