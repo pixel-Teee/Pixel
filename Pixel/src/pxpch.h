@@ -14,7 +14,9 @@
 #include <unordered_set>
 
 #include "Pixel/Core/Log.h"
+#include "Pixel/Debug/Instrumentor.h"
 
 #ifdef PX_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif
+
