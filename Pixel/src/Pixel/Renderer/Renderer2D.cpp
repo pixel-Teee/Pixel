@@ -90,6 +90,7 @@ namespace Pixel {
 	{	
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetFloat4("u_Color", color);
+		s_Data->TextureShader->SetFloat("u_TilingFactor", 1.0f);
 		//Bind white texture here
 		s_Data->WhiteTexture->Bind();
 
@@ -101,14 +102,15 @@ namespace Pixel {
 		RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture>& texture)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture>& texture, float tilingFactor)
 	{
-		DrawQuad({position.x, position.y, 0.0f}, size, texture);
+		DrawQuad({position.x, position.y, 0.0f}, size, texture, tilingFactor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture>& texture)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture>& texture, float tilingFactor)
 	{
 		s_Data->TextureShader->SetFloat4("u_Color", glm::vec4(1.0f));
+		s_Data->TextureShader->SetFloat("u_TilingFactor", 1.0f);
 		//s_Data->FlatColorShader->SetFloat4("u_Color", color);
 		//把设置颜色改为设置纹理
 		texture->Bind();
