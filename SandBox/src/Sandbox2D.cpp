@@ -65,7 +65,9 @@ void Sandbox2D::OnUpdate(Pixel::Timestep ts)
 		Pixel::Renderer2D::BeginScene(m_CameraController.GetCamera());
 		Pixel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
 		Pixel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-		Pixel::Renderer2D::DrawQuad({ 0.2f, 0.5f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture);
+		//Pixel::Renderer2D::DrawRotatedQuad({0.2f, 0.5f, -0.1f},{10.0f, 10.0f}, 45.0f, {2.0f, 1.0f, 0.8f, 1.0f});
+		Pixel::Renderer2D::DrawRotatedQuad(glm::vec3(0.2f, 0.5f, -0.1f), glm::vec2(10.0f, 10.0f), 30.0f, m_CheckerboardTexture, 10.0f);
+		//Pixel::Renderer2D::DrawRotatedQuad({ 0.2f, 0.5f, -0.1f }, { 10.0f, 10.0f }, glm::radians(30.0f), m_CheckerboardTexture, 10.0f);
 		Pixel::Renderer2D::EndScene();
 	}
 	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
