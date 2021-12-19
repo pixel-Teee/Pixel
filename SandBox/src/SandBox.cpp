@@ -15,6 +15,7 @@ class ExampleLayer : public Pixel::Layer
 public:
 	ExampleLayer():Layer("Example"), m_CameraController(1280.0f / 720.0f)
 	{
+		/*
 		//Vertex Array
 		m_VertexArray = Pixel::VertexArray::Create();
 
@@ -143,6 +144,7 @@ public:
 
 		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_ShaderLibrary.Get("Texture"))->Bind();
 		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_ShaderLibrary.Get("Texture"))->UploadUniformInt("u_Texture", 0);
+		*/
 	}
 
 	void OnImGuiRender() override
