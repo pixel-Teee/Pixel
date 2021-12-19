@@ -24,7 +24,7 @@ namespace Pixel {
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:	  PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OpenGL:    return std::make_shared<OpenGLVertexBuffer>(new OpenGLVertexBuffer(size));
+		case RendererAPI::API::OpenGL:    return CreateRef<OpenGLVertexBuffer>(size);
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
