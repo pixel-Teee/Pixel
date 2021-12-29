@@ -19,6 +19,7 @@ private:
 	Pixel::Ref<Pixel::Shader> m_FlatColorShader;
 
 	Pixel::Ref<Pixel::Texture> m_CheckerboardTexture;
+	Pixel::Ref<Pixel::Texture> m_CupTexture;
 
 	glm::vec4 m_SquareColor = {0.2f, 0.3f, 0.8f, 1.0f};
 };
