@@ -73,7 +73,9 @@ namespace Pixel {
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
+		//glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTextureUnit(slot, m_RendererID);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	}
 
 }
