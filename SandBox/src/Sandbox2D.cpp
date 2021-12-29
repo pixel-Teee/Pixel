@@ -63,13 +63,17 @@ void Sandbox2D::OnUpdate(Pixel::Timestep ts)
 
 	{
 		PX_PROFILE_SCOPE("Renderer Draw");
+
+		static float rotation = 0.0f;
+		rotation += ts * 20.0f;
+
 		Pixel::Renderer2D::BeginScene(m_CameraController.GetCamera());
 		Pixel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-		Pixel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+		Pixel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, m_CupTexture);
 		//Pixel::Renderer2D::DrawRotatedQuad({0.2f, 0.5f, -0.1f},{10.0f, 10.0f}, 45.0f, {2.0f, 1.0f, 0.8f, 1.0f});
 		Pixel::Renderer2D::DrawQuad(glm::vec3(0.2f, 0.5f, -0.1f), glm::vec2(10.0f, 10.0f), m_CheckerboardTexture, 1.0f, glm::vec4(0.3f, 0.5f, 0.6f, 1.0f));
-		Pixel::Renderer2D::DrawQuad(glm::vec3(-0.5f, -0.5f, -0.1f), glm::vec2(1.0f, 1.0f), m_CupTexture, 10.0f, glm::vec4(0.3f, 0.5f, 0.6f, 1.0f));
-		//Pixel::Renderer2D::DrawRotatedQuad({ 0.2f, 0.5f, -0.1f }, { 10.0f, 10.0f }, glm::radians(30.0f), m_CheckerboardTexture, 10.0f);
+		Pixel::Renderer2D::DrawQuad(glm::vec3(-0.5f, -0.5f, 0.3f), glm::vec2(1.0f, 1.0f), m_CupTexture, 10.0f, glm::vec4(0.3f, 0.5f, 0.6f, 1.0f));
+		Pixel::Renderer2D::DrawRotatedQuad({ 0.2f, 0.5f, -0.1f }, { 10.0f, 10.0f }, rotation, m_CheckerboardTexture, 10.0f);
 		Pixel::Renderer2D::EndScene();
 	}
 	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
