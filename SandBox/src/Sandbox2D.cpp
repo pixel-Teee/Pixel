@@ -16,6 +16,9 @@ void Sandbox2D::OnAttach()
 {
 	m_CheckerboardTexture = Pixel::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_CupTexture = Pixel::Texture2D::Create("assets/textures/test.jpg");
+	m_SpriteSheets = Pixel::Texture2D::Create("assets/game/textures/tilemap_packed.png");
+
+	m_TextureStairs = Pixel::SubTexture2D::CreateFromCoords(m_SpriteSheets, {14, 0}, {16, 16}, {1, 3});
 }
 
 void Sandbox2D::OnDetach()
@@ -75,6 +78,7 @@ void Sandbox2D::OnUpdate(Pixel::Timestep ts)
 		Pixel::RenderCommand::Clear();
 	}
 
+#if 0
 	{
 		PX_PROFILE_SCOPE("Renderer Draw");
 
@@ -106,6 +110,13 @@ void Sandbox2D::OnUpdate(Pixel::Timestep ts)
 		}
 		Pixel::Renderer2D::EndScene();
 	}
+#endif
+	Pixel::Renderer2D::BeginScene(m_CameraController.GetCamera());
+
+	//Pixel::Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, m_SpriteSheets);
+	Pixel::Renderer2D::DrawQuad({0.0f, 0.0f}, {1.0f, 1.0f}, m_TextureStairs);
+
+	Pixel::Renderer2D::EndScene();
 	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 	//TODO: Shader::SetMat4, Shader::SetFloat4
 	/*
