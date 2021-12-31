@@ -16,7 +16,7 @@ namespace Pixel {
 	class PIXEL_API Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Pixel Engine");
 		virtual ~Application();
 
 		void Run();

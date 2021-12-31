@@ -9,7 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Pixel/Renderer/Shader.h"
-#include "Sandbox2D.h"
+#include "EditorLayer.h"
 class ExampleLayer : public Pixel::Layer
 {
 public:
@@ -233,23 +233,26 @@ private:
 	glm::vec3 m_SquareColor = glm::vec3(1.0f);
 };
 
-class SandBox : public Pixel::Application
-{
-public:
-	SandBox()
+namespace Pixel {
+	class PixelEditor : public Application
 	{
-		//PushLayer(new ExampleLayer());
-		PushLayer(new Sandbox2D());
-		//PushOverlay(new Pixel::ImGuiLayer());
-	}
+	public:
+		PixelEditor():Application("Pixel Editor")
+		{
+			//PushLayer(new ExampleLayer());
+			PushLayer(new EditorLayer());
+			//PushOverlay(new Pixel::ImGuiLayer());
+		}
 
-	~SandBox()
+		~PixelEditor()
+		{
+
+		}
+	};
+
+	Application* CreateApplication()
 	{
-
+		return new PixelEditor();
 	}
-};
-
-Pixel::Application* Pixel::CreateApplication()
-{
-	return new SandBox();
 }
+
