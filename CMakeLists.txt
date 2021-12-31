@@ -15,7 +15,7 @@ add_subdirectory(Pixel/vendor/GLFW)
 add_subdirectory(Pixel/vendor/imgui)
 add_subdirectory(Pixel)
 add_subdirectory(SandBox)
-add_subdirectory(Pixel-Editor)
+add_subdirectory(PixelEditor)
 
 target_compile_definitions(Pixel
     PRIVATE _CRT_SECURE_NO_WARNINGS
