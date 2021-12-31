@@ -111,9 +111,19 @@ namespace Pixel
 
 			ImGui::EndMenuBar();
 		}
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+		ImGui::Begin("ColorEdit");
+		ImGui::ColorEdit4("ColorTint", glm::value_ptr(m_SquareColor));
+		ImGui::End();
 
 		ImGui::Begin("Viewport");
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		//PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
+		//PIXEL_WARN("Viewport is focused:{0}", ImGui::IsWindowFocused());
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		m_ViewportHovered = ImGui::IsWindowHovered();
+		PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		if(m_ViewportSize != *((glm::vec2*)&viewportPanelSize))
 		{
@@ -124,9 +134,9 @@ namespace Pixel
 		}
 		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureId, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
-		ImGui::PopStyleVar();
-		ImGui::End();
 		
+		ImGui::End();
+		ImGui::PopStyleVar();
 		ImGui::End();
 	}
 
@@ -134,14 +144,18 @@ namespace Pixel
 	{
 		PX_PROFILE_FUNCTION();
 
+		if(m_ViewportFocused)
+			m_CameraController.OnUpdate(ts);
+
 		//Timer timer("EditorLayer::OnUpdate", [&](ProfileResult profileResult){ m_ProfileResults.push_back(profileResult);});
 
+		/*
 		{
 			PX_PROFILE_SCOPE("CameraController::OnUpdate");
 			//Update
 			m_CameraController.OnUpdate(ts);
 		}
-
+		*/
 		//Render
 		//Reset stats here
 		Renderer2D::ResetStats();
@@ -187,9 +201,9 @@ namespace Pixel
 		}
 #endif
 		Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-		//Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, m_SpriteSheets);
+	
 		Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, m_TextureStairs);
+		Renderer2D::DrawQuad({ -5.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, m_SquareColor);
 
 		Renderer2D::EndScene();
 		m_Framebuffer->UnBind();
