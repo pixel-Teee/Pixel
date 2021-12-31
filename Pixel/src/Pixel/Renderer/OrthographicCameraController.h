@@ -7,6 +7,14 @@
 #include "Pixel/Events/MouseEvent.h"
 
 namespace Pixel {
+	struct OrthographicCameraBounds
+	{
+		float Left, Right;
+		float Bottom, Top;
+
+		float GetWidth() { return Right - Left;}
+		float GetHeight() { return Top - Bottom;}
+	};
 
 	class OrthographicCameraController
 	{
@@ -19,9 +27,11 @@ namespace Pixel {
 		OrthographicCamera& GetCamera() { return m_Camera; }
 		const OrthographicCamera& GetCamera() const { return m_Camera; }
 
-		void SetZoomLevel(float level){ m_ZoomLevel = level; }
+		void SetZoomLevel(float level){ m_ZoomLevel = level; CalculateView();}
 		float GetZoomLevel() const { return m_ZoomLevel; }
 	private:
+		void CalculateView();
+
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 	private:
@@ -37,5 +47,7 @@ namespace Pixel {
 		float m_CameraRotation = 0.0f;
 		float m_CameraTranslationSpeed = 1.0f, m_CameraRotationSpeed = 1.0f;
 
+		//temp data for set projection
+		OrthographicCameraBounds m_Bounds;
 	};
 }

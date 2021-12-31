@@ -81,6 +81,11 @@ namespace Pixel {
 		layer->OnAttach();
 	}
 	
+	void Application::Close()
+	{
+		m_Running = false;
+	}
+
 	void Application::Run()
 	{
 		while (m_Running)
