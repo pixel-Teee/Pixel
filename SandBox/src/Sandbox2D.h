@@ -25,5 +25,7 @@ private:
 	Pixel::Ref<Pixel::Texture2D> m_SpriteSheets;
 	Pixel::Ref<Pixel::SubTexture2D> m_TextureStairs;
 
+	Pixel::Ref<Pixel::Framebuffer> m_Framebuffer;
+
 	glm::vec4 m_SquareColor = {0.2f, 0.3f, 0.8f, 1.0f};
 };

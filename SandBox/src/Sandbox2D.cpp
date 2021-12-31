@@ -21,6 +21,11 @@ void Sandbox2D::OnAttach()
 	m_TextureStairs = Pixel::SubTexture2D::CreateFromCoords(m_SpriteSheets, {14, 0}, {16, 16}, {1, 3});
 
 	m_CameraController.SetZoomLevel(5.5f);
+
+	Pixel::FramebufferSpecification fbSpec;
+	fbSpec.Width = 1280;
+	fbSpec.Height = 720;
+	m_Framebuffer = Pixel::Framebuffer::Create(fbSpec);
 }
 
 void Sandbox2D::OnDetach()
@@ -134,9 +139,9 @@ void Sandbox2D::OnImGuiRender()
 
 	ImGui::ColorEdit4("SquareColor", glm::value_ptr(m_SquareColor));
 
-	uint32_t textureId = m_CheckerboardTexture->GetRendererID();
+	uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
 
-	ImGui::Image((void*)textureId, ImVec2(64.0f, 64.0f)); 
+	ImGui::Image((void*)textureId, ImVec2(1280.0f, 720.0f)); 
 
 	//static bool show = true;
 
@@ -161,6 +166,7 @@ void Sandbox2D::OnUpdate(Pixel::Timestep ts)
 	Pixel::Renderer2D::ResetStats();
 	{
 		PX_PROFILE_SCOPE("Renderer Prep");
+		m_Framebuffer->Bind();
 		//Render
 		Pixel::RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
 		Pixel::RenderCommand::Clear();
@@ -205,6 +211,7 @@ void Sandbox2D::OnUpdate(Pixel::Timestep ts)
 	Pixel::Renderer2D::DrawQuad({0.0f, 0.0f}, {1.0f, 1.0f}, m_TextureStairs);
 
 	Pixel::Renderer2D::EndScene();
+	m_Framebuffer->UnBind();
 	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 	//TODO: Shader::SetMat4, Shader::SetFloat4
 	/*
