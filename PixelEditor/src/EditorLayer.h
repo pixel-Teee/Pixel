@@ -34,6 +34,9 @@ namespace Pixel
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 
 		Entity m_square;
+		Entity m_CameraEntity;
+		Entity m_CameraEntity2;
+		bool PrimiaryCamera = true;
 		//Viewport Size
 		glm::vec2 m_ViewportSize = {0, 0};
 		glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };

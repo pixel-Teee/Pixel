@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Pixel/Renderer/Camera.h"
+
 namespace Pixel {
 	
 	struct TagComponent
@@ -36,5 +38,16 @@ namespace Pixel {
 
 		operator glm::vec4& () { return Color; }
 		operator const glm::vec4& () const { return Color; };
+	};
+
+	struct CameraComponent
+	{
+		Camera camera;
+		//think about move to scene
+		bool Primary = true;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(const glm::mat4& projection) : camera(projection) {}
 	};
 }

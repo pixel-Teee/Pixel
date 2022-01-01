@@ -34,6 +34,12 @@ namespace Pixel
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
 		m_square.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));	
+
+		m_CameraEntity = m_ActiveScene->CreateEntity("Camera");
+		m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+	
+		m_CameraEntity2 = m_ActiveScene->CreateEntity("Camera2");
+		m_CameraEntity2.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f)).Primary = false;
 	}
 
 	void EditorLayer::OnDetach()
@@ -119,21 +125,29 @@ namespace Pixel
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
+		ImGui::Begin("ColorEdit");
 		if (m_square)
-		{
-			ImGui::Begin("ColorEdit");
+		{		
+			
+			ImGui::Separator();
 			auto& tag = m_square.GetComponent<TagComponent>().Tag;
 			ImGui::Text("%s", tag.c_str());
 
-			ImGui::Separator();
+			
 			auto& squareColor = m_square.GetComponent<SpriteRendererComponent>().Color;
 			ImGui::ColorEdit4("ColorTint", glm::value_ptr(squareColor));
 
 			ImGui::Separator();
-			ImGui::End();
+			
 		}
 		
-
+		ImGui::DragFloat4("Camera Transform", glm::value_ptr(m_CameraEntity2.GetComponent<TransformComponent>().Transform[3]));
+		if (ImGui::Checkbox("Camera A", &PrimiaryCamera))
+		{
+			m_CameraEntity2.GetComponent<CameraComponent>().Primary = PrimiaryCamera;
+			m_CameraEntity.GetComponent<CameraComponent>().Primary = !PrimiaryCamera;
+		}
+		ImGui::End();
 		ImGui::Begin("Viewport");
 		//PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
 		//PIXEL_WARN("Viewport is focused:{0}", ImGui::IsWindowFocused());
@@ -171,12 +185,9 @@ namespace Pixel
 		RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
 		RenderCommand::Clear();
 		
-		Renderer2D::BeginScene(m_CameraController.GetCamera());
 		//Update scene
 		m_ActiveScene->OnUpdate(ts);
 
-
-		Renderer2D::EndScene();
 		m_Framebuffer->UnBind();
 	}
 
