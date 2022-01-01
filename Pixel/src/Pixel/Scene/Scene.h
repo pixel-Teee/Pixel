@@ -6,13 +6,15 @@
 
 namespace Pixel
 {
+	class Entity;
+
 	class Scene
 	{
 	public:
 		Scene();
 		~Scene();
 
-		entt::entity CreateEntity();
+		Entity CreateEntity(const std::string& name);
 		
 		entt::registry& Reg() { return m_Registry; }
 
@@ -20,5 +22,7 @@ namespace Pixel
 	private:
 		//registry is a container for entity and component
 		entt::registry m_Registry;
+
+		friend class Entity;
 	};
 }

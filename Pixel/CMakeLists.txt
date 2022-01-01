@@ -10,7 +10,7 @@ file(GLOB PixelSrc
 "src/Pixel/ImGui/*.h"
 "src/Pixel/Renderer/*.h"
 "src/Pixel/Debug/*.h"
-"src/Pixel/Scene/*h"
+"src/Pixel/Scene/*.h"
 "src/Pixel/Core/*.cpp"
 "src/Pixel/Events/*.cpp"
 "src/Pixel/ImGui/*.cpp"

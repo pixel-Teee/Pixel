@@ -2,6 +2,7 @@
 #include "Scene.h"
 
 #include "Components.h"
+#include "Entity.h"
 #include "Pixel/Renderer/Renderer2D.h"
 
 #include <glm/glm.hpp>
@@ -41,9 +42,14 @@ namespace Pixel
 
 	}
 
-	entt::entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		return m_Registry.create();
+		Entity entity = {m_Registry.create(), this};
+		entity.AddComponent<TransformComponent>();
+		auto& tag = entity.AddComponent<TagComponent>(name);
+		tag.Tag = name.empty() ? "Entity" : name;
+	
+		return entity;
 	}
 
 	void Scene::OnUpdate(Timestep& ts)

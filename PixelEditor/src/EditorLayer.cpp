@@ -30,9 +30,10 @@ namespace Pixel
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
-		auto squre = m_ActiveScene->CreateEntity();
-		m_ActiveScene->Reg().emplace<TransformComponent>(squre);
-		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(squre, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+		
+		//entity
+		m_square = m_ActiveScene->CreateEntity("Square");
+		m_square.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));	
 	}
 
 	void EditorLayer::OnDetach()
@@ -118,9 +119,20 @@ namespace Pixel
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
-		ImGui::Begin("ColorEdit");
-		ImGui::ColorEdit4("ColorTint", glm::value_ptr(m_SquareColor));
-		ImGui::End();
+		if (m_square)
+		{
+			ImGui::Begin("ColorEdit");
+			auto& tag = m_square.GetComponent<TagComponent>().Tag;
+			ImGui::Text("%s", tag.c_str());
+
+			ImGui::Separator();
+			auto& squareColor = m_square.GetComponent<SpriteRendererComponent>().Color;
+			ImGui::ColorEdit4("ColorTint", glm::value_ptr(squareColor));
+
+			ImGui::Separator();
+			ImGui::End();
+		}
+		
 
 		ImGui::Begin("Viewport");
 		//PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
