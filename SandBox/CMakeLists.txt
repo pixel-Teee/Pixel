@@ -19,6 +19,7 @@ PRIVATE
 "../Pixel/src"
 "../Pixel/vendor"
 "../Pixel/vendor/glm"
+"../Pixel/vendor/entt/include"
 )
 
 target_compile_definitions(SandBox PRIVATE

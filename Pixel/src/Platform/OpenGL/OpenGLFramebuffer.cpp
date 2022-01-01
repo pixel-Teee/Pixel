@@ -5,6 +5,8 @@
 
 namespace Pixel {
 
+	static const uint32_t s_MaxFramebufferSize = 8192;
+
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec):m_Specification(spec)
 	{
 		Invalidate();
@@ -63,6 +65,11 @@ namespace Pixel {
 
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
+		if (width == 0 || height == 0 || width >= s_MaxFramebufferSize || height >= s_MaxFramebufferSize)
+		{
+			PIXEL_CORE_WARN("Attemped to resize framebuffer to {0}, {1}", width, height);
+			return;
+		}
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 

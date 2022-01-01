@@ -15,6 +15,9 @@
 
 #include "Pixel/ImGui/ImGuiLayer.h"
 
+#include "Pixel/Scene/Scene.h"
+#include "Pixel/Scene/Components.h"
+
 //---Renderer---
 #include "Pixel/Renderer/Renderer.h"
 #include "Pixel/Renderer/Renderer2D.h"

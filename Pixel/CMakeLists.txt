@@ -10,11 +10,13 @@ file(GLOB PixelSrc
 "src/Pixel/ImGui/*.h"
 "src/Pixel/Renderer/*.h"
 "src/Pixel/Debug/*.h"
+"src/Pixel/Scene/*h"
 "src/Pixel/Core/*.cpp"
 "src/Pixel/Events/*.cpp"
 "src/Pixel/ImGui/*.cpp"
 "src/Pixel/Renderer/*.cpp"
 "src/Pixel/Debug/*.cpp"
+"src/Pixel/Scene/*.cpp"
 "src/Platform/OpenGL/*.h"
 "src/Platform/OpenGL/*.cpp"
 "src/Platform/Windows/*.h"
@@ -23,6 +25,7 @@ file(GLOB PixelSrc
 "vendor/stb_image/*.cpp"
 "vendor/glm/glm/*.hpp"
 "vendor/glm/glm/*.inl"
+"vendor/entt/include/*.hpp"
 )
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/Pixel FILES ${PixelSrc})
@@ -39,6 +42,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/imgui"
 "vendor/glm"
 "vendor/stb_image"
+"vendor/entt/include"
 )
 
 target_compile_definitions(Pixel

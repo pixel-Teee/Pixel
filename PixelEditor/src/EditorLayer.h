@@ -29,6 +29,8 @@ namespace Pixel
 
 		Ref<Framebuffer> m_Framebuffer;
 
+		Ref<Scene> m_ActiveScene;
+
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 
 		//Viewport Size

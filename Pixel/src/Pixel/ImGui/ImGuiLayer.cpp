@@ -97,6 +97,7 @@ namespace Pixel {
 
 	void ImGuiLayer::OnEvent(Event& e)
 	{
+		//只要阻塞了，就进行事件的处理，不广播出去
 		if (m_BlockEvents)
 		{
 			ImGuiIO& io = ImGui::GetIO();

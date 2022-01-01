@@ -28,6 +28,11 @@ namespace Pixel
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+
+		m_ActiveScene = CreateRef<Scene>();
+		auto squre = m_ActiveScene->CreateEntity();
+		m_ActiveScene->Reg().emplace<TransformComponent>(squre);
+		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(squre, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 	}
 
 	void EditorLayer::OnDetach()
@@ -122,10 +127,10 @@ namespace Pixel
 		//PIXEL_WARN("Viewport is focused:{0}", ImGui::IsWindowFocused());
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
-		PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
+		//PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		if(m_ViewportSize != *((glm::vec2*)&viewportPanelSize))
+		if(m_ViewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x > 0 && viewportPanelSize.y > 0)
 		{
 			m_Framebuffer->Resize((uint32_t)viewportPanelSize.x, (uint32_t)viewportPanelSize.y);
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };		
@@ -146,75 +151,21 @@ namespace Pixel
 
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
-
-		//Timer timer("EditorLayer::OnUpdate", [&](ProfileResult profileResult){ m_ProfileResults.push_back(profileResult);});
-
-		/*
-		{
-			PX_PROFILE_SCOPE("CameraController::OnUpdate");
-			//Update
-			m_CameraController.OnUpdate(ts);
-		}
-		*/
 		//Render
-		//Reset stats here
 		Renderer2D::ResetStats();
-		{
-			PX_PROFILE_SCOPE("Renderer Prep");
-			m_Framebuffer->Bind();
-			//Render
-			RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
-			RenderCommand::Clear();
-		}
-
-#if 0
-		{
-			PX_PROFILE_SCOPE("Renderer Draw");
-
-			static float rotation = 0.0f;
-			rotation += ts * 20.0f;
-
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-			Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 1.0f, 1.0f }, m_CupTexture);
-			Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-			Renderer2D::DrawQuad({ 0.5f, -0.5f, -0.3f }, { 2.0f, 2.0f }, m_CupTexture);
-
-
-
-			//Renderer2D::DrawRotatedQuad({0.2f, 0.5f, -0.1f},{10.0f, 10.0f}, 45.0f, {2.0f, 1.0f, 0.8f, 1.0f});
-			//Renderer2D::DrawQuad(glm::vec3(0.2f, 0.5f, -0.1f), glm::vec2(10.0f, 10.0f), m_CheckerboardTexture, 1.0f, glm::vec4(0.3f, 0.5f, 0.6f, 1.0f));
-			//Renderer2D::DrawQuad(glm::vec3(-0.5f, -0.5f, 0.3f), glm::vec2(1.0f, 1.0f), m_CupTexture, 10.0f, glm::vec4(0.3f, 0.5f, 0.6f, 1.0f));
-			//Renderer2D::DrawRotatedQuad({ 0.2f, 0.5f, -0.1f }, { 10.0f, 10.0f }, rotation, m_CheckerboardTexture, 10.0f);
-			Renderer2D::EndScene();
-
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			for (float y = -5.0f; y < 5.0f; y += 0.5f)
-			{
-				for (float x = -5.0f; x < 5.0f; x += 0.5f)
-				{
-					glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.5f };
-					Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
-				}
-			}
-			Renderer2D::EndScene();
-		}
-#endif
+		//PX_PROFILE_SCOPE("Renderer Prep");
+		m_Framebuffer->Bind();
+		
+		RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
+		RenderCommand::Clear();
+		
 		Renderer2D::BeginScene(m_CameraController.GetCamera());
-	
-		Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, m_TextureStairs);
-		Renderer2D::DrawQuad({ -5.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, m_SquareColor);
+		//Update scene
+		m_ActiveScene->OnUpdate(ts);
+
 
 		Renderer2D::EndScene();
 		m_Framebuffer->UnBind();
-		//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-		//TODO: Shader::SetMat4, Shader::SetFloat4
-		/*
-		std::dynamic_pointer_cast<OpenGLShader>(m_FlatColorShader)->Bind();
-		std::dynamic_pointer_cast<OpenGLShader>(m_FlatColorShader)->UploadUniformFloat4("u_Color", m_SquareColor);
-
-		Renderer::Submit(m_FlatColorShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-		*/
 	}
 
 	void EditorLayer::OnEvent(Event& e)
