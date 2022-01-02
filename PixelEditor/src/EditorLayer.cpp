@@ -36,10 +36,10 @@ namespace Pixel
 		m_square.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));	
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera");
-		m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+		m_CameraEntity.AddComponent<CameraComponent>().Primary = false;
 	
 		m_CameraEntity2 = m_ActiveScene->CreateEntity("Camera2");
-		m_CameraEntity2.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f)).Primary = false;
+		m_CameraEntity2.AddComponent<CameraComponent>();
 	}
 
 	void EditorLayer::OnDetach()
@@ -162,6 +162,8 @@ namespace Pixel
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };		
 			
 			m_CameraController.OnResize(viewportPanelSize.x, viewportPanelSize.y);
+
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, m_ViewportSize.y);
 		}
 		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureId, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));

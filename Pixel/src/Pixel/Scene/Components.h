@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Pixel/Renderer/Camera.h"
+#include "SceneCamera.h"
 
 namespace Pixel {
 	
@@ -42,12 +42,13 @@ namespace Pixel {
 
 	struct CameraComponent
 	{
-		Camera camera;
+		SceneCamera camera;
 		//think about move to scene
 		bool Primary = true;
+		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(const glm::mat4& projection) : camera(projection) {}
+		//CameraComponent(const glm::mat4& projection);
 	};
 }
