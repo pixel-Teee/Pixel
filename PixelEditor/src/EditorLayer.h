@@ -35,6 +35,7 @@ namespace Pixel
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 
 		Entity m_square;
+		Entity m_RedSquare;
 		Entity m_CameraEntity;
 		Entity m_CameraEntity2;
 		bool PrimiaryCamera = true;

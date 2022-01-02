@@ -46,6 +46,7 @@ namespace Pixel {
 		SceneCamera camera;
 		//think about move to scene
 		bool Primary = true;
+		//when OnResize, whether is SetViewport
 		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;

@@ -35,6 +35,10 @@ namespace Pixel
 		m_square = m_ActiveScene->CreateEntity("Square");
 		m_square.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));	
 
+		//Red Square
+		m_RedSquare = m_ActiveScene->CreateEntity("Red Square");
+		m_RedSquare.AddComponent<SpriteRendererComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera");
 		m_CameraEntity.AddComponent<CameraComponent>().Primary = false;
 	
