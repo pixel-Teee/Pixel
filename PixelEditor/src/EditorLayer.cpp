@@ -99,6 +99,7 @@ namespace Pixel
 		//     {
 		//         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		//     }
+		/*----------Dock Space----------*/
 		static bool DockSpaceOpen = true;
 		static bool opt_fullscreen = true;
 		static bool opt_padding = false;
@@ -162,40 +163,27 @@ namespace Pixel
 			ImGui::EndMenuBar();
 		}
 
-		//Render Panel
+		/*----------Render Panel----------*/
 		m_SceneHierarchyPanel.OnImGuiRender();
+		/*----------Render Panel----------*/
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		/*----------Render Stats----------*/
+		ImGui::Begin("Render Stats");
 
-		ImGui::Begin("ColorEdit");
-		if (m_square)
-		{		
-			
-			ImGui::Separator();
-			auto& tag = m_square.GetComponent<TagComponent>().Tag;
-			ImGui::Text("%s", tag.c_str());
-
-			
-			auto& squareColor = m_square.GetComponent<SpriteRendererComponent>().Color;
-			ImGui::ColorEdit4("ColorTint", glm::value_ptr(squareColor));
-
-			ImGui::Separator();
-			
-		}
-		
-		ImGui::DragFloat4("Camera Transform", glm::value_ptr(m_CameraEntity2.GetComponent<TransformComponent>().Transform[3]));
-		if (ImGui::Checkbox("Camera A", &PrimiaryCamera))
-		{
-			m_CameraEntity2.GetComponent<CameraComponent>().Primary = PrimiaryCamera;
-			m_CameraEntity.GetComponent<CameraComponent>().Primary = !PrimiaryCamera;
-		}
+		auto stats = Renderer2D::GetStats();
+		ImGui::Text("Renderer2D Stats");
+		ImGui::Text("Draw Call: %d", stats.DrawCalls);
+		ImGui::Text("Quads: %d", stats.QuadCount);
+		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 		ImGui::End();
+		/*----------Render Stats----------*/
+
+		/*----------View Port----------*/
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
-		//PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
-		//PIXEL_WARN("Viewport is focused:{0}", ImGui::IsWindowFocused());
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
-		//PIXEL_WARN("Viewport is hoverd:{0}", ImGui::IsWindowHovered());
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		if(m_ViewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x > 0 && viewportPanelSize.y > 0)
@@ -208,11 +196,12 @@ namespace Pixel
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)textureId, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));
-		
+		ImGui::Image((void*)textureId, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
 		ImGui::End();
 		ImGui::PopStyleVar();
+		/*----------View port----------*/
 		ImGui::End();
+		/*----------Dock Space----------*/
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
