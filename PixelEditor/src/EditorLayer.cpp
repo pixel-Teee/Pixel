@@ -71,7 +71,9 @@ namespace Pixel
 					transform[3][1] -= speed * ts;
 			}
 		};
-		m_CameraEntity2.AddComponent<NativeComponent>().Bind<CameraController>();
+		m_CameraEntity2.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -155,6 +157,10 @@ namespace Pixel
 
 			ImGui::EndMenuBar();
 		}
+
+		//Render Panel
+		m_SceneHierarchyPanel.OnImGuiRender();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
 		ImGui::Begin("ColorEdit");
@@ -195,7 +201,7 @@ namespace Pixel
 			
 			m_CameraController.OnResize(viewportPanelSize.x, viewportPanelSize.y);
 
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, m_ViewportSize.y);
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureId, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));

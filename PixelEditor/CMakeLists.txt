@@ -8,7 +8,14 @@ DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB PixelEditorSrc
 "src/*.h"
-"src/*.cpp")
+"src/*.cpp"
+"src/Panels/*.h"
+"src/Panels/*.cpp"
+)
+
+source_group(TREE ${CMAKE_SOURCE_DIR}/PixelEditor FILES ${PixelEditorSrc})
+
+# message(${CMAKE_SOURCE_DIR}/PixelEditor/src)
 
 add_executable(PixelEditor ${PixelEditorSrc})
 
