@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "SceneCamera.h"
+#include "ScriptableEntity.h"
 
 namespace Pixel {
 	
@@ -50,5 +51,27 @@ namespace Pixel {
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 		//CameraComponent(const glm::mat4& projection);
+	};
+
+	struct NativeComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+
+		std::function<void()> InstantiateFunction;
+		std::function<void()> DestroyInstanceFunction;
+		std::function<void(ScriptableEntity* instance)> OnCreateFunction;
+		std::function<void(ScriptableEntity* instance)> OnDestroyFunction;
+		std::function<void(ScriptableEntity*, Timestep)> OnUpdateFunction;
+
+		template<typename T>
+		void Bind()
+		{
+			InstantiateFunction = [&](){ Instance = new T();};
+			DestroyInstanceFunction = [&]() { delete (T*)Instance; Instance = nullptr; };
+
+			OnCreateFunction = [&](ScriptableEntity* instance){ ((T*)instance)->OnCreate(); };
+			OnDestroyFunction = [&](ScriptableEntity* instance){ ((T*)instance)->OnDestroy(); };
+			OnUpdateFunction = [&](ScriptableEntity* instance, Timestep ts){ ((T*)instance)->OnUpdate(ts); };
+		}
 	};
 }

@@ -40,6 +40,38 @@ namespace Pixel
 	
 		m_CameraEntity2 = m_ActiveScene->CreateEntity("Camera2");
 		m_CameraEntity2.AddComponent<CameraComponent>();
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+				std::cout << "OnCreate" << std::endl;
+			}
+
+			void OnDestroy()
+			{
+
+			}
+
+			void OnUpdate(Timestep ts)
+			{
+				//std::cout << "Timestep: " << ts << std::endl;
+
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+
+				if(Input::IsKeyPressed(PX_KEY_A))
+					transform[3][0] -= speed * ts;
+				if (Input::IsKeyPressed(PX_KEY_D))
+					transform[3][0] += speed * ts;
+				if (Input::IsKeyPressed(PX_KEY_W))
+					transform[3][1] += speed * ts;
+				if (Input::IsKeyPressed(PX_KEY_S))
+					transform[3][1] -= speed * ts;
+			}
+		};
+		m_CameraEntity2.AddComponent<NativeComponent>().Bind<CameraController>();
 	}
 
 	void EditorLayer::OnDetach()
