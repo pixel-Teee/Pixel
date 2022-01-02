@@ -72,7 +72,7 @@ namespace Pixel
 		}
 
 		Camera* mainCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		glm::mat4* cameraTransform;
 		{
 			//Render 2D
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
@@ -83,7 +83,7 @@ namespace Pixel
 				if (camera.Primary)
 				{
 					mainCamera = &camera.camera;
-					cameraTransform = &transform.Transform;
+					cameraTransform = &transform.GetTransform();
 					break;
 				}
 			}
@@ -98,7 +98,7 @@ namespace Pixel
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-				Renderer2D::DrawQuad(transform, sprite);
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite);
 			}
 
 			Renderer2D::EndScene();

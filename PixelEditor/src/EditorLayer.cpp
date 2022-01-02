@@ -50,7 +50,9 @@ namespace Pixel
 		public:
 			void OnCreate()
 			{
-				std::cout << "OnCreate" << std::endl;
+				//std::cout << "OnCreate" << std::endl;
+				auto& translation = GetComponent<TransformComponent>().Translation;
+				translation.x = rand() % 10 - 5.0f;
 			}
 
 			void OnDestroy()
@@ -62,17 +64,17 @@ namespace Pixel
 			{
 				//std::cout << "Timestep: " << ts << std::endl;
 
-				auto& transform = GetComponent<TransformComponent>().Transform;
+				auto& translation = GetComponent<TransformComponent>().Translation;
 				float speed = 5.0f;
 
 				if(Input::IsKeyPressed(PX_KEY_A))
-					transform[3][0] -= speed * ts;
+					translation.x -= speed * ts;
 				if (Input::IsKeyPressed(PX_KEY_D))
-					transform[3][0] += speed * ts;
+					translation.x += speed * ts;
 				if (Input::IsKeyPressed(PX_KEY_W))
-					transform[3][1] += speed * ts;
+					translation.y += speed * ts;
 				if (Input::IsKeyPressed(PX_KEY_S))
-					transform[3][1] -= speed * ts;
+					translation.y -= speed * ts;
 			}
 		};
 		m_CameraEntity2.AddComponent<NativeScriptComponent>().Bind<CameraController>();
