@@ -15,11 +15,14 @@ namespace Pixel
 		~Scene();
 
 		Entity CreateEntity(const std::string& name);
-		
+		void DestroyEntity(Entity entity);
 		entt::registry& Reg() { return m_Registry; }
 
 		void OnUpdate(Timestep& ts);
 		void OnViewportResize(uint32_t width, uint32_t height);
+	private:
+		template<typename T>
+		void OnComponentAdded(Entity entity, T& component);
 	private:
 		//registry is a container for entity and component
 		entt::registry m_Registry;
@@ -27,4 +30,7 @@ namespace Pixel
 		friend class Entity;
 		friend class SceneHierarchyPanel;
 	};
+
+	
+
 }
