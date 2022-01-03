@@ -23,7 +23,7 @@
 #endif
 
 #ifdef PX_ENABLE_ASSERTS
-	#define PX_ASSERT(x, ...) { if(!x) {PIXEL_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak();}}
+	#define PX_ASSERT(x, ...) { if(!(x)) {PIXEL_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak();}}
 	#define PX_CORE_ASSERT(x, ...) { if(!(x)) { PIXEL_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 #else
 	#define PX_ASSERT(x, ...)

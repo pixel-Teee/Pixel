@@ -13,6 +13,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/${outputdir}/${PROJ
 add_subdirectory(Pixel/vendor/Glad)
 add_subdirectory(Pixel/vendor/GLFW)
 add_subdirectory(Pixel/vendor/imgui)
+add_subdirectory(Pixel/vendor/yaml-cpp)
 add_subdirectory(Pixel)
 add_subdirectory(SandBox)
 add_subdirectory(PixelEditor)

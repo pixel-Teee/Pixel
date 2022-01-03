@@ -26,6 +26,7 @@ file(GLOB PixelSrc
 "vendor/glm/glm/*.hpp"
 "vendor/glm/glm/*.inl"
 "vendor/entt/include/*.hpp"
+"vendor/yaml-cpp/*.h"
 )
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/Pixel FILES ${PixelSrc})
@@ -43,6 +44,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/glm"
 "vendor/stb_image"
 "vendor/entt/include"
+"vendor/yaml-cpp/include"
 )
 
 target_compile_definitions(Pixel
@@ -51,6 +53,7 @@ target_compile_definitions(Pixel
     PRIVATE GLFW_INCLUDE_NONE
     PRIVATE IMGUI_IMPL_OPENGL_LOADER_CUSTOM
     PRIVATE PX_DEBUG
+    PRIVATE YAML_CPP_STATIC_DEFINE
 )
 
 #Ô¤±àÒëÍ·ÎÄ¼þ
@@ -69,7 +72,9 @@ endif()
 target_link_libraries(Pixel PUBLIC glfw
 PUBLIC GLAD
 PUBLIC ImGui
-PUBLIC ${OPENGL_LIBRARIES})
+PUBLIC ${OPENGL_LIBRARIES}
+PRIVATE yaml-cpp
+)
 
 
 

@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Pixel/Scene/SceneSerializer.h"
+
 #include <chrono>
 
 namespace Pixel
@@ -30,7 +32,7 @@ namespace Pixel
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
-		
+#if 0	
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
 		m_square.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));	
@@ -78,8 +80,12 @@ namespace Pixel
 			}
 		};
 		m_CameraEntity2.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-
+#endif
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		SceneSerializer serializer(m_ActiveScene);
+		//serializer.Serialize("assets/scenes/Example.pixel");
+		serializer.Deserialize("assets/scenes/Example.pixel");
 	}
 
 	void EditorLayer::OnDetach()

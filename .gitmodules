@@ -11,3 +11,6 @@
 [submodule "Pixel/vendor/glm"]
 	path = Pixel/vendor/glm
 	url = https://github.com/pixel-Teee/glm.git
+[submodule "Pixel/vendor/yaml-cpp"]
+	path = Pixel/vendor/yaml-cpp
+	url = https://github.com/pixel-Teee/yaml-cpp.git
