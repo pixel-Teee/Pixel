@@ -6,6 +6,8 @@
 
 #include "Pixel/Scene/SceneSerializer.h"
 
+#include "Pixel/Utils/PlatformUtils.h"
+
 #include <chrono>
 
 namespace Pixel
@@ -168,6 +170,21 @@ namespace Pixel
 		{
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("New", "Ctrl+N"))
+				{
+					NewScene();
+				}
+
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
+				{
+					OpenScene();
+				}
+
+				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				{
+					SaveSceneAs();
+				}
+
 				if (ImGui::MenuItem("Exit"))
 					Application::Get().Close();
 				ImGui::EndMenu();
@@ -240,6 +257,73 @@ namespace Pixel
 	void EditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
+
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<KeyPressedEvent>(PX_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+	}
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	{
+		//Shortcuts
+		if(e.GetRepeatCount() > 0)
+			return false;
+
+		bool control = Input::IsKeyPressed(PX_KEY_LEFT_CONTROL) || Input::IsKeyPressed(PX_KEY_RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(PX_KEY_LEFT_SHIFT) || Input::IsKeyPressed(PX_KEY_RIGHT_SHIFT);
+		switch (e.GetKeyCode())
+		{
+			case PX_KEY_N:
+			{
+				if (control)
+					NewScene();
+				break;
+			}
+			case PX_KEY_O:
+			{
+				if (control)
+					OpenScene();
+				break;
+			}
+			case PX_KEY_S:
+			{
+				if (control && shift)
+					SaveSceneAs();
+				break;
+			}
+		}
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filepath = FileDialogs::OpenFile("Pixel Scene (*.pixel)\0*.pixel\0");
+		if (!filepath.empty())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(filepath);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filepath = FileDialogs::SaveFile("Pixel Scene (*.pixel)\0*.pixel\0");
+
+		SceneSerializer serializer(m_ActiveScene);
+		if (!filepath.empty())
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(filepath);
+		}
 	}
 
 }
