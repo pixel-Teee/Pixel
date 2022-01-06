@@ -28,6 +28,7 @@ PRIVATE
 "../Pixel/vendor"
 "../Pixel/vendor/glm"
 "../Pixel/vendor/entt/include"
+"../Pixel/vendor/imguizmo"
 )
 
 target_compile_definitions(PixelEditor PRIVATE

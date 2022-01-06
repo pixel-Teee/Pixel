@@ -12,6 +12,7 @@ file(GLOB PixelSrc
 "src/Pixel/Debug/*.h"
 "src/Pixel/Scene/*.h"
 "src/Pixel/Utils/*.h"
+"src/Pixel/Math/*.h"
 "src/Pixel/Core/*.cpp"
 "src/Pixel/Events/*.cpp"
 "src/Pixel/ImGui/*.cpp"
@@ -19,6 +20,7 @@ file(GLOB PixelSrc
 "src/Pixel/Debug/*.cpp"
 "src/Pixel/Scene/*.cpp"
 "src/Pixel/Utils/*.cpp"
+"src/Pixel/Math/*.cpp"
 "src/Platform/OpenGL/*.h"
 "src/Platform/OpenGL/*.cpp"
 "src/Platform/Windows/*.h"
@@ -29,6 +31,8 @@ file(GLOB PixelSrc
 "vendor/glm/glm/*.inl"
 "vendor/entt/include/*.hpp"
 "vendor/yaml-cpp/*.h"
+"vendor/imguizmo/ImGuizmo.h"
+"vendor/imguizmo/ImGuizmo.cpp"
 )
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/Pixel FILES ${PixelSrc})
@@ -47,6 +51,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/stb_image"
 "vendor/entt/include"
 "vendor/yaml-cpp/include"
+"vendor/imguizmo"
 )
 
 target_compile_definitions(Pixel
@@ -57,6 +62,8 @@ target_compile_definitions(Pixel
     PRIVATE PX_DEBUG
     PRIVATE YAML_CPP_STATIC_DEFINE
 )
+
+set_source_files_properties(vendor/imguizmo/imGuizmo.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
 #Ô¤±àÒëÍ·ÎÄ¼þ
 target_precompile_headers(Pixel
