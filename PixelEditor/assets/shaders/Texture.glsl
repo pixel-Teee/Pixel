@@ -30,7 +30,7 @@ void main()
 #version 330 core
 
 layout(location = 0)out vec4 color;
-layout(location = 1)out vec4 color2;
+layout(location = 1) out int color2;
 
 in vec4 v_Color;
 in vec2 v_TexCoord;
@@ -43,5 +43,5 @@ void main()
 {
 	//TODO: u_TilingFactor
 	color = texture(u_Textures[int(v_TexIndex)], v_TexCoord * v_TilingFactor) * v_Color;
-	color2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	color2 = 50;
 }

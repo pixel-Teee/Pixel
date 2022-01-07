@@ -51,7 +51,9 @@ namespace Pixel
 
 		//Viewport Size
 		glm::vec2 m_ViewportSize = {0, 0};
-		glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };
+		//Viewport Coordinate
+		glm::vec2 m_ViewportBounds[2];
+
 
 		//GizmoType
 		int m_GizmoType = -1;
