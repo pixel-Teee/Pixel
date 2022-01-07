@@ -33,6 +33,7 @@ namespace Pixel
 		m_CameraController.SetZoomLevel(5.5f);
 
 		FramebufferSpecification fbSpec;
+		fbSpec.Attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth};
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
@@ -224,7 +225,7 @@ namespace Pixel
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
 
-		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
+		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID(1);
 		ImGui::Image(reinterpret_cast<void*>(textureId), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
 
 		/*----------Gizmos----------*/
