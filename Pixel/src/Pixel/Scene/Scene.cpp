@@ -4,7 +4,6 @@
 #include "Components.h"
 #include "Entity.h"
 #include "Pixel/Renderer/Renderer2D.h"
-
 #include <glm/glm.hpp>
 
 namespace Pixel
@@ -59,7 +58,22 @@ namespace Pixel
 		m_Registry.destroy(entity);
 	}
 
-	void Scene::OnUpdate(Timestep& ts)
+	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera)
+	{
+		Renderer2D::BeginScene(camera);
+
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+		for (auto entity : group)
+		{
+			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite);
+		}
+
+		Renderer2D::EndScene();
+	}
+
+	void Scene::OnUpdateRuntime(Timestep& ts)
 	{
 		//Update Scripts	
 		{

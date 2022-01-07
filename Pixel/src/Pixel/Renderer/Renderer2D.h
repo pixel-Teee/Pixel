@@ -6,6 +6,7 @@
 #include "Pixel/Renderer/SubTexture2D.h"
 
 #include "Pixel/Renderer/Camera.h"
+#include "Pixel/Renderer/EditorCamera.h"
 
 namespace Pixel {
 
@@ -16,6 +17,7 @@ namespace Pixel {
 		static void Shutdown();
 
 		static void BeginScene(const OrthographicCamera& camera); //TODO: Remove
+		static void BeginScene(const EditorCamera& camera);
 		static void BeginScene(const Camera& camera, const glm::mat4& transform);
 		static void EndScene();
 		static void Flush();

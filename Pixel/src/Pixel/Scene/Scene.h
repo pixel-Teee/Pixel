@@ -3,6 +3,7 @@
 #include "entt.hpp"
 
 #include "Pixel/Core/Timestep.h"
+#include "Pixel/Renderer/EditorCamera.h"
 
 namespace Pixel
 {
@@ -18,7 +19,8 @@ namespace Pixel
 		void DestroyEntity(Entity entity);
 		entt::registry& Reg() { return m_Registry; }
 
-		void OnUpdate(Timestep& ts);
+		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
+		void OnUpdateRuntime(Timestep& ts);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();

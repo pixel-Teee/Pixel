@@ -38,6 +38,8 @@ namespace Pixel
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
+
+		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.1f, 1000.0f);
 #if 0	
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
@@ -220,17 +222,10 @@ namespace Pixel
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		if(m_ViewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x > 0 && viewportPanelSize.y > 0)
-		{
-			m_Framebuffer->Resize((uint32_t)viewportPanelSize.x, (uint32_t)viewportPanelSize.y);
-			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };		
-			
-			m_CameraController.OnResize(viewportPanelSize.x, viewportPanelSize.y);
+		m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
 
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		}
 		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)textureId, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
+		ImGui::Image(reinterpret_cast<void*>(textureId), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
 
 		/*----------Gizmos----------*/
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -244,11 +239,16 @@ namespace Pixel
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
 			//camera entity
-			auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-			const auto& camera = cameraEntity.GetComponent<CameraComponent>().camera;
-			const glm::mat4& cameraProjection = camera.GetProjection();
-			glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+			//Runtime Camera
+			//auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+			//const auto& camera = cameraEntity.GetComponent<CameraComponent>().camera;
+			//const glm::mat4& cameraProjection = camera.GetProjection();
+			//glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
 			
+			//Editor Camera
+			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+			glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+
 			//entity transform
 			auto& tc = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4& transform = tc.GetTransform();
@@ -292,8 +292,22 @@ namespace Pixel
 	{
 		PX_PROFILE_FUNCTION();
 
+		//Resize
+		if(FramebufferSpecification spec = m_Framebuffer->GetSpecification();
+		m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f &&
+		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+		{
+			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		}
 		if(m_ViewportFocused)
+		{
 			m_CameraController.OnUpdate(ts);
+			m_EditorCamera.OnUpdate(ts);
+		}
+	
 		//Render
 		Renderer2D::ResetStats();
 		//PX_PROFILE_SCOPE("Renderer Prep");
@@ -303,7 +317,7 @@ namespace Pixel
 		RenderCommand::Clear();
 		
 		//Update scene
-		m_ActiveScene->OnUpdate(ts);
+		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 
 		m_Framebuffer->UnBind();
 	}
@@ -311,6 +325,7 @@ namespace Pixel
 	void EditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
+		m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(PX_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
