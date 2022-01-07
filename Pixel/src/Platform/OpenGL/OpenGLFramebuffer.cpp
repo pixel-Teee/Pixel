@@ -74,6 +74,18 @@ namespace Pixel {
 			}
 			return false;
 		}
+
+		static GLenum PixelTextureFormatToGL(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+				case FramebufferTextureFormat::RGBA8:		return GL_RGBA8;
+				case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+
+			}
+
+			return 0;
+		}
 	}	
 
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec):m_Specification(spec)
@@ -170,6 +182,10 @@ namespace Pixel {
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
+
+		//ClearColorAttachment<float>(index, )
+		//int value = -1;
+		//glClearTexImage(m_ColorAttachments[1], 0, GL_RED_INTEGER, GL_INT, &value);
 	}
 
 	void OpenGLFramebuffer::UnBind()
@@ -196,6 +212,13 @@ namespace Pixel {
 		int pixelData;
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
 		return pixelData;
+	}
+
+	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
+	{
+		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
+
+		glClearTexImage(m_ColorAttachments[attachmentIndex], 0, Utils::PixelTextureFormatToGL(spec.TextureFormat), GL_INT, &value);
 	}
 
 }
