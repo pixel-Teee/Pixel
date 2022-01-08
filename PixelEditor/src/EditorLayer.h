@@ -19,7 +19,7 @@ namespace Pixel
 		void OnEvent(Event& e)override;
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
-
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		void NewScene();
 		void OpenScene();
 		void SaveSceneAs();
@@ -53,7 +53,8 @@ namespace Pixel
 		glm::vec2 m_ViewportSize = {0, 0};
 		//Viewport Coordinate
 		glm::vec2 m_ViewportBounds[2];
-
+		//Hovered Entity
+		Entity m_HoveredEntity;
 
 		//GizmoType
 		int m_GizmoType = -1;
