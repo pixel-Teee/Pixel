@@ -2,7 +2,7 @@
 
 #include "Pixel.h"
 #include "Panels/SceneHierarchyPanel.h"
-
+#include "Panels/ContentBrowserPanel.h"
 #include "Pixel/Renderer/EditorCamera.h"
 
 namespace Pixel
@@ -61,6 +61,7 @@ namespace Pixel
 
 		//Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		ContentBrowserPanel m_ContentBrowserPanel;
 	};
 }
 

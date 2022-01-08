@@ -204,6 +204,10 @@ namespace Pixel
 		m_SceneHierarchyPanel.OnImGuiRender();
 		/*----------Render Panel----------*/
 
+		/*----------Render Content Browser----------*/
+		m_ContentBrowserPanel.OnImGuiRender();
+		/*----------Render Content Browser----------*/
+
 		/*----------Render Stats----------*/
 		ImGui::Begin("Render Stats");
 
