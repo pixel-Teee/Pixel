@@ -14,3 +14,6 @@
 [submodule "Pixel/vendor/yaml-cpp"]
 	path = Pixel/vendor/yaml-cpp
 	url = https://github.com/pixel-Teee/yaml-cpp.git
+[submodule "Pixel/vendor/imguizmo"]
+	path = Pixel/vendor/imguizmo
+	url = https://github.com/pixel-Teee/ImGuizmo.git
