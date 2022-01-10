@@ -62,6 +62,7 @@ namespace Pixel
 
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera)
 	{
+		/*
 		Renderer2D::BeginScene(camera);
 
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
@@ -73,6 +74,19 @@ namespace Pixel
 		}
 
 		Renderer2D::EndScene();
+		*/
+		Renderer3D::BeginScene(camera);
+
+		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent>);
+
+		for (auto entity : group)
+		{
+			auto [transform, mesh] = group.get<TransformComponent, StaticMeshComponent>(entity);
+
+			Renderer3D::DrawModel(transform.GetTransform(), mesh, (int)entity);
+		}
+
+		Renderer3D::EndScene();
 	}
 
 	void Scene::OnUpdateRuntime(Timestep& ts)
@@ -111,7 +125,7 @@ namespace Pixel
 				}
 			}
 		}
-		/*
+		
 		if (mainCamera)
 		{
 			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
@@ -127,22 +141,6 @@ namespace Pixel
 
 			Renderer2D::EndScene();
 		}		
-		*/
-		if (mainCamera)
-		{
-			Renderer3D::BeginScene(*mainCamera, *cameraTransform);
-
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-
-			for (auto entity : group)
-			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
-				Renderer3D::DrawQube(transform.GetTransform());
-			}
-
-			Renderer3D::EndScene();
-		}
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -202,6 +200,12 @@ namespace Pixel
 	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
 	{
 		
+	}
+
+	template<>
+	void Scene::OnComponentAdded<StaticMeshComponent>(Entity entity, StaticMeshComponent& component)
+	{
+		component.mesh = Model(component.path);
 	}
 }
 

@@ -9,7 +9,6 @@ file(GLOB PixelSrc
 "src/Pixel/Events/*.h"
 "src/Pixel/ImGui/*.h"
 "src/Pixel/Renderer/*.h"
-"src/Pixel/Renderer/3D/*.h"
 "src/Pixel/Debug/*.h"
 "src/Pixel/Scene/*.h"
 "src/Pixel/Utils/*.h"
@@ -18,7 +17,7 @@ file(GLOB PixelSrc
 "src/Pixel/Events/*.cpp"
 "src/Pixel/ImGui/*.cpp"
 "src/Pixel/Renderer/*.cpp"
-"src/Pixel/Renderer/3D/*.cpp"
+"src/Pixel/Renderer/3D/*.h"
 "src/Pixel/Debug/*.cpp"
 "src/Pixel/Scene/*.cpp"
 "src/Pixel/Utils/*.cpp"
@@ -27,6 +26,7 @@ file(GLOB PixelSrc
 "src/Platform/OpenGL/*.cpp"
 "src/Platform/Windows/*.h"
 "src/Platform/Windows/*.cpp"
+"src/Pixel/Renderer/3D/*.cpp"
 "vendor/stb_image/*.h"
 "vendor/stb_image/*.cpp"
 "vendor/glm/glm/*.hpp"
@@ -35,6 +35,7 @@ file(GLOB PixelSrc
 "vendor/yaml-cpp/*.h"
 "vendor/imguizmo/ImGuizmo.h"
 "vendor/imguizmo/ImGuizmo.cpp"
+"vendor/assimp/include"
 )
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/Pixel FILES ${PixelSrc})
@@ -54,6 +55,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/entt/include"
 "vendor/yaml-cpp/include"
 "vendor/imguizmo"
+"vendor/assimp/include"
 )
 
 target_compile_definitions(Pixel
@@ -85,6 +87,7 @@ PUBLIC GLAD
 PUBLIC ImGui
 PUBLIC ${OPENGL_LIBRARIES}
 PRIVATE yaml-cpp
+PUBLIC assimp
 )
 
 

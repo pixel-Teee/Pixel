@@ -9,11 +9,12 @@ namespace Pixel{
 	public:
 		static void Init();
 
-		static void DrawQube(const glm::mat4& transform);
+		static void DrawModel(const glm::mat4& transform, StaticMeshComponent& MeshComponent, int EntityID);
 
 		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		static void BeginScene(const EditorCamera& camera);
+
 		static void EndScene();
-		static void Flush();
 	};
 
 }

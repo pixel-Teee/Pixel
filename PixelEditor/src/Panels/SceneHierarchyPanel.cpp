@@ -249,6 +249,12 @@ namespace Pixel
 				ImGui::CloseCurrentPopup();
 			}
 
+			if (ImGui::MenuItem("Static Mesh Renderer"))
+			{
+				m_SelectionContext.AddComponent<StaticMeshComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 		/*----------Add Component----------*/
@@ -336,6 +342,15 @@ namespace Pixel
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			}
+		);
+
+		DrawComponent<StaticMeshComponent>("Static Mesh Renderer", entity, [](auto& component)
+			{
+				if (ImGui::InputText("Mesh Path", component.path, sizeof(component.path)))
+				{
+					component.mesh = Model(component.path);
+				}
 			}
 		);
 	}

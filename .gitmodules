@@ -17,3 +17,6 @@
 [submodule "Pixel/vendor/imguizmo"]
 	path = Pixel/vendor/imguizmo
 	url = https://github.com/pixel-Teee/ImGuizmo.git
+[submodule "Pixel/vendor/assimp"]
+	path = Pixel/vendor/assimp
+	url = https://github.com/pixel-Teee/assimp.git

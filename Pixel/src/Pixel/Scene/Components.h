@@ -7,6 +7,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "SceneCamera.h"
+#include "Pixel/Renderer/3D/Model.h"
 #include "ScriptableEntity.h"
 
 namespace Pixel {
@@ -78,6 +79,22 @@ namespace Pixel {
 		{
 			InstantiateScript = [](){ return static_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+		}
+	};
+
+	struct StaticMeshComponent
+	{
+		Model mesh;	
+		//std::string path;
+
+		char path[256];
+
+		StaticMeshComponent() = default;
+		StaticMeshComponent(const StaticMeshComponent&) = default;
+		StaticMeshComponent(const std::string& Path)
+		{
+			memcpy(path, Path.c_str(), sizeof(char) * Path.size());
+			path[Path.size()] = '\0';
 		}
 	};
 }

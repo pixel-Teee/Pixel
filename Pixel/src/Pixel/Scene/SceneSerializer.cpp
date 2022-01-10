@@ -147,6 +147,17 @@ namespace Pixel {
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
 
+		if (entity.HasComponent<StaticMeshComponent>())
+		{
+			out << YAML::Key << "StaticMeshComponent";
+			out << YAML::BeginMap;
+
+			auto& staticMeshComponent = entity.GetComponent<StaticMeshComponent>();
+			out << YAML::Key << "Path" << YAML::Value << staticMeshComponent.path;
+
+			out << YAML::EndMap;
+		}
+
 		out << YAML::EndMap;
 	}
 
@@ -241,6 +252,13 @@ namespace Pixel {
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+				}
+
+				auto staticMeshComponent = entity["StaticMeshComponent"];
+				if (staticMeshComponent)
+				{
+					std::string str = staticMeshComponent["Path"].as<std::string>();
+					auto& src = deserializedEntity.AddComponent<StaticMeshComponent>(str);
 				}
 			}
 		}
