@@ -3,6 +3,7 @@
 
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Renderer2D.h"
+#include "Pixel/Renderer/3D/Renderer3D.h"
 
 namespace Pixel {
 
@@ -12,6 +13,7 @@ namespace Pixel {
 	{
 		RenderCommand::Init();
 		Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)

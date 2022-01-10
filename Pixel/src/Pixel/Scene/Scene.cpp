@@ -4,6 +4,7 @@
 #include "Components.h"
 #include "Entity.h"
 #include "Pixel/Renderer/Renderer2D.h"
+#include "Pixel/Renderer/3D/Renderer3D.h"
 
 #include <glm/glm.hpp>
 
@@ -95,7 +96,7 @@ namespace Pixel
 				}
 			}
 		}
-
+		/*
 		if (mainCamera)
 		{
 			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
@@ -110,6 +111,22 @@ namespace Pixel
 
 			Renderer2D::EndScene();
 		}		
+		*/
+		if (mainCamera)
+		{
+			Renderer3D::BeginScene(*mainCamera, *cameraTransform);
+
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+
+			for (auto entity : group)
+			{
+				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+				Renderer3D::DrawQube(transform.GetTransform());
+			}
+
+			Renderer3D::EndScene();
+		}
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
