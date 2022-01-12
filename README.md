@@ -19,3 +19,7 @@ Pixel Game Engine
 `cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Debug` 
 or
 `cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release`
+
+# ScreenShot
+
+![ReadMe1](./ReadMe1.png)
