@@ -8,4 +8,4 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     StaticMeshComponent:
-      Path: assets//models//cube.obj
+      Path: assets//models//Bleach.obj
