@@ -8,6 +8,7 @@
 
 #include "SceneCamera.h"
 #include "ScriptableEntity.h"
+#include "Pixel/Renderer/Texture.h"
 
 namespace Pixel {
 	
@@ -44,6 +45,8 @@ namespace Pixel {
 	struct SpriteRendererComponent
 	{
 		glm::vec4 Color{1.0f, 1.0f, 1.0f, 1.0f};
+		Ref<Texture2D> Texture;
+		float TilingFactor = 1.0f;
 		//Ref<Material>
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
