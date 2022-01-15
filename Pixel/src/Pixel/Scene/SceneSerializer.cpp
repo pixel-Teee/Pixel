@@ -324,7 +324,7 @@ namespace Pixel {
 				}
 
 				auto rigidBody2DComponent = entity["Rigidbody2DComponent"];
-				if (spriteRendererComponent)
+				if (rigidBody2DComponent)
 				{
 					auto& rb2d = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 					rb2d.Type = RigidBody2DBodyTypeFromString(rigidBody2DComponent["BodyType"].as<std::string>());
