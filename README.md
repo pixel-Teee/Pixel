@@ -20,6 +20,8 @@ Pixel Game Engine
 or
 `cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release`
 
+Select the PixelEditor as the StartupProject
+
 # ScreenShot
 
 ![ReadMe1](./ReadMe1.png)
