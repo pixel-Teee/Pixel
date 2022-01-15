@@ -1,7 +1,7 @@
 #pragma once
 
 #include "entt.hpp"
-
+#include "Pixel/Core/UUID.h"
 #include "Pixel/Core/Timestep.h"
 #include "Pixel/Renderer/EditorCamera.h"
 
@@ -18,6 +18,7 @@ namespace Pixel
 		~Scene();
 
 		Entity CreateEntity(const std::string& name);
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name);
 		void DestroyEntity(Entity entity);
 
 		void OnRuntimeStart();
