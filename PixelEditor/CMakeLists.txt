@@ -35,6 +35,7 @@ PRIVATE
 "../Pixel/vendor/glm"
 "../Pixel/vendor/entt/include"
 "../Pixel/vendor/imguizmo"
+"../Pixel/vendor/Box2D"
 )
 
 target_compile_definitions(PixelEditor PRIVATE
