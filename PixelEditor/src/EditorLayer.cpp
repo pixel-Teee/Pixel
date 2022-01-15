@@ -27,10 +27,8 @@ namespace Pixel
 	void EditorLayer::OnAttach()
 	{
 		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_CupTexture = Texture2D::Create("assets/textures/test.jpg");
-		m_SpriteSheets = Texture2D::Create("assets/game/textures/tilemap_packed.png");
-
-		m_TextureStairs = SubTexture2D::CreateFromCoords(m_SpriteSheets, { 14, 0 }, { 16, 16 }, { 1, 3 });
+		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
+		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
 
 		m_CameraController.SetZoomLevel(5.5f);
 
@@ -317,6 +315,10 @@ namespace Pixel
 		ImGui::PopStyleVar();
 		/*----------Gizmos----------*/
 		/*----------View port----------*/
+
+		/*---------Play Button And Pause Button---------*/
+		UI_Toobar();
+		/*---------Play Button And Pause Button----------*/
 		ImGui::End();
 		/*----------Dock Space----------*/
 	}
@@ -335,11 +337,6 @@ namespace Pixel
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-		if(m_ViewportFocused)
-		{
-			m_CameraController.OnUpdate(ts);
-			m_EditorCamera.OnUpdate(ts);
-		}
 	
 		//Render
 		Renderer2D::ResetStats();
@@ -351,10 +348,27 @@ namespace Pixel
 
 		//Clear our entity ID attachment to -1
 		m_Framebuffer->ClearAttachment(1, -1);
-		
-		//Update scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 
+		switch (m_SceneState)
+		{
+			case EditorLayer::SceneState::Edit:
+			{
+				if (m_ViewportFocused)
+				{
+					m_CameraController.OnUpdate(ts);
+					m_EditorCamera.OnUpdate(ts);
+				}
+				//Update scene
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+				break;
+			}
+			case EditorLayer::SceneState::Play:
+			{
+				m_ActiveScene->OnUpdateRuntime(ts);
+				break;
+			}
+		}
+		
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -476,6 +490,44 @@ namespace Pixel
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
 		}
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		m_SceneState = SceneState::Play;
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
+	}
+
+	void EditorLayer::UI_Toobar()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		auto& colors = ImGui::GetStyle().Colors;
+		const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0));
+
+		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		float size = ImGui::GetWindowHeight() - 4.0f;
+		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+		ImGui::SameLine(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		{
+		if(m_SceneState == SceneState::Edit)
+			OnScenePlay();
+		else if(m_SceneState == SceneState::Play)
+			OnSceneStop();
+		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(3);
+		ImGui::End();
 	}
 
 }

@@ -24,6 +24,12 @@ namespace Pixel
 		void OpenScene();
 		void OpenScene(const std::filesystem::path filepath);
 		void SaveSceneAs();
+
+		void OnScenePlay();
+		void OnSceneStop();
+
+		//UI Panels
+		void UI_Toobar();
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -63,6 +69,16 @@ namespace Pixel
 		//Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
+
+		enum class SceneState
+		{
+			Edit = 0, Play = 1
+		};
+
+		SceneState m_SceneState = SceneState::Edit;
+
+		//Editor Resources
+		Ref<Texture2D> m_IconPlay, m_IconStop;
 	};
 }
 

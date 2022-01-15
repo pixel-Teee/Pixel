@@ -349,10 +349,18 @@ namespace Pixel
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
 						component.Texture = Texture2D::Create(texturePath.string());
+						
 					}
 
 					ImGui::EndDragDropTarget();
 				}
+
+				/*
+				if (component.Texture)
+				{
+					ImGui::ImageButton((ImTextureID)component.Texture->GetRendererID(), ImVec2(16.0f, 16.0f));
+				}
+				*/
 
 				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
 			}
