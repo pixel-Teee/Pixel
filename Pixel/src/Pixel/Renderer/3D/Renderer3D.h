@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pixel/Scene/Components.h"
+#include "Pixel/Renderer/EditorCamera.h"
 
 namespace Pixel{
 

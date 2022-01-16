@@ -22,7 +22,19 @@ namespace Pixel
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		void NewScene();
 		void OpenScene();
+		void OpenScene(const std::filesystem::path filepath);
 		void SaveSceneAs();
+		void SaveScene();
+
+		void SerializerScene(Ref<Scene> scene, const std::filesystem::path& path);
+
+		void OnScenePlay();
+		void OnSceneStop();
+
+		void OnDuplicateEntity();
+
+		//UI Panels
+		void UI_Toobar();
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -39,6 +51,8 @@ namespace Pixel
 		Ref<Framebuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
+		std::filesystem::path m_CurrentScenePath;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 
@@ -62,6 +76,16 @@ namespace Pixel
 		//Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
+
+		enum class SceneState
+		{
+			Edit = 0, Play = 1
+		};
+
+		SceneState m_SceneState = SceneState::Edit;
+
+		//Editor Resources
+		Ref<Texture2D> m_IconPlay, m_IconStop;
 	};
 }
 

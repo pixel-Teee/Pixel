@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(Pixel)
 
-file(GLOB PixelSrc
+file(GLOB_RECURSE PixelSrc
 "src/*.h"
 "src/*.cpp"
 "src/Pixel/Core/*.h"
@@ -35,6 +35,8 @@ file(GLOB PixelSrc
 "vendor/yaml-cpp/*.h"
 "vendor/imguizmo/ImGuizmo.h"
 "vendor/imguizmo/ImGuizmo.cpp"
+"vendor/Box2D/include/*.h"
+"vendor/Box2D/src/*.cpp"
 "vendor/assimp/include"
 )
 
@@ -55,6 +57,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/entt/include"
 "vendor/yaml-cpp/include"
 "vendor/imguizmo"
+"vendor/Box2D/include"
 "vendor/assimp/include"
 )
 

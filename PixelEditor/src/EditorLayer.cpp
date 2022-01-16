@@ -16,6 +16,8 @@
 
 namespace Pixel
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f)
 	{
@@ -25,10 +27,8 @@ namespace Pixel
 	void EditorLayer::OnAttach()
 	{
 		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_CupTexture = Texture2D::Create("assets/textures/test.jpg");
-		m_SpriteSheets = Texture2D::Create("assets/game/textures/tilemap_packed.png");
-
-		m_TextureStairs = SubTexture2D::CreateFromCoords(m_SpriteSheets, { 14, 0 }, { 16, 16 }, { 1, 3 });
+		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
+		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
 
 		m_CameraController.SetZoomLevel(5.5f);
 
@@ -38,7 +38,8 @@ namespace Pixel
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 
 		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.1f, 1000.0f);
 #if 0	
@@ -245,6 +246,19 @@ namespace Pixel
 
 		//PIXEL_CORE_INFO("{0}, {1}", minBound.x, minBound.y);
 
+		/*----------Drag Dop---------*/
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				OpenScene(std::filesystem::path(g_AssetPath) / path);
+			}
+			
+			ImGui::EndDragDropTarget();
+		}
+		/*----------Drag Dop---------*/
+
 		/*----------Gizmos----------*/
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (selectedEntity && m_GizmoType != -1)
@@ -302,6 +316,10 @@ namespace Pixel
 		ImGui::PopStyleVar();
 		/*----------Gizmos----------*/
 		/*----------View port----------*/
+
+		/*---------Play Button And Pause Button---------*/
+		UI_Toobar();
+		/*---------Play Button And Pause Button----------*/
 		ImGui::End();
 		/*----------Dock Space----------*/
 	}
@@ -320,11 +338,6 @@ namespace Pixel
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-		if(m_ViewportFocused)
-		{
-			m_CameraController.OnUpdate(ts);
-			m_EditorCamera.OnUpdate(ts);
-		}
 	
 		//Render
 		Renderer2D::ResetStats();
@@ -336,10 +349,27 @@ namespace Pixel
 
 		//Clear our entity ID attachment to -1
 		m_Framebuffer->ClearAttachment(1, -1);
-		
-		//Update scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 
+		switch (m_SceneState)
+		{
+			case EditorLayer::SceneState::Edit:
+			{
+				if (m_ViewportFocused)
+				{
+					m_CameraController.OnUpdate(ts);
+					m_EditorCamera.OnUpdate(ts);
+				}
+				//Update scene
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+				break;
+			}
+			case EditorLayer::SceneState::Play:
+			{
+				m_ActiveScene->OnUpdateRuntime(ts);
+				break;
+			}
+		}
+		
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -394,8 +424,21 @@ namespace Pixel
 			}
 			case PX_KEY_S:
 			{
-				if (control && shift)
-					SaveSceneAs();
+				if (control)
+				{
+					if(shift)
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
+					
+				break;
+			}
+
+			case PX_KEY_D:
+			{
+				if(control)
+					OnDuplicateEntity();
 				break;
 			}
 
@@ -427,22 +470,35 @@ namespace Pixel
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_CurrentScenePath = std::filesystem::path();
 	}
 
 	void EditorLayer::OpenScene()
 	{
 		std::string filepath = FileDialogs::OpenFile("Pixel Scene (*.pixel)\0*.pixel\0");
-		if (!filepath.empty())
-		{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		OpenScene(filepath);
+	}
 
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(filepath);
+	void EditorLayer::OpenScene(const std::filesystem::path filepath)
+	{
+		if(m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
+		Ref<Scene> newScene = CreateRef<Scene>();
+		SceneSerializer serializer(newScene);
+
+		if (serializer.Deserialize(filepath.string()))
+		{
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
+			m_CurrentScenePath = filepath;
 		}
 	}
 
@@ -450,12 +506,83 @@ namespace Pixel
 	{
 		std::string filepath = FileDialogs::SaveFile("Pixel Scene (*.pixel)\0*.pixel\0");
 
-		SceneSerializer serializer(m_ActiveScene);
 		if (!filepath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath);
+			SerializerScene(m_ActiveScene, filepath);
+
+			m_CurrentScenePath = filepath;
 		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_CurrentScenePath.empty())
+			SerializerScene(m_ActiveScene, m_CurrentScenePath);
+		else
+			SaveSceneAs();
+	}
+
+	void EditorLayer::SerializerScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		m_SceneState = SceneState::Play;
+
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		m_ActiveScene->OnRuntimeStart();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
+		m_ActiveScene->OnRuntimeStop();
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if(m_SceneState != SceneState::Edit)
+			return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if(selectedEntity)
+			m_EditorScene->DuplicateEntity(selectedEntity);
+	}
+
+	void EditorLayer::UI_Toobar()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		auto& colors = ImGui::GetStyle().Colors;
+		const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0));
+
+		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		float size = ImGui::GetWindowHeight() - 4.0f;
+		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+		ImGui::SameLine(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		{
+		if(m_SceneState == SceneState::Edit)
+			OnScenePlay();
+		else if(m_SceneState == SceneState::Play)
+			OnSceneStop();
+		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(3);
+		ImGui::End();
 	}
 
 }

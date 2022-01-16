@@ -6,6 +6,12 @@ project(PixelEditor)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Resources
+DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini
+DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 file(GLOB PixelEditorSrc
 "src/*.h"
 "src/*.cpp"
@@ -29,6 +35,7 @@ PRIVATE
 "../Pixel/vendor/glm"
 "../Pixel/vendor/entt/include"
 "../Pixel/vendor/imguizmo"
+"../Pixel/vendor/Box2D"
 )
 
 target_compile_definitions(PixelEditor PRIVATE
@@ -42,5 +49,10 @@ PRIVATE
 cxx_std_17
 )
 
+if(MSVC)
+	set_target_properties(
+	PixelEditor PROPERTIES
+	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/PixelEditor")
+endif()
 
 
