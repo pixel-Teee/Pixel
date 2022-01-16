@@ -49,5 +49,10 @@ PRIVATE
 cxx_std_17
 )
 
+if(MSVC)
+	set_target_properties(
+	PixelEditor PROPERTIES
+	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/PixelEditor")
+endif()
 
 
