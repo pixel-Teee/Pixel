@@ -38,7 +38,8 @@ namespace Pixel
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 
 		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.1f, 1000.0f);
 #if 0	
@@ -423,8 +424,21 @@ namespace Pixel
 			}
 			case PX_KEY_S:
 			{
-				if (control && shift)
-					SaveSceneAs();
+				if (control)
+				{
+					if(shift)
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
+					
+				break;
+			}
+
+			case PX_KEY_D:
+			{
+				if(control)
+					OnDuplicateEntity();
 				break;
 			}
 
@@ -456,9 +470,11 @@ namespace Pixel
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_CurrentScenePath = std::filesystem::path();
 	}
 
 	void EditorLayer::OpenScene()
@@ -469,14 +485,20 @@ namespace Pixel
 
 	void EditorLayer::OpenScene(const std::filesystem::path filepath)
 	{
-		if (!filepath.empty())
-		{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		if(m_SceneState != SceneState::Edit)
+			OnSceneStop();
 
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(filepath.string());
+		Ref<Scene> newScene = CreateRef<Scene>();
+		SceneSerializer serializer(newScene);
+
+		if (serializer.Deserialize(filepath.string()))
+		{
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
+			m_CurrentScenePath = filepath;
 		}
 	}
 
@@ -484,24 +506,55 @@ namespace Pixel
 	{
 		std::string filepath = FileDialogs::SaveFile("Pixel Scene (*.pixel)\0*.pixel\0");
 
-		SceneSerializer serializer(m_ActiveScene);
 		if (!filepath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath);
+			SerializerScene(m_ActiveScene, filepath);
+
+			m_CurrentScenePath = filepath;
 		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_CurrentScenePath.empty())
+			SerializerScene(m_ActiveScene, m_CurrentScenePath);
+		else
+			SaveSceneAs();
+	}
+
+	void EditorLayer::SerializerScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
 	}
 
 	void EditorLayer::OnScenePlay()
 	{
-		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
+
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		m_ActiveScene->OnRuntimeStart();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnSceneStop()
 	{
-		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
+		m_ActiveScene->OnRuntimeStop();
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if(m_SceneState != SceneState::Edit)
+			return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if(selectedEntity)
+			m_EditorScene->DuplicateEntity(selectedEntity);
 	}
 
 	void EditorLayer::UI_Toobar()

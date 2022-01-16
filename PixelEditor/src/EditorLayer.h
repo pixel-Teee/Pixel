@@ -24,9 +24,14 @@ namespace Pixel
 		void OpenScene();
 		void OpenScene(const std::filesystem::path filepath);
 		void SaveSceneAs();
+		void SaveScene();
+
+		void SerializerScene(Ref<Scene> scene, const std::filesystem::path& path);
 
 		void OnScenePlay();
 		void OnSceneStop();
+
+		void OnDuplicateEntity();
 
 		//UI Panels
 		void UI_Toobar();
@@ -46,6 +51,8 @@ namespace Pixel
 		Ref<Framebuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
+		std::filesystem::path m_CurrentScenePath;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 
