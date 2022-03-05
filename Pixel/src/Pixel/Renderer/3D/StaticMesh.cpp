@@ -14,13 +14,12 @@ namespace Pixel {
 		VAO = VertexArray::Create();
 
 		//Create VBO
-		VBO = VertexBuffer::Create(sizeof(Vertex) * vertices.size());
+		VBO = VertexBuffer::Create(vertices.size() * sizeof(Vertex));
 		VBO->SetLayout(
 			{
 				{
 					{ShaderDataType::Float3, "a_Pos"},
 					{ShaderDataType::Float3, "a_Normal"},
-					{ShaderDataType::Float3, "a_Tangent"},
 					{ShaderDataType::Float2, "a_TexCoord"},
 					{ShaderDataType::Int,	 "a_EntityID"}
 				}
@@ -35,15 +34,51 @@ namespace Pixel {
 		VAO->SetIndexBuffer(IBO);
 	}
 
-	void StaticMesh::Draw(const glm::mat4& transform, const Ref<Shader>& shader, int entityID)
+	void StaticMesh::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID)
 	{
 		SetupMesh(entityID);
 		shader->Bind();
-		shader->SetMat4("u_Model", (transform));
+		shader->SetMat4("u_Model", transform);
+
+		//Bind Texture
+		shader->SetInt("tex_Albedo", 0);
+		textures[0]->Bind(0);
+
+		shader->SetInt("tex_normalMap", 1);
+		textures[1]->Bind(1);
+
+		shader->SetInt("tex_Specular", 2);
+		textures[2]->Bind(2);
+
+		shader->SetInt("tex_metallic", 3);
+		textures[3]->Bind(3);
+
+		shader->SetInt("tex_emissive", 4);
+		textures[4]->Bind(4);
+
 		VAO->Bind();
 		RenderCommand::DrawIndexed(VAO, IBO->GetCount());
 	}
 
+	void StaticMesh::Draw()
+	{
+		//SetupMesh(EntityID);
+		if (!isFirst)
+		{
+			isFirst = true;
+			VAO->Bind();
+
+			VBO->SetData(vertices.data(), sizeof(Vertex) * vertices.size());
+
+			IBO->SetData(indices.data(), indices.size());
+
+			VAO->Unbind();
+		}
+		VAO->Bind();
+		RenderCommand::DrawIndexed(VAO, IBO->GetCount());
+	}
+
+	//setup mesh after load model
 	void StaticMesh::SetupMesh(int entityID)
 	{
 		if (EntityID == -1)

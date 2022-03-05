@@ -14,6 +14,8 @@ namespace Pixel {
 		{
 			s_RendererAPI->SetViewport(x, y, width, height);
 		}
+
+		//color
 		inline static void SetClearColor(const glm::vec4& color)
 		{
 			s_RendererAPI->SetClearColor(color);
@@ -27,6 +29,62 @@ namespace Pixel {
 		{
 			s_RendererAPI->DrawIndexed(vertexArray, count);
 		}
+
+		//Open/Close Depth Write
+		inline static void DepthMask(int32_t MaskBit)
+		{
+			s_RendererAPI->DepthMask(MaskBit);
+		}
+
+		//Open/Close Depth Test
+		inline static void DepthTest(int32_t Bit)
+		{
+			s_RendererAPI->DepthTest(Bit);
+		}
+
+		//blend
+		inline static void Blend(int32_t Bit)
+		{
+			s_RendererAPI->Blend(Bit);
+		}
+
+		inline static void BindTexture(int32_t slot, uint32_t textureID)
+		{
+			s_RendererAPI->BindTexture(slot, textureID);
+		}
+
+		//stencil
+		inline static void StencilTest(int32_t Bit)
+		{
+			s_RendererAPI->StencilTest(Bit);
+		}
+
+		inline static void SetStencilFunc(StencilFunc stencilFunc, int32_t ref, int32_t mask)
+		{
+			s_RendererAPI->SetStencilFunc(stencilFunc, ref, mask);
+		}
+
+		inline static void SetFrontOrBackStencilOp(int32_t FrontOrBack, StencilOp stencilFail, StencilOp depthFail, StencilOp depthSuccess)
+		{
+			s_RendererAPI->SetFrontOrBackStencilOp(FrontOrBack, stencilFail, depthFail, depthSuccess);
+		}
+
+		inline static void ClearStencil()
+		{
+			s_RendererAPI->ClearStencil();
+		}
+
+		//cull
+		inline static void Cull(int32_t Bit)
+		{
+			s_RendererAPI->Cull(Bit);
+		}
+
+		inline static void CullFrontOrBack(int32_t Bit)
+		{
+			s_RendererAPI->CullFrontOrBack(Bit);
+		}
+
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

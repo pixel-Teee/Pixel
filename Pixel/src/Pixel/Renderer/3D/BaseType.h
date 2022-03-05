@@ -8,7 +8,6 @@ namespace Pixel
 	{
 		glm::vec3 Pos;
 		glm::vec3 Normal;
-		glm::vec3 Tangent;
 		glm::vec2 TexCoord;
 		//Editor
 		int EntityID;

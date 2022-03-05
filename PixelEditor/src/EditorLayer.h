@@ -48,6 +48,8 @@ namespace Pixel
 		Ref<Texture2D> m_SpriteSheets;
 		Ref<SubTexture2D> m_TextureStairs;
 
+		Ref<Framebuffer> m_GeoFramebuffer;
+
 		Ref<Framebuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
@@ -86,6 +88,11 @@ namespace Pixel
 
 		//Editor Resources
 		Ref<Texture2D> m_IconPlay, m_IconStop;
+
+		//----------test
+		Ref<Shader> m_testShader;
+		Model m_Model;
+		//----------test
 	};
 }
 

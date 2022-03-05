@@ -51,6 +51,11 @@ namespace Pixel {
 			* rotation
 			* glm::scale(glm::mat4(1.0f), Scale);
 		}
+
+		void SetScale(glm::vec3 scale)
+		{
+			Scale = scale;
+		}
 	};
 
 	struct SpriteRendererComponent
@@ -136,6 +141,32 @@ namespace Pixel {
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
+	struct MaterialComponent
+	{
+		Ref<Texture2D> Albedo;
+		Ref<Texture2D> Roughness;
+		Ref<Texture2D> NormalMap;
+		Ref<Texture2D> Metallic;
+		Ref<Texture2D> Emissive;
+
+		MaterialComponent()
+		{
+			uint32_t whiteTextureData = 0xffffff;
+			uint32_t whiteTextureData2 = 0xff;
+			Albedo = Texture2D::Create(1, 1, TextureFormat::RGB);
+			Albedo->SetData(&whiteTextureData, 3);
+			NormalMap = Texture2D::Create(1, 1, TextureFormat::RGB);
+			NormalMap->SetData(&whiteTextureData, 3);
+			Roughness = Texture2D::Create(1, 1, TextureFormat::RED);
+			Roughness->SetData(&whiteTextureData2, 1);
+			Metallic = Texture2D::Create(1, 1, TextureFormat::RED);
+			Metallic->SetData(&whiteTextureData2, 1);
+			Emissive = Texture2D::Create(1, 1, TextureFormat::RED);
+			Emissive->SetData(&whiteTextureData2, 1);
+		}
+		MaterialComponent(const MaterialComponent&) = default;
+	};
+
 	struct StaticMeshComponent
 	{
 		Model mesh;	
@@ -143,12 +174,40 @@ namespace Pixel {
 
 		char path[256];
 
+		//Editor's Attribute
+		int currentItem;
+
 		StaticMeshComponent() = default;
 		StaticMeshComponent(const StaticMeshComponent&) = default;
 		StaticMeshComponent(const std::string& Path)
 		{
 			memcpy(path, Path.c_str(), sizeof(char) * Path.size());
 			path[Path.size()] = '\0';
+		}
+	};
+
+	//TODO£ºtemporary there only have a point light
+	struct LightComponent
+	{
+		//LightColor
+		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		float constant = 1.0f;
+		float linear = 0.09f;
+		float quadratic = 0.032f;
+
+		LightComponent() = default;
+		LightComponent(const LightComponent&) = default;
+
+		float GetSphereLightVolumeRadius()
+		{
+			float lightMax = glm::compMax(color);
+
+			//light volume sphere radius
+			float radius = 
+			(-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * lightMax))) / (2 * quadratic);
+
+			return radius;
 		}
 	};
 }

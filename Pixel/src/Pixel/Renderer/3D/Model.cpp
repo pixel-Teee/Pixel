@@ -1,15 +1,26 @@
 #include "pxpch.h"
 
 #include "Model.h"
+#include "PixeL/Renderer/Texture.h"
 
 namespace Pixel {
 
-	void Model::Draw(const glm::mat4& transform, Ref<Shader>& shader, int entityID)
+	//draw model's every meshes
+	void Model::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID)
 	{
 		for(unsigned int i = 0; i < m_Meshes.size(); ++i)
-			m_Meshes[i].Draw(transform, shader, entityID);
+			m_Meshes[i].Draw(transform, shader, textures, entityID);
 	}
 
+	void Model::Draw()
+	{	
+		for(unsigned int i = 0; i < m_Meshes.size(); ++i)
+			m_Meshes[i].Draw();
+	}
+
+	/*------------------------------------------------------
+	----------Load Modle and Populate Vertex Information----
+	------------------------------------------------------*/
 	void Model::LoadModel(const std::string& path)
 	{
 		Assimp::Importer importer;
@@ -21,7 +32,7 @@ namespace Pixel {
 			return;
 		}
 
-		m_directory = path.substr(0, path.find_last_not_of('/'));
+		m_directory = path.substr(path.find_last_of("/\\"));
 
 		ProcessNode(scene->mRootNode, scene);
 	}
@@ -76,6 +87,8 @@ namespace Pixel {
 				vec.y = mesh->mTextureCoords[0][i].y;
 				vertex.TexCoord = vec;
 			}
+			else
+				vertex.TexCoord = glm::vec2(0.0f, 0.0f);
 
 			vertex.EntityID = -1;
 

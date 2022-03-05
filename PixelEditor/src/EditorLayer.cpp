@@ -31,17 +31,34 @@ namespace Pixel
 		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
 
 		m_CameraController.SetZoomLevel(5.5f);
+		/*------Create Geometry Framebuffer------*/
 
+		/*------------------------------------
+		R			G			B			A 
+		position.r	position.g	position.b	x
+		normal.r	normal.g	normal.b	x
+		albedo.r	albedo.g	albedo.b	x
+		roughness	metallic	emissive	x
+		--------------------------------------*/
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 1280;
+		fbSpec.Height = 970;
+		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
+		/*------Create Geometry Framebuffer------*/
+
+		/*------Create GeoFramebuffer------*/	
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+		/*------Create GeoFramebuffer------*/
 
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
 
-		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.1f, 1000.0f);
+		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
 #if 0	
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
@@ -317,6 +334,27 @@ namespace Pixel
 		/*----------Gizmos----------*/
 		/*----------View port----------*/
 
+		/*---------Deferred Shading Viewport---------*/
+		
+		ImGui::Begin("Deferred Shading Viewport");
+
+		ImVec2 DeferredViewPortSize = ImVec2(m_ViewportSize.x / 4.0f, m_ViewportSize.y / 4.0f);
+
+		ImGui::Text("position");
+		uint32_t deferredTextureID = m_GeoFramebuffer->GetColorAttachmentRendererID(0);
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("normal");
+		deferredTextureID = m_GeoFramebuffer->GetColorAttachmentRendererID(1);
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("albedo");
+		deferredTextureID = m_GeoFramebuffer->GetColorAttachmentRendererID(2);
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("depth");
+		deferredTextureID = m_GeoFramebuffer->GetDepthAttachmentRendererID();
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));	
+		ImGui::End();
+		/*---------Deferred Shading Viewport---------*/
+
 		/*---------Play Button And Pause Button---------*/
 		UI_Toobar();
 		/*---------Play Button And Pause Button----------*/
@@ -334,6 +372,7 @@ namespace Pixel
 		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -341,14 +380,6 @@ namespace Pixel
 	
 		//Render
 		Renderer2D::ResetStats();
-		//PX_PROFILE_SCOPE("Renderer Prep");
-		m_Framebuffer->Bind();
-		
-		RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
-		RenderCommand::Clear();
-
-		//Clear our entity ID attachment to -1
-		m_Framebuffer->ClearAttachment(1, -1);
 
 		switch (m_SceneState)
 		{
@@ -360,7 +391,7 @@ namespace Pixel
 					m_EditorCamera.OnUpdate(ts);
 				}
 				//Update scene
-				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, const_cast<Framebuffer*>(m_GeoFramebuffer.get()), const_cast<Framebuffer*>(m_Framebuffer.get()));
 				break;
 			}
 			case EditorLayer::SceneState::Play:
@@ -381,13 +412,14 @@ namespace Pixel
 		int mouseY = (int)my;
 		//PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
 
+		m_GeoFramebuffer->Bind();
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			int pixelData = m_GeoFramebuffer->ReadPixel(4, mouseX, mouseY);
 			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
-		m_Framebuffer->UnBind();
+		m_GeoFramebuffer->UnBind();
 	}
 
 	void EditorLayer::OnEvent(Event& e)

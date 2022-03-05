@@ -25,6 +25,16 @@ namespace Pixel {
 		virtual uint32_t GetColorAttachmentRendererID(uint32_t index) const override { return m_ColorAttachments[index]; }
 
 		virtual const FramebufferSpecification& GetSpecification() const override { return m_Specification;}
+
+		virtual uint32_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment; }
+
+		virtual void SetDepthAttachmentRendererID(uint32_t rendererID) override;
+
+
+		virtual void CloseColorAttachmentDraw() override;
+
+		virtual void SetColorAttachmentDraw(uint32_t ID) override;
+
 	private:
 		uint32_t m_RendererID = 0;
 		

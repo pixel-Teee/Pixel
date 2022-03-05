@@ -2,6 +2,7 @@
 
 #include "Pixel/Scene/Components.h"
 #include "Pixel/Renderer/EditorCamera.h"
+#include "Pixel/Renderer/Framebuffer.h"
 
 namespace Pixel{
 
@@ -10,12 +11,12 @@ namespace Pixel{
 	public:
 		static void Init();
 
-		static void DrawModel(const glm::mat4& transform, StaticMeshComponent& MeshComponent, int EntityID);
+		static void DrawModel(const glm::mat4& transform, StaticMeshComponent& MeshComponent, MaterialComponent& Material, int EntityID);
 
 		static void BeginScene(const Camera& camera, const glm::mat4& transform);
-		static void BeginScene(const EditorCamera& camera);
+		static void BeginScene(const EditorCamera& camera, Framebuffer* geometryFramebuffer);
 
-		static void EndScene();
+		static void EndScene(const EditorCamera& camera, glm::vec2& gScreenSize, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Framebuffer* geoPassFramebuffer, Framebuffer* LightPassFramebuffer);
 	};
 
 }

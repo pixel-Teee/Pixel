@@ -4,6 +4,7 @@
 #include "Pixel/Core/UUID.h"
 #include "Pixel/Core/Timestep.h"
 #include "Pixel/Renderer/EditorCamera.h"
+#include "Pixel/Renderer/Framebuffer.h"
 
 class b2World;
 
@@ -28,7 +29,7 @@ namespace Pixel
 
 		entt::registry& Reg() { return m_Registry; }
 
-		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
+		void OnUpdateEditor(Timestep& ts, EditorCamera& camera, Framebuffer* m_GeoPassFramebuffer, Framebuffer* m_LightPassFramebuffer);
 		void OnUpdateRuntime(Timestep& ts);
 		void OnViewportResize(uint32_t width, uint32_t height);
 

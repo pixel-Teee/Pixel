@@ -116,6 +116,8 @@ namespace Pixel
 		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<MaterialComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<LightComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
 	}
@@ -185,9 +187,9 @@ namespace Pixel
 		m_PhysicsWorld = nullptr;
 	}
 
-	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera)
+	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Framebuffer* m_GeoPassFramebuffer, Framebuffer* m_LightPassFramebuffer)
 	{
-		/*
+#ifndef PIXEL_3D
 		Renderer2D::BeginScene(camera);
 
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
@@ -199,19 +201,36 @@ namespace Pixel
 		}
 
 		Renderer2D::EndScene();
-		*/
-		Renderer3D::BeginScene(camera);
+#endif
+#ifdef PIXEL_3D
+		Renderer3D::BeginScene(camera, m_GeoPassFramebuffer);
 
-		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent>);
-
+		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
+		
 		for (auto entity : group)
 		{
-			auto [transform, mesh] = group.get<TransformComponent, StaticMeshComponent>(entity);
+			auto [transform, material, mesh] = group.get<TransformComponent, MaterialComponent, StaticMeshComponent>(entity);
 
-			Renderer3D::DrawModel(transform.GetTransform(), mesh, (int)entity);
+			//auto material = group.<MaterialComponent>(entity);
+			Renderer3D::DrawModel(transform.GetTransform(), mesh, material, (int)entity);
 		}
 
-		Renderer3D::EndScene();
+		//TODO:Point Light
+		std::vector<TransformComponent> Trans;
+		std::vector<LightComponent> Lights;
+		auto group2 = m_Registry.view<TransformComponent, LightComponent>();
+
+		for (auto entity : group2)
+		{
+			auto [transform, point] = group2.get<TransformComponent, LightComponent>(entity);
+			transform.SetScale(glm::vec3(point.GetSphereLightVolumeRadius()));
+			Lights.push_back(point);
+			Trans.push_back(transform);
+			//Trans.back().SetScale(glm::vec3(Lights.back().GetSphereLightVolumeRadius()));
+		}
+		
+		Renderer3D::EndScene(camera, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
+#endif
 	}
 
 	void Scene::OnUpdateRuntime(Timestep& ts)
@@ -319,6 +338,9 @@ namespace Pixel
 		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
 		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExists<MaterialComponent>(newEntity, entity);
+		CopyComponentIfExists<StaticMeshComponent>(newEntity, entity);
+		CopyComponentIfExists<LightComponent>(newEntity, entity);
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()
@@ -383,6 +405,18 @@ namespace Pixel
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MaterialComponent>(Entity entity, MaterialComponent& component)
+	{
+		
+	}
+
+	template<>
+	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
 
 	}

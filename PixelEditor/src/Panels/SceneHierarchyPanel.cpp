@@ -273,6 +273,18 @@ namespace Pixel
 				ImGui::CloseCurrentPopup();
 			}
 
+			if (ImGui::MenuItem("Material"))
+			{
+				m_SelectionContext.AddComponent<MaterialComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Light"))
+			{
+				m_SelectionContext.AddComponent<LightComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 		/*----------Add Component----------*/
@@ -424,12 +436,126 @@ namespace Pixel
 
 		DrawComponent<StaticMeshComponent>("Static Mesh Renderer", entity, [](auto& component)
 			{
-				if (ImGui::InputText("Mesh Path", component.path, sizeof(component.path)))
+				//ImGui::Combo("Mesh", &component.currentItem, component.path);
+				
+				ImGui::Text("Mesh:");
+				ImGui::SameLine();
+				ImGui::Button(component.path, ImVec2(100.0f, 0.0f));
+				//ImGui::Text
+				if (ImGui::BeginDragDropTarget())
 				{
-					component.mesh = Model(component.path);
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path meshPath = std::filesystem::path(g_AssetPath) / path;
+						component.mesh = Model(meshPath.string());
+
+						/*
+						std::string filepath = meshPath.string();
+						auto lastSlash = filepath.find_last_of("/\\");
+						lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+						auto lastDot = filepath.rfind('.');
+						auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+						std::string Name = filepath.substr(lastSlash, count);
+						*/
+						memcpy(component.path, meshPath.string().c_str(), meshPath.string().size());
+						//memcpy(const_cast<char*>(component.path), const_cast<char*>(meshPath.string().c_str()), sizeof(char) * const_cast<char*>(meshPath.string().c_str()));
+					}
+
+					ImGui::EndDragDropTarget();
 				}
 			}
 		);
-	}
+		
+		DrawComponent<MaterialComponent>("Material Component", entity, [](auto& component)
+			{
+				ImGui::Text("Albedo");
+				ImGui::Image((ImTextureID)component.Albedo->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Albedo = Texture2D::Create(texturePath.string());
 
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("NormalMap");
+				ImGui::Image((ImTextureID)component.NormalMap->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.NormalMap = Texture2D::Create(texturePath.string());
+
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("Roughness");
+				ImGui::Image((ImTextureID)component.Roughness->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Roughness = Texture2D::Create(texturePath.string());
+
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("Metallic");
+				ImGui::Image((ImTextureID)component.Metallic->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Metallic = Texture2D::Create(texturePath.string());
+
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("Emissive");
+				ImGui::Image((ImTextureID)component.Emissive->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Emissive = Texture2D::Create(texturePath.string());
+
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				//ImGui::DragFloat("Shininess", &component.shininess, 2.0f, 2.0f, 64.0f);
+			}
+		);
+		
+		DrawComponent<LightComponent>("Light Component", entity, [](auto& component) 
+			{
+				ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
+				//ImGui::DragFloat("Light diffuse", &component.diffuse, 10.0f, 1.0f, 1000.0f);
+				ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
+				ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
+				ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
+			}
+		);
+	}
 }

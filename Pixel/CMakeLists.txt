@@ -68,6 +68,7 @@ target_compile_definitions(Pixel
     PRIVATE IMGUI_IMPL_OPENGL_LOADER_CUSTOM
     PRIVATE PX_DEBUG
     PRIVATE YAML_CPP_STATIC_DEFINE
+    PRIVATE PIXEL_3D
 )
 
 set_source_files_properties(vendor/imguizmo/imGuizmo.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
