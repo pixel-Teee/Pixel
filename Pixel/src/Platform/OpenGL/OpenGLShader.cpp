@@ -5,6 +5,8 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "spirv_glsl.hpp"
+
 namespace Pixel {
 
 	static GLenum ShaderTypeFromString(const std::string& type)

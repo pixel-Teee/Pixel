@@ -29,13 +29,16 @@ namespace Pixel
 
 		entt::registry& Reg() { return m_Registry; }
 
-		void OnUpdateEditor(Timestep& ts, EditorCamera& camera, Framebuffer* m_GeoPassFramebuffer, Framebuffer* m_LightPassFramebuffer);
-		void OnUpdateRuntime(Timestep& ts);
+		void OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
+		void OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		void DuplicateEntity(Entity entity);
 
 		Entity GetPrimaryCameraEntity();
+
+		void SetViewPortSize(int m_ViewportWidth, int m_ViewportHeight);
+		glm::vec2 GetViewPortSize();
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

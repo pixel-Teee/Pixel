@@ -1,0 +1,35 @@
+Scene: Untitled
+Entities:
+  - Entity: 7329457073252019956
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [2.73439479, 1.59723413, 0]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 16746273294614672179
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Box.fbx
+  - Entity: 13996981743599478898
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [-3.04643059, 1.59723413, -0.644706011]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015

@@ -26,7 +26,7 @@ namespace Pixel
 
 	void EditorLayer::OnAttach()
 	{
-		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
+		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
 
@@ -110,9 +110,9 @@ namespace Pixel
 #endif
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
-		SceneSerializer serializer(m_ActiveScene);
+		//SceneSerializer serializer(m_ActiveScene);
 		//serializer.Serialize("assets/scenes/Example.pixel");
-		serializer.Deserialize("assets/scenes/Example.pixel");
+		//serializer.Deserialize("assets/scenes/Example.pixel");
 	}
 
 	void EditorLayer::OnDetach()
@@ -227,7 +227,7 @@ namespace Pixel
 		/*----------Render Content Browser----------*/
 
 		/*----------Render Stats----------*/
-		ImGui::Begin("Render Stats");
+		/*ImGui::Begin("Render Stats");
 
 		std::string name = "None";
 		if(m_HoveredEntity)
@@ -240,7 +240,7 @@ namespace Pixel
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::End();
+		ImGui::End();*/
 		/*----------Render Stats----------*/
 
 		/*----------View Port----------*/
@@ -379,7 +379,7 @@ namespace Pixel
 		}
 	
 		//Render
-		Renderer2D::ResetStats();
+		//Renderer2D::ResetStats();
 
 		switch (m_SceneState)
 		{
@@ -391,12 +391,12 @@ namespace Pixel
 					m_EditorCamera.OnUpdate(ts);
 				}
 				//Update scene
-				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, const_cast<Framebuffer*>(m_GeoFramebuffer.get()), const_cast<Framebuffer*>(m_Framebuffer.get()));
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
 				break;
 			}
 			case EditorLayer::SceneState::Play:
 			{
-				m_ActiveScene->OnUpdateRuntime(ts);
+				m_ActiveScene->OnUpdateRuntime(ts, m_GeoFramebuffer, m_Framebuffer);
 				break;
 			}
 		}
@@ -521,6 +521,8 @@ namespace Pixel
 			OnSceneStop();
 
 		Ref<Scene> newScene = CreateRef<Scene>();
+		glm::vec2 viewPortSize = m_EditorScene->GetViewPortSize();
+		newScene->SetViewPortSize(viewPortSize.x, viewPortSize.y);
 		SceneSerializer serializer(newScene);
 
 		if (serializer.Deserialize(filepath.string()))

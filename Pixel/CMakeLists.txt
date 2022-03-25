@@ -38,7 +38,13 @@ file(GLOB_RECURSE PixelSrc
 "vendor/Box2D/include/*.h"
 "vendor/Box2D/src/*.cpp"
 "vendor/assimp/include"
+"vendor/spir-v"
 )
+
+set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${outputdir}/${PROJECT_NAME})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${outputdir}/${PROJECT_NAME})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${outputdir}/${PROJECT_NAME})
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/Pixel FILES ${PixelSrc})
 #message(${CMAKE_SOURCE_DIR})
@@ -59,6 +65,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/imguizmo"
 "vendor/Box2D/include"
 "vendor/assimp/include"
+"vendor/spir-v"
 )
 
 target_compile_definitions(Pixel
@@ -92,6 +99,7 @@ PUBLIC ImGui
 PUBLIC ${OPENGL_LIBRARIES}
 PRIVATE yaml-cpp
 PUBLIC assimp
+PUBLIC spirv-cross-glsl
 )
 
 

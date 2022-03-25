@@ -35,6 +35,8 @@ namespace Pixel {
 
 		virtual void SetColorAttachmentDraw(uint32_t ID) override;
 
+		uint32_t GetRenderId() override;
+
 	private:
 		uint32_t m_RendererID = 0;
 		

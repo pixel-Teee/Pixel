@@ -128,6 +128,15 @@ namespace Pixel {
 		return Rigidbody2DComponent::BodyType::Static;
 	}
 
+	static SceneCamera::ProjectionType ProjectionTypeFromInt(int projectionType)
+	{
+		if(projectionType == 0) return SceneCamera::ProjectionType::Perspective;
+		if(projectionType == 1) return SceneCamera::ProjectionType::Orthographic;
+
+		PX_CORE_ASSERT(false, "Unknown Camera Type");
+		return SceneCamera::ProjectionType::Perspective;
+	}
+
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 	:m_Scene(scene)
 	{
@@ -238,6 +247,34 @@ namespace Pixel {
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<LightComponent>())
+		{
+			out << YAML::Key << "LightComponent";
+			out << YAML::BeginMap;
+
+			auto& lightComponent = entity.GetComponent<LightComponent>();
+			out << YAML::Key << "Color" << YAML::Value << lightComponent.color;
+			out << YAML::Key << "Constant" << YAML::Value << lightComponent.constant;
+			out << YAML::Key << "Linear" << YAML::Value << lightComponent.linear;
+			out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.quadratic;
+
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<MaterialComponent>())
+		{
+			out << YAML::Key << "MaterialComponent";
+			out << YAML::BeginMap;
+			
+			auto& materialComponent = entity.GetComponent<MaterialComponent>();
+			out << YAML::Key << "albedoPath" << YAML::Value << materialComponent.albedoPath;
+			out << YAML::Key << "normalMapPath" << YAML::Value << materialComponent.normalMapPath;
+			out << YAML::Key << "roughnessPath" << YAML::Value << materialComponent.roughnessPath;
+			out << YAML::Key << "emissivePath" << YAML::Value << materialComponent.emissivePath;
+			out << YAML::Key << "metallicPath" << YAML::Value << materialComponent.metallicPath;
+			out << YAML::EndMap;
+		}
+
 		out << YAML::EndMap;
 	}
 
@@ -313,8 +350,7 @@ namespace Pixel {
 					auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
 					auto& cameraProps = cameraComponent["Camera"];
-					cc.camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
-
+					//PIXEL_CORE_INFO(cameraProps["ProjectionType"].as<int>());
 					cc.camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
 					cc.camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
 					cc.camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
@@ -325,6 +361,8 @@ namespace Pixel {
 
 					cc.Primary = cameraComponent["Primary"].as<bool>();
 					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+
+					cc.camera.SetProjectionType(ProjectionTypeFromInt(cameraProps["ProjectionType"].as<int>()));
 				}
 
 				auto spriteRendererComponent = entity["SpriteRendererComponent"];
@@ -359,6 +397,27 @@ namespace Pixel {
 				{
 					std::string str = staticMeshComponent["Path"].as<std::string>();
 					auto& src = deserializedEntity.AddComponent<StaticMeshComponent>(str);
+				}
+
+				auto lightComponent = entity["LightComponent"];
+				if (lightComponent)
+				{
+					auto& light = deserializedEntity.AddComponent<LightComponent>();
+					light.color = lightComponent["Color"].as<glm::vec3>();
+					light.constant = lightComponent["Constant"].as<float>();
+					light.linear = lightComponent["Linear"].as<float>();
+					light.quadratic = lightComponent["Quadratic"].as<float>();
+				}
+
+				auto materialComponent = entity["MaterialComponent"];
+				if (materialComponent)
+				{
+					std::string albedoPath = materialComponent["albedoPath"].as<std::string>();
+					std::string roughnessPath = materialComponent["roughnessPath"].as<std::string>();
+					std::string metallicPath = materialComponent["metallicPath"].as<std::string>();
+					std::string normalMapPath = materialComponent["normalMapPath"].as<std::string>();
+					std::string emissivePath = materialComponent["emissivePath"].as<std::string>();
+					auto& material = deserializedEntity.AddComponent<MaterialComponent>(albedoPath, normalMapPath, roughnessPath, metallicPath, emissivePath);
 				}
 			}
 		}

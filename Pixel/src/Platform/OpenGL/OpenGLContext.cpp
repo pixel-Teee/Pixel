@@ -13,7 +13,6 @@ namespace Pixel {
 
 	void OpenGLContext::Init()
 	{
-		//^
 		glfwMakeContextCurrent(m_WindowHandle);
 		//glad¼ÓÔØOpenGLµÄº¯Êý
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -23,6 +22,15 @@ namespace Pixel {
 		PIXEL_CORE_INFO("Vendor : {0}", glGetString(GL_VENDOR));
 		PIXEL_CORE_INFO("Renderer : {0}", glGetString(GL_RENDERER));
 		PIXEL_CORE_INFO("Version : {0}", glGetString(GL_VERSION));
+
+		if (GL_SPIR_V_EXTENSIONS)
+		{
+			PIXEL_CORE_INFO("Support spirv module!");
+		}
+		else
+		{
+			PIXEL_CORE_INFO("Don't support spirv module!");
+		}
 	}
 
 	void OpenGLContext::SwapBuffers()

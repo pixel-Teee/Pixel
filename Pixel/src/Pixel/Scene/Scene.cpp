@@ -117,6 +117,7 @@ namespace Pixel
 		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<MaterialComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<StaticMeshComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<LightComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
@@ -145,64 +146,50 @@ namespace Pixel
 
 	void Scene::OnRuntimeStart()
 	{
-		//Parameter:gravity
-		m_PhysicsWorld = new b2World({0.0f, -9.8f});
-		auto view = m_Registry.view<Rigidbody2DComponent>();
+		////Parameter:gravity
+		//m_PhysicsWorld = new b2World({0.0f, -9.8f});
+		//auto view = m_Registry.view<Rigidbody2DComponent>();
 
-		for (auto e : view)
-		{
-			Entity entity = {e, this};
-			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+		//for (auto e : view)
+		//{
+		//	Entity entity = {e, this};
+		//	auto& transform = entity.GetComponent<TransformComponent>();
+		//	auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-			b2BodyDef bodyDef;
-			bodyDef.type = Rigidbody2DTypeToBox2DType(rb2d.Type);
-			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
-			bodyDef.angle = transform.Rotation.z;
-			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
-			body->SetFixedRotation(rb2d.FixedRotation);
-			rb2d.RuntimeBody = body;
+		//	b2BodyDef bodyDef;
+		//	bodyDef.type = Rigidbody2DTypeToBox2DType(rb2d.Type);
+		//	bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+		//	bodyDef.angle = transform.Rotation.z;
+		//	b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
+		//	body->SetFixedRotation(rb2d.FixedRotation);
+		//	rb2d.RuntimeBody = body;
 
-			if (entity.HasComponent<BoxCollider2DComponent>())
-			{
-				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
+		//	if (entity.HasComponent<BoxCollider2DComponent>())
+		//	{
+		//		auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 
-				b2PolygonShape boxShape;
-				boxShape.SetAsBox(transform.Scale.x * bc2d.Size.x, transform.Scale.y * bc2d.Size.y);
+		//		b2PolygonShape boxShape;
+		//		boxShape.SetAsBox(transform.Scale.x * bc2d.Size.x, transform.Scale.y * bc2d.Size.y);
 
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &boxShape;
-				fixtureDef.density = bc2d.Density;
-				fixtureDef.friction = bc2d.Friction;
-				fixtureDef.restitution = bc2d.Restitution;
-				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
-				body->CreateFixture(&fixtureDef);
-			}
-		}
+		//		b2FixtureDef fixtureDef;
+		//		fixtureDef.shape = &boxShape;
+		//		fixtureDef.density = bc2d.Density;
+		//		fixtureDef.friction = bc2d.Friction;
+		//		fixtureDef.restitution = bc2d.Restitution;
+		//		fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+		//		body->CreateFixture(&fixtureDef);
+		//	}
+		//}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
-		delete m_PhysicsWorld;
-		m_PhysicsWorld = nullptr;
+		/*delete m_PhysicsWorld;
+		m_PhysicsWorld = nullptr;*/
 	}
 
-	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Framebuffer* m_GeoPassFramebuffer, Framebuffer* m_LightPassFramebuffer)
+	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
 	{
-#ifndef PIXEL_3D
-		Renderer2D::BeginScene(camera);
-
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group)
-		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
-			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
-		}
-
-		Renderer2D::EndScene();
-#endif
-#ifdef PIXEL_3D
 		Renderer3D::BeginScene(camera, m_GeoPassFramebuffer);
 
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
@@ -230,10 +217,9 @@ namespace Pixel
 		}
 		
 		Renderer3D::EndScene(camera, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
-#endif
 	}
 
-	void Scene::OnUpdateRuntime(Timestep& ts)
+	void Scene::OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
 	{
 		//Update Scripts	
 		{
@@ -252,32 +238,66 @@ namespace Pixel
 				});
 		}
 
-		//Physics
-		{
-			const int32_t velocityIterations = 6;
-			const int32_t positionIterations = 2;
-			m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
+		////Physics
+		//{
+		//	const int32_t velocityIterations = 6;
+		//	const int32_t positionIterations = 2;
+		//	m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
-			//Retrive transform from box2d
-			auto view = m_Registry.view<Rigidbody2DComponent>();
-			for (auto e : view)
-			{
-				Entity entity = {e, this};
-				auto& transform = entity.GetComponent<TransformComponent>();
-				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+		//	//Retrive transform from box2d
+		//	auto view = m_Registry.view<Rigidbody2DComponent>();
+		//	for (auto e : view)
+		//	{
+		//		Entity entity = {e, this};
+		//		auto& transform = entity.GetComponent<TransformComponent>();
+		//		auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-				b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				const auto& position = body->GetPosition();
-				transform.Translation.x = position.x;
-				transform.Translation.y = position.y;
-				transform.Rotation.z = body->GetAngle();
-			}
-		}
+		//		b2Body* body = (b2Body*)rb2d.RuntimeBody;
+		//		const auto& position = body->GetPosition();
+		//		transform.Translation.x = position.x;
+		//		transform.Translation.y = position.y;
+		//		transform.Rotation.z = body->GetAngle();
+		//	}
+		//}
+
+		//Camera* mainCamera = nullptr;
+		//glm::mat4* cameraTransform;
+		//{
+		//	//Render 2D
+		//	auto view = m_Registry.view<TransformComponent, CameraComponent>();
+		//	for (auto entity : view)
+		//	{
+		//		auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+
+		//		if (camera.Primary)
+		//		{
+		//			mainCamera = &camera.camera;
+		//			cameraTransform = &transform.GetTransform();
+		//			break;
+		//		}
+		//	}
+		//}
+		//
+		//if (mainCamera)
+		//{
+		//	Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+
+		//	auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+		//	for (auto entity : group)
+		//	{
+		//		auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+		//		//Renderer2D::DrawQuad(transform.GetTransform(), sprite);
+		//		//Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+		//	}
+
+		//	Renderer2D::EndScene();
+		//}		
 
 		Camera* mainCamera = nullptr;
-		glm::mat4* cameraTransform;
+		TransformComponent* cameraTransform;
 		{
-			//Render 2D
+			//Renderer 3D
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
 			{
@@ -286,27 +306,41 @@ namespace Pixel
 				if (camera.Primary)
 				{
 					mainCamera = &camera.camera;
-					cameraTransform = &transform.GetTransform();
+					cameraTransform = &transform;
 					break;
 				}
 			}
 		}
-		
+
 		if (mainCamera)
 		{
-			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+			Renderer3D::BeginScene(*mainCamera, *cameraTransform, m_GeoPassFramebuffer);
+			auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : group)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto [transform, material, mesh] = group.get<TransformComponent, MaterialComponent, StaticMeshComponent>(entity);
 
-				//Renderer2D::DrawQuad(transform.GetTransform(), sprite);
-				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+				//auto material = group.<MaterialComponent>(entity);
+				Renderer3D::DrawModel(transform.GetTransform(), mesh, material, (int)entity);
 			}
 
-			Renderer2D::EndScene();
-		}		
+			//TODO:Point Light
+			std::vector<TransformComponent> Trans;
+			std::vector<LightComponent> Lights;
+			auto group2 = m_Registry.view<TransformComponent, LightComponent>();
+
+			for (auto entity : group2)
+			{
+				auto [transform, point] = group2.get<TransformComponent, LightComponent>(entity);
+				transform.SetScale(glm::vec3(point.GetSphereLightVolumeRadius()));
+				Lights.push_back(point);
+				Trans.push_back(transform);
+				//Trans.back().SetScale(glm::vec3(Lights.back().GetSphereLightVolumeRadius()));
+			}
+
+			Renderer3D::EndScene(*mainCamera, *cameraTransform, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
+		}
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -353,6 +387,17 @@ namespace Pixel
 				return Entity{ entity, this };
 		}
 		return {};
+	}
+
+	void Scene::SetViewPortSize(int width, int height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+	}
+
+	glm::vec2 Scene::GetViewPortSize()
+	{
+		return {m_ViewportWidth, m_ViewportHeight};
 	}
 
 	template<typename T>

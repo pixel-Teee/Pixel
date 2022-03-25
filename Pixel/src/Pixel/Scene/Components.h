@@ -149,6 +149,12 @@ namespace Pixel {
 		Ref<Texture2D> Metallic;
 		Ref<Texture2D> Emissive;
 
+		std::string albedoPath;
+		std::string roughnessPath;
+		std::string normalMapPath;
+		std::string metallicPath;
+		std::string emissivePath;
+
 		MaterialComponent()
 		{
 			uint32_t whiteTextureData = 0xffffff;
@@ -165,6 +171,48 @@ namespace Pixel {
 			Emissive->SetData(&whiteTextureData2, 1);
 		}
 		MaterialComponent(const MaterialComponent&) = default;
+
+		MaterialComponent(std::string& albedoPath, std::string& normalMapPath,
+			std::string& roughnessPath, std::string& metallicPath, std::string& emissivePath)
+		{
+			uint32_t whiteTextureData = 0xffffff;
+			uint32_t whiteTextureData2 = 0xff;
+			if(albedoPath != "")
+				Albedo = Texture2D::Create(albedoPath);
+			else
+			{
+				Albedo = Texture2D::Create(1, 1, TextureFormat::RGB);
+				Albedo->SetData(&whiteTextureData, 3);
+			}
+			if(normalMapPath != "")
+				NormalMap = Texture2D::Create(normalMapPath);
+			else
+			{
+				NormalMap = Texture2D::Create(1, 1, TextureFormat::RGB);
+				NormalMap->SetData(&whiteTextureData, 3);
+			}
+			if(roughnessPath != "")
+				Roughness = Texture2D::Create(roughnessPath);
+			else
+			{
+				Roughness = Texture2D::Create(1, 1, TextureFormat::RED);
+				Roughness->SetData(&whiteTextureData2, 1);
+			}
+			if(metallicPath != "")
+				Metallic = Texture2D::Create(metallicPath);
+			else
+			{
+				Metallic = Texture2D::Create(1, 1, TextureFormat::RED);
+				Metallic->SetData(&whiteTextureData2, 1);
+			}
+			if(emissivePath != "")
+				Emissive = Texture2D::Create(emissivePath);
+			else
+			{
+				Emissive = Texture2D::Create(1, 1, TextureFormat::RED);
+				Emissive->SetData(&whiteTextureData2, 1);
+			}
+		}
 	};
 
 	struct StaticMeshComponent
@@ -172,7 +220,8 @@ namespace Pixel {
 		Model mesh;	
 		//std::string path;
 
-		char path[256];
+		//char path[256];
+		std::string path;
 
 		//Editor's Attribute
 		int currentItem;
@@ -181,8 +230,9 @@ namespace Pixel {
 		StaticMeshComponent(const StaticMeshComponent&) = default;
 		StaticMeshComponent(const std::string& Path)
 		{
-			memcpy(path, Path.c_str(), sizeof(char) * Path.size());
-			path[Path.size()] = '\0';
+			//memcpy(path, Path.c_str(), sizeof(char) * Path.size());
+			//path[Path.size()] = '\0';
+			path = Path;
 		}
 	};
 

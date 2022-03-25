@@ -36,6 +36,8 @@ namespace Pixel {
 		Ref<Shader> Load(const std::string& filepath);
 		Ref<Shader> Load(const std::string& name, const std::string& filepath);
 
+		void Test(const std::string& filepath);
+
 		Ref<Shader> Get(const std::string& name);
 
 		bool Exists(const std::string& name) const;

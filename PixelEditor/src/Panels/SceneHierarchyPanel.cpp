@@ -440,7 +440,7 @@ namespace Pixel
 				
 				ImGui::Text("Mesh:");
 				ImGui::SameLine();
-				ImGui::Button(component.path, ImVec2(100.0f, 0.0f));
+				ImGui::Button(component.path.c_str(), ImVec2(100.0f, 0.0f));
 				//ImGui::Text
 				if (ImGui::BeginDragDropTarget())
 				{
@@ -458,7 +458,8 @@ namespace Pixel
 						auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 						std::string Name = filepath.substr(lastSlash, count);
 						*/
-						memcpy(component.path, meshPath.string().c_str(), meshPath.string().size());
+						//memcpy(component.path, meshPath.string().c_str(), meshPath.string().size());
+						component.path = meshPath.string();
 						//memcpy(const_cast<char*>(component.path), const_cast<char*>(meshPath.string().c_str()), sizeof(char) * const_cast<char*>(meshPath.string().c_str()));
 					}
 
@@ -478,7 +479,7 @@ namespace Pixel
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
 						component.Albedo = Texture2D::Create(texturePath.string());
-
+						component.albedoPath = texturePath.string();
 					}
 
 					ImGui::EndDragDropTarget();
@@ -493,7 +494,7 @@ namespace Pixel
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
 						component.NormalMap = Texture2D::Create(texturePath.string());
-
+						component.normalMapPath = texturePath.string();
 					}
 
 					ImGui::EndDragDropTarget();
@@ -508,7 +509,7 @@ namespace Pixel
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
 						component.Roughness = Texture2D::Create(texturePath.string());
-
+						component.roughnessPath = texturePath.string();
 					}
 
 					ImGui::EndDragDropTarget();
@@ -523,7 +524,7 @@ namespace Pixel
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
 						component.Metallic = Texture2D::Create(texturePath.string());
-
+						component.metallicPath = texturePath.string();
 					}
 
 					ImGui::EndDragDropTarget();
@@ -538,7 +539,7 @@ namespace Pixel
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
 						component.Emissive = Texture2D::Create(texturePath.string());
-
+						component.emissivePath = texturePath.string();
 					}
 
 					ImGui::EndDragDropTarget();

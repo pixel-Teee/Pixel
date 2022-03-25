@@ -23,6 +23,11 @@ source_group(TREE ${CMAKE_SOURCE_DIR}/PixelEditor FILES ${PixelEditorSrc})
 
 # message(${CMAKE_SOURCE_DIR}/PixelEditor/src)
 
+set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${outputdir}/${PROJECT_NAME})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${outputdir}/${PROJECT_NAME})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${outputdir}/${PROJECT_NAME})
+
 add_executable(PixelEditor ${PixelEditorSrc})
 
 target_link_libraries(PixelEditor PRIVATE Pixel)

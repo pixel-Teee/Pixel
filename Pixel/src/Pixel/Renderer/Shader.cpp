@@ -58,7 +58,12 @@ namespace Pixel {
 		auto shader = Shader::Create(filepath);
 		Add(name, shader);
 		return shader;
-	}	
+	}
+	void ShaderLibrary::Test(const std::string& filepath)
+	{
+		//auto& TestShader = std::make_shared<SpirvShader>("assets/shaders/Test.spriv");	
+	}
+
 
 	Ref<Shader> ShaderLibrary::Get(const std::string& name)
 	{

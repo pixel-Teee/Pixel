@@ -23,3 +23,6 @@
 [submodule "Pixel/vendor/assimp"]
 	path = Pixel/vendor/assimp
 	url = https://github.com/pixel-Teee/assimp.git
+[submodule "Pixel/vendor/spir-v"]
+	path = Pixel/vendor/spir-v
+	url = https://github.com/KhronosGroup/SPIRV-Cross.git

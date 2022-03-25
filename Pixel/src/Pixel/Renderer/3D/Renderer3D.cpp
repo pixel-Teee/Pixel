@@ -9,8 +9,11 @@
 #include "Pixel/Renderer/RenderCommand.h"
 
 namespace Pixel {
-	void LightPassStencil(int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Framebuffer* geoPassFramebuffer, Framebuffer* LightPassFramebuffer);
-	void LightPass(const EditorCamera& camera, glm::vec2& gScreenSize, int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Framebuffer* geoPassFramebuffer, Framebuffer* LightPassFramebuffer);
+	void LightPassStencil(int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer);
+	void LightPass(Camera& camera, TransformComponent& trans, glm::vec2& gScreenSize, int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer);
+
+	//Editor
+	void LightPass(const EditorCamera& camera, glm::vec2& gScreenSize, int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer);
 	void test(std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights);
 	//deferred shading geometry pass
 	static Ref<Shader> m_GeoPass;
@@ -53,12 +56,33 @@ namespace Pixel {
  		MeshComponent.mesh.Draw(transform, m_GeoPass, MaterialTextures, EntityID);
 	}
 
-	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	void Renderer3D::BeginScene(const Camera& camera, TransformComponent& transform, Ref<Framebuffer> geometryFramebuffer)
 	{
-		
+		viewProj = camera.GetProjection() * glm::inverse(transform.GetTransform());
+		geometryFramebuffer->Bind();
+		m_GeoPass->Bind();
+
+		//open depth test and depth write
+		RenderCommand::DepthTest(1);
+		RenderCommand::DepthMask(1);
+		//clear color buffer and depth buffer
+		RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
+		RenderCommand::Clear();
+		//set all pixel's entity id to -1
+		geometryFramebuffer->ClearAttachment(4, -1);
+
+		//close stencil test
+		RenderCommand::StencilTest(0);
+		RenderCommand::ClearStencil();
+
+		m_GeoPass->SetMat4("u_ViewProjection", viewProj);
+
+		/*-------------------------------------------------------
+		 middle call the DrawModel function to write the gbuffer
+		--------------------------------------------------------*/
 	}
 
-	void Renderer3D::BeginScene(const EditorCamera& camera, Framebuffer* geometryFramebuffer)
+	void Renderer3D::BeginScene(const EditorCamera& camera, Ref<Framebuffer> geometryFramebuffer)
 	{
 		viewProj = camera.GetViewProjection();
 		geometryFramebuffer->Bind();
@@ -84,7 +108,7 @@ namespace Pixel {
 		--------------------------------------------------------*/	
 	}
 
-	void Renderer3D::EndScene(const EditorCamera& camera, glm::vec2& gScreenSize, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Framebuffer* geoPassFramebuffer, Framebuffer* LightPassFramebuffer)
+	void Renderer3D::EndScene(const EditorCamera& camera, glm::vec2& gScreenSize, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer)
 	{
 		geoPassFramebuffer->UnBind();
 		RenderCommand::DepthTest(0);
@@ -103,6 +127,32 @@ namespace Pixel {
 		{
 			LightPassStencil(i, Trans, Lights, geoPassFramebuffer, LightPassFramebuffer);
 			LightPass(camera, gScreenSize, i, Trans, Lights, geoPassFramebuffer, LightPassFramebuffer);
+			//test(Trans, Lights);
+		}
+
+		RenderCommand::StencilTest(0);
+		LightPassFramebuffer->UnBind();
+	}
+
+	void Renderer3D::EndScene(Camera& camera, TransformComponent& trans, glm::vec2& gScreenSize, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer)
+	{
+		geoPassFramebuffer->UnBind();
+		RenderCommand::DepthTest(0);
+		RenderCommand::DepthMask(0);
+
+		/*--------------------------------------------
+		----------------Light Pass--------------------
+		----------------------------------------------*/
+
+		LightPassFramebuffer->Bind();
+		RenderCommand::Clear();
+		LightPassFramebuffer->SetDepthAttachmentRendererID(geoPassFramebuffer->GetDepthAttachmentRendererID());
+		//open stencil
+		RenderCommand::StencilTest(1);
+		for (int32_t i = 0; i < Trans.size(); ++i)
+		{
+			LightPassStencil(i, Trans, Lights, geoPassFramebuffer, LightPassFramebuffer);
+			LightPass(camera, trans, gScreenSize, i, Trans, Lights, geoPassFramebuffer, LightPassFramebuffer);
 			//test(Trans, Lights);
 		}
 
@@ -136,7 +186,7 @@ namespace Pixel {
 		m_TestShader->Unbind();
 	}
 
-	static void LightPassStencil(int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Framebuffer* geoPassFramebuffer, Framebuffer* LightPassFramebuffer)
+	static void LightPassStencil(int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer)
 	{
 		/*----------------------------------------------
 		----Render Volume Sphere Stencil Value Buffer---
@@ -173,7 +223,7 @@ namespace Pixel {
 		RenderCommand::DepthTest(0);
 	}
 
-	static void LightPass(const EditorCamera& camera, glm::vec2& gScreenSize, int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Framebuffer* geoPassFramebuffer, Framebuffer* LightPassFramebuffer)
+	static void LightPass(const EditorCamera& camera, glm::vec2& gScreenSize, int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer)
 	{
 		m_LightPass->Bind();
 		LightPassFramebuffer->SetColorAttachmentDraw(0);
@@ -205,6 +255,55 @@ namespace Pixel {
 
 		m_LightPass->SetFloat2("gScreenSize", gScreenSize);
 		m_LightPass->SetFloat3("camPos", camera.GetPosition());
+
+		//Set Light Attribute
+		m_LightPass->SetFloat3("light.position", Trans[LightIndex].Translation);
+		m_LightPass->SetFloat3("light.color", Lights[LightIndex].color);
+		m_LightPass->SetFloat("light.constant", Lights[LightIndex].constant);
+		m_LightPass->SetFloat("light.linear", Lights[LightIndex].linear);
+		m_LightPass->SetFloat("light.quadratic", Lights[LightIndex].quadratic);
+
+		SphereModel.Draw();
+		//cull back
+		RenderCommand::CullFrontOrBack(0);
+		//close blend
+		RenderCommand::Blend(0);
+		RenderCommand::DepthTest(1);
+		m_LightPass->Unbind();
+	}
+
+	static void LightPass(Camera& camera, TransformComponent& trans, glm::vec2& gScreenSize, int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer)
+	{
+		m_LightPass->Bind();
+		LightPassFramebuffer->SetColorAttachmentDraw(0);
+		//not equal stecil buff already exist value, then raster pixel
+		RenderCommand::SetStencilFunc(StencilFunc::NOTEQUAL, 0, 0xff);
+
+		//close depth test
+		RenderCommand::DepthTest(0);
+		//open blend
+		RenderCommand::Blend(1);
+
+		//cull front
+		RenderCommand::Cull(1);
+		RenderCommand::CullFrontOrBack(1);
+
+		//Bind Texture
+		m_LightPass->SetInt("g_Position", 0);
+		RenderCommand::BindTexture(0, geoPassFramebuffer->GetColorAttachmentRendererID(0));
+		m_LightPass->SetInt("g_Normal", 1);
+		RenderCommand::BindTexture(1, geoPassFramebuffer->GetColorAttachmentRendererID(1));
+		m_LightPass->SetInt("g_Albedo", 2);
+		RenderCommand::BindTexture(2, geoPassFramebuffer->GetColorAttachmentRendererID(2));
+		m_LightPass->SetInt("g_RoughnessMetallicEmissive", 3);
+		RenderCommand::BindTexture(3, geoPassFramebuffer->GetColorAttachmentRendererID(3));
+		//Bind Texture
+
+		m_LightPass->SetMat4("u_ViewProjection", viewProj);
+		m_LightPass->SetMat4("u_Model", Trans[LightIndex].GetTransform());
+
+		m_LightPass->SetFloat2("gScreenSize", gScreenSize);
+		m_LightPass->SetFloat3("camPos", trans.Translation);
 
 		//Set Light Attribute
 		m_LightPass->SetFloat3("light.position", Trans[LightIndex].Translation);

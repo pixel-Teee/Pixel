@@ -242,4 +242,24 @@ namespace Pixel {
 		glDrawBuffer(GL_COLOR_ATTACHMENT0 + index);
 	}
 
+	uint32_t OpenGLFramebuffer::GetRenderId()
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+		return m_RendererID;
+	}
+
+	void BindReadFramebuffer(uint32_t renderId)
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderId);
+	}
+
+	void BindWriteFramebuffer(uint32_t renderId)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, renderId);
+	}
+
+	void BlitFramebuffer(int32_t srcWidth, int32_t srcHeight)
+	{
+		glBlitFramebuffer(0, 0, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
 }
