@@ -20,7 +20,7 @@ namespace Pixel {
 			LoadModel(path);
 		}
 
-		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID);
+		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
 
 		//TODO:forward temporary
 		void Draw();

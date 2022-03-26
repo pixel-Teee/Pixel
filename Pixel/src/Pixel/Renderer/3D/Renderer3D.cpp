@@ -7,6 +7,9 @@
 #include "Model.h"
 
 #include "Pixel/Renderer/RenderCommand.h"
+#include "Pixel/Renderer/UniformBuffer.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Pixel {
 	void LightPassStencil(int32_t LightIndex, std::vector<TransformComponent>& Trans, std::vector<LightComponent>& Lights, Ref<Framebuffer> geoPassFramebuffer, Ref<Framebuffer> LightPassFramebuffer);
@@ -31,6 +34,8 @@ namespace Pixel {
 
 	static Ref<Shader> m_TestShader;
 
+	static Ref<UniformBuffer> m_MVPUuniformBuffer;
+
 	void Renderer3D::Init()
 	{	
 		m_GeoPass = Shader::Create("assets/shaders/DeferredShading/GeometryPass.glsl");
@@ -42,6 +47,9 @@ namespace Pixel {
 
 		//Light Point
 		SphereModel = Model("assets/models/Sphere.obj");
+
+		//bind to uniform block offset:64
+		m_MVPUuniformBuffer = UniformBuffer::Create(0, 128, 0);
 	}
 
 	void Renderer3D::DrawModel(const glm::mat4& transform, StaticMeshComponent& MeshComponent, MaterialComponent& Material, int EntityID)
@@ -53,7 +61,7 @@ namespace Pixel {
 		MaterialTextures.push_back(Material.Metallic);
 		MaterialTextures.push_back(Material.Emissive);
 
- 		MeshComponent.mesh.Draw(transform, m_GeoPass, MaterialTextures, EntityID);
+ 		MeshComponent.mesh.Draw(transform, m_GeoPass, MaterialTextures, EntityID, m_MVPUuniformBuffer);
 	}
 
 	void Renderer3D::BeginScene(const Camera& camera, TransformComponent& transform, Ref<Framebuffer> geometryFramebuffer)
@@ -75,8 +83,8 @@ namespace Pixel {
 		RenderCommand::StencilTest(0);
 		RenderCommand::ClearStencil();
 
-		m_GeoPass->SetMat4("u_ViewProjection", viewProj);
-
+		//m_GeoPass->SetMat4("u_ViewProjection", viewProj);
+		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 		/*-------------------------------------------------------
 		 middle call the DrawModel function to write the gbuffer
 		--------------------------------------------------------*/
@@ -101,8 +109,8 @@ namespace Pixel {
 		RenderCommand::StencilTest(0);
 		RenderCommand::ClearStencil();
 		
-		m_GeoPass->SetMat4("u_ViewProjection", viewProj);
-
+		//m_GeoPass->SetMat4("u_ViewProjection", viewProj);
+		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 		/*-------------------------------------------------------
 		 middle call the DrawModel function to write the gbuffer
 		--------------------------------------------------------*/	

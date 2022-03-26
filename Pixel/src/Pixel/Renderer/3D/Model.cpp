@@ -1,15 +1,16 @@
 #include "pxpch.h"
 
 #include "Model.h"
-#include "PixeL/Renderer/Texture.h"
+#include "Pixel/Renderer/Texture.h"
+#include "Pixel/Renderer/UniformBuffer.h"
 
 namespace Pixel {
 
 	//draw model's every meshes
-	void Model::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID)
+	void Model::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer)
 	{
 		for(unsigned int i = 0; i < m_Meshes.size(); ++i)
-			m_Meshes[i].Draw(transform, shader, textures, entityID);
+			m_Meshes[i].Draw(transform, shader, textures, entityID, modelUniformBuffer);
 	}
 
 	void Model::Draw()

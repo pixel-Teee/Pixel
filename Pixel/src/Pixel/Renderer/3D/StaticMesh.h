@@ -6,6 +6,7 @@
 #include "Pixel/Renderer/Buffer.h"
 #include "Pixel/Renderer/Shader.h"
 #include "Pixel/Renderer/Texture.h"
+#include "Pixel/Renderer/UniformBuffer.h"
 
 namespace Pixel {
 
@@ -14,7 +15,7 @@ namespace Pixel {
 	public:
 		StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices);
 
-		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID);
+		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
 
 		//TODO:temporary forward draw
 		void Draw();

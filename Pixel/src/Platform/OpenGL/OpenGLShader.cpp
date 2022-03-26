@@ -2,6 +2,7 @@
 #include "OpenGLShader.h"
 
 #include <fstream>
+#include <filesystem>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -159,6 +160,14 @@ namespace Pixel {
 
 		for (auto id : glShaderIDs)
 			glDetachShader(program, id);
+	}
+
+	void OpenGLShader::CompileOrGetBinary(const std::unordered_map<GLenum, std::string>& shaderSources)
+	{
+		for (auto& [shaderType, shaderSource] : shaderSources)
+		{
+					
+		}
 	}
 
 	void OpenGLShader::Bind() const

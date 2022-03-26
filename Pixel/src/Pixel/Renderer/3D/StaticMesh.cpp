@@ -2,6 +2,9 @@
 
 #include "StaticMesh.h"
 #include "Pixel/Renderer/RenderCommand.h"
+#include "Pixel/Renderer/UniformBuffer.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Pixel {
 
@@ -34,11 +37,13 @@ namespace Pixel {
 		VAO->SetIndexBuffer(IBO);
 	}
 
-	void StaticMesh::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID)
+	void StaticMesh::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer)
 	{
 		SetupMesh(entityID);
 		shader->Bind();
-		shader->SetMat4("u_Model", transform);
+		glm::mat4 trans = transform;
+		//shader->SetMat4("u_Model", transform);
+		modelUniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(trans));
 
 		//Bind Texture
 		shader->SetInt("tex_Albedo", 0);

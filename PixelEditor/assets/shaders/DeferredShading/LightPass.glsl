@@ -6,8 +6,15 @@ layout(location = 1) in vec3 a_Normal;
 layout(location = 2) in vec2 a_TexCoord;
 layout(location = 3) in int a_EntityID;
 
-uniform mat4 u_ViewProjection;
+/*
+layout(std140, binding = 0) uniform UBO{
+	mat4 u_Model;
+	mat4 u_ViewProjection;	
+} ubo;
+*/
+
 uniform mat4 u_Model;
+uniform mat4 u_ViewProjection;
 
 void main()
 {
@@ -16,15 +23,6 @@ void main()
 
 #type fragment
 #version 450 core
-
-struct Light{
-	vec3 position;
-	vec3 color;
-
-	float constant;
-	float linear;
-	float quadratic;
-};
 
 const float PI = 3.14159265359;
 
@@ -38,10 +36,35 @@ uniform sampler2D g_Normal;
 uniform sampler2D g_Albedo;
 uniform sampler2D g_RoughnessMetallicEmissive;
 
-uniform vec2 gScreenSize;
-uniform vec3 camPos;
+/*
+layout(std140, binding = 1) uniform Light{
+	vec3 position;
+	vec3 color;
+
+	float constant;
+	float linear;
+	float quadratic;
+} light;
+
+layout(std140, binding = 2) uniform Camera{
+	vec2 gScreenSize;
+	vec3 camPos;
+} camera;
+*/
+
+struct Light{
+	vec3 position;
+	vec3 color;
+
+	float constant;
+	float linear;
+	float quadratic;
+};
 
 uniform Light light;
+
+uniform	vec2 gScreenSize;
+uniform	vec3 camPos;
 
 vec2 CalcTexCoord()
 {
