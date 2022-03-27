@@ -5,6 +5,7 @@
 #include "Pixel/Core/Timestep.h"
 #include "Pixel/Renderer/EditorCamera.h"
 #include "Pixel/Renderer/Framebuffer.h"
+#include "Pixel/Renderer/Texture.h"
 
 class b2World;
 
@@ -39,10 +40,15 @@ namespace Pixel
 
 		void SetViewPortSize(int m_ViewportWidth, int m_ViewportHeight);
 		glm::vec2 GetViewPortSize();
+
+		void SetSkyBox(Ref<CubeMap> skyBox);
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 	private:
+		//environment
+		Ref<CubeMap> m_skyBox;
+
 		//registry is a container for entity and component
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;

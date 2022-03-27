@@ -49,8 +49,12 @@ namespace Pixel {
 	public:
 		virtual ~CubeMap() = default;
 		virtual void SetFace(FaceTarget faceIndex, const std::string& path) = 0;
-		virtual void Bind() = 0;
+		virtual void GenerateCubeMap() = 0;
+		virtual std::vector<std::string>& GetPaths() = 0;
+		virtual void Bind(uint32_t slot = 0) = 0;
 		virtual void UnBind() = 0;
+		virtual void SetDirty(bool value) = 0;
+		virtual bool IsDirty() = 0;
 		static Ref<CubeMap> Create(std::vector<std::string>& paths);
 	};
 }

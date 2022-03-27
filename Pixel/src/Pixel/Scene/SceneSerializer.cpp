@@ -278,6 +278,29 @@ namespace Pixel {
 		out << YAML::EndMap;
 	}
 
+	static void SerializeEnvironment(YAML::Emitter& out, const std::vector<std::string>& paths)
+	{
+		out << YAML::BeginMap;
+		out << YAML::Key << "EnvironmentType" << YAML::Value << "SkyBox";
+		out << YAML::Key << "SkyBox";
+		out << YAML::BeginMap;
+		static std::vector<std::string> faces = {
+			"Right",
+			"Left",
+			"Top",
+			"Bottom",
+			"Front",
+			"Back"
+		};
+
+		for (uint32_t i = 0; i < paths.size(); ++i)
+		{
+			out << YAML::Key << faces[i] << YAML::Value << paths[i];
+		}
+		out << YAML::EndMap;
+		out << YAML::EndMap;
+	}
+
 	void SceneSerializer::Serialize(const std::string& filepath)
 	{
 		YAML::Emitter out;
@@ -294,6 +317,11 @@ namespace Pixel {
 		}
 		);
 		out << YAML::EndSeq;
+
+		out << YAML::Key << "Environment" << YAML::BeginSeq;
+		SerializeEnvironment(out, m_Scene->m_skyBox->GetPaths());
+		out << YAML::EndSeq;
+
 		out << YAML::EndMap;
 
 		std::ofstream fout(filepath);
@@ -323,105 +351,146 @@ namespace Pixel {
 		{
 			for (auto entity : entities)
 			{
-				uint64_t uuid = entity["Entity"].as<uint64_t>(); 
+			uint64_t uuid = entity["Entity"].as<uint64_t>();
 
-				std::string name;
-				auto tagComponent = entity["TagComponent"];
-				if (tagComponent)
-					name = tagComponent["Tag"].as<std::string>();
+			std::string name;
+			auto tagComponent = entity["TagComponent"];
+			if (tagComponent)
+				name = tagComponent["Tag"].as<std::string>();
 
-				PIXEL_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
+			PIXEL_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
-				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(UUID(), name);
+			Entity deserializedEntity = m_Scene->CreateEntityWithUUID(UUID(), name);
 
-				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
-				{
-					// Entities always have transforms
-					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-					tc.Translation = transformComponent["Translation"].as<glm::vec3>();
-					tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
-					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
-				}
+			auto transformComponent = entity["TransformComponent"];
+			if (transformComponent)
+			{
+				// Entities always have transforms
+				auto& tc = deserializedEntity.GetComponent<TransformComponent>();
+				tc.Translation = transformComponent["Translation"].as<glm::vec3>();
+				tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+				tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+			}
 
-				auto cameraComponent = entity["CameraComponent"];
-				if (cameraComponent)
-				{
-					auto& cc = deserializedEntity.AddComponent<CameraComponent>();
+			auto cameraComponent = entity["CameraComponent"];
+			if (cameraComponent)
+			{
+				auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
-					auto& cameraProps = cameraComponent["Camera"];
-					//PIXEL_CORE_INFO(cameraProps["ProjectionType"].as<int>());
-					cc.camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
-					cc.camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
-					cc.camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
+				auto& cameraProps = cameraComponent["Camera"];
+				//PIXEL_CORE_INFO(cameraProps["ProjectionType"].as<int>());
+				cc.camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
+				cc.camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
+				cc.camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
 
-					cc.camera.SetOrthographicSize(cameraProps["OrthographicSize"].as<float>());
-					cc.camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
-					cc.camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
+				cc.camera.SetOrthographicSize(cameraProps["OrthographicSize"].as<float>());
+				cc.camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
+				cc.camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
 
-					cc.Primary = cameraComponent["Primary"].as<bool>();
-					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+				cc.Primary = cameraComponent["Primary"].as<bool>();
+				cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
 
-					cc.camera.SetProjectionType(ProjectionTypeFromInt(cameraProps["ProjectionType"].as<int>()));
-				}
+				cc.camera.SetProjectionType(ProjectionTypeFromInt(cameraProps["ProjectionType"].as<int>()));
+			}
 
-				auto spriteRendererComponent = entity["SpriteRendererComponent"];
-				if (spriteRendererComponent)
-				{
-					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
-					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
-				}
+			auto spriteRendererComponent = entity["SpriteRendererComponent"];
+			if (spriteRendererComponent)
+			{
+				auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
+				src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+			}
 
-				auto rigidBody2DComponent = entity["Rigidbody2DComponent"];
-				if (rigidBody2DComponent)
-				{
-					auto& rb2d = deserializedEntity.AddComponent<Rigidbody2DComponent>();
-					rb2d.Type = RigidBody2DBodyTypeFromString(rigidBody2DComponent["BodyType"].as<std::string>());
-					rb2d.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
-				}
+			auto rigidBody2DComponent = entity["Rigidbody2DComponent"];
+			if (rigidBody2DComponent)
+			{
+				auto& rb2d = deserializedEntity.AddComponent<Rigidbody2DComponent>();
+				rb2d.Type = RigidBody2DBodyTypeFromString(rigidBody2DComponent["BodyType"].as<std::string>());
+				rb2d.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
+			}
 
-				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
-				if (boxCollider2DComponent)
-				{
-					auto& bc2d = deserializedEntity.AddComponent<BoxCollider2DComponent>();
-					bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
-					bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
-					bc2d.Density = boxCollider2DComponent["Density"].as<float>();
-					bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
-					bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
-					bc2d.Restitution = boxCollider2DComponent["RestitutionThreshold"].as<float>();
-				}
+			auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+			if (boxCollider2DComponent)
+			{
+				auto& bc2d = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+				bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
+				bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+				bc2d.Density = boxCollider2DComponent["Density"].as<float>();
+				bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
+				bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
+				bc2d.Restitution = boxCollider2DComponent["RestitutionThreshold"].as<float>();
+			}
 
-				auto staticMeshComponent = entity["StaticMeshComponent"];
-				if (staticMeshComponent)
-				{
-					std::string str = staticMeshComponent["Path"].as<std::string>();
-					auto& src = deserializedEntity.AddComponent<StaticMeshComponent>(str);
-				}
+			auto staticMeshComponent = entity["StaticMeshComponent"];
+			if (staticMeshComponent)
+			{
+				std::string str = staticMeshComponent["Path"].as<std::string>();
+				auto& src = deserializedEntity.AddComponent<StaticMeshComponent>(str);
+			}
 
-				auto lightComponent = entity["LightComponent"];
-				if (lightComponent)
-				{
-					auto& light = deserializedEntity.AddComponent<LightComponent>();
-					light.color = lightComponent["Color"].as<glm::vec3>();
-					light.constant = lightComponent["Constant"].as<float>();
-					light.linear = lightComponent["Linear"].as<float>();
-					light.quadratic = lightComponent["Quadratic"].as<float>();
-				}
+			auto lightComponent = entity["LightComponent"];
+			if (lightComponent)
+			{
+				auto& light = deserializedEntity.AddComponent<LightComponent>();
+				light.color = lightComponent["Color"].as<glm::vec3>();
+				light.constant = lightComponent["Constant"].as<float>();
+				light.linear = lightComponent["Linear"].as<float>();
+				light.quadratic = lightComponent["Quadratic"].as<float>();
+			}
 
-				auto materialComponent = entity["MaterialComponent"];
-				if (materialComponent)
-				{
-					std::string albedoPath = materialComponent["albedoPath"].as<std::string>();
-					std::string roughnessPath = materialComponent["roughnessPath"].as<std::string>();
-					std::string metallicPath = materialComponent["metallicPath"].as<std::string>();
-					std::string normalMapPath = materialComponent["normalMapPath"].as<std::string>();
-					std::string emissivePath = materialComponent["emissivePath"].as<std::string>();
-					auto& material = deserializedEntity.AddComponent<MaterialComponent>(albedoPath, normalMapPath, roughnessPath, metallicPath, emissivePath);
-				}
+			auto materialComponent = entity["MaterialComponent"];
+			if (materialComponent)
+			{
+				std::string albedoPath = materialComponent["albedoPath"].as<std::string>();
+				std::string roughnessPath = materialComponent["roughnessPath"].as<std::string>();
+				std::string metallicPath = materialComponent["metallicPath"].as<std::string>();
+				std::string normalMapPath = materialComponent["normalMapPath"].as<std::string>();
+				std::string emissivePath = materialComponent["emissivePath"].as<std::string>();
+				auto& material = deserializedEntity.AddComponent<MaterialComponent>(albedoPath, normalMapPath, roughnessPath, metallicPath, emissivePath);
+			}
 			}
 		}
 
+		//environment
+		{
+			auto environments = data["Environment"];
+			if (environments)
+			{
+				for (auto environment : environments)
+				{
+					std::string environmentType = environment["EnvironmentType"].as<std::string>();
+					PX_CORE_ASSERT("environment type{0}", environmentType);
+					auto SkyBox = environment["SkyBox"];
+					if (SkyBox)
+					{
+
+						//PIXEL_CORE_TRACE("Deserializing environment '{0}'", environment);
+
+						static std::vector<std::string> faces = {
+							"Right",
+							"Left",
+							"Top",
+							"Bottom",
+							"Front",
+							"Back"
+						};
+
+						std::vector<std::string> paths(6);
+
+						for (uint32_t i = 0; i < 6; ++i)
+						{
+							paths[i] = SkyBox[faces[i]].as<std::string>();
+						}
+						
+						for (uint32_t i = 0; i < 6; ++i)
+						{
+							m_Scene->m_skyBox->SetFace((FaceTarget)i, paths[i]);
+						}
+						m_Scene->m_skyBox->GenerateCubeMap();
+						m_Scene->m_skyBox->SetDirty(true);
+					}
+				}
+			}	
+		}	
 		return true;
 	}
 

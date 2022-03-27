@@ -44,6 +44,13 @@ namespace Pixel {
 	static Ref<Shader> m_SkyBoxShader;
 	static Model m_Box;
 
+	std::vector<std::string> m_paths{ "assets/textures/skybox/right.jpg",
+		"assets/textures/skybox/left.jpg",
+		"assets/textures/skybox/top.jpg",
+		"assets/textures/skybox/bottom.jpg",
+		"assets/textures/skybox/front.jpg",
+		"assets/textures/skybox/back.jpg" };
+
 	void Renderer3D::Init()
 	{	
 		m_GeoPass = Shader::Create("assets/shaders/DeferredShading/GeometryPass.glsl");
@@ -57,14 +64,7 @@ namespace Pixel {
 		SphereModel = Model("assets/models/Sphere.obj");
 		m_Box = Model("assets/models/Box.obj");
 
-		std::vector<std::string> paths{"assets/textures/skybox/right.jpg",
-		"assets/textures/skybox/left.jpg",
-		"assets/textures/skybox/top.jpg",
-		"assets/textures/skybox/bottom.jpg",
-		"assets/textures/skybox/front.jpg",
-		"assets/textures/skybox/back.jpg"};
-
-		m_SkyBox = CubeMap::Create(paths);
+		m_SkyBox = CubeMap::Create(m_paths);
 
 		//bind to uniform block offset:64
 		m_MVPUuniformBuffer = UniformBuffer::Create(0, 128, 0);
@@ -218,12 +218,18 @@ namespace Pixel {
 		return m_SkyBox;
 	}
 
+	Ref<Pixel::CubeMap> Renderer3D::GetDefaultSkyBox()
+	{
+		m_SkyBox = CubeMap::Create(m_paths);
+		return m_SkyBox;
+	}
+
 	void Renderer3D::DrawSkyBox(const EditorCamera& camera, Ref<Framebuffer> LightPassFramebuffer, Ref<Framebuffer> geoPassFramebuffer)
 	{
 		LightPassFramebuffer->Bind();
 		LightPassFramebuffer->SetColorAttachmentDraw(0);
-		RenderCommand::Cull(1);
-		RenderCommand::CullFrontOrBack(1);
+		RenderCommand::Cull(0);
+		//RenderCommand::CullFrontOrBack(1);
 		/*BindReadFramebuffer(geoPassFramebuffer->GetRenderId());
 		BindWriteFramebuffer(LightPassFramebuffer->GetRenderId());
 		uint32_t width = LightPassFramebuffer->GetSpecification().Width;
@@ -236,16 +242,13 @@ namespace Pixel {
 		glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 		glm::mat4 proj = camera.GetProjection();
 		glm::mat4 viewProj = proj * view;
-
 		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 
 		m_SkyBoxShader->SetInt("SkyBox", 0);
-		m_SkyBox->Bind();
+		m_SkyBox->Bind(0);
 		m_Box.Draw();
 
 		RenderCommand::DepthFunc(DepthComp::LESS);
-		RenderCommand::Cull(0);
-		RenderCommand::CullFrontOrBack(0);
 		LightPassFramebuffer->UnBind();
 	}
 

@@ -11,10 +11,16 @@ namespace Pixel {
 		~EnvironmentPanel();
 
 		void SetSkyBox(Ref<CubeMap> skyBox);
+		void SetVisualizeFacesTextures(const std::vector<std::string>& paths);
+		void SetVisualizeFacesTexture(FaceTarget faceIndex, std::string& path);
 
+		std::string& GetPath(FaceTarget faceIndex);
 		void OnImGuiRender();
 	private:
+		//from scene
 		Ref<CubeMap> m_skyBox;
+
+		std::vector<std::string> m_paths;
 
 		//Visualization
 		Ref<Texture> m_right;

@@ -111,6 +111,9 @@ namespace Pixel
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 		//Set Sky Box
+		//ownership is belgon to Renderer3D
+		m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
+		m_EditorScene->SetSkyBox(Renderer3D::GetSkyBox());
 		m_environmentPanel.SetSkyBox(Renderer3D::GetSkyBox());
 
 		//SceneSerializer serializer(m_ActiveScene);
@@ -338,6 +341,21 @@ namespace Pixel
 		/*----------View port----------*/
 
 		/*---------Environment Panel---------*/
+		bool IsDirty = Renderer3D::GetSkyBox()->IsDirty();
+		if (IsDirty)
+		{	
+			Renderer3D::GetSkyBox()->SetDirty(false);
+			std::vector<std::string>& paths = Renderer3D::GetSkyBox()->GetPaths();
+
+			for (uint32_t i = 0; i < 6; ++i)
+			{
+				if (paths[i] != m_environmentPanel.GetPath((FaceTarget)i))
+				{
+					m_environmentPanel.SetVisualizeFacesTexture((FaceTarget)i, paths[i]);
+				}
+			}
+		}
+		
 		m_environmentPanel.OnImGuiRender();
 		/*---------Environment Panel---------*/
 
@@ -510,6 +528,7 @@ namespace Pixel
 	void EditorLayer::NewScene()
 	{
 		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene->SetSkyBox(Renderer3D::GetDefaultSkyBox());
 		m_ActiveScene = m_EditorScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -530,6 +549,7 @@ namespace Pixel
 		Ref<Scene> newScene = CreateRef<Scene>();
 		glm::vec2 viewPortSize = m_EditorScene->GetViewPortSize();
 		newScene->SetViewPortSize(viewPortSize.x, viewPortSize.y);
+		newScene->SetSkyBox(Renderer3D::GetSkyBox());
 		SceneSerializer serializer(newScene);
 
 		if (serializer.Deserialize(filepath.string()))

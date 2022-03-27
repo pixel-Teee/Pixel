@@ -404,6 +404,11 @@ namespace Pixel
 		return {m_ViewportWidth, m_ViewportHeight};
 	}
 
+	void Scene::SetSkyBox(Ref<CubeMap> skyBox)
+	{
+		m_skyBox = skyBox;
+	}
+
 	template<typename T>
 	void Pixel::Scene::OnComponentAdded(Entity entity, T& component)
 	{

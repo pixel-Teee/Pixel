@@ -1,10 +1,28 @@
 Scene: Untitled
 Entities:
-  - Entity: 7329457073252019956
+  - Entity: 2910792429235327085
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [2.73439479, 1.59723413, 0]
+      Translation: [-0.558467865, 0.013367773, 3.32182431]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 6197559272408905453
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 1.92746401, -0.121566594]
       Rotation: [0, 0, 0]
       Scale: [38.2261543, 38.2261543, 38.2261543]
     LightComponent:
@@ -12,7 +30,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 16746273294614672179
+  - Entity: 14244603471901768085
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
@@ -21,11 +39,17 @@ Entities:
       Scale: [1, 1, 1]
     StaticMeshComponent:
       Path: assets\models\Box.fbx
-  - Entity: 13996981743599478898
+    MaterialComponent:
+      albedoPath: assets\textures\Material_Albedo.png
+      normalMapPath: assets\textures\Material_normal.png
+      roughnessPath: assets\textures\Material_roughness.png
+      emissivePath: assets\textures\Material_emissive.png
+      metallicPath: assets\textures\Material_metallic.png
+  - Entity: 17291893094204749147
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-3.04643059, 1.59723413, -0.644706011]
+      Translation: [0, 0.075532496, -2.81224537]
       Rotation: [0, 0, 0]
       Scale: [38.2261543, 38.2261543, 38.2261543]
     LightComponent:
@@ -33,3 +57,12 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
+Environment:
+  - EnvironmentType: SkyBox
+    SkyBox:
+      Right: assets\textures\skybox\posx.jpg
+      Left: assets\textures\skybox\negx.jpg
+      Top: assets\textures\skybox\posy.jpg
+      Bottom: assets\textures\skybox\negy.jpg
+      Front: assets\textures\skybox\posz.jpg
+      Back: assets\textures\skybox\negz.jpg

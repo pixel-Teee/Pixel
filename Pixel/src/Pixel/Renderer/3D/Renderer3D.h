@@ -23,6 +23,7 @@ namespace Pixel{
 
 		//------give editor use------
 		static Ref<CubeMap> GetSkyBox();
+		static Ref<CubeMap> GetDefaultSkyBox();
 
 		static void DrawSkyBox(const EditorCamera& camera, Ref<Framebuffer> LightPassFramebuffer, Ref<Framebuffer> geoPassFramebuffer);
 
