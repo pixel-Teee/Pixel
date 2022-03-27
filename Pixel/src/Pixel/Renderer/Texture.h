@@ -34,4 +34,23 @@ namespace Pixel {
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height, TextureFormat textureFormat);
 		static Ref<Texture2D> Create(const std::string& path);
 	};
+
+	enum FaceTarget {
+		Right = 0,
+		Left = 1,
+		Top = 2,
+		Bottom = 3,
+		Back = 4,
+		Front = 5
+	};
+
+	class CubeMap
+	{
+	public:
+		virtual ~CubeMap() = default;
+		virtual void SetFace(FaceTarget faceIndex, const std::string& path) = 0;
+		virtual void Bind() = 0;
+		virtual void UnBind() = 0;
+		static Ref<CubeMap> Create(std::vector<std::string>& paths);
+	};
 }

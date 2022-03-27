@@ -51,6 +51,7 @@ namespace Pixel {
 	void BindWriteFramebuffer(uint32_t renderId);
 	void BindReadFramebuffer(uint32_t renderId);
 	void BlitFramebuffer(int32_t srcWidth, int32_t srcHeight);
+	void BlitDepthFramebuffer(uint32_t srcWidth, uint32_t srcHeight);
 
 	class Framebuffer
 	{

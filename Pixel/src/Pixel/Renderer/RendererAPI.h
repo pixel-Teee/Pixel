@@ -19,6 +19,13 @@ namespace Pixel {
 		DECREMENT
 	};
 
+	enum DepthComp
+	{
+		EQUAL,
+		LEQUAL,
+		LESS
+	};
+
 	class RendererAPI
 	{
 	public:
@@ -38,6 +45,7 @@ namespace Pixel {
 		//depth
 		virtual void DepthTest(int32_t Bit) = 0;
 		virtual void DepthMask(int32_t MaskBit) = 0;
+		virtual void DepthFunc(DepthComp comp) = 0;
 
 		//blend
 		virtual void Blend(int32_t Bit) = 0;

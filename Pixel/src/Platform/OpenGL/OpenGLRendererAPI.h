@@ -33,5 +33,8 @@ namespace Pixel {
 
 
 		virtual void SetFrontOrBackStencilOp(int32_t FrontOrBack, StencilOp stencilFail, StencilOp depthFail, StencilOp depthSuccess) override;
+
+		virtual void DepthFunc(DepthComp comp) override;
+
 	};
 }

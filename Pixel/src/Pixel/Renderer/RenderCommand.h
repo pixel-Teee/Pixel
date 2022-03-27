@@ -42,6 +42,11 @@ namespace Pixel {
 			s_RendererAPI->DepthTest(Bit);
 		}
 
+		inline static void DepthFunc(DepthComp comp)
+		{
+			s_RendererAPI->DepthFunc(comp);
+		}
+
 		//blend
 		inline static void Blend(int32_t Bit)
 		{

@@ -262,4 +262,9 @@ namespace Pixel {
 	{
 		glBlitFramebuffer(0, 0, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
+
+	void BlitDepthFramebuffer(uint32_t srcWidth, uint32_t srcHeight)
+	{
+		glBlitFramebuffer(0, 0, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	}
 }

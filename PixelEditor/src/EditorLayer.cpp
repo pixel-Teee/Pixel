@@ -44,16 +44,16 @@ namespace Pixel
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
 		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
-		fbSpec.Height = 970;
+		fbSpec.Height = 720;
 		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
 		/*------Create Geometry Framebuffer------*/
 
-		/*------Create GeoFramebuffer------*/	
+		/*------Create Framebuffer------*/	
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
-		/*------Create GeoFramebuffer------*/
+		/*------Create Framebuffer------*/
 
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
@@ -109,6 +109,9 @@ namespace Pixel
 		m_CameraEntity2.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 #endif
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		//Set Sky Box
+		m_environmentPanel.SetSkyBox(Renderer3D::GetSkyBox());
 
 		//SceneSerializer serializer(m_ActiveScene);
 		//serializer.Serialize("assets/scenes/Example.pixel");
@@ -333,6 +336,10 @@ namespace Pixel
 		ImGui::PopStyleVar();
 		/*----------Gizmos----------*/
 		/*----------View port----------*/
+
+		/*---------Environment Panel---------*/
+		m_environmentPanel.OnImGuiRender();
+		/*---------Environment Panel---------*/
 
 		/*---------Deferred Shading Viewport---------*/
 		

@@ -217,6 +217,8 @@ namespace Pixel
 		}
 		
 		Renderer3D::EndScene(camera, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
+
+		Renderer3D::DrawSkyBox(camera, m_LightPassFramebuffer, m_GeoPassFramebuffer);
 	}
 
 	void Scene::OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
@@ -340,6 +342,8 @@ namespace Pixel
 			}
 
 			Renderer3D::EndScene(*mainCamera, *cameraTransform, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
+
+			Renderer3D::DrawSkyBox(*mainCamera, *cameraTransform, m_LightPassFramebuffer, m_GeoPassFramebuffer);
 		}
 	}
 

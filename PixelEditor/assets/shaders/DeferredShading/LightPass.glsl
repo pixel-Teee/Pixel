@@ -6,19 +6,19 @@ layout(location = 1) in vec3 a_Normal;
 layout(location = 2) in vec2 a_TexCoord;
 layout(location = 3) in int a_EntityID;
 
-/*
 layout(std140, binding = 0) uniform UBO{
 	mat4 u_Model;
 	mat4 u_ViewProjection;	
 } ubo;
-*/
 
+/*
 uniform mat4 u_Model;
 uniform mat4 u_ViewProjection;
+*/
 
 void main()
 {
-	gl_Position = u_ViewProjection * u_Model * vec4(a_Pos, 1.0f);
+	gl_Position = ubo.u_ViewProjection * ubo.u_Model * vec4(a_Pos, 1.0f);
 }
 
 #type fragment
@@ -36,7 +36,6 @@ uniform sampler2D g_Normal;
 uniform sampler2D g_Albedo;
 uniform sampler2D g_RoughnessMetallicEmissive;
 
-/*
 layout(std140, binding = 1) uniform Light{
 	vec3 position;
 	vec3 color;
@@ -50,8 +49,8 @@ layout(std140, binding = 2) uniform Camera{
 	vec2 gScreenSize;
 	vec3 camPos;
 } camera;
-*/
 
+/*
 struct Light{
 	vec3 position;
 	vec3 color;
@@ -62,13 +61,14 @@ struct Light{
 };
 
 uniform Light light;
+*/
 
-uniform	vec2 gScreenSize;
-uniform	vec3 camPos;
+//uniform	vec2 gScreenSize;
+//uniform	vec3 camPos;
 
 vec2 CalcTexCoord()
 {
-	return gl_FragCoord.xy / gScreenSize; 
+	return gl_FragCoord.xy / camera.gScreenSize; 
 }
 
 float CalcAttenuation(vec3 WorldPos, vec3 Normal)
@@ -92,7 +92,7 @@ void main()
 	float Emissive = texture(g_RoughnessMetallicEmissive, TexCoord).b;
 
 	vec3 N = normalize(Normal);
-	vec3 V = normalize(camPos - WorldPos);
+	vec3 V = normalize(camera.camPos - WorldPos);
 
 	//PBR
 	vec3 F0 = vec3(0.04);

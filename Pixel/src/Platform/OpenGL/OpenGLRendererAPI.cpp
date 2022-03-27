@@ -36,6 +36,21 @@ namespace Pixel
 		return -1;
 	}
 
+	static GLenum DepthcomparisonToOpenGLDepthcomparison(DepthComp comp)
+	{
+		switch (comp)
+		{
+		case DepthComp::EQUAL:
+			return GL_EQUAL;
+		case DepthComp::LEQUAL:
+			return GL_LEQUAL;
+		case DepthComp::LESS:
+			return GL_LESS;
+		}
+		PX_CORE_ASSERT(false, "Unknown DepthComp");
+		return -1;
+	}
+
 	void OpenGLRendererAPI::Init()
 	{
 		glEnable(GL_BLEND);
@@ -130,6 +145,11 @@ namespace Pixel
 		{
 			glStencilOpSeparate(GL_BACK, StencilOpToOpenGLStencilOp(stencilFail), StencilOpToOpenGLStencilOp(depthFail), StencilOpToOpenGLStencilOp(depthSuccess));
 		}
+	}
+
+	void OpenGLRendererAPI::DepthFunc(DepthComp comp)
+	{
+		glDepthFunc(DepthcomparisonToOpenGLDepthcomparison(comp));
 	}
 
 	void OpenGLRendererAPI::BindTexture(int32_t slot, uint32_t textureID)
