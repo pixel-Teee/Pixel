@@ -43,6 +43,7 @@ PRIVATE
 "../Pixel/vendor/entt/include"
 "../Pixel/vendor/imguizmo"
 "../Pixel/vendor/Box2D"
+"../Pixel/vendor/imgui-node-editor"
 )
 
 target_compile_definitions(PixelEditor PRIVATE

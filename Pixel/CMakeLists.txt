@@ -41,6 +41,14 @@ file(GLOB_RECURSE PixelSrc
 "vendor/spir-v"
 "vendor/imgui-node-editor/imgui_node_editor.h"
 "vendor/imgui-node-editor/imgui_node_editor.cpp"
+"vendor/imgui-node-editor/imgui_node_editor_internal.h"
+"vendor/imgui-node-editor/imgui_node_editor_api.cpp"
+"vendor/imgui-node-editor/imgui_bezier_math.h"
+"vendor/imgui-node-editor/imgui_canvas.h"
+"vendor/imgui-node-editor/imgui_canvas.cpp"
+"vendor/imgui-node-editor/imgui_extra_math.h"
+"vendor/imgui-node-editor/crude_json.h"
+"vendor/imgui-node-editor/crude_json.cpp"
 )
 
 set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")
