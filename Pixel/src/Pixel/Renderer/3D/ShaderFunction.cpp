@@ -112,13 +112,13 @@ namespace Pixel {
 			}
 			else if (m_pInput[i]->GetValueType() == PutNode::VT_3)
 			{
-				OutString += Renderer3D::Float2() + (" ");
+				OutString += Renderer3D::Float3() + (" ");
 
 				Temp = Renderer3D::FloatConst3("0", "0", "0");
 			}
 			else
 			{
-				OutString += Renderer3D::Float2() + (" ");
+				OutString += Renderer3D::Float4() + (" ");
 
 				Temp = Renderer3D::FloatConst4("0", "0", "0", "1");
 			}
@@ -468,6 +468,7 @@ namespace Pixel {
 		{
 			for (uint32_t i = 0; i < m_pInput.size(); ++i)
 			{
+				OutString += "	";
 				if (m_pInput[i] == GetNormalNode())
 					continue;
 				if (m_pInput[i]->GetValueType() == PutNode::VT_1)
@@ -497,18 +498,12 @@ namespace Pixel {
 
 				if (!m_pInput[i]->GetOutputLink())
 				{
-					OutString += m_pInput[i]->GetNodeName() + " = " + ";\n";
+					OutString += m_pInput[i]->GetNodeName() + " = " + Temp + ";\n";
 				}
 				OutString += GetValueEqualString(m_pInput[i]->GetOutputLink(), m_pInput[i]);
 			}			
 		}
 
-		return true;
-	}
-
-	bool ShaderMainFunction::GetOutputValueString(std::string& OutString) const
-	{
-		//throw std::logic_error("The method or operation is not implemented.");
 		return true;
 	}
 
@@ -521,7 +516,7 @@ namespace Pixel {
 	void ShaderMainFunction::GetValueUseDeclareString(std::string& OutString, uint32_t uiValueUseString)
 	{
 		std::string DefaultValue = Renderer3D::FloatConst3("0", "0", "0");
-
+		OutString += "	";
 		if ((uiValueUseString & VUS_WORLD_POS) == VUS_WORLD_POS)
 		{
 			OutString += Renderer3D::Float3() + ShaderStringFactory::m_WorldPos + " = " + DefaultValue + ";\n";
@@ -596,10 +591,10 @@ namespace Pixel {
 
 		if ((uiOutPutStringType & VUS_WORLD_POS) == VUS_WORLD_POS)
 		{
-			OutString += ShaderStringFactory::m_WorldPos + " = ";
+			//OutString += "	" + ShaderStringFactory::m_WorldPos + " = ";
 			//Local World To Pos
-			ShaderStringFactory::LocalToWorldPos(ShaderStringFactory::m_PSInputLocalNormal, OutString);
-			OutString += ";\n";
+			//ShaderStringFactory::LocalToWorldPos(ShaderStringFactory::m_PSInputLocalNormal, OutString);
+			//OutString += ";\n";
 		}
 	}
 

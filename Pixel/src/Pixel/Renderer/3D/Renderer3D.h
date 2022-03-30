@@ -76,7 +76,7 @@ namespace Pixel{
 
 		static std::string FloatConst4(const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4)
 		{
-			return std::string("vec3") + "(" + value1 + ", " + value2 + ", " + value3 + ", " + value4 + ")";
+			return std::string("vec4") + "(" + value1 + ", " + value2 + ", " + value3 + ", " + value4 + ")";
 		}
 		//------value------
 

@@ -11,19 +11,28 @@ layout(std140, binding = 0) uniform UBO{
 	mat4 u_ViewProjection;	
 } ubo;
 
+layout(location = 0) out vec3 v_TexCoords;
+
 //uniform mat4 u_Model;
 //uniform mat4 u_ViewProjection;
 
 void main()
 {
-	gl_Position = ubo.u_ViewProjection * ubo.u_Model * vec4(a_Pos, 1.0f);
+	v_TexCoords = a_Pos;
+	vec4 pos = ubo.u_ViewProjection * vec4(a_Pos, 1.0f);
+	gl_Position = pos.xyww;
 }
 
 #type fragment
 #version 450 core
 
+layout(location = 0) in vec3 v_TexCoords;
+
+layout(location = 0) out vec4 color;
+
+uniform samplerCube SkyBox;
+
 void main()
 {
-	
+	color = texture(SkyBox, v_TexCoords);
 }
-

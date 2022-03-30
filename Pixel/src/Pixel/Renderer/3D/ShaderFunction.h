@@ -79,8 +79,6 @@ namespace Pixel {
 
 		virtual bool GetInputValueString(std::string& OutString, uint32_t uiOutPutStringType);
 
-		virtual bool GetOutputValueString(std::string& OutString) const override;
-
 		virtual bool GetFunctionString(std::string& OutString) const override;
 
 		virtual bool GetShaderTreeString(std::string& OutString, uint32_t uiOutPutStringType);

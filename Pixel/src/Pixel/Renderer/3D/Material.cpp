@@ -1,6 +1,7 @@
 #include "pxpch.h"
 #include "Material.h"
 #include "ShaderStringFactory.h"
+#include "Pixel/Renderer/3D/ShaderPbrFunction.h"
 
 namespace Pixel {
 	void MaterialInterface::Create()
@@ -45,12 +46,19 @@ namespace Pixel {
 
 	}
 
-	Material::Material(const std::string& showName)
+	Material::Material(const std::string& showName, uint32_t uiMUT)
 	{
 		m_ShowName = showName;
 		m_pShaderFunctionArray.clear();
 		m_pShaderMainFunction.clear();
 		//TODO, create pbr shadermainfunction, and add to m_pShaderMainFunction
+		if (uiMUT == MUT_PBR)
+		{
+			Ref<ShaderPbrFunction> pShaderPbrFunction = CreateRef<ShaderPbrFunction>();
+			pShaderPbrFunction->Init();//important
+			m_pShaderMainFunction.push_back(pShaderPbrFunction);
+		}
+
 	}
 	
 	void Material::AddShaderFunction(Ref<ShaderFunction> pShaderFunction)
@@ -79,8 +87,8 @@ namespace Pixel {
 			//TODO: implement ResetInShaderName
 			//m_pShaderFunctionArray[i]->ResetInShaderName();
 		}
-
-		return m_pShaderMainFunction[uiPassId]->GetShaderTreeString(OutString, uiOST);
+		
+		return (std::static_pointer_cast<ShaderMainFunction>(m_pShaderMainFunction[uiPassId]))->GetShaderTreeString(OutString, uiOST);
 	}
 
 	//------Material------

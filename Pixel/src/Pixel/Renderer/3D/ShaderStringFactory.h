@@ -17,8 +17,10 @@ namespace Pixel {
 
 		static std::string m_WorldPos;
 		static std::string m_WorldNormal;
+		static std::string m_WorldMatrix;
 
 		static std::string m_PSInputLocalNormal;
+		static std::string m_PSOutputColorValue;
 
 		static void Init();
 

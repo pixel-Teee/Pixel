@@ -19,7 +19,7 @@ namespace Pixel {
 			Ref<StaticMesh> mesh = CreateRef<StaticMesh>(meshes[0]);
 			//Ref<StaticMesh> mesh = CreateRef<StaticMesh>();
 			Ref<Camera> pCamera = CreateRef<Camera>();
-			Ref<Material> tempMaterial = CreateRef<Material>();
+			Ref<Material> tempMaterial = CreateRef<Material>("Test", Material::MUT_PBR);
 			Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>(tempMaterial);
 			pass.SetCamera(pCamera);
 			pass.SetMaterialInstance(pMaterialInstance);

@@ -2,6 +2,10 @@
 #include "ShaderStringFactory.h"
 #include "RendererPass.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 namespace Pixel {
 	int32_t ShaderStringFactory::m_ShaderValueIndex;
 	uint32_t ShaderStringFactory::m_CreateShaderNum;
@@ -9,6 +13,9 @@ namespace Pixel {
 	std::string ShaderStringFactory::m_ViewProjection;
 	std::string ShaderStringFactory::m_WorldPos;
 	std::string ShaderStringFactory::m_WorldNormal;
+	std::string ShaderStringFactory::m_PSInputLocalNormal;
+	std::string ShaderStringFactory::m_WorldMatrix;
+	std::string ShaderStringFactory::m_PSOutputColorValue;
 	void ShaderStringFactory::Init()
 	{
 		m_Model = "u_Model";
@@ -155,7 +162,14 @@ namespace Pixel {
 			std::string PFunctionString;
 			
 			GetPIncludeType(PInclude);
+
 			CreatePInputDeclare(MSPara, uiPassType, PInputDeclare);
+
+			CreatePOutputDeclare(MSPara, uiPassType, POutputDeclare);
+
+			CreatePFunction(MSPara, uiPassType, PFunctionString);
+
+			shaderText += PInclude + "\n" + PInputDeclare + "\n" + POutputDeclare + "\n" + PUserConstantString + "\n" + PFunctionString + "\n";
 
 			std::ofstream out(filePath);
 			out << shaderText;
@@ -170,6 +184,17 @@ namespace Pixel {
 	{
 		OutString += "#type fragment\n";
 		OutString += "#version 450 core\n";
+
+		std::string shaderInclude;
+		std::string Temp;
+		std::ifstream file("assets/shaders/test/shader.glsl");
+		while (file.peek() != EOF)
+		{
+			std::getline(file, Temp);
+			shaderInclude += Temp + "\n";
+		}
+		file.close();
+		OutString += shaderInclude + "\n";
 	}
 
 	void ShaderStringFactory::CreatePInputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
@@ -184,7 +209,8 @@ namespace Pixel {
 	void ShaderStringFactory::CreatePOutputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
 	{
 		std::string TempDeclare;
-		OutString += "layout(location = 0) out vec4 Color;\n";
+		m_PSOutputColorValue = "OutColor";
+		OutString += "layout(location = 0) out vec4 " + m_PSOutputColorValue + ";\n";
 	}
 
 	void ShaderStringFactory::CreatePFunction(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
@@ -194,13 +220,16 @@ namespace Pixel {
 			std::string FunctionBody;
 			Ref<Material> pMaterial = MSPara.pMaterialInstance->GetMaterial();
 			
+			pMaterial->GetShaderTreeString(FunctionBody, MSPara, ShaderMainFunction::OST_MATERIAL, MSPara.uiPassId);
+
+			OutString += "void main(){\n" + FunctionBody + "\n};\n";
 		}
 	}
 
 	//------Local Position To World Position------
 	void ShaderStringFactory::LocalToWorldPos(const std::string& LocalPos, std::string& OutString)
 	{
-		OutString += "TransPos(" + LocalPos + "," + ShaderStringFactory::m_WorldPos + ")";
+		//OutString += ShaderStringFactory::m_WorldMatrix + " * " + 
 	}
 	//------Local Position To World Position------
 }

@@ -1,37 +1,55 @@
 Scene: Untitled
 Entities:
-  - Entity: 1129207493805082175
+  - Entity: 17980200911007382786
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-3.04643059, 1.59723413, -0.644706011]
-      Rotation: [0, 0, 0]
-      Scale: [38.2261543, 38.2261543, 38.2261543]
-    LightComponent:
-      Color: [1, 1, 1]
-      Constant: 1
-      Linear: 0.0900000036
-      Quadratic: 0.0320000015
-  - Entity: 4066586238561111328
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [-4.23281479, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Translation: [-2.19981098, 3.82424355, 0.280970663]
+      Rotation: [1.50335658, 0, 0]
+      Scale: [1, 1.00000334, 1.00000334]
     StaticMeshComponent:
       Path: assets\models\Box.fbx
     MaterialComponent:
-      albedoPath: assets\textures\Material_Albedo.png
-      normalMapPath: assets\textures\Material_normal.png
-      roughnessPath: assets\textures\Material_roughness.png
-      emissivePath: assets\textures\Material_emissive.png
-      metallicPath: assets\textures\Material_metallic.png
-  - Entity: 6077039979826385670
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+  - Entity: 11063345145649406790
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-0.423911333, -1.38442099, 1.60161591]
+      Translation: [3.18633699, 0.189828098, 2.4207449]
+      Rotation: [1.45099771, 0.971746624, -0.0990898684]
+      Scale: [0.999999881, 1.00000274, 1.00000083]
+    StaticMeshComponent:
+      Path: assets\models\Box.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+  - Entity: 8327070000029410652
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [-5.56939173, 0.0658375099, -3.5194664]
+      Rotation: [1.45099771, 0.971746624, -0.0990898684]
+      Scale: [0.999999881, 1.00000274, 0.99999404]
+    StaticMeshComponent:
+      Path: assets\models\Box.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+  - Entity: 16119323771198086474
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [2.73439479, 1.59723413, 0]
       Rotation: [0, 0, 0]
       Scale: [38.2261543, 38.2261543, 38.2261543]
     LightComponent:
@@ -39,7 +57,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 3271784595297674429
+  - Entity: 17207901720389912801
     TagComponent:
       Tag: Camera
     TransformComponent:
@@ -57,11 +75,11 @@ Entities:
         OrthographicFar: 1
       Primary: true
       FixedAspectRatio: false
-  - Entity: 10556386815200486280
+  - Entity: 2531913378584675005
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [2.73439479, 1.59723413, 0]
+      Translation: [-0.423911333, -1.38442099, 1.60161591]
       Rotation: [0, 0, 0]
       Scale: [38.2261543, 38.2261543, 38.2261543]
     LightComponent:
@@ -69,33 +87,39 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 3858115700298253012
+  - Entity: 5845799693221216278
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-2.19981098, 3.82621932, 0.310222864]
+      Translation: [-2.19981098, -0.0163786933, 0.569760263]
       Rotation: [1.50335658, 0, 0]
       Scale: [1, 1.00000334, 1.00000334]
     StaticMeshComponent:
       Path: assets\models\Box.fbx
     MaterialComponent:
-      albedoPath: assets\textures\Material_Albedo.png
-      normalMapPath: assets\textures\Material_normal.png
-      roughnessPath: assets\textures\Material_roughness.png
-      emissivePath: assets\textures\Material_emissive.png
-      metallicPath: assets\textures\Material_metallic.png
-  - Entity: 8846861900596860289
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+  - Entity: 1146977092303487442
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0, 2.38418579e-07]
+      Translation: [-3.04643059, 1.59723413, -0.644706011]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Box.fbx
-    MaterialComponent:
-      albedoPath: assets\textures\Material_Albedo.png
-      normalMapPath: assets\textures\Material_normal.png
-      roughnessPath: assets\textures\Material_roughness.png
-      emissivePath: assets\textures\Material_emissive.png
-      metallicPath: assets\textures\Material_metallic.png
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+Environment:
+  - EnvironmentType: SkyBox
+    SkyBox:
+      Right: assets\textures\skybox\posx.jpg
+      Left: assets\textures\skybox\negx.jpg
+      Top: assets\textures\skybox\posy.jpg
+      Bottom: assets\textures\skybox\negy.jpg
+      Front: assets\textures\skybox\posz.jpg
+      Back: assets\textures\skybox\negz.jpg

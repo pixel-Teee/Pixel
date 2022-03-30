@@ -115,7 +115,7 @@ namespace Pixel {
 	public:
 		Material();
 		virtual ~Material();
-		Material(const std::string& showName);
+		Material(const std::string& showName, uint32_t uiMUT = MUT_PBR);
 		//material name
 		std::string m_ShowName;
 		//logic node
