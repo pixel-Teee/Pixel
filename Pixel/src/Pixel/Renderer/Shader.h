@@ -31,6 +31,9 @@ namespace Pixel {
 	class ShaderLibrary
 	{
 	public:
+		static ShaderLibrary shaderlibrary;
+		static void Init();
+		static ShaderLibrary GetShaderLibrary();
 		void Add(const Ref<Shader>& shader);
 		void Add(const std::string& name, const Ref<Shader>& shader);
 		Ref<Shader> Load(const std::string& filepath);

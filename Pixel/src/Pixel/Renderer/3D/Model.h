@@ -1,13 +1,12 @@
 #pragma once
 
 #include "Pixel/Core/Core.h"
+#include "Pixel/Renderer/Shader.h"
+#include "StaticMesh.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include "Pixel/Renderer/Shader.h"
-#include "StaticMesh.h"
 
 namespace Pixel {
 
@@ -24,6 +23,8 @@ namespace Pixel {
 
 		//TODO:forward temporary
 		void Draw();
+
+		std::vector<StaticMesh> GetMeshes() { return m_Meshes; }
 	private:
 		//the model's every meshes
 		std::vector<StaticMesh> m_Meshes;

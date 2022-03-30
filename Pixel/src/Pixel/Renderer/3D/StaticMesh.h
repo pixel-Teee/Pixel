@@ -13,12 +13,16 @@ namespace Pixel {
 	class StaticMesh
 	{
 	public:
+		StaticMesh();
 		StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices);
 
 		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
 
 		//TODO:temporary forward draw
 		void Draw();
+
+		Ref<VertexArray> GetVerterArray();
+		Ref<VertexBuffer> GetVertexBuffer();
 	private:
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;

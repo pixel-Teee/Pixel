@@ -231,6 +231,10 @@ namespace Pixel
 		/*----------Render Content Browser----------*/
 		m_ContentBrowserPanel.OnImGuiRender();
 		/*----------Render Content Browser----------*/
+		m_NodeGraph.OnImGuiRender();
+		/*---------Node Graph----------*/
+		
+		/*---------Node Graph----------*/
 
 		/*----------Render Stats----------*/
 		/*ImGui::Begin("Render Stats");

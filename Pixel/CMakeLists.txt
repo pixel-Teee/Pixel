@@ -39,6 +39,8 @@ file(GLOB_RECURSE PixelSrc
 "vendor/Box2D/src/*.cpp"
 "vendor/assimp/include"
 "vendor/spir-v"
+"vendor/imgui-node-editor/imgui_node_editor.h"
+"vendor/imgui-node-editor/imgui_node_editor.cpp"
 )
 
 set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")
@@ -66,6 +68,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/Box2D/include"
 "vendor/assimp/include"
 "vendor/spir-v"
+"vendor/imgui-node-editor"
 )
 
 target_compile_definitions(Pixel
@@ -95,9 +98,9 @@ endif()
 
 target_link_libraries(Pixel PUBLIC glfw
 PUBLIC GLAD
-PUBLIC ImGui
 PUBLIC ${OPENGL_LIBRARIES}
 PRIVATE yaml-cpp
+PUBLIC ImGui
 PUBLIC assimp
 PUBLIC spirv-cross-glsl
 )

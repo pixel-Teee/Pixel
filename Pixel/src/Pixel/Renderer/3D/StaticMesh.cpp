@@ -8,6 +8,11 @@
 
 namespace Pixel {
 
+	StaticMesh::StaticMesh()
+	{
+
+	}
+
 	StaticMesh::StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices)
 	{
 		this->vertices = vertices;
@@ -81,6 +86,16 @@ namespace Pixel {
 		}
 		VAO->Bind();
 		RenderCommand::DrawIndexed(VAO, IBO->GetCount());
+	}
+
+	Ref<VertexArray> StaticMesh::GetVerterArray()
+	{
+		return VAO;
+	}
+
+	Ref<VertexBuffer> StaticMesh::GetVertexBuffer()
+	{
+		return VBO;
 	}
 
 	//setup mesh after load model

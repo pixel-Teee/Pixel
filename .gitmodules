@@ -26,3 +26,6 @@
 [submodule "Pixel/vendor/spir-v"]
 	path = Pixel/vendor/spir-v
 	url = https://github.com/KhronosGroup/SPIRV-Cross.git
+[submodule "Pixel/vendor/imgui-node-editor"]
+	path = Pixel/vendor/imgui-node-editor
+	url = https://github.com/pixel-Teee/imgui-node-editor.git

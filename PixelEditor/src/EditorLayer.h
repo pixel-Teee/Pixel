@@ -4,6 +4,7 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/EnvironmentPanel.h"
+#include "NodeGraph/NodeGraph.h"
 #include "Pixel/Renderer/EditorCamera.h"
 
 namespace Pixel
@@ -80,6 +81,7 @@ namespace Pixel
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
 		EnvironmentPanel m_environmentPanel;
+		NodeGraph m_NodeGraph;
 
 		enum class SceneState
 		{

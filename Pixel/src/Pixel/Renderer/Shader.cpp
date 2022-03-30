@@ -34,6 +34,18 @@ namespace Pixel {
 	///Shader Library///
 	////////////////////
 
+	ShaderLibrary ShaderLibrary::shaderlibrary;
+
+	void ShaderLibrary::Init()
+	{
+		shaderlibrary.m_Shaders.clear();
+	}
+
+	ShaderLibrary ShaderLibrary::GetShaderLibrary()
+	{
+		return shaderlibrary;
+	}
+
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
 		PX_CORE_ASSERT(!Exists(name), "Shader already exists!");
