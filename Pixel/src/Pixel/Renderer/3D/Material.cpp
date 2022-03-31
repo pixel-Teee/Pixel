@@ -61,6 +61,16 @@ namespace Pixel {
 
 	}
 	
+	Ref<ShaderMainFunction> Material::GetMainFunction(uint32_t uiPassId)
+	{
+		return m_pShaderMainFunction[uiPassId];
+	}
+
+	std::vector<Ref<ShaderFunction>> Material::GetShaderFunction()
+	{
+		return m_pShaderFunctionArray;
+	}
+
 	void Material::AddShaderFunction(Ref<ShaderFunction> pShaderFunction)
 	{
 		if (pShaderFunction != nullptr)

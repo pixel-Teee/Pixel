@@ -53,7 +53,7 @@ namespace Pixel {
 			m_pOwner = pShaderFunction;
 		}
 
-
+		void Connection(Ref<OutputNode> outputNode);
 
 		const Ref<OutputNode> GetOutputLink() const
 		{
@@ -90,5 +90,7 @@ namespace Pixel {
 		{
 			return m_pOwner;
 		}
+
+		void Connect(Ref<InputNode> inputNode);
 	};
 }

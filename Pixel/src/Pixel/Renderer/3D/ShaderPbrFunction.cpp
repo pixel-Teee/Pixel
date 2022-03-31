@@ -39,11 +39,6 @@ namespace Pixel {
 
 	}
 
-	bool ShaderPbrFunction::IsHaveOutput()
-	{
-		return true;
-	}
-
 	bool ShaderPbrFunction::GetFunctionString(std::string& OutString) const
 	{
 		if (m_pInput[IN_ALBEDO]->GetOutputLink() == nullptr)

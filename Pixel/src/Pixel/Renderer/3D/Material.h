@@ -130,7 +130,8 @@ namespace Pixel {
 			MUT_LIGHT,
 			MUT_MAX
 		};
-
+		Ref<ShaderMainFunction> GetMainFunction(uint32_t uiPassId);
+		std::vector<Ref<ShaderFunction>> GetShaderFunction();
 		void AddShaderFunction(Ref<ShaderFunction> pShaderFunction);
 		void DeleteShaderFunction(Ref<ShaderFunction> pShaderFunction);
 		bool GetShaderTreeString(std::string& OutString, MaterialShaderPara& MSPara, uint32_t uiOST, uint32_t uiPassId);

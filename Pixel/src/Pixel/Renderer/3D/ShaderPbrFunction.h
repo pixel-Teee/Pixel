@@ -24,7 +24,6 @@ namespace Pixel {
 		void Init();
 		virtual ~ShaderPbrFunction();
 	public:
-		virtual bool IsHaveOutput() override;
 
 		virtual bool GetFunctionString(std::string& OutString) const override;
 

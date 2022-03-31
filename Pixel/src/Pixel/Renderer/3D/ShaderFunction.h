@@ -23,11 +23,27 @@ namespace Pixel {
 	public:
 		ShaderFunction() = default;
 		virtual ~ShaderFunction();
-		virtual bool IsHaveOutput()
+		bool IsHaveOutput()
 		{
-			//
-			return true;
+			return m_pOutput.size() != 0;
 		}
+
+		bool IsHaveInput()
+		{
+			return m_pInput.size() != 0;
+		}
+
+		uint32_t GetInputNodeNum()
+		{
+			return m_pInput.size();
+		}
+
+		uint32_t GetOutputNodeNum()
+		{
+			return m_pOutput.size();
+		}
+
+		std::string GetShowName();
 
 		//in terms of index get node
 		Ref<InputNode> GetInputNode(uint32_t nodeId) const;
@@ -46,6 +62,8 @@ namespace Pixel {
 		bool ClearShaderTreeStringFlag();
 
 		std::string GetValueEqualString(const Ref<OutputNode> pOutputNode, const Ref<InputNode> pInputNode) const;
+
+		void AddToMaterialOwner();
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;
@@ -74,8 +92,6 @@ namespace Pixel {
 		ShaderMainFunction() = default;
 		virtual ~ShaderMainFunction() = default;
 		void GetValueUseDeclareString(std::string& OutString, uint32_t uiValueUseString);
-
-		virtual bool IsHaveOutput() override;
 
 		virtual bool GetInputValueString(std::string& OutString, uint32_t uiOutPutStringType);
 
@@ -113,6 +129,8 @@ namespace Pixel {
 		ConstFloatValue() = default;
 		ConstFloatValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 
+		void ConstrcutPutNodeAndSetPutNodeOwner();
+
 		//set param value
 		void SetValue(uint32_t index, float value);
 		virtual bool GetOutputValueString(std::string& OutString) const;
@@ -123,6 +141,8 @@ namespace Pixel {
 		virtual void ResetInShaderName();
 
 		std::vector<float> m_Value;
+
+		int32_t m_valueNumber;
 
 		enum OutValueElement
 		{

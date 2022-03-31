@@ -83,11 +83,13 @@ layout(location = 0) out vec4 OutColor;
 
 void main(){
 	vec3 WorldPos = vec3(0, 0, 0);
-	vec4  Albedo = vec4(0, 0, 0, 0);
+vec4  ConstFloatValue0;
+ConstFloatValue0 = vec4(0.000000, 0.000000, 0.000000, 0.000000);
+	vec4  Albedo = ConstFloatValue0;
 	float  Roughness = 0;
 	float  Metallic = 0;
 	vec4  Color = vec4(0, 0, 0, 1);
-	Color = vec4(0, 0, 0, 1);
+	Albedo = ConstFloatValue0;
 	OutColor = Color;
 
 };
