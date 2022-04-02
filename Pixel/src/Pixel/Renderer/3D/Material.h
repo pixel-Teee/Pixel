@@ -63,7 +63,10 @@ namespace Pixel {
 		};
 		CustomFloatValue();
 		virtual ~CustomFloatValue();
+
+		//------save float array------
 		std::vector<float> Value;
+		//------save float array------
 		ValueType m_valueType;
 		CustomFloatValue& operator=(const CustomFloatValue& Para)
 		{
@@ -74,7 +77,7 @@ namespace Pixel {
 		}
 		friend bool operator==(const CustomFloatValue& Para1, const CustomFloatValue& Para2)
 		{
-			if (Para1.ConstValueName == Para2.ConstValueName) return true;
+			return Para1.ConstValueName == Para2.ConstValueName;
 		}
 	};
 
@@ -87,13 +90,13 @@ namespace Pixel {
 		Ref<Texture2D> m_pTexture;
 		CustomTexSampler& operator=(const CustomTexSampler& Para)
 		{
-			MaterialCustomPara::operator =(Para);
+			MaterialCustomPara::operator = (Para);
 			m_pTexture = Para.m_pTexture;
 			return *this;
 		}
 		friend bool operator==(const CustomTexSampler& Para1, const CustomTexSampler& Para2)
 		{
-			if (Para1.ConstValueName == Para2.ConstValueName) return true;
+			return Para1.ConstValueName == Para2.ConstValueName;
 		}
 	};
 	//------Param------
@@ -109,8 +112,14 @@ namespace Pixel {
 		std::vector<Ref<CustomTexSampler>> m_PSShaderCustomTex;
 	};
 
+	class RenderPass;
 	class Material : public MaterialBase
 	{
+	public:
+		enum {
+			MUT_PBR,
+			MUT_MAX
+		};
 	//TODO:protected 
 	public:
 		Material();
@@ -121,23 +130,29 @@ namespace Pixel {
 		//logic node
 		//main light calculate shader
 		std::vector<Ref<ShaderMainFunction>> m_pShaderMainFunction;
-		//other node
+		//other shader function
 		std::vector<Ref<ShaderFunction>> m_pShaderFunctionArray;
-
+		//pass ptr
+		//correspond to shader main function one by one
+		//TODO: Because recursive renderer pass and material header, could not access RenderPass::RenderPassType
+		Ref<RenderPass> m_pPass[MUT_MAX];
 	public:
-		enum {
-			MUT_PBR,
-			MUT_LIGHT,
-			MUT_MAX
-		};
+		//---one material will be processed with multiple pass---//
 		Ref<ShaderMainFunction> GetMainFunction(uint32_t uiPassId);
+		//---one material will be processed with multiple pass---//
+
+		//---other logic node---
 		std::vector<Ref<ShaderFunction>> GetShaderFunction();
+		//---other logic node---
+
 		void AddShaderFunction(Ref<ShaderFunction> pShaderFunction);
 		void DeleteShaderFunction(Ref<ShaderFunction> pShaderFunction);
 		bool GetShaderTreeString(std::string& OutString, MaterialShaderPara& MSPara, uint32_t uiOST, uint32_t uiPassId);
+
+		std::string GetMaterialName() { return m_ShowName; }
 	};
 
-	//multiple MaterialInstance can shader one Material
+	//multiple MaterialInstance can share one Material
 	class MaterialInstance
 	{
 	public:
@@ -155,7 +170,7 @@ namespace Pixel {
 		Ref<Material> m_pMaterial;
 	public:
 		//Current Shader, will be set from pass
-		Ref<Shader> m_CurrShader;
+		Ref<Shader> m_CurrShader[Material::MUT_MAX];
 		//set shader param, total
 		void SetPSShaderValue(Ref<Shader> pPSShader);
 		void SetVSShaderValue(Ref<Shader> pVSShader);

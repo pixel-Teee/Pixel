@@ -3,6 +3,8 @@
 
 #include "Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Pixel/Renderer/3D/ShaderStringFactory.h"
+#include "Pixel/Renderer/3D/Material.h"
 
 namespace Pixel {
 
@@ -34,56 +36,75 @@ namespace Pixel {
 	///Shader Library///
 	////////////////////
 
-	ShaderLibrary ShaderLibrary::shaderlibrary;
-
-	void ShaderLibrary::Init()
+	ShaderLibrary::ShaderLibrary(const std::string& Name)
 	{
-		shaderlibrary.m_Shaders.clear();
+		m_MapName = Name;
 	}
 
-	ShaderLibrary ShaderLibrary::GetShaderLibrary()
+	ShaderLibrary::~ShaderLibrary()
 	{
-		return shaderlibrary;
-	}
 
-	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
+	}
+	
+	void ShaderLibrary::SetShader(const std::string& Name, Ref<ShaderKey> Key, Ref<Shader> pShader)
 	{
-		PX_CORE_ASSERT(!Exists(name), "Shader already exists!");
-		m_Shaders[name] = shader;
+		Ref<ShaderSet> pSet = CreateRef<ShaderSet>();
+		pSet->insert(std::make_pair(Key, pShader));
+		m_ShaderMap[Name] = pSet;
 	}
 
-	void ShaderLibrary::Add(const Ref<Shader>& shader)
+	Ref<ShaderLibrary::ShaderSet> ShaderLibrary::GetShaderSet(const std::string& Name)
 	{
-		auto& name = shader->GetName();
-		Add(name, shader);
+		return m_ShaderMap[Name];
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
+	void ShaderLibrary::DeleteShaderSet(const std::string& Name)
 	{
-		auto shader = Shader::Create(filepath);
-		Add(shader);
-		return shader;
+		m_ShaderMap.erase(Name);
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
-	{	
-		auto shader = Shader::Create(filepath);
-		Add(name, shader);
-		return shader;
-	}
-	void ShaderLibrary::Test(const std::string& filepath)
+	Ref<Shader> ShaderLibrary::GetShader(const std::string& Name, Ref<ShaderKey> Key)
 	{
-		//auto& TestShader = std::make_shared<SpirvShader>("assets/shaders/Test.spriv");	
+		Ref<ShaderSet> pSet = m_ShaderMap[Name];
+		auto it = pSet->find(Key);
+		return it->second;
 	}
 
-
-	Ref<Shader> ShaderLibrary::Get(const std::string& name)
+	void ShaderLibrary::DeleteShader(const std::string& Name, Ref<ShaderKey> Key)
 	{
-		return m_Shaders[name];
+		Ref<ShaderSet> pSet = m_ShaderMap[Name];
+		pSet->erase(Key);
 	}
 
-	bool ShaderLibrary::Exists(const std::string& name) const
+	bool ShaderResourceManager::CacheShader()
 	{
-		return m_Shaders.find(name) != m_Shaders.end();
+		return true;
 	}
+
+	Ref<Shader> ShaderResourceManager::CreateShader(MaterialShaderPara& MSPara, uint32_t uiPassType, uint32_t uiShaderId)
+	{
+		if (!MSPara.m_pStaticMesh || !MSPara.pMaterialInstance)
+			return nullptr;
+
+		Ref<Shader> pShader;
+
+		Ref<Material> pMaterial = MSPara.pMaterialInstance->GetMaterial();
+		
+		std::string filePath;
+
+		//get the shader filepath
+		//generater the shader text
+		if (!ShaderStringFactory::CreateShaderString(pShader, MSPara, uiPassType, filePath))
+		{
+			return nullptr;
+		}
+
+		//from the disk to load shader and compile the shader
+		pShader = Shader::Create(filePath);
+		pShader->m_pShaderKey = CreateRef<ShaderKey>();
+		ShaderKey::SetMaterialShaderKey(pShader->m_pShaderKey, MSPara, uiPassType);
+
+		return pShader;
+	}
+
 }

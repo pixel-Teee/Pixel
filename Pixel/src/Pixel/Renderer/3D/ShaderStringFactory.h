@@ -7,11 +7,12 @@ namespace Pixel {
 	class ShaderStringFactory
 	{
 	public:
-		//give the variable one id, variable name + id
-		static int32_t m_ShaderValueIndex;
+		//give the temp variable one id, variable name + id
+		static uint32_t m_ShaderValueIndex;
 
 		static uint32_t m_CreateShaderNum;
 
+		//m_Model: world matrix
 		static std::string m_Model;
 		static std::string m_ViewProjection;
 
@@ -20,6 +21,8 @@ namespace Pixel {
 		static std::string m_WorldMatrix;
 
 		static std::string m_PSInputLocalNormal;
+
+		//pixel shader's output color
 		static std::string m_PSOutputColorValue;
 
 		static void Init();

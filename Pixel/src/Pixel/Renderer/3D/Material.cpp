@@ -2,6 +2,7 @@
 #include "Material.h"
 #include "ShaderStringFactory.h"
 #include "Pixel/Renderer/3D/ShaderPbrFunction.h"
+#include "Pixel/Renderer/3D/MaterialPass.h"
 
 namespace Pixel {
 	void MaterialInterface::Create()
@@ -51,7 +52,7 @@ namespace Pixel {
 		m_ShowName = showName;
 		m_pShaderFunctionArray.clear();
 		m_pShaderMainFunction.clear();
-		//TODO, create pbr shadermainfunction, and add to m_pShaderMainFunction
+		
 		if (uiMUT == MUT_PBR)
 		{
 			Ref<ShaderPbrFunction> pShaderPbrFunction = CreateRef<ShaderPbrFunction>();
@@ -59,6 +60,7 @@ namespace Pixel {
 			m_pShaderMainFunction.push_back(pShaderPbrFunction);
 		}
 
+		m_pPass[RenderPass::PT_MATERIAL] = CreateRef<MaterialPass>();
 	}
 	
 	Ref<ShaderMainFunction> Material::GetMainFunction(uint32_t uiPassId)
@@ -97,7 +99,8 @@ namespace Pixel {
 			//TODO: implement ResetInShaderName
 			//m_pShaderFunctionArray[i]->ResetInShaderName();
 		}
-		
+
+		//current PassId
 		return (std::static_pointer_cast<ShaderMainFunction>(m_pShaderMainFunction[uiPassId]))->GetShaderTreeString(OutString, uiOST);
 	}
 
@@ -116,6 +119,7 @@ namespace Pixel {
 	{
 
 	}
+	//------Material Instance------
 
 	//------Pixel Shader------
 
@@ -411,7 +415,4 @@ namespace Pixel {
 
 	}
 	//------Material Instance------
-
-
-
 }

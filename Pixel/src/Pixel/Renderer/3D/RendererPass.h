@@ -20,25 +20,22 @@ namespace Pixel
 		virtual ~RenderPass() = 0;
 	protected:
 		RenderPass();
+
 		Ref<StaticMesh> m_pMesh; //current render mesh
 		Ref<Camera> m_pCamera; //current camera
 		RenderPassType m_uiPassId; //current pass id
 
-		Ref<Shader> m_pShader; //current shader
-		std::string m_ShaderName; //current use shader name, to find shader in shader library
+		Ref<ShaderLibrary::ShaderSet> m_pShaderSet;//shader set, include this pass to renderer
+		Ref<ShaderKey> m_pShaderKey;//shader key, to find shader in pShaderSet
 
 		Ref<MaterialInstance> m_pMaterialInstance; //current use material instance
 
 		MaterialShaderPara m_MSPara; //current use render parameter
-
 	public:
 		virtual bool Draw() = 0;
 		virtual RenderPassType GetPassType() = 0;
 
-		void SetShader(Ref<Shader> pShader)
-		{
-			m_pShader = pShader;
-		}
+		//---set current member---
 
 		void SetCamera(Ref<Camera> pCamera)
 		{
@@ -54,7 +51,7 @@ namespace Pixel
 		{
 			m_pMesh = pMesh;
 		}
-
-		bool GetShader(MaterialShaderPara& MSPara, ShaderLibrary& ShaderLibrary, const std::string& Name);
+		//---set current member---
+		bool GetShader(MaterialShaderPara& MSPara, Ref<ShaderLibrary> shaderLibrary, std::string& Name);
 	};
 }

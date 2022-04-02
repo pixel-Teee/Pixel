@@ -7,7 +7,7 @@
 #include <string>
 
 namespace Pixel {
-	int32_t ShaderStringFactory::m_ShaderValueIndex;
+	uint32_t ShaderStringFactory::m_ShaderValueIndex;
 	uint32_t ShaderStringFactory::m_CreateShaderNum;
 	std::string ShaderStringFactory::m_Model;
 	std::string ShaderStringFactory::m_ViewProjection;
@@ -150,7 +150,7 @@ namespace Pixel {
 			shaderText = VInclude + "\n" + VInputDeclare + "\n" + VOutputDeclare + "\n" + VUserConstantString + "\n" + VFunctionString + "\n";
 
 			//TODO:filename is temp use
-			filePath = "assets/shaders/test/test.glsl";
+			filePath = "assets/shaders/cache/" + MSPara.pMaterialInstance->GetMaterial()->GetMaterialName() + ".glsl";
 
 			std::string PInclude;//TODO: common include
 			std::string PDynamic;

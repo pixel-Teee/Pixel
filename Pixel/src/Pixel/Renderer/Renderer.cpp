@@ -15,7 +15,6 @@ namespace Pixel {
 		//Renderer2D::Init();
 		Renderer3D::Init();
 		ShaderStringFactory::Init();
-		ShaderLibrary::Init();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)

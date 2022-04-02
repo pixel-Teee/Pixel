@@ -1,4 +1,5 @@
 #include "pxpch.h"
+#include "Pixel/Renderer/Shader.h"
 #include "MaterialPass.h"
 
 namespace Pixel
@@ -33,8 +34,19 @@ namespace Pixel
 		m_MSPara.pMaterialInstance = m_pMaterialInstance;
 		m_MSPara.uiPassId = m_uiPassId;
 
+		Ref<ShaderLibrary> pLibrary = ShaderResourceManager::GetMaterialShaderMap();
 		//TODO:implement this
-		GetShader(m_MSPara, ShaderLibrary::GetShaderLibrary(),"test");
+		//GetShader(m_MSPara, pLibrary, 0);
+
+		//set shader to material
+		if (!GetShader(m_MSPara, pLibrary, pMaterial->GetMaterialName()))
+		{
+			return false;
+		}
+
+		//set material instance's parameter to shader
+
+		//draw
 	}
 
 	Pixel::RenderPass::RenderPassType MaterialPass::GetPassType()
