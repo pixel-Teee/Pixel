@@ -57,12 +57,13 @@ namespace Pixel {
 
 		if (m_isopen)
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 			ImGui::Begin("Graph Editor Context");
-			ed::Begin("Graph Editor", ImVec2(0.0, 0.0f));
 
 			auto [mx, my] = ImGui::GetMousePos();
 			m_MousePos = { mx, my };
-			PIXEL_CORE_INFO("{0}, {1}", mx, my);
+
+			ed::Begin("Graph Editor", ImVec2(0.0, 0.0f));
 
 			if (ImGui::Button("Compiler"))
 			{
@@ -171,6 +172,7 @@ namespace Pixel {
 			ed::EndCreate();
 			ed::End();
 			ImGui::End();
+			ImGui::PopStyleVar();
 		}
 	}
 
@@ -193,18 +195,16 @@ namespace Pixel {
 
 	bool NodeGraph::CreateNewNodeMenu()
 	{
-		if (ed::ShowBackgroundContextMenu())
-			ImGui::OpenPopup("CreateNewNode");
-
 		ed::Suspend();
-
+		if (ed::ShowBackgroundContextMenu())
+			ImGui::OpenPopup("CreateNewNode", ImGuiPopupFlags_MouseButtonRight);
 		if (ImGui::BeginPopup("CreateNewNode"))
 		{
 			if (ImGui::MenuItem("ConstColor4"))
 			{
 				++m_uniqueId;
 				//Create a ConstFloatValue Node, and add to m_pMaterial shaderfunction
-				Ref<ConstFloatValue> floatValue4 = CreateRef<ConstFloatValue>(std::string("ConstColor4") + std::to_string(m_uniqueId), m_pMaterial, 4, false);
+				Ref<ConstFloatValue> floatValue4 = CreateRef<ConstFloatValue>(std::string("ConstColor4"), m_pMaterial, 4, false);
 				//two phase initializer
 				floatValue4->ConstrcutPutNodeAndSetPutNodeOwner();
 				floatValue4->AddToMaterialOwner();
@@ -235,7 +235,7 @@ namespace Pixel {
 					}
 				}
 				m_Nodes.push_back(floatNode);
-				ed::SetNodePosition(floatNode->m_NodeId, ImVec2(m_MousePos.x, m_MousePos.y));
+				ed::SetNodePosition(floatNode->m_NodeId, ed::ScreenToCanvas(ImVec2(m_MousePos.x, m_MousePos.y)));
 			}
 
 			ImGui::EndPopup();

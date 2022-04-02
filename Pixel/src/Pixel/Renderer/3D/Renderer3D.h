@@ -57,6 +57,7 @@ namespace Pixel{
 		{
 			return std::string("return ");
 		}
+		//------type------
 
 		//------value------
 		static std::string FloatConst(const std::string& value) 
@@ -80,19 +81,20 @@ namespace Pixel{
 		}
 		//------value------
 
+		//------extract value element of PutNode, etc xxx.x------
 		enum ValueElement
 		{
 			VE_NONE = 0,
 			VE_R = 1,
-			VE_G = 1 << 1,
-			VE_B = 1 << 2,
-			VE_A = 1 << 3,
+			VE_G = BIT(1),
+			VE_B = BIT(2),
+			VE_A = BIT(3),
 			DF_ALL = 0x0F
 		};
 
 		static std::string GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement)
 		{
-			//extract the pPutNode's valueElement
+			//extract the pPutNode's value element
 			std::string Temp = pPutNode->GetNodeName();
 
 			if (valueElement > 0)
@@ -116,7 +118,7 @@ namespace Pixel{
 			Mask[3] = VE_A;
 			Temp += (".");
 
-			//valueElement: need to extracded element
+			//value element: need to extracted element
 			for (uint32_t i = 0; i < 4; ++i)
 			{
 				if (i <= pPutNode->GetValueType())
@@ -130,8 +132,9 @@ namespace Pixel{
 
 			return Temp;
 		}
+		//------extract value element of PutNode, etc xxx.x------
 
-		static std::string SetUniform()
+		static std::string Uniform()
 		{
 			return "uniform";
 		}

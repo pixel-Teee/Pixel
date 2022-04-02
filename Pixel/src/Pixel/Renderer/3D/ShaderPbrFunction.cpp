@@ -43,18 +43,18 @@ namespace Pixel {
 	{
 		if (m_pInput[IN_ALBEDO]->GetOutputLink() == nullptr)
 		{
-			OutString += "	";
 			OutString += m_pOutput[OUT_COLOR]->GetNodeName() + " = " +
 				Renderer3D::FloatConst4("0", "0", "0", "1") + ";\n";
 		}
 		else
 		{
-			OutString += "	";
+			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_ALBEDO]->GetOutputLink();
 			OutString += m_pInput[OUT_COLOR]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
-		OutString += "	";
+		//m_PSOutputColorValue, pixel shader's output node name
+		//m_PSOutputColorValue is initialized at ShaderStringFactory Init Function
 		OutString += ShaderStringFactory::m_PSOutputColorValue + " = " + m_pOutput[OUT_COLOR]->GetNodeName() + ";\n";
 
 		return true;

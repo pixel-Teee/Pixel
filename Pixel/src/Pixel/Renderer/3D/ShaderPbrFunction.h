@@ -20,13 +20,14 @@ namespace Pixel {
 			OUT_COLOR,
 			OUT_MAX
 		};
+
 		ShaderPbrFunction();
+		//two phase init
 		void Init();
 		virtual ~ShaderPbrFunction();
 	public:
 
 		virtual bool GetFunctionString(std::string& OutString) const override;
-
 
 		virtual Ref<InputNode> GetAlbedoNode() override
 		{

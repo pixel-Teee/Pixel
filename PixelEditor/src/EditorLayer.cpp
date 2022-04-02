@@ -224,6 +224,10 @@ namespace Pixel
 			ImGui::EndMenuBar();
 		}
 
+		//------Main Window Pos------//
+		ImVec2 mainWindowPos = ImGui::GetWindowPos();
+		//------Main Window Pos------//
+
 		/*----------Render Panel----------*/
 		m_SceneHierarchyPanel.OnImGuiRender();
 		/*----------Render Panel----------*/

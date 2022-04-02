@@ -18,7 +18,6 @@ namespace Pixel {
 
 	ShaderFunction::~ShaderFunction()
 	{
-		//m_pOwner->DeleteShaderFunction(CreateRef<ShaderFunction>(*this));
 		m_pOwner->DeleteShaderFunction(std::shared_ptr<ShaderFunction>(shared_from_this()));
 	}
 
@@ -153,6 +152,11 @@ namespace Pixel {
 		return true;
 	}
 
+	bool ShaderFunction::ResetValueType() const
+	{
+		return true;
+	}
+
 	bool ShaderFunction::GetShaderTreeString(std::string& OutString)
 	{
 		if (m_bIsVisited == true)
@@ -166,11 +170,15 @@ namespace Pixel {
 					continue;
 				else
 				{
-					m_pInput[i]->GetOutputLink()->GetOwner()->GetShaderTreeString(OutString);
+					(std::static_pointer_cast<ShaderFunction>(m_pInput[i]->GetOutputLink()->GetOwner()))->GetShaderTreeString(OutString);
 				}
 			}
 
 			//TODO:reset input type and output type
+			if (!ResetValueType())
+			{
+				return false;
+			}
 			
 			if (!GetInputValueString(OutString))
 				return false;
@@ -186,7 +194,7 @@ namespace Pixel {
 	//from the main calculate light node to clear flag
 	bool ShaderFunction::ClearShaderTreeStringFlag()
 	{
-		//recursive clear, from 
+		//recursive clear
 		if (m_bIsVisited == false)
 			return true;
 		else
@@ -198,8 +206,8 @@ namespace Pixel {
 					continue;
 				else
 				{
-					//m_pInput[i]->GetOutputLink()
-					m_pInput[i]->GetOutputLink()->GetOwner()->ClearShaderTreeStringFlag();
+					//recursive clear
+					(std::static_pointer_cast<ShaderFunction>(m_pInput[i]->GetOutputLink()->GetOwner()))->ClearShaderTreeStringFlag();
 				}
 			}
 		}
@@ -226,10 +234,10 @@ namespace Pixel {
 
 		std::string Value[4];
 		Renderer3D::ValueElement Mask[4];
-		Mask[0] = Renderer3D::VE_R;
-		Mask[1] = Renderer3D::VE_G;
-		Mask[2] = Renderer3D::VE_B;
-		Mask[3] = Renderer3D::VE_A;
+		Mask[0] = Renderer3D::ValueElement::VE_R;
+		Mask[1] = Renderer3D::ValueElement::VE_G;
+		Mask[2] = Renderer3D::ValueElement::VE_B;
+		Mask[3] = Renderer3D::ValueElement::VE_A;
 
 		for (uint32_t i = 0; i < 4; ++i)
 		{
@@ -291,26 +299,26 @@ namespace Pixel {
 
 	void ConstFloatValue::ConstrcutPutNodeAndSetPutNodeOwner()
 	{
-		//Create Temp output variable
-		std::string OutputID = std::to_string(ShaderStringFactory::m_ShaderValueIndex);
+		//create temp output variable
+		std::string OutputID = std::to_string(++ShaderStringFactory::m_ShaderValueIndex);
 		std::string OutputName = "ConstFloatValue" + OutputID;
 
 		Ref<OutputNode> pOutputNode;
 		pOutputNode = CreateRef<OutputNode>((PutNode::ValueType)(m_valueNumber - 1), OutputName, shared_from_this());
 		m_pOutput.push_back(pOutputNode);
 
-		//Create Temp Variable
+		//create temp variable
 		//if temp variable ConstFloatValue have 4 components
-		//and have create 4 temp variable
-		//ConstFloatValue.x 
-		//ConstFloatValue.y
-		//ConstFloatValue.z
-		//ConstFloatValue.w
+		//and will create 4 temp variable
+		//ConstFloatValueID.x 
+		//ConstFloatValueID.y
+		//ConstFloatValueID.z
+		//ConstFloatValueID.w
 
 		++ShaderStringFactory::m_ShaderValueIndex;
 		if (m_valueNumber >= 1)
 		{
-			std::string OutputNameR = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_R);
+			std::string OutputNameR = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_R);//PutNode name just ConstFloatValueID.x
 			Ref<OutputNode> pOutputNode;
 			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameR, shared_from_this());
 			m_pOutput.push_back(pOutputNode);
@@ -320,7 +328,7 @@ namespace Pixel {
 		{
 			std::string OutputNameG = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_G);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_2, OutputNameG, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameG, shared_from_this());
 			m_pOutput.push_back(pOutputNode);
 		}
 
@@ -328,7 +336,7 @@ namespace Pixel {
 		{
 			std::string OutputNameB = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_B);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_3, OutputNameB, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameB, shared_from_this());
 			m_pOutput.push_back(pOutputNode);
 		}
 
@@ -336,7 +344,7 @@ namespace Pixel {
 		{
 			std::string OutputNameA = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_A);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_4, OutputNameA, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameA, shared_from_this());
 			m_pOutput.push_back(pOutputNode);
 		}
 		m_Value.clear();
@@ -349,7 +357,9 @@ namespace Pixel {
 
 	void ConstFloatValue::SetValue(uint32_t index, float value)
 	{
+		PX_CORE_ASSERT(index <= m_Value.size(), "index out of range!");
 
+		m_Value[index] = value;
 	}
 
 	bool ConstFloatValue::GetOutputValueString(std::string& OutString) const
@@ -434,7 +444,7 @@ namespace Pixel {
 			return false;
 
 		//uniform vec4 xx;
-		OutString += Renderer3D::SetUniform() + m_pOutput[0]->GetNodeName() + (";\n");
+		OutString += Renderer3D::Uniform() + m_pOutput[0]->GetNodeName() + (";\n");
 		return true;
 	}
 
@@ -449,8 +459,7 @@ namespace Pixel {
 		{
 			std::string OutputNameR = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_R);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameR, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutput.push_back(pOutputNode);
+			m_pOutput[0]->SetNodeName(OutputNameR);
 		}
 
 		if (m_Value.size() >= 2)
@@ -458,7 +467,7 @@ namespace Pixel {
 			std::string OutputNameG = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_G);
 			Ref<OutputNode> pOutputNode;
 			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameG, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutput.push_back(pOutputNode);
+			m_pOutput[0]->SetNodeName(OutputNameG);
 		}
 
 		if (m_Value.size() >= 3)
@@ -466,7 +475,7 @@ namespace Pixel {
 			std::string OutputNameB = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_B);
 			Ref<OutputNode> pOutputNode;
 			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameB, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutput.push_back(pOutputNode);
+			m_pOutput[0]->SetNodeName(OutputNameB);
 		}
 
 		if (m_Value.size() >= 4)
@@ -474,10 +483,9 @@ namespace Pixel {
 			std::string OutputNameA = Renderer3D::GetValueElement(GetOutputNode(OUT_VALUE), Renderer3D::VE_A);
 			Ref<OutputNode> pOutputNode;
 			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameA, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutput.push_back(pOutputNode);
+			m_pOutput[0]->SetNodeName(OutputNameA);
 		}
 	}
-
 	//------ConstFloatValue------
 
 	bool ShaderMainFunction::GetInputValueString(std::string& OutString, uint32_t uiOutPutStringType)
@@ -487,7 +495,6 @@ namespace Pixel {
 		{
 			for (uint32_t i = 0; i < m_pInput.size(); ++i)
 			{
-				OutString += "	";
 				if (m_pInput[i] == GetNormalNode())
 					continue;
 				if (m_pInput[i]->GetValueType() == PutNode::VT_1)
@@ -518,7 +525,9 @@ namespace Pixel {
 				if (!m_pInput[i]->GetOutputLink())
 				{
 					OutString += m_pInput[i]->GetNodeName() + " = " + Temp + ";\n";
+					continue;
 				}
+				
 				OutString += GetValueEqualString(m_pInput[i]->GetOutputLink(), m_pInput[i]);
 			}			
 		}
@@ -526,16 +535,12 @@ namespace Pixel {
 		return true;
 	}
 
-	bool ShaderMainFunction::GetFunctionString(std::string& OutString) const
-	{
-		return true;
-	}
-
 	//------Declare nonuser custom variable------
+	//------float3 WorldPos------
+	//------float3 WorldNormal------
 	void ShaderMainFunction::GetValueUseDeclareString(std::string& OutString, uint32_t uiValueUseString)
 	{
 		std::string DefaultValue = Renderer3D::FloatConst3("0", "0", "0");
-		OutString += "	";
 		if ((uiValueUseString & VUS_WORLD_POS) == VUS_WORLD_POS)
 		{
 			OutString += Renderer3D::Float3() + ShaderStringFactory::m_WorldPos + " = " + DefaultValue + ";\n";
@@ -561,8 +566,8 @@ namespace Pixel {
 				//WorldPos¡¢WorldNormal etc.
 				GetValueUseDeclareString(OutString, VUS_ALL);
 
-				//Get Main Function Input Node's input code
-				//Becase WorldNormal need this, and roughness and metaillic are also need this
+				//get main function input node's input code
+				//becase WorldNormal need this, and roughness and metallic are also need this
 				GetNormalString(OutString);
 
 				GetValueUseString(OutString, VUS_ALL);
@@ -577,18 +582,21 @@ namespace Pixel {
 					}
 					else
 					{
-						m_pInput[i]->GetOutputLink()->GetOwner()->GetShaderTreeString(OutString);
+						(std::static_pointer_cast<ShaderFunction>(m_pInput[i]->GetOutputLink()->GetOwner()))->GetShaderTreeString(OutString);
 					}
 				}
 			}
 		}
 
+		//input temp variable declare
 		if (!GetInputValueString(OutString, uiOutPutStringType))
 			return false;
 
+		//output temp variable declare
 		if (!GetOutputValueString(OutString))
 			return false;
 
+		//calculate output temp variable from input temp variable
 		if (uiOutPutStringType == OST_MATERIAL)
 		{
 			if (!GetFunctionString(OutString))
@@ -621,7 +629,7 @@ namespace Pixel {
 	{
 		if (GetNormalNode()->GetOutputLink())
 		{
-			(GetNormalNode()->GetOutputLink()->GetOwner())->GetShaderTreeString(OutString);
+			(std::static_pointer_cast<ShaderFunction>(GetNormalNode()->GetOutputLink()->GetOwner()))->GetShaderTreeString(OutString);
 		}
 	}
 

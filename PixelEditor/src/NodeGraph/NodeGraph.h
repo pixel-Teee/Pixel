@@ -38,7 +38,6 @@ namespace Pixel {
 		std::vector<Ref<GraphNodeLink>> m_NodeLink;
 		std::vector<Ref<GraphNode>> m_Nodes;
 		//------Graph Editor------
-
 		glm::vec2 m_MousePos;
 	};
 }
