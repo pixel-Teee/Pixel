@@ -14,6 +14,9 @@ namespace Pixel {
 	{
 	public:
 		StaticMesh();
+		StaticMesh(const StaticMesh& others);
+		~StaticMesh();
+
 		StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices);
 
 		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
@@ -24,9 +27,14 @@ namespace Pixel {
 		Ref<VertexArray> GetVerterArray();
 		Ref<VertexBuffer> GetVertexBuffer();
 	private:
-		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
-		
+		/*------Data------*/
+		unsigned char* m_DataBuffer[(uint64_t)Semantics::MAX];
+		uint32_t m_DataBufferSize[(uint64_t)Semantics::MAX];
+		unsigned char* m_Index = nullptr;
+		uint32_t m_IndexSize = 0;
+		unsigned char* m_AlternationDataBuffer = nullptr;
+		uint32_t m_AlternationDataBufferSize = 0;//total databuffer size
+		/*------Data------*/
 		Ref<VertexArray> VAO;
 		Ref<VertexBuffer> VBO;
 		Ref<IndexBuffer> IBO;
@@ -37,5 +45,7 @@ namespace Pixel {
 		bool isFirst = false;
 
 		void SetupMesh(int entityID);
+
+		friend class Model;
 	};
 }

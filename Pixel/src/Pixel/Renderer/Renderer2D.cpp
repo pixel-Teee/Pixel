@@ -59,14 +59,18 @@ namespace Pixel {
 		//VertexBuffer
 
 		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" },
-			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float, "a_TexIndex"},
-			{ ShaderDataType::Float, "a_TilingFactor"},
-			{ ShaderDataType::Int, "a_EntityID"}
-			});
+
+		BufferLayout layout
+		{
+			{ ShaderDataType::Float3, "a_Position", Semantics::POSITION},
+			{ ShaderDataType::Float4, "a_Color", Semantics::COLOR},
+			{ ShaderDataType::Float2, "a_TexCoord", Semantics::TEXCOORD},
+			{ ShaderDataType::Float, "a_TexIndex", Semantics::FLOAT},
+			{ ShaderDataType::Float, "a_TilingFactor", Semantics::FLOAT},
+			{ ShaderDataType::Int, "a_EntityID", Semantics::Editor}
+		};
+
+		s_Data.QuadVertexBuffer->SetLayout(layout);
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];

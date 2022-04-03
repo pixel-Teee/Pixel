@@ -63,4 +63,14 @@ namespace Pixel
 		return true;
 	}
 
+	void RenderPass::SetBlendState(BlendState blendstate)
+	{
+		m_blendstate = blendstate;
+	}
+
+	void RenderPass::SetStencilState(StencilState stencilstate)
+	{
+		m_stencilstate = stencilstate;
+	}
+
 }

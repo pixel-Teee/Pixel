@@ -44,6 +44,63 @@ namespace Pixel {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
+	bool OpenGLVertexBuffer::HavePosition()
+	{
+		return CheckHaveSematics(Semantics::POSITION, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveNormal()
+	{
+		return CheckHaveSematics(Semantics::NORMAL, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveTangent()
+	{
+		return CheckHaveSematics(Semantics::TANGENT, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveBinormal()
+	{
+		return CheckHaveSematics(Semantics::BINORMAL, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveColors(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::COLOR, Level);
+	}
+
+	bool OpenGLVertexBuffer::HaveTexCoord(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::TEXCOORD, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveBoneIndex(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::BLENDINDICES, Level);
+	}
+
+	bool OpenGLVertexBuffer::HaveBoneWeight(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::BLENDWEIGHT, Level);
+	}
+
+	bool OpenGLVertexBuffer::CheckHaveSematics(Semantics semantics, uint32_t level)
+	{
+		uint32_t Level = 0;
+		for (auto it = m_Layout.begin(); it != m_Layout.end(); ++it)
+		{
+			if (it->m_sematics == semantics)
+			{
+				++Level;
+			}
+		}
+		if (Level >= level)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	///////////////////////////
 	//IndicesBuffer////////////
 	///////////////////////////

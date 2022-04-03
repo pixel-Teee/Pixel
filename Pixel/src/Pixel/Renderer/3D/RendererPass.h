@@ -31,6 +31,9 @@ namespace Pixel
 		Ref<MaterialInstance> m_pMaterialInstance; //current use material instance
 
 		MaterialShaderPara m_MSPara; //current use render parameter
+
+		BlendState m_blendstate;
+		StencilState m_stencilstate;
 	public:
 		virtual bool Draw() = 0;
 		virtual RenderPassType GetPassType() = 0;
@@ -53,5 +56,8 @@ namespace Pixel
 		}
 		//---set current member---
 		bool GetShader(MaterialShaderPara& MSPara, Ref<ShaderLibrary> shaderLibrary, std::string& Name);
+
+		void SetBlendState(BlendState blendstate);
+		void SetStencilState(StencilState stencilstate);
 	};
 }

@@ -104,6 +104,16 @@ namespace Pixel {
 		return (std::static_pointer_cast<ShaderMainFunction>(m_pShaderMainFunction[uiPassId]))->GetShaderTreeString(OutString, uiOST);
 	}
 
+	void Material::SetBlendState(BlendState blendstate, uint32_t uiPassId)
+	{
+
+	}
+
+	void Material::SetStencilState(StencilState stencilstate, uint32_t uiPassId)
+	{
+
+	}
+
 	//------Material------
 
 	//------Material Instance------

@@ -17,9 +17,28 @@ namespace Pixel {
 	
 		virtual const BufferLayout& GetLayout() const override{ return m_Layout; }
 		virtual void SetLayout(const BufferLayout& layout) override{ m_Layout = layout;}
+
+		//------check vertex type info------
+		bool HavePosition() override;
+		bool HaveNormal() override;
+		bool HaveTangent() override;
+		bool HaveBinormal() override;
+		//may have levels vertex color
+		bool HaveColors(uint32_t Level) override;
+		//may have levels vertex texcoord
+		bool HaveTexCoord(uint32_t Level) override;
+
+		bool HaveBoneIndex(uint32_t Level) override;
+		bool HaveBoneWeight(uint32_t Level) override;
+		//------check vertex type info------
 	private:
+		bool CheckHaveSematics(Semantics semantics, uint32_t level);
 		uint32_t m_RendererID;
 		BufferLayout m_Layout;
+		//------data------
+		unsigned char* m_data;
+		uint32_t m_size;
+		//------data------
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer

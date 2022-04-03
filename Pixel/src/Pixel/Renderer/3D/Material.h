@@ -6,6 +6,8 @@
 #include "Pixel/Renderer/Shader.h"
 #include "Pixel/Renderer/3D/StaticMesh.h"
 #include "Pixel/Renderer/3D/ShaderFunction.h"
+#include "Pixel/Renderer/3D/BlendState.h"
+#include "Pixel/Renderer/3D/StencilState.h"
 
 #include <vector>
 #include <string>
@@ -150,6 +152,11 @@ namespace Pixel {
 		bool GetShaderTreeString(std::string& OutString, MaterialShaderPara& MSPara, uint32_t uiOST, uint32_t uiPassId);
 
 		std::string GetMaterialName() { return m_ShowName; }
+
+		//------Set Render Pass State------
+		void SetBlendState(BlendState blendstate, uint32_t uiPassId);
+		void SetStencilState(StencilState stencilstate, uint32_t uiPassId);
+		//------Set Render Pass State------
 	};
 
 	//multiple MaterialInstance can share one Material
