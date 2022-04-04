@@ -28,6 +28,10 @@ namespace Pixel {
 		{
 			return m_valueType;
 		}
+		void SetValueType(ValueType valueType)
+		{
+			m_valueType = valueType;
+		}
 		std::string GetNodeName()
 		{
 			return m_nodeName;

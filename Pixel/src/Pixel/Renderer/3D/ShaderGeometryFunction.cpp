@@ -79,7 +79,7 @@ namespace Pixel {
 		{
 			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_POS]->GetOutputLink();
-			OutString += m_pInput[OUT_POS]->GetNodeName() + " = " +
+			OutString += m_pOutput[OUT_POS]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
 
@@ -92,7 +92,7 @@ namespace Pixel {
 		{
 			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_ALBEDO]->GetOutputLink();
-			OutString += m_pInput[OUT_ALBEDO]->GetNodeName() + " = " +
+			OutString += m_pOutput[OUT_ALBEDO]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
 
@@ -105,7 +105,7 @@ namespace Pixel {
 		{
 			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_NORMAL]->GetOutputLink();
-			OutString += m_pInput[OUT_NORMAL]->GetNodeName() + " = " +
+			OutString += m_pOutput[OUT_NORMAL]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
 
@@ -118,7 +118,7 @@ namespace Pixel {
 		{
 			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_ROUGHNESS]->GetOutputLink();
-			OutString += m_pInput[OUT_ROUGHNESS]->GetNodeName() + " = " +
+			OutString += m_pOutput[OUT_ROUGHNESS]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
 
@@ -131,7 +131,7 @@ namespace Pixel {
 		{
 			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_METALLIC]->GetOutputLink();
-			OutString += m_pInput[OUT_METALLIC]->GetNodeName() + " = " +
+			OutString += m_pOutput[OUT_METALLIC]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
 
@@ -144,7 +144,7 @@ namespace Pixel {
 		{
 			//there calculate light and shadow
 			Ref<OutputNode> pOutputNode = m_pInput[IN_EMISSIVE]->GetOutputLink();
-			OutString += m_pInput[OUT_EMISSIVE]->GetNodeName() + " = " +
+			OutString += m_pOutput[OUT_EMISSIVE]->GetNodeName() + " = " +
 				pOutputNode->GetNodeName() + ";\n";
 		}
 

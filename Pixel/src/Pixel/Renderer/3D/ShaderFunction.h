@@ -72,6 +72,7 @@ namespace Pixel {
 		std::string GetValueEqualString(const Ref<OutputNode> pOutputNode, const Ref<InputNode> pInputNode) const;
 
 		void AddToMaterialOwner();
+		virtual void ConstrcutPutNodeAndSetPutNodeOwner();
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;
@@ -150,7 +151,7 @@ namespace Pixel {
 		ConstFloatValue() = default;
 		ConstFloatValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 
-		void ConstrcutPutNodeAndSetPutNodeOwner();
+		virtual void ConstrcutPutNodeAndSetPutNodeOwner();
 
 		//set param value
 		void SetValue(uint32_t index, float value);

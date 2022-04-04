@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "NodeGraph.h"
 
+#include "Pixel/Renderer/3D/Mul.h"
+
 namespace Pixel {
 
 	NodeGraph::NodeGraph()
@@ -85,8 +87,8 @@ namespace Pixel {
 				{
 					for (uint32_t j = 0; j < m_Nodes[i]->m_InputPin.size(); ++j)
 					{
-						ed::BeginPin(m_Nodes[i]->m_InputPin[j]->m_PinId, ed::PinKind::Output);
-						ImGui::Text((m_Nodes[i]->p_Owner->GetInputNode(j)->GetNodeName() + "->").c_str());
+						ed::BeginPin(m_Nodes[i]->m_InputPin[j]->m_PinId, ed::PinKind::Input);
+						ImGui::Text(("->" + m_Nodes[i]->p_Owner->GetInputNode(j)->GetNodeName()).c_str());
 						ed::EndPin();
 					}
 				}
@@ -138,7 +140,7 @@ namespace Pixel {
 								bool flag = false;
 								for (uint32_t j = 0; j < m_Nodes[i]->m_InputPin.size(); ++j)
 								{
-									if (m_Nodes[i]->m_InputPin[j] != nullptr && m_Nodes[i]->m_InputPin[j]->m_PinId == inputPinId)
+									if (m_Nodes[i]->m_InputPin[j] != nullptr && m_Nodes[i]->m_InputPin[j]->m_PinId == outputPinId)
 									{
 										flag = true;
 										inPinNode = m_Nodes[i];
@@ -266,6 +268,43 @@ namespace Pixel {
 				ed::SetNodePosition(floatNode->m_NodeId, ed::ScreenToCanvas(ImVec2(m_MousePos.x, m_MousePos.y)));
 			}
 
+			if (ImGui::MenuItem("Mul"))
+			{
+				++m_uniqueId;
+				Ref<Mul> pMul = CreateRef<Mul>(std::string("Mul"), m_pMaterial);
+				pMul->ConstrcutPutNodeAndSetPutNodeOwner();
+				pMul->AddToMaterialOwner();
+
+				Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+				pGraphNode->m_NodeId = m_uniqueId;
+				pGraphNode->p_Owner = pMul;
+
+				if (pMul->IsHaveInput())
+				{
+					pGraphNode->m_InputPin.resize(pMul->GetInputNodeNum());
+					for (uint32_t i = 0; i < pGraphNode->m_InputPin.size(); ++i)
+					{
+						pGraphNode->m_InputPin[i] = CreateRef<GraphPin>();
+						pGraphNode->m_InputPin[i]->m_PinId = ++m_uniqueId;
+						pGraphNode->m_InputPin[i]->m_LocationIndex = i;
+						pGraphNode->m_InputPin[i]->m_Node = pGraphNode;
+					}
+				}
+
+				if (pMul->IsHaveOutput())
+				{
+					pGraphNode->m_OutputPin.resize(pMul->GetOutputNodeNum());
+					for (uint32_t i = 0; i < pGraphNode->m_OutputPin.size(); ++i)
+					{
+						pGraphNode->m_OutputPin[i] = CreateRef<GraphPin>();
+						pGraphNode->m_OutputPin[i]->m_PinId = ++m_uniqueId;
+						pGraphNode->m_OutputPin[i]->m_LocationIndex = i;
+						pGraphNode->m_OutputPin[i]->m_Node = pGraphNode;
+					}
+				}
+				m_Nodes.push_back(pGraphNode);
+				ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImVec2(m_MousePos.x, m_MousePos.y)));
+			}
 			ImGui::EndPopup();
 		}
 

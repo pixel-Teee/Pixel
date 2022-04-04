@@ -26,6 +26,11 @@ namespace Pixel {
 		m_pOwner->AddShaderFunction(std::shared_ptr<ShaderFunction>(shared_from_this()));
 	}
 
+	void ShaderFunction::ConstrcutPutNodeAndSetPutNodeOwner()
+	{
+
+	}
+
 	std::string ShaderFunction::GetShowName()
 	{
 		return m_ShowName;
@@ -87,13 +92,13 @@ namespace Pixel {
 			}
 			else if (m_pInput[i]->GetValueType() == PutNode::VT_3)
 			{
-				OutString += Renderer3D::Float2() + (" ");
+				OutString += Renderer3D::Float3() + (" ");
 
 				Temp = Renderer3D::FloatConst3("0", "0", "0");
 			}
 			else
 			{
-				OutString += Renderer3D::Float2() + (" ");
+				OutString += Renderer3D::Float4() + (" ");
 
 				Temp = Renderer3D::FloatConst4("0", "0", "0", "1");
 			}
