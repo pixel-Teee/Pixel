@@ -2,6 +2,7 @@
 
 #include "Pixel/Renderer/3D/Model.h"
 #include "Pixel/Renderer/3D/MaterialPass.h"
+#include "Pixel/Renderer/3D/GeometryPass.h"
 #include "imgui-node-editor/imgui_node_editor.h"
 
 #include "Node.h"
@@ -17,10 +18,13 @@ namespace Pixel {
 	private:
 		void DrawPbrNode();
 		bool CreateNewNodeMenu();
+
+		void CreateNodePin(Ref<GraphNode> graphNode, uint32_t locationId);
+
 		Model m_previewBox;
 
 		//TODO:move to scene class
-		MaterialPass m_materialPass;
+		GeometryPass m_materialPass;
 
 		Ref<Model> m_Model;
 		Ref<Camera> m_pCamera;

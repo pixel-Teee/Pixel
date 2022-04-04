@@ -30,10 +30,9 @@ namespace Pixel {
 	{
 		if (!pKey) return;
 
-		if (uiPassType == RenderPass::PT_MATERIAL)
+		if (uiPassType == RenderPass::PT_GEOMETRY)
 		{
-			//TODO:need to fix
-			pKey->SetTheKey("MaterialVertex", 1);
+			pKey->SetTheKey("GeometryPass", 1);
 		}
 	}
 

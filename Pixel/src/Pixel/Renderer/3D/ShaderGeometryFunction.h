@@ -3,31 +3,43 @@
 #include "ShaderFunction.h"
 
 namespace Pixel {
-	class ShaderPbrFunction : public ShaderMainFunction
+	class ShaderGeometryFunction : public ShaderMainFunction
 	{
 	public:
 		enum
 		{
+			IN_POS,
 			IN_ALBEDO,
+			IN_NORMAL,
 			IN_ROUGHNESS,
 			IN_METALLIC,
-			IN_NORMAL,
+			IN_EMISSIVE,
 			IN_MAX
 		};
 
 		enum 
 		{
-			OUT_COLOR,
+			OUT_POS,
+			OUT_ALBEDO,
+			OUT_NORMAL,
+			OUT_ROUGHNESS,
+			OUT_METALLIC,
+			OUT_EMISSIVE,
 			OUT_MAX
 		};
 
-		ShaderPbrFunction();
+		ShaderGeometryFunction();
 		//two phase init
 		void Init();
-		virtual ~ShaderPbrFunction();
+		virtual ~ShaderGeometryFunction();
 	public:
 
 		virtual bool GetFunctionString(std::string& OutString) const override;
+
+		virtual Ref<InputNode> GetWorldPosNode() override
+		{
+			return m_pInput[IN_POS];
+		}
 
 		virtual Ref<InputNode> GetAlbedoNode() override
 		{
@@ -42,6 +54,11 @@ namespace Pixel {
 		virtual Ref<InputNode> GetMetallicNode() override
 		{
 			return m_pInput[IN_METALLIC];
+		}
+
+		virtual Ref<InputNode> GetEmissiveNode() override
+		{
+			return m_pInput[IN_EMISSIVE];
 		}
 
 		virtual Ref<InputNode> GetNormalNode() override

@@ -1,7 +1,7 @@
 #include "pxpch.h"
 #include "Material.h"
 #include "ShaderStringFactory.h"
-#include "Pixel/Renderer/3D/ShaderPbrFunction.h"
+#include "Pixel/Renderer/3D/ShaderGeometryFunction.h"
 #include "Pixel/Renderer/3D/MaterialPass.h"
 
 namespace Pixel {
@@ -53,14 +53,14 @@ namespace Pixel {
 		m_pShaderFunctionArray.clear();
 		m_pShaderMainFunction.clear();
 		
-		if (uiMUT == MUT_PBR)
+		if (uiMUT == MUT_GEO)
 		{
-			Ref<ShaderPbrFunction> pShaderPbrFunction = CreateRef<ShaderPbrFunction>();
+			Ref<ShaderGeometryFunction> pShaderPbrFunction = CreateRef<ShaderGeometryFunction>();
 			pShaderPbrFunction->Init();//important
 			m_pShaderMainFunction.push_back(pShaderPbrFunction);
 		}
 
-		m_pPass[RenderPass::PT_MATERIAL] = CreateRef<MaterialPass>();
+		m_pPass[RenderPass::PT_GEOMETRY] = CreateRef<MaterialPass>();
 	}
 	
 	Ref<ShaderMainFunction> Material::GetMainFunction(uint32_t uiPassId)

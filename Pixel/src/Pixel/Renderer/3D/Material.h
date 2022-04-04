@@ -119,14 +119,16 @@ namespace Pixel {
 	{
 	public:
 		enum {
-			MUT_PBR,
+			MUT_GEO,
+			MUT_STENCIL,
+			MUT_LIGHT,
 			MUT_MAX
 		};
 	//TODO:protected 
 	public:
 		Material();
 		virtual ~Material();
-		Material(const std::string& showName, uint32_t uiMUT = MUT_PBR);
+		Material(const std::string& showName, uint32_t uiMUT = MUT_GEO);
 		//material name
 		std::string m_ShowName;
 		//logic node

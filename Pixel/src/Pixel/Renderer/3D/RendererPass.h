@@ -13,7 +13,9 @@ namespace Pixel
 	public:
 		enum RenderPassType
 		{
-			PT_MATERIAL, //material light
+			PT_GEOMETRY, //deferred shading geometry pass
+			PT_STENCIL, //deferred shading stencil pass
+			PT_LIGHT, //deferred shading light pass
 			PT_MAX
 		};
 
@@ -35,6 +37,7 @@ namespace Pixel
 		BlendState m_blendstate;
 		StencilState m_stencilstate;
 	public:
+		virtual bool Resize(uint32_t width, uint32_t height) = 0;
 		virtual bool Draw() = 0;
 		virtual RenderPassType GetPassType() = 0;
 

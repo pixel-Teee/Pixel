@@ -7,7 +7,7 @@ namespace Pixel
 	
 	MaterialPass::MaterialPass()
 	{
-		m_uiPassId = RenderPass::PT_MATERIAL;
+		m_uiPassId = RenderPass::PT_GEOMETRY;
 	}
 
 	MaterialPass::~MaterialPass()
@@ -52,6 +52,11 @@ namespace Pixel
 	Pixel::RenderPass::RenderPassType MaterialPass::GetPassType()
 	{
 		return m_uiPassId;
+	}
+
+	bool MaterialPass::Resize(uint32_t width, uint32_t height)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 }

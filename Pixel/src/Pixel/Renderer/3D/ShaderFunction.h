@@ -107,6 +107,8 @@ namespace Pixel {
 		virtual bool GetShaderTreeString(std::string& OutString, uint32_t uiOutPutStringType);
 
 		//------four userful node------
+		virtual Ref<InputNode> GetWorldPosNode() = 0;
+
 		virtual Ref<InputNode> GetAlbedoNode() = 0;
 
 		virtual Ref<InputNode> GetRoughness() = 0;
@@ -114,6 +116,8 @@ namespace Pixel {
 		virtual Ref<InputNode> GetMetallicNode() = 0;
 
 		virtual Ref<InputNode> GetNormalNode() = 0;
+
+		virtual Ref<InputNode> GetEmissiveNode() = 0;
 		//------four userful node------
 
 		//------non user declare type---

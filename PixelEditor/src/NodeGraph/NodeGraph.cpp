@@ -12,7 +12,7 @@ namespace Pixel {
 		//TODO:improve the staticmesh class's architecture
 		m_pStaticMesh = CreateRef<StaticMesh>(m_previewBox.GetMeshes()[0]);
 		
-		m_pMaterial = CreateRef<Material>("Test", Material::MUT_PBR);
+		m_pMaterial = CreateRef<Material>("Test", Material::MUT_GEO);
 		m_pMaterialInstance = CreateRef<MaterialInstance>(m_pMaterial);
 
 		m_materialPass.SetCamera(m_pCamera);
@@ -32,9 +32,10 @@ namespace Pixel {
 		m_pbrNode = CreateRef<GraphNode>();
 		m_pbrNode->p_Owner = m_pMaterial->GetMainFunction(0);
 		m_pbrNode->m_NodeId = ++m_uniqueId;
-		m_pbrNode->m_InputPin = CreateRef<GraphPin>();
-		m_pbrNode->m_InputPin->m_PinId = ++m_uniqueId;
-		m_pbrNode->m_InputPin->m_Node = m_pbrNode;
+		for (uint32_t i = 0; i < 6; ++i)
+		{
+			CreateNodePin(m_pbrNode, i);
+		}
 		//------Node Graph------
 	}
 
@@ -82,9 +83,12 @@ namespace Pixel {
 				ImGui::Text((m_Nodes[i]->p_Owner->GetShowName()).c_str());
 				if (m_Nodes[i]->p_Owner->IsHaveInput())
 				{
-					ed::BeginPin(m_Nodes[i]->m_InputPin->m_PinId, ed::PinKind::Input);
-					ImGui::Text(("->" + m_Nodes[i]->p_Owner->GetInputNode(i)->GetNodeName()).c_str());
-					ed::EndPin();
+					for (uint32_t j = 0; j < m_Nodes[i]->m_InputPin.size(); ++j)
+					{
+						ed::BeginPin(m_Nodes[i]->m_InputPin[j]->m_PinId, ed::PinKind::Output);
+						ImGui::Text((m_Nodes[i]->p_Owner->GetInputNode(j)->GetNodeName() + "->").c_str());
+						ed::EndPin();
+					}
 				}
 				if (m_Nodes[i]->p_Owner->IsHaveOutput())
 				{
@@ -119,21 +123,30 @@ namespace Pixel {
 							Ref<GraphPin> inPin;
 							Ref<GraphPin> outPin;
 
-							if (m_pbrNode->m_InputPin->m_PinId == outputPinId)
+							for (uint32_t i = 0; i < m_pbrNode->m_InputPin.size(); ++i)
 							{
-								inPinNode = m_pbrNode;
-								inPin = m_pbrNode->m_InputPin;
+								if (m_pbrNode->m_InputPin[i]->m_PinId == outputPinId)
+								{
+									inPinNode = m_pbrNode;
+									inPin = m_pbrNode->m_InputPin[i];
+								}
 							}
 
 							//find pin's owner
 							for (uint32_t i = 0; i < m_Nodes.size(); ++i)
 							{
-								if (m_Nodes[i]->m_InputPin != nullptr && m_Nodes[i]->m_InputPin->m_PinId == outputPinId)
+								bool flag = false;
+								for (uint32_t j = 0; j < m_Nodes[i]->m_InputPin.size(); ++j)
 								{
-									inPinNode = m_Nodes[i];
-									inPin = m_Nodes[i]->m_InputPin;
-									break;
+									if (m_Nodes[i]->m_InputPin[j] != nullptr && m_Nodes[i]->m_InputPin[j]->m_PinId == inputPinId)
+									{
+										flag = true;
+										inPinNode = m_Nodes[i];
+										inPin = m_Nodes[i]->m_InputPin[j];
+										break;
+									}
 								}
+								if (flag) break;
 							}
 							for (uint32_t i = 0; i < m_Nodes.size(); ++i)
 							{
@@ -180,14 +193,26 @@ namespace Pixel {
 	{
 		Ref<ShaderMainFunction> mainFunction = m_pMaterialInstance->GetMaterial()->GetMainFunction(0);
 		
-		//Create Login InputNode
-		Ref<InputNode> pAlbedoNode = mainFunction->GetAlbedoNode();
-		
 		ed::BeginNode(m_pbrNode->m_NodeId);
 			ImGui::Text(mainFunction->GetShowName().c_str());
+			ed::BeginPin(m_pbrNode->m_InputPin[0]->m_PinId, ed::PinKind::Input);
+				ImGui::Text(("->" + mainFunction->GetWorldPosNode()->GetNodeName()).c_str());
+			ed::EndPin();
 			//Draw Albedo Pin
-			ed::BeginPin(m_pbrNode->m_InputPin->m_PinId, ed::PinKind::Input);
+			ed::BeginPin(m_pbrNode->m_InputPin[1]->m_PinId, ed::PinKind::Input);
 				ImGui::Text(("->" + mainFunction->GetAlbedoNode()->GetNodeName()).c_str());
+			ed::EndPin();
+			ed::BeginPin(m_pbrNode->m_InputPin[2]->m_PinId, ed::PinKind::Input);
+				ImGui::Text(("->" + mainFunction->GetNormalNode()->GetNodeName()).c_str());
+			ed::EndPin();
+			ed::BeginPin(m_pbrNode->m_InputPin[3]->m_PinId, ed::PinKind::Input);
+				ImGui::Text(("->" + mainFunction->GetRoughness()->GetNodeName()).c_str());
+			ed::EndPin();
+			ed::BeginPin(m_pbrNode->m_InputPin[4]->m_PinId, ed::PinKind::Input);
+				ImGui::Text(("->" + mainFunction->GetMetallicNode()->GetNodeName()).c_str());
+			ed::EndPin();
+			ed::BeginPin(m_pbrNode->m_InputPin[5]->m_PinId, ed::PinKind::Input);
+				ImGui::Text(("->" + mainFunction->GetEmissiveNode()->GetNodeName()).c_str());
 			ed::EndPin();
 			//ImGui::Text()
 		ed::EndNode();
@@ -217,11 +242,14 @@ namespace Pixel {
 				//in terms of floatValue4 to create pin
 				if (floatValue4->IsHaveInput())
 				{
-					//4 phase
-					floatNode->m_InputPin = CreateRef<GraphPin>();
-					floatNode->m_InputPin->m_PinId = ++m_uniqueId;
-					floatNode->m_InputPin->m_LocationIndex = 0;
-					floatNode->m_InputPin->m_Node = floatNode;
+					floatNode->m_InputPin.reserve(floatValue4->GetInputNodeNum());
+					for (uint32_t i = 0; i < floatValue4->GetOutputNodeNum(); ++i)
+					{
+						floatNode->m_InputPin[i] = CreateRef<GraphPin>();
+						floatNode->m_InputPin[i]->m_PinId = ++m_uniqueId;
+						floatNode->m_InputPin[i]->m_LocationIndex = i;
+						floatNode->m_InputPin[i]->m_Node = floatNode;
+					}
 				}
 				if (floatValue4->IsHaveOutput())
 				{
@@ -246,4 +274,11 @@ namespace Pixel {
 		return true;
 	}
 
+	void NodeGraph::CreateNodePin(Ref<GraphNode> graphNode, uint32_t locationId)
+	{
+		graphNode->m_InputPin.push_back(CreateRef<GraphPin>());
+		graphNode->m_InputPin.back()->m_PinId = ++m_uniqueId;
+		graphNode->m_InputPin.back()->m_LocationIndex = locationId;
+		graphNode->m_InputPin.back()->m_Node = graphNode;
+	}
 }

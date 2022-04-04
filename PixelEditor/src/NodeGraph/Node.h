@@ -49,7 +49,7 @@ namespace Pixel {
 		Ref<ShaderFunction> p_Owner;
 		
 		//one input pin
-		Ref<GraphPin> m_InputPin;
+		std::vector<Ref<GraphPin>> m_InputPin;
 
 		//many output pins
 		std::vector<Ref<GraphPin>> m_OutputPin;
@@ -59,15 +59,23 @@ namespace Pixel {
 		//------check have pin------
 		bool HaveInputPin(GraphPin InputPin)
 		{
-			if (InputPin == *m_InputPin.get())
-				return true;
+			for (uint32_t i = 0; i < m_InputPin.size(); ++i)
+			{
+				if (*m_InputPin[i].get() == InputPin)
+				{
+					return true;
+				}
+			}
 			return false;
 		}
 
 		bool HaveInputPin(ed::PinId pinId)
 		{
-			if (m_InputPin->m_PinId == pinId)
-				return true;
+			for (uint32_t i = 0; i < m_InputPin.size(); ++i)
+			{
+				if (m_InputPin[i]->m_PinId == pinId)
+					return true;
+			}
 			return false;
 		}
 

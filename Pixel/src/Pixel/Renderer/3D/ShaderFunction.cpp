@@ -121,14 +121,14 @@ namespace Pixel {
 				OutString += Renderer3D::Float() + " ";
 				Temp = Renderer3D::FloatConst("0");
 			}
-			else if (m_pInput[i]->GetValueType() == PutNode::VT_2)
+			else if (m_pOutput[i]->GetValueType() == PutNode::VT_2)
 			{
 				//Get the Type
 				OutString += Renderer3D::Float2() + (" ");
 
 				Temp = Renderer3D::FloatConst2("0", "0");
 			}
-			else if (m_pInput[i]->GetValueType() == PutNode::VT_3)
+			else if (m_pOutput[i]->GetValueType() == PutNode::VT_3)
 			{
 				OutString += Renderer3D::Float3() + (" ");
 

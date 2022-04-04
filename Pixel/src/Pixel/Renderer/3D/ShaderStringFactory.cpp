@@ -36,12 +36,41 @@ namespace Pixel {
 
 	void ShaderStringFactory::CreateVOutputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
 	{
-		std::string TempDeclare;
-		//world position
-		OutString += "layout(location = 0) out vec3 v_WorldPos;\n";
-		OutString += "layout(location = 1) out vec3 v_Normal;\n";
-		OutString += "layout(location = 2) out vec2 v_TexCoord;\n";
-		OutString += "layout(location = 3) out flat int v_EntityID;\n";
+		Ref<VertexBuffer> vertexBuffer = MSPara.m_pStaticMesh->GetVertexBuffer();
+		BufferLayout layout = vertexBuffer->GetLayout();
+		uint32_t locationId = 0;
+		for (auto iter : layout.GetElements())
+		{
+			OutString += "layout(location = " + std::to_string(locationId) + ")";
+			OutString += " out ";
+			switch (iter.Type)
+			{
+			case ShaderDataType::Float:
+				OutString += "float ";
+				break;
+			case ShaderDataType::Float2:
+				OutString += "vec2 ";
+				break;
+			case ShaderDataType::Float3:
+				OutString += "vec3 ";
+				break;
+			case ShaderDataType::Float4:
+				OutString += "vec4 ";
+				break;
+			case ShaderDataType::Int:
+				if (iter.m_sematics == Semantics::Editor)
+				{
+					OutString += "flat int ";
+				}
+				else
+				{
+					OutString += "int ";
+				}
+				break;
+			}
+			OutString += "v" + iter.Name.substr(iter.Name.find("_")) + ";\n";
+			++locationId;
+		}
 	}
 
 	void ShaderStringFactory::CreateVInputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
@@ -82,7 +111,7 @@ namespace Pixel {
 	void ShaderStringFactory::CreateVUserConstant(Ref<Shader> pShader, MaterialShaderPara& para, uint32_t& uiPassType, std::string& OutString)
 	{
 		//create uniform string
-		if (uiPassType == RenderPass::RenderPassType::PT_MATERIAL)
+		if (uiPassType == RenderPass::RenderPassType::PT_GEOMETRY)
 		{
 			CreateUserConstantModelViewProjectionMatrix(pShader, OutString);
 		}
@@ -101,21 +130,91 @@ namespace Pixel {
 
 		OutString += "void main(){\n";
 		//Temp Variable, will be output the output variable
-		OutString += "	vec4 WorldPos = vec4(0.0, 0.0, 0.0, 0.0);\n";
-		OutString += "	vec3 Normal = vec3(0.0, 0.0, 0.0);\n";
-		OutString += "	vec2 TexCoord = vec2(0.0, 0.0);\n";
+		OutString += "vec4 WorldPos = vec4(0.0, 0.0, 0.0, 0.0);\n";
+		OutString += "vec3 Normal = vec3(0.0, 0.0, 0.0);\n";
+		OutString += "vec2 TexCoord = vec2(0.0, 0.0);\n";
 
-		OutString += "	WorldPos = " + ShaderStringFactory::m_Model + " * " + "vec4(a_Pos, 1.0);\n";
-		OutString += "	mat3 NormalMatrix = mat3(transpose(inverse(" + ShaderStringFactory::m_Model + ")));\n";
-		OutString += "	Normal = NormalMatrix * a_Normal;\n";
-		OutString += "	TexCoord = a_TexCoord;\n";
+		if (vertexBuffer->HavePosition())
+		{
+			for (auto it : layout)
+			{
+				if (it.m_sematics == Semantics::POSITION)
+				{
+					OutString += "WorldPos = " + ShaderStringFactory::m_Model + " * " + "vec4(" + it.Name + ", 1.0);\n";
+					break;
+				}
+			}
+		}
+		if (vertexBuffer->HaveNormal())
+		{
+			OutString += "mat3 NormalMatrix = mat3(transpose(inverse(" + ShaderStringFactory::m_Model + ")));\n";
+			for (auto it : layout)
+			{
+				if (it.m_sematics == Semantics::NORMAL)
+				{
+					OutString += "Normal = NormalMatrix * " + it.Name + ";\n";
+					break;
+				}
+			}
+		}
+		if (vertexBuffer->HaveTexCoord(0))
+		{
+			for (auto it : layout)
+			{
+				if (it.m_sematics == Semantics::TEXCOORD)
+				{
+					OutString += "TexCoord = " + it.Name + ";\n";
+					break;
+				}
+			}
+		}
+
+		if (vertexBuffer->HavePosition())
+		{
+			for (auto iter : layout)
+			{
+				if (iter.m_sematics == Semantics::POSITION)
+				{
+					OutString += "v" + iter.Name.substr(iter.Name.find("_")) + " = " + "WorldPos.xyz" + ";\n";
+					break;
+				}
+			}
+		}
+		if (vertexBuffer->HaveTexCoord(0))
+		{
+			for (auto iter : layout)
+			{
+				if (iter.m_sematics == Semantics::TEXCOORD)
+				{
+					OutString += "v" + iter.Name.substr(iter.Name.find("_")) + " = " + "TexCoord" + ";\n";
+					break;
+				}
+			}
+		}
+
+		if (vertexBuffer->HaveNormal())
+		{
+			for (auto iter : layout)
+			{
+				if (iter.m_sematics == Semantics::NORMAL)
+				{
+					OutString += "v" + iter.Name.substr(iter.Name.find("_")) + " = " + "Normal" + ";\n";
+					break;
+				}
+			}
+		}
 		
-		//assign to output variable
-		OutString += "	v_WorldPos = WorldPos.xyz;\n";
-		OutString += "	v_Normal = Normal;\n";
-		OutString += "	v_TexCoord = TexCoord;\n";
-		OutString += "	v_EntityID = a_EntityID;\n";
-		OutString += "	gl_Position = u_ViewProjection * WorldPos;\n";
+		//assign entityid
+		for (auto it : layout)
+		{
+			if (it.m_sematics == Semantics::Editor)
+			{
+				OutString += "v" + it.Name.substr(it.Name.find("_")) + " = " + it.Name + ";\n";
+				break;
+			}
+		}
+
+		OutString += "gl_Position = " + ShaderStringFactory::m_ViewProjection + " * " + "WorldPos;\n";
 		OutString += "}";
 	}
 
@@ -183,7 +282,9 @@ namespace Pixel {
 	void ShaderStringFactory::GetPIncludeType(std::string& OutString)
 	{
 		OutString += "#type fragment\n";
-		OutString += "#version 450 core\n";
+		OutString += "#version 450 core\n\n";
+
+		/*OutString += "//------PBR Function------//\n";
 
 		std::string shaderInclude;
 		std::string Temp;
@@ -195,34 +296,89 @@ namespace Pixel {
 		}
 		file.close();
 		OutString += shaderInclude + "\n";
+		OutString += "//------PBR Function------//\n";*/
 	}
 
 	void ShaderStringFactory::CreatePInputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
 	{
-		std::string TempDeclare;
-		OutString += "layout(location = 0) in vec3 v_WorldPos;\n";
-		OutString += "layout(location = 1) in vec3 v_Normal;\n";
-		OutString += "layout(location = 2) in vec2 v_TexCoord;\n";
-		OutString += "layout(location = 3) in flat int v_EntityID;\n";
+		Ref<VertexBuffer> vertexBuffer = MSPara.m_pStaticMesh->GetVertexBuffer();
+		BufferLayout layout = vertexBuffer->GetLayout();
+		uint32_t locationId = 0;
+		for (auto iter : layout.GetElements())
+		{
+			OutString += "layout(location = " + std::to_string(locationId) + ")";
+			OutString += " in ";
+			switch (iter.Type)
+			{
+			case ShaderDataType::Float:
+				OutString += "float ";
+				break;
+			case ShaderDataType::Float2:
+				OutString += "vec2 ";
+				break;
+			case ShaderDataType::Float3:
+				OutString += "vec3 ";
+				break;
+			case ShaderDataType::Float4:
+				OutString += "vec4 ";
+				break;
+			case ShaderDataType::Int:
+				if (iter.m_sematics == Semantics::Editor)
+				{
+					OutString += "flat int ";
+				}
+				else
+				{
+					OutString += "int ";
+				}
+				break;
+			}
+			OutString += "v" + iter.Name.substr(iter.Name.find("_")) + ";\n";
+			++locationId;
+		}
 	}
 
 	void ShaderStringFactory::CreatePOutputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
 	{
-		std::string TempDeclare;
-		m_PSOutputColorValue = "OutColor";
-		OutString += "layout(location = 0) out vec4 " + m_PSOutputColorValue + ";\n";
+		Ref<VertexBuffer> vertexBuffer = MSPara.m_pStaticMesh->GetVertexBuffer();
+		BufferLayout layout = vertexBuffer->GetLayout();
+		if (uiPassType == RenderPass::PT_GEOMETRY)
+		{
+			OutString += "layout(location = 0) out vec3 g_Position;\n";
+			OutString += "layout(location = 1) out vec3 g_Normal;\n";
+			OutString += "layout(location = 2) out vec3 g_Albedo;\n";
+			OutString += "layout(location = 3) out vec3 g_RoughnessMetallicEmissive;\n";
+			
+			//Editor
+			for (auto it : layout)
+			{
+				if (it.m_sematics == Semantics::Editor)
+				{
+					OutString += "layout(location = 4) out flat int g" + it.Name.substr(it.Name.find("_")) + ";\n";
+					break;
+				}
+			}
+		}
+		else if (uiPassType == RenderPass::PT_STENCIL)
+		{
+
+		}
 	}
 
 	void ShaderStringFactory::CreatePFunction(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
 	{
-		if (uiPassType == RenderPass::RenderPassType::PT_MATERIAL)
+		if (uiPassType == RenderPass::RenderPassType::PT_GEOMETRY)
 		{
 			std::string FunctionBody;
 			Ref<Material> pMaterial = MSPara.pMaterialInstance->GetMaterial();
-			
+
 			pMaterial->GetShaderTreeString(FunctionBody, MSPara, ShaderMainFunction::OST_MATERIAL, MSPara.uiPassId);
 
 			OutString += "void main(){\n" + FunctionBody + "\n};\n";
+		}
+		else if (uiPassType == RenderPass::RenderPassType::PT_STENCIL)
+		{
+
 		}
 	}
 
