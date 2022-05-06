@@ -1,8 +1,10 @@
 #include "pxpch.h"
 #include "Scene.h"
 
+#include "Pixel/Core/Application.h"
 #include "Components.h"
 #include "ScriptableEntity.h"
+#include "Pixel/Core/Input.h"
 #include "Pixel/Renderer/Renderer2D.h"
 #include "Pixel/Renderer/3D/Renderer3D.h"
 
@@ -16,6 +18,152 @@
 
 namespace Pixel
 {
+	Scene* g_Scene;
+	//------Lua------
+	static int Lua_GetEntityByName(lua_State* L)
+	{
+		const char* str = lua_tostring(ScriptableEntity::g_pLuaState, -1);
+		entt::registry& Registry = g_Scene->GetRegistry();
+		auto entities = Registry.view<TagComponent>();
+
+		for (auto entity : entities)
+		{
+			TagComponent& tag = entities.get<TagComponent>(entity);
+			if (tag.Tag == str)
+			{
+				//TODO: return entity or UUID
+				lua_pushnumber(ScriptableEntity::g_pLuaState, (int32_t)entity);
+			}
+		}
+
+		return 1;
+	}
+
+	static int Lua_SetTransformComponentLocation(lua_State* L)
+	{
+		int32_t entityId = lua_tonumber(ScriptableEntity::g_pLuaState, -4);
+
+		Entity entity{ (entt::entity)entityId, g_Scene};
+		TransformComponent& trans = entity.GetComponent<TransformComponent>();
+
+		double x = lua_tonumber(ScriptableEntity::g_pLuaState, -3);
+		double y = lua_tonumber(ScriptableEntity::g_pLuaState, -2);
+		double z = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+
+		trans.Translation = { x, y, z };
+
+		return 0;
+	}
+
+	static int Lua_GetTransformComponentLocation(lua_State* L)
+	{
+		int32_t entityId = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+
+		Entity entity{ (entt::entity)entityId, g_Scene };
+		TransformComponent& trans = entity.GetComponent<TransformComponent>();
+
+		lua_pushnumber(ScriptableEntity::g_pLuaState, trans.Translation.x);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, trans.Translation.y);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, trans.Translation.z);
+
+		return 3;
+	}
+
+	static int Lua_GetTransformComponentRotation(lua_State* L)
+	{
+		int32_t entityId = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+
+		Entity entity{ (entt::entity)entityId, g_Scene };
+		TransformComponent& trans = entity.GetComponent<TransformComponent>();
+
+		lua_pushnumber(ScriptableEntity::g_pLuaState, trans.Rotation.x);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, trans.Rotation.y);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, trans.Rotation.z);
+
+		return 3;
+	}
+
+	static int Lua_SetTransformComponentRotation(lua_State* L)
+	{
+		int32_t entityId = lua_tonumber(ScriptableEntity::g_pLuaState, -4);
+
+		Entity entity{ (entt::entity)entityId, g_Scene };
+		TransformComponent& trans = entity.GetComponent<TransformComponent>();
+
+		double x = lua_tonumber(ScriptableEntity::g_pLuaState, -3);
+		double y = lua_tonumber(ScriptableEntity::g_pLuaState, -2);
+		double z = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+
+		trans.Rotation = { x, y, z };
+
+		return 0;
+	}
+
+	static int Lua_GetAsyncKeyInput(lua_State* L)
+	{
+		int32_t KeyCodes = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+		if (Input::IsKeyPressed(KeyCodes))
+		{
+			lua_pushboolean(ScriptableEntity::g_pLuaState, true);
+		}
+		else
+		{
+			lua_pushboolean(ScriptableEntity::g_pLuaState, false);
+		}
+
+		return 1;
+	}
+
+	static int Lua_GetMousePos(lua_State* L)
+	{
+		std::pair<float, float> MousePos = Input::GetMousePosition();
+
+		lua_pushnumber(ScriptableEntity::g_pLuaState, MousePos.first);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, MousePos.second);
+
+		return 2;
+	}
+
+	static int Lua_GetTransformComponentDirectionAndRight(lua_State* L)
+	{
+		int32_t entityId = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+
+		Entity entity{ (entt::entity)entityId, g_Scene };
+		TransformComponent& trans = entity.GetComponent<TransformComponent>();
+
+		glm::vec3 front;
+		front.x = -glm::cos(trans.Rotation.x) * glm::sin(trans.Rotation.y);
+		front.y = glm::sin(-trans.Rotation.x);
+		front.z = -glm::cos(-trans.Rotation.x) * glm::cos(trans.Rotation.y);
+		front = glm::normalize(front);
+
+		glm::vec3 Right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0)));
+
+		lua_pushnumber(ScriptableEntity::g_pLuaState, front.x);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, front.y);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, front.z);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, Right.x);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, Right.y);
+		lua_pushnumber(ScriptableEntity::g_pLuaState, Right.z);
+		return 6;
+	}
+
+	static int Lua_SetLightComponentColor(lua_State* L)
+	{
+		int32_t entityId = lua_tonumber(ScriptableEntity::g_pLuaState, -4);
+
+		Entity entity{ (entt::entity)entityId, g_Scene };
+		LightComponent& light = entity.GetComponent<LightComponent>();
+
+		double x = lua_tonumber(ScriptableEntity::g_pLuaState, -3);
+		double y = lua_tonumber(ScriptableEntity::g_pLuaState, -2);
+		double z = lua_tonumber(ScriptableEntity::g_pLuaState, -1);
+		
+		light.color = { x, y, z };
+		return 0;
+	}
+	//------Lua------
+
 	static b2BodyType Rigidbody2DTypeToBox2DType(Rigidbody2DComponent::BodyType bodyType)
 	{
 		switch (bodyType)
@@ -56,6 +204,9 @@ namespace Pixel
 		*/
 
 		//m_Registry.on_construct<CameraComponent>().connect<&Function>();
+
+		//Create Geometry Pass
+		m_pGeometryPass = CreateRef<GeometryPass>();
 	}
 
 	Scene::~Scene()
@@ -93,6 +244,7 @@ namespace Pixel
 
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
+		newScene->m_pGeometryPass = other->m_pGeometryPass;
 
 		std::unordered_map<UUID, entt::entity> enttMap;
 
@@ -119,6 +271,7 @@ namespace Pixel
 		CopyComponent<MaterialComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<StaticMeshComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<LightComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<MaterialTreeComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
 	}
@@ -180,12 +333,57 @@ namespace Pixel
 		//		body->CreateFixture(&fixtureDef);
 		//	}
 		//}
+		
+		//TODO:fix
+		g_Scene = this;
+		if (ScriptableEntity::g_pLuaState == nullptr)
+		{
+			//---Open Lua---
+			ScriptableEntity::g_pLuaState = luaL_newstate();
+			luaL_openlibs(ScriptableEntity::g_pLuaState);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_Print", Lua_Print);
+			//---Open Lua---
+
+			//---Create Global Function---
+			//---Create Entity---
+			lua_register(ScriptableEntity::g_pLuaState, "Host_GetEntityByName", Lua_GetEntityByName);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_SetTransformComponentLocation", Lua_SetTransformComponentLocation);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_GetTransformComponentLocation", Lua_GetTransformComponentLocation);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_GetAsyncKeyInput", Lua_GetAsyncKeyInput);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_SetTransformComponentRotation", Lua_SetTransformComponentRotation);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_GetTransformComponentRotation", Lua_GetTransformComponentRotation);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_GetMousePos", Lua_GetMousePos);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_GetTransformComponentDirectionAndRight", Lua_GetTransformComponentDirectionAndRight);
+			lua_register(ScriptableEntity::g_pLuaState, "Host_SetLightComponentColor", Lua_SetLightComponentColor);
+			//---Create Entity---
+			//---Create Global Function---
+		}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
 		/*delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;*/
+		m_Registry.view<NativeScriptComponent>().each(
+			[=](auto entity, auto& nsc)
+		{
+			//ToDo: Move to Scene:OnScenePlay
+			if (nsc.Instance)
+			{
+				//nsc.Instantiate(nsc.m_path);
+				//nsc.Instance->m_Entity = Entity{ entity, this };
+				nsc.Instance->OnDestroy();
+			}
+		});
+
+		if (ScriptableEntity::g_pLuaState != nullptr)
+		{
+			lua_close(ScriptableEntity::g_pLuaState);
+			ScriptableEntity::g_pLuaState = nullptr;
+		}
+
+		//g_Scene = nullptr;
+		g_Scene = nullptr;
 	}
 
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
@@ -224,20 +422,36 @@ namespace Pixel
 	void Scene::OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
 	{
 		//Update Scripts	
-		{
-				m_Registry.view<NativeScriptComponent>().each(
-				[=](auto entity, auto& nsc)
-				{
-					//ToDo: Move to Scene:OnScenePlay
-					if (!nsc.Instance)
-					{
-						nsc.Instance = nsc.InstantiateScript();
-						nsc.Instance->m_Entity = Entity{entity, this};
-						nsc.Instance->OnCreate();
-					}
+		//{
+		//		m_Registry.view<NativeScriptComponent>().each(
+		//		[=](auto entity, auto& nsc)
+		//		{
+		//			//ToDo: Move to Scene:OnScenePlay
+		//			if (!nsc.m_pLuaState)
+		//			{
+		//				nsc.Instance = nsc.InstantiateScript();
+		//				nsc.Instance->m_Entity = Entity{entity, this};
+		//				nsc.Instance->OnCreate();
+		//			}
 
-					nsc.Instance->OnUpdate(ts);
-				});
+		//			nsc.Instance->OnUpdate(ts);
+		//		});
+		//}
+
+		{
+			m_Registry.view<NativeScriptComponent>().each(
+			[=](auto entity, auto& nsc)
+			{
+				//ToDo: Move to Scene:OnScenePlay
+				if (!nsc.Instance)
+				{
+					nsc.Instantiate(nsc.m_path);
+					nsc.Instance->m_Entity = Entity{entity, this};
+					nsc.Instance->OnCreate();
+				}
+
+				nsc.Instance->OnUpdate(ts);
+			});
 		}
 
 		////Physics
@@ -360,6 +574,7 @@ namespace Pixel
 			if (!cameraComponent.FixedAspectRatio)
 			{
 				cameraComponent.camera.SetViewportSize(width, height);
+				m_pGeometryPass->Resize(width, height);
 			}
 		}
 	}
@@ -379,6 +594,7 @@ namespace Pixel
 		CopyComponentIfExists<MaterialComponent>(newEntity, entity);
 		CopyComponentIfExists<StaticMeshComponent>(newEntity, entity);
 		CopyComponentIfExists<LightComponent>(newEntity, entity);
+		CopyComponentIfExists<MaterialTreeComponent>(newEntity, entity);
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()
@@ -407,6 +623,15 @@ namespace Pixel
 	void Scene::SetSkyBox(Ref<CubeMap> skyBox)
 	{
 		m_skyBox = skyBox;
+	}
+
+	void Scene::MarkMeshEntityIDDirty()
+	{
+		m_Registry.view<StaticMeshComponent>().each(
+			[=](auto entity, auto& smc)
+		{
+			smc.mesh.SetEntityDirty(true);
+		});
 	}
 
 	template<typename T>
@@ -472,6 +697,16 @@ namespace Pixel
 	template<>
 	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MaterialTreeComponent>(Entity entity, MaterialTreeComponent& component)
+	{
+		//from path to load the logic material tree
+		std::string path = component.path;
+
+		//read the material logic node, and compile the shader
 
 	}
 }

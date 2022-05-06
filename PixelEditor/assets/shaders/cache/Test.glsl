@@ -31,6 +31,66 @@ gl_Position = u_ViewProjection * WorldPos;
 #type fragment
 #version 450 core
 
+//------PBR Function------//
+const float PI = 3.14159265359;
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+	float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return nom / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+
+    return nom / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+vec3 FromTangentToWorld(vec3 normal, vec3 worldNormal, vec3 worldPos, vec2 texcoord)
+{
+    vec3 Q1  = dFdx(worldPos);
+    vec3 Q2  = dFdy(worldPos);
+    vec2 st1 = dFdx(texcoord);
+    vec2 st2 = dFdy(texcoord);
+
+    //calculate TBN
+    vec3 N   = normalize(worldNormal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * normal);
+}
+
+//------PBR Function------//
 
 layout(location = 0) in vec3 v_Pos;
 layout(location = 1) in vec2 v_TexCoord;
@@ -46,16 +106,12 @@ layout(location = 4) out flat int g_EntityID;
 
 void main(){
 vec3 WorldPos = vec3(0, 0, 0);
+vec4  ConstFloatValue7;
+ConstFloatValue7 = vec4(0.000000, 0.000000, 0.000000, 0.000000);
 vec4  ConstFloatValue1;
 ConstFloatValue1 = vec4(0.000000, 0.000000, 0.000000, 0.000000);
-vec4  ConstFloatValue3;
-ConstFloatValue3 = vec4(0.000000, 0.000000, 0.000000, 0.000000);
-vec4  MulInputA5 = ConstFloatValue1;
-vec4  MulInputB7 = ConstFloatValue3;
-vec4  MulOutput8 = vec4(0, 0, 0, 1);
-MulOutput8 = MulInputA5 * MulInputB7;
 vec4  Pos = vec4(0, 0, 0, 0);
-vec4  Albedo = vec4(0, 0, 0, 0);
+vec4  Albedo = ConstFloatValue1;
 float  Roughness = 0;
 float  Metallic = 0;
 float  Emissive = 0;
@@ -66,8 +122,8 @@ float  O_Roughness = 0;
 float  O_Metallic = 0;
 float  O_Emissive = 0;
 O_WorldPos = vec4(v_Pos, 1.0);
-O_Albedo = vec4(0, 0, 0, 0);
-O_Normal = MulOutput8;
+O_Albedo = ConstFloatValue1;
+O_Normal = ConstFloatValue7;
 O_Roughness = 0;
 O_Metallic = 0;
 O_Emissive = 0;

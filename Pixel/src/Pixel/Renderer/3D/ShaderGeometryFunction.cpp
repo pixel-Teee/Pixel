@@ -7,7 +7,7 @@ namespace Pixel {
 
 	ShaderGeometryFunction::ShaderGeometryFunction()
 	{
-		
+		m_functionType = ShaderFunctionType::GeoMetry;
 	}
 
 	//because shared_from_this need object have constructed

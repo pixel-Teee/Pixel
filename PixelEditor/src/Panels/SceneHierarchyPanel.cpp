@@ -285,6 +285,12 @@ namespace Pixel
 				ImGui::CloseCurrentPopup();
 			}
 
+			if (ImGui::MenuItem("Script"))
+			{
+				m_SelectionContext.AddComponent<NativeScriptComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 		/*----------Add Component----------*/
@@ -556,6 +562,18 @@ namespace Pixel
 				ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
 				ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
 				ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
+			}
+		);
+
+		DrawComponent<NativeScriptComponent>("Script Component", entity, [](auto& component)
+			{
+				char buf[256];
+				memcpy(buf, component.m_path.c_str(), component.m_path.size());
+				buf[component.m_path.size()] = '\0';
+				if (ImGui::InputText("Script Path:", buf, 256))
+				{
+					component.m_path = buf;
+				}
 			}
 		);
 	}

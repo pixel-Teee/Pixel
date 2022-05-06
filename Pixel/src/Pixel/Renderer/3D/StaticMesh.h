@@ -10,6 +10,7 @@
 
 namespace Pixel {
 
+	class MaterialInstance;
 	class StaticMesh
 	{
 	public:
@@ -19,8 +20,10 @@ namespace Pixel {
 
 		StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices);
 
-		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
+		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer, bool bEntityDirty);
 
+		//TODO:
+		void Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID);
 		//TODO:temporary forward draw
 		void Draw();
 
@@ -44,7 +47,7 @@ namespace Pixel {
 		//temporary for forward draw
 		bool isFirst = false;
 
-		void SetupMesh(int entityID);
+		void SetupMesh(int entityID, bool bHavedSwitched);
 
 		friend class Model;
 	};

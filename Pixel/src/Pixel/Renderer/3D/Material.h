@@ -153,12 +153,19 @@ namespace Pixel {
 		void DeleteShaderFunction(Ref<ShaderFunction> pShaderFunction);
 		bool GetShaderTreeString(std::string& OutString, MaterialShaderPara& MSPara, uint32_t uiOST, uint32_t uiPassId);
 
+		void CreateConstValueDeclare(std::string& OutString);
+		void CreateTextureDeclare(std::string& OutString);
+		void CreateCustomValue();
+		void CreateCustomTexture();
+
 		std::string GetMaterialName() { return m_ShowName; }
 
 		//------Set Render Pass State------
 		void SetBlendState(BlendState blendstate, uint32_t uiPassId);
 		void SetStencilState(StencilState stencilstate, uint32_t uiPassId);
 		//------Set Render Pass State------
+
+		friend class SerializerMaterial;
 	};
 
 	//multiple MaterialInstance can share one Material

@@ -3,6 +3,7 @@
 #include "ShaderStringFactory.h"
 #include "Pixel/Renderer/3D/ShaderGeometryFunction.h"
 #include "Pixel/Renderer/3D/MaterialPass.h"
+#include "Pixel/Renderer/3D/TexSampler.h"
 
 namespace Pixel {
 	void MaterialInterface::Create()
@@ -102,6 +103,69 @@ namespace Pixel {
 
 		//current PassId
 		return (std::static_pointer_cast<ShaderMainFunction>(m_pShaderMainFunction[uiPassId]))->GetShaderTreeString(OutString, uiOST);
+	}
+
+	void Material::CreateConstValueDeclare(std::string& OutString)
+	{
+		for (uint32_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			Ref<ConstValue> Temp = std::dynamic_pointer_cast<ConstValue>(m_pShaderFunctionArray[i]);
+			//uniform
+			//fix: hard code
+			if (Temp != nullptr && Temp->m_bIsCustom)
+			{
+				OutString += "uniform vec4 " + Temp->GetShowName() + ";\n";
+			}
+		}
+	}
+
+	void Material::CreateTextureDeclare(std::string& OutString)
+	{
+		for (uint32_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			Ref<TexSampler> Temp = std::dynamic_pointer_cast<TexSampler>(m_pShaderFunctionArray[i]);
+			//uniform
+			//fix: hard code
+			if (Temp != nullptr)
+			{
+				OutString += "uniform sampler2D " + Temp->GetShowName() + ";\n";
+			}
+		}
+	}
+
+	void Material::CreateCustomValue()
+	{
+		for (uint32_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			Ref<ConstValue> Temp = std::dynamic_pointer_cast<ConstValue>(m_pShaderFunctionArray[i]);
+			//uniform
+			//fix: hard code
+			if (Temp != nullptr && Temp->m_bIsCustom)
+			{
+				//OutString += "uniform vec4 " + Temp->GetShowName() + ";\n";
+				Ref<CustomFloatValue> pCustomFloatValue = CreateRef<CustomFloatValue>();
+				pCustomFloatValue->m_valueType = CustomFloatValue::VT_4;
+				pCustomFloatValue->Value.resize(4);
+				m_PSShaderCustomValue.push_back(pCustomFloatValue);
+			}
+		}
+	}
+
+	void Material::CreateCustomTexture()
+	{
+		for (uint32_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			Ref<TexSampler> Temp = std::dynamic_pointer_cast<TexSampler>(m_pShaderFunctionArray[i]);
+			//uniform
+			//fix: hard code
+			if (Temp != nullptr)
+			{
+				//OutString += "uniform vec4 " + Temp->GetShowName() + ";\n";
+				Ref<CustomTexSampler> pCustomTexture = CreateRef<CustomTexSampler>();
+				pCustomTexture->m_pTexture = Temp->GetTexture();
+				m_PSShaderCustomTex.push_back(pCustomTexture);
+			}
+		}
 	}
 
 	void Material::SetBlendState(BlendState blendstate, uint32_t uiPassId)

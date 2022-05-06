@@ -6,6 +6,7 @@
 #include "Pixel/Renderer/EditorCamera.h"
 #include "Pixel/Renderer/Framebuffer.h"
 #include "Pixel/Renderer/Texture.h"
+#include "Pixel/Renderer/3D/GeometryPass.h"
 
 class b2World;
 
@@ -42,12 +43,20 @@ namespace Pixel
 		glm::vec2 GetViewPortSize();
 
 		void SetSkyBox(Ref<CubeMap> skyBox);
+
+		void MarkMeshEntityIDDirty();
+
+		//Get Registry
+		entt::registry& GetRegistry() { return m_Registry;  }
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 	private:
 		//environment
 		Ref<CubeMap> m_skyBox;
+
+		//geometry pass
+		Ref<GeometryPass> m_pGeometryPass;
 
 		//registry is a container for entity and component
 		entt::registry m_Registry;

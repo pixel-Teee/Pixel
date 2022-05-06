@@ -7,7 +7,7 @@
 
 namespace Pixel {
 
-	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
+	Renderer::SceneData* Renderer::m_SceneData = nullptr;
 
 	void Renderer::Init()
 	{
@@ -15,6 +15,17 @@ namespace Pixel {
 		//Renderer2D::Init();
 		Renderer3D::Init();
 		ShaderStringFactory::Init();
+
+		m_SceneData = new Renderer::SceneData;
+	}
+
+	void Renderer::Finitialize()
+	{
+		RenderCommand::Finitialize();
+		if (m_SceneData != nullptr) {
+			delete m_SceneData;
+			m_SceneData = nullptr;
+		}
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)

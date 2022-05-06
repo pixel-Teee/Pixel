@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "ContentBrowserPanel.h"
 
+#include "Pixel/Scene/SerializerMaterial.h"
+
 #include <imgui/imgui.h>
 
 namespace Pixel {
@@ -15,8 +17,28 @@ namespace Pixel {
 		m_File = Texture2D::Create(g_AssetPath.string() + "/icons/file.png");
 	}
 
+	void ContentBrowserPanel::OpenAssetEditor(const std::string& filename)
+	{
+		Ref<Material> pMaterial;
+		Ref<MaterialInstance> pMaterialInstance;
+		SerializerMaterial seralizer;
+		seralizer.DeserializerMaterialAssetAndCreateMaterial(filename, pMaterial, pMaterialInstance);
+
+		if (pMaterial != nullptr)
+		{
+			m_bIsOpen = true;
+			//Open The Node Graph
+			m_NodeGraph = CreateRef<NodeGraph>(pMaterial, pMaterialInstance, filename);
+		}
+	}
+
 	void ContentBrowserPanel::OnImGuiRender()
 	{
+		if (m_NodeGraph != nullptr && m_bIsOpen)
+		{
+			m_NodeGraph->OnImGuiRender();
+		}
+
 		//list all the files in the assets directory
 		ImGui::Begin("Content Browser");
 		
@@ -26,6 +48,18 @@ namespace Pixel {
 			{
 				m_CurrentDirectory = m_CurrentDirectory.parent_path();
 			}
+		}
+
+		if (ImGui::IsMouseClicked(1) && ImGui::IsWindowFocused())
+			ImGui::OpenPopup("Create Asset");
+
+		if (ImGui::BeginPopup("Create Asset"))
+		{
+			if (ImGui::MenuItem("Create Material Asset"))
+			{
+				CreateMaterialAsset(m_CurrentDirectory.string());
+			}
+			ImGui::EndPopup();
 		}
 
 		float ContentWidth = ImGui::GetContentRegionAvailWidth();
@@ -41,8 +75,7 @@ namespace Pixel {
 		ImGui::Columns(CellNumber, 0, false);
 
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
-		{
-			
+		{		
 			const auto& path = directoryEntry.path();
 			//ImGui::Text("%s", path.string().c_str());
 			auto relativePath = std::filesystem::relative(path, g_AssetPath);
@@ -70,6 +103,13 @@ namespace Pixel {
 				{
 					m_CurrentDirectory /= path.filename();
 				}
+
+				//------Open Asset Editor------
+				if (!directoryEntry.is_directory())
+				{
+					OpenAssetEditor(path.string());
+				}
+				//------Open Asset Editor------
 			}
 			ImGui::TextWrapped("%s", filenameString.c_str());
 			ImGui::NextColumn();
@@ -80,7 +120,21 @@ namespace Pixel {
 		ImGui::SliderFloat("ThumbnailSize", &ThumbnailSize, 16.0f, 512.0f);
 		ImGui::SliderFloat("Padding", &Padding, 2.0f, 16.0f);
 
+		//Right Click, Draw For Create Material File
+
+
 		ImGui::End();
+	}
+
+	void ContentBrowserPanel::CreateMaterialAsset(std::string filePath)
+	{
+		Ref<Material> pMaterial = CreateRef<Material>("Material");
+		Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>(pMaterial);
+
+		filePath += "\\Test.mut";
+
+		SerializerMaterial serializerMaterial;
+		serializerMaterial.SerializerMaterialAsset(filePath, pMaterial, pMaterialInstance);
 	}
 
 }

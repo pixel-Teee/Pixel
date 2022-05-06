@@ -20,11 +20,14 @@ namespace Pixel {
 		}
 
 		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
-
+		void Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID);
 		//TODO:forward temporary
 		void Draw();
 
 		std::vector<StaticMesh> GetMeshes() { return m_Meshes; }
+
+		void SetEntityDirty(bool dirty) { m_EntityDirty = dirty; }
+		bool m_EntityDirty = false;
 	private:
 		//the model's every meshes
 		std::vector<StaticMesh> m_Meshes;

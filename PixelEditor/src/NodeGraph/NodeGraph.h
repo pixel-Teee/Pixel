@@ -13,6 +13,7 @@ namespace Pixel {
 	class NodeGraph {
 	public:
 		NodeGraph();
+		NodeGraph(Ref<Material> pMaterial, Ref<MaterialInstance> pMaterialInstance, std::string filePath);
 		~NodeGraph();
 		void OnImGuiRender();
 	private:
@@ -43,5 +44,7 @@ namespace Pixel {
 		std::vector<Ref<GraphNode>> m_Nodes;
 		//------Graph Editor------
 		glm::vec2 m_MousePos;
+
+		std::string m_filePath;
 	};
 }

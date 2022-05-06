@@ -12,6 +12,7 @@
 
 #include "SceneCamera.h"
 #include "Pixel/Renderer/3D/Model.h"
+#include "Pixel/Renderer/3D/Material.h"
 
 namespace Pixel {
 	
@@ -46,7 +47,7 @@ namespace Pixel {
 		glm::mat4 GetTransform() const
 		{
 			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-
+			
 			return glm::translate(glm::mat4(1.0f), Translation)
 			* rotation
 			* glm::scale(glm::mat4(1.0f), Scale);
@@ -89,17 +90,39 @@ namespace Pixel {
 	class ScriptableEntity;
 	struct NativeScriptComponent
 	{
+		//------
 		ScriptableEntity* Instance = nullptr;
 
-		ScriptableEntity*(*InstantiateScript)();
-		void (*DestroyScript)(NativeScriptComponent*);
+		//ScriptableEntity*(*InstantiateScript)();
+		//void (*DestroyScript)(NativeScriptComponent*);
 
-		template<typename T>
+		std::string m_path;
+
+		void Instantiate(std::string path);
+
+		void Destroy();
+
+		
+		/*template<typename T>
 		void Bind()
 		{
 			InstantiateScript = [](){ return static_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
-		}
+		}*/
+		//------
+		
+		/*lua_State* m_pLuaState;
+
+		void (*InstantiateScript)(NativeScriptComponent* nsc);
+		void (*DestroyScript)(NativeScriptComponent*);
+
+		void Bind()
+		{
+			InstantiateScript = [](NativeScriptComponent* nsc) { nsc->m_pLuaState = luaL_newstate();
+				luaL_openlibs(nsc->m_pLuaState);
+			};
+			DestroyScript = [](NativeScriptComponent* nsc) { lua_close(nsc->m_pLuaState); };
+		}*/
 	};
 
 	//Physics
@@ -172,41 +195,46 @@ namespace Pixel {
 		}
 		MaterialComponent(const MaterialComponent&) = default;
 
-		MaterialComponent(std::string& albedoPath, std::string& normalMapPath,
-			std::string& roughnessPath, std::string& metallicPath, std::string& emissivePath)
+		MaterialComponent(std::string& AlbedoPath, std::string& NormalMapPath,
+			std::string& RoughnessPath, std::string& MetallicPath, std::string& EmissivePath)
 		{
 			uint32_t whiteTextureData = 0xffffff;
 			uint32_t whiteTextureData2 = 0xff;
-			if(albedoPath != "")
-				Albedo = Texture2D::Create(albedoPath);
+			albedoPath = AlbedoPath;
+			normalMapPath = NormalMapPath;
+			roughnessPath = RoughnessPath;
+			metallicPath = MetallicPath;
+			emissivePath = EmissivePath;
+			if(AlbedoPath != "")
+				Albedo = Texture2D::Create(AlbedoPath);
 			else
 			{
 				Albedo = Texture2D::Create(1, 1, TextureFormat::RGB);
 				Albedo->SetData(&whiteTextureData, 3);
 			}
-			if(normalMapPath != "")
-				NormalMap = Texture2D::Create(normalMapPath);
+			if(NormalMapPath != "")
+				NormalMap = Texture2D::Create(NormalMapPath);
 			else
 			{
 				NormalMap = Texture2D::Create(1, 1, TextureFormat::RGB);
 				NormalMap->SetData(&whiteTextureData, 3);
 			}
-			if(roughnessPath != "")
-				Roughness = Texture2D::Create(roughnessPath);
+			if(RoughnessPath != "")
+				Roughness = Texture2D::Create(RoughnessPath);
 			else
 			{
 				Roughness = Texture2D::Create(1, 1, TextureFormat::RED);
 				Roughness->SetData(&whiteTextureData2, 1);
 			}
-			if(metallicPath != "")
-				Metallic = Texture2D::Create(metallicPath);
+			if(MetallicPath != "")
+				Metallic = Texture2D::Create(MetallicPath);
 			else
 			{
 				Metallic = Texture2D::Create(1, 1, TextureFormat::RED);
 				Metallic->SetData(&whiteTextureData2, 1);
 			}
-			if(emissivePath != "")
-				Emissive = Texture2D::Create(emissivePath);
+			if(EmissivePath != "")
+				Emissive = Texture2D::Create(EmissivePath);
 			else
 			{
 				Emissive = Texture2D::Create(1, 1, TextureFormat::RED);
@@ -214,6 +242,21 @@ namespace Pixel {
 			}
 		}
 	};
+
+	//---experimental component---
+	struct MaterialTreeComponent {
+		std::string path;//material tree component file path
+		Ref<Material> m_pMaterial;
+		Ref<MaterialInstance> m_pMaterialInstance;
+		MaterialTreeComponent(const std::string& Path) {
+			path = Path;
+			//from this path to load the material file's logic node
+			//there add one shader main function
+			m_pMaterial = CreateRef<Material>("Material", Material::MUT_GEO);
+			m_pMaterialInstance = CreateRef<MaterialInstance>(m_pMaterial);
+		}
+	};
+	//---experimental component---
 
 	struct StaticMeshComponent
 	{

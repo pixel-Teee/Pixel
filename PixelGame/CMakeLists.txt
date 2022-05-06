@@ -25,6 +25,7 @@ PRIVATE
 "../Pixel/vendor"
 "../Pixel/vendor/glm"
 "../Pixel/vendor/entt/include"
+"../Pixel/vendor/lua"
 )
 
 target_compile_definitions(PixelGame PRIVATE

@@ -11,32 +11,34 @@ layout(location = 1) out vec3 v_Normal;
 layout(location = 2) out vec2 v_TexCoord;
 layout(location = 3) out flat int v_EntityID;
 
+/*
 layout(std140, binding = 0) uniform UBO{
 	mat4 u_Model;
 	mat4 u_ViewProjection;	
 } ubo;
+*/
 
-//uniform mat4 u_Model;
-//uniform mat4 u_ViewProjection;
+uniform mat4 u_Model;
+uniform mat4 u_ViewProjection;
 
 void main()
 {
 	//all coordinate are in world pos
 
 	//worldpos
-	vec4 WorldPos = ubo.u_Model * vec4(a_Pos, 1.0);
+	vec4 WorldPos = u_Model * vec4(a_Pos, 1.0);
 	v_WorldPos = WorldPos.xyz;
 
 	//texcoord
 	v_TexCoord = a_TexCoord;
 
 	//normal
-	mat3 NormalMatrix = mat3(transpose(inverse(ubo.u_Model)));
+	mat3 NormalMatrix = mat3(transpose(inverse(u_Model)));
 	v_Normal = NormalMatrix * a_Normal;
 
 	v_EntityID = a_EntityID;
 
-	gl_Position = ubo.u_ViewProjection * WorldPos;
+	gl_Position = u_ViewProjection * WorldPos;
 }
 
 #type fragment

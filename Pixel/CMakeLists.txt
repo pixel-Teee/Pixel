@@ -38,7 +38,6 @@ file(GLOB_RECURSE PixelSrc
 "vendor/Box2D/include/*.h"
 "vendor/Box2D/src/*.cpp"
 "vendor/assimp/include"
-"vendor/spir-v"
 "vendor/imgui-node-editor/imgui_node_editor.h"
 "vendor/imgui-node-editor/imgui_node_editor.cpp"
 "vendor/imgui-node-editor/imgui_node_editor_internal.h"
@@ -49,6 +48,7 @@ file(GLOB_RECURSE PixelSrc
 "vendor/imgui-node-editor/imgui_extra_math.h"
 "vendor/imgui-node-editor/crude_json.h"
 "vendor/imgui-node-editor/crude_json.cpp"
+"vendor/lua/*.h"
 )
 
 set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")
@@ -75,8 +75,8 @@ target_include_directories(Pixel PRIVATE
 "vendor/imguizmo"
 "vendor/Box2D/include"
 "vendor/assimp/include"
-"vendor/spir-v"
 "vendor/imgui-node-editor"
+"vendor/lua"
 )
 
 target_compile_definitions(Pixel
@@ -110,7 +110,7 @@ PUBLIC ${OPENGL_LIBRARIES}
 PRIVATE yaml-cpp
 PUBLIC ImGui
 PUBLIC assimp
-PUBLIC spirv-cross-glsl
+PUBLIC lua
 )
 
 

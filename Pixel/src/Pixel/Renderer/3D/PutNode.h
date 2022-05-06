@@ -58,6 +58,7 @@ namespace Pixel {
 		}
 
 		void Connection(Ref<OutputNode> outputNode);
+		void DisConnection();
 
 		const Ref<OutputNode> GetOutputLink() const
 		{

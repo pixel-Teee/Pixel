@@ -40,6 +40,15 @@ namespace Pixel {
 		Ref<GraphPin> m_OutputPin;
 
 		GraphNodeLink() = default;
+		friend bool operator==(GraphNodeLink& lhs, GraphNodeLink& rhs)
+		{
+			return lhs.m_LinkId == rhs.m_LinkId;
+		}
+
+		friend bool operator!=(GraphNodeLink& lhs, GraphNodeLink& rhs)
+		{
+			return lhs.m_LinkId != rhs.m_LinkId;
+		}
 	};
 
 	class GraphNode {
@@ -48,7 +57,7 @@ namespace Pixel {
 
 		Ref<ShaderFunction> p_Owner;
 		
-		//one input pin
+		//many input pin
 		std::vector<Ref<GraphPin>> m_InputPin;
 
 		//many output pins

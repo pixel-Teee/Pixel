@@ -105,4 +105,10 @@ namespace Pixel {
 		//glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	}
 
+	std::string& OpenGLTexture2D::GetPath()
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+		return m_path;
+	}
+
 }

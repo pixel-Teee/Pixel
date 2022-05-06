@@ -3,6 +3,7 @@
 #include "Model.h"
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/UniformBuffer.h"
+#include "Pixel/Renderer/3D/Material.h"
 
 namespace Pixel {
 
@@ -10,7 +11,12 @@ namespace Pixel {
 	void Model::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer)
 	{
 		for(unsigned int i = 0; i < m_Meshes.size(); ++i)
-			m_Meshes[i].Draw(transform, shader, textures, entityID, modelUniformBuffer);
+			m_Meshes[i].Draw(transform, shader, textures, entityID, modelUniformBuffer, m_EntityDirty);
+	}
+
+	void Model::Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID)
+	{
+
 	}
 
 	void Model::Draw()

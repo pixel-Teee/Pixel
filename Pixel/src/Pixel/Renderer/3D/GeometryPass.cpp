@@ -27,6 +27,14 @@ namespace Pixel
 	bool GeometryPass::Resize(uint32_t width, uint32_t height)
 	{
 		//throw std::logic_error("The method or operation is not implemented.");
+		FramebufferSpecification fbSpec;
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+
+		fbSpec.Width = width;
+		fbSpec.Height = height;
+
+		m_GeometryFrameBuffer = Framebuffer::Create(fbSpec);
 		return true;
 	}
 

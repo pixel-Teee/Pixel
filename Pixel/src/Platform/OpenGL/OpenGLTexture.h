@@ -25,6 +25,9 @@ namespace Pixel {
 		{
 			return m_RendererID == ((OpenGLTexture2D&)other).m_RendererID;
 		}
+
+		virtual std::string& GetPath() override;
+
 	private:
 		std::string m_path;
 		uint32_t m_Width, m_Height;

@@ -235,10 +235,6 @@ namespace Pixel
 		/*----------Render Content Browser----------*/
 		m_ContentBrowserPanel.OnImGuiRender();
 		/*----------Render Content Browser----------*/
-		m_NodeGraph.OnImGuiRender();
-		/*---------Node Graph----------*/
-		
-		/*---------Node Graph----------*/
 
 		/*----------Render Stats----------*/
 		/*ImGui::Begin("Render Stats");
@@ -545,7 +541,7 @@ namespace Pixel
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filepath = FileDialogs::OpenFile("Pixel Scene (*.pixel)\0*.pixel\0");
+		std::wstring filepath = FileDialogs::OpenFile(L"Pixel Scene (*.pixel)\0*.pixel\0");
 		OpenScene(filepath);
 	}
 
@@ -573,7 +569,7 @@ namespace Pixel
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filepath = FileDialogs::SaveFile("Pixel Scene (*.pixel)\0*.pixel\0");
+		std::wstring filepath = FileDialogs::SaveFile(L"Pixel Scene (*.pixel)\0*.pixel\0");
 
 		if (!filepath.empty())
 		{
@@ -605,6 +601,7 @@ namespace Pixel
 		m_ActiveScene->OnRuntimeStart();
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
 	}
 
 	void EditorLayer::OnSceneStop()
@@ -612,7 +609,8 @@ namespace Pixel
 		m_SceneState = SceneState::Edit;
 		m_ActiveScene->OnRuntimeStop();
 		m_ActiveScene = m_EditorScene;
-
+		//m_Editor->model entity's is dirty
+		m_ActiveScene->MarkMeshEntityIDDirty();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 

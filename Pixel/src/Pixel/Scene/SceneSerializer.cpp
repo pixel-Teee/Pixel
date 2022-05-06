@@ -143,6 +143,49 @@ namespace Pixel {
 
 	}
 
+	static void SerializeMaterialTreeComponent(MaterialTreeComponent& materialTreeComponent)
+	{
+		//YAML::Emitter out;
+		//Ref<Material> pMaterial = materialTreeComponent.m_pMaterial;
+		//std::vector<Ref<ShaderFunction>> pShaderFunctions = pMaterial->GetShaderFunction();
+		//
+		//out << YAML::BeginMap;
+		//for (uint32_t i = 0; i < pShaderFunctions.size(); ++i)
+		//{
+		//	//traverse every node, and output every node's input node and output node in location
+		//	out << YAML::Key << "NodeName" << YAML::Value << pShaderFunctions[i]->GetShowName();
+		//	out << YAML::Key << "NodeType" << YAML::Value << pShaderFunctions[i]->GetFunctionType();
+		//	out << YAML::Key << "NodePos" << YAML::Value << pShaderFunctions[i]->GetFunctioNodePos();
+
+		//	out << YAML::Key << "InputNode";
+		//	out << YAML::Flow;
+		//	out << YAML::Value;
+		//	out << YAML::BeginSeq;
+		//	for (uint32_t j = 0; j < pShaderFunctions[i]->GetInputNodeNum(); ++j)
+		//	{
+		//		out << pShaderFunctions[i]->GetInputNode(j)->GetOutputLink()->GetOwner()->GetShowName();
+		//	}
+		//	out << YAML::EndSeq;
+
+		//	out << YAML::Key << "OutputNode";
+		//	out << YAML::Flow;
+		//	out << YAML::Value;
+		//	out << YAML::BeginSeq;
+		//	for (uint32_t j = 0; j < pShaderFunctions[i]->GetOutputNodeNum(); ++j)
+		//	{
+		//		//out << pShaderFunctions[i]->GetOutputNode(j)->
+		//		out << pShaderFunctions[i]->GetOutputNode(j)->GetInputLink()[0]->GetOwner()->GetShowName();
+		//	}
+		//	out << YAML::EndSeq;
+		//}
+		//out << YAML::EndMap;
+		////save the node relationship in one file
+		//std::ofstream fstream;
+		//fstream.open(materialTreeComponent.path);
+
+		//fstream.close();
+	}
+
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap;//Entity
@@ -272,6 +315,28 @@ namespace Pixel {
 			out << YAML::Key << "roughnessPath" << YAML::Value << materialComponent.roughnessPath;
 			out << YAML::Key << "emissivePath" << YAML::Value << materialComponent.emissivePath;
 			out << YAML::Key << "metallicPath" << YAML::Value << materialComponent.metallicPath;
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<MaterialTreeComponent>())
+		{
+			out << YAML::Key << "MaterialTreeComponent";
+			out << YAML::BeginMap;
+
+			auto& materialTreeComponent = entity.GetComponent<MaterialTreeComponent>();
+			out << YAML::Key << "Path" << YAML::Value << materialTreeComponent.path;
+			out << YAML::EndMap;
+			//save the node relationship to materialTreeComponent.path's file;
+			//SerializeMaterialTreeComponent(materialTreeComponent);
+		}
+
+		if (entity.HasComponent<NativeScriptComponent>())
+		{
+			out << YAML::Key << "ScriptComponent";
+			out << YAML::BeginMap;
+
+			auto& ScriptComponent = entity.GetComponent<NativeScriptComponent>();
+			out << YAML::Key << "Path" << YAML::Value << ScriptComponent.m_path;
 			out << YAML::EndMap;
 		}
 
@@ -446,6 +511,21 @@ namespace Pixel {
 				std::string normalMapPath = materialComponent["normalMapPath"].as<std::string>();
 				std::string emissivePath = materialComponent["emissivePath"].as<std::string>();
 				auto& material = deserializedEntity.AddComponent<MaterialComponent>(albedoPath, normalMapPath, roughnessPath, metallicPath, emissivePath);
+			}
+
+			auto materialTreeComponent = entity["MaterialTreeComponent"];
+			if (materialTreeComponent)
+			{
+				std::string Path = materialComponent["Path"].as<std::string>();
+				auto& materialTree = deserializedEntity.AddComponent<MaterialTreeComponent>(Path);
+			}
+
+			auto scriptComponent = entity["ScriptComponent"];
+			if (scriptComponent)
+			{
+				std::string Path = scriptComponent["Path"].as<std::string>();
+				auto& script = deserializedEntity.AddComponent<NativeScriptComponent>();
+				script.m_path = Path;
 			}
 			}
 		}

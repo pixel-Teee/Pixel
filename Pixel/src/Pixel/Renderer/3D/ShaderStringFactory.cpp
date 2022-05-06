@@ -266,6 +266,8 @@ namespace Pixel {
 
 			CreatePOutputDeclare(MSPara, uiPassType, POutputDeclare);
 
+			CreatePUserConstant(nullptr, MSPara, uiPassType, PUserConstantString);
+
 			CreatePFunction(MSPara, uiPassType, PFunctionString);
 
 			shaderText += PInclude + "\n" + PInputDeclare + "\n" + POutputDeclare + "\n" + PUserConstantString + "\n" + PFunctionString + "\n";
@@ -284,7 +286,7 @@ namespace Pixel {
 		OutString += "#type fragment\n";
 		OutString += "#version 450 core\n\n";
 
-		/*OutString += "//------PBR Function------//\n";
+		OutString += "//------PBR Function------//\n";
 
 		std::string shaderInclude;
 		std::string Temp;
@@ -296,7 +298,7 @@ namespace Pixel {
 		}
 		file.close();
 		OutString += shaderInclude + "\n";
-		OutString += "//------PBR Function------//\n";*/
+		OutString += "//------PBR Function------//\n";
 	}
 
 	void ShaderStringFactory::CreatePInputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
@@ -379,6 +381,27 @@ namespace Pixel {
 		else if (uiPassType == RenderPass::RenderPassType::PT_STENCIL)
 		{
 
+		}
+	}
+
+	void ShaderStringFactory::CreatePUserConstant(Ref<Shader> pShader, MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString)
+	{
+		if (uiPassType == RenderPass::PT_GEOMETRY)
+		{
+			Ref<Material> pMaterial = MSPara.pMaterialInstance->GetMaterial();
+			//create world matrix uniform
+
+			//create view matrix uniform
+
+			//create projection matrix uniform
+
+			//create light 
+
+			//etc.......
+			pMaterial->CreateConstValueDeclare(OutString);
+			pMaterial->CreateCustomValue();
+			pMaterial->CreateTextureDeclare(OutString);
+			pMaterial->CreateCustomTexture();
 		}
 	}
 

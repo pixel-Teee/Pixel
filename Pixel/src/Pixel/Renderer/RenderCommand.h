@@ -6,9 +6,14 @@ namespace Pixel {
 	class RenderCommand
 	{
 	public:
-		inline static void Init()
+		static void Init();
+		inline static void Finitialize()
 		{
-			s_RendererAPI->Init();
+			if (s_RendererAPI != nullptr)
+			{
+				delete s_RendererAPI;
+				s_RendererAPI = nullptr;
+			}
 		}
 		inline static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 		{

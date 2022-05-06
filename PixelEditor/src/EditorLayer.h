@@ -81,7 +81,6 @@ namespace Pixel
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
 		EnvironmentPanel m_environmentPanel;
-		NodeGraph m_NodeGraph;
 
 		enum class SceneState
 		{

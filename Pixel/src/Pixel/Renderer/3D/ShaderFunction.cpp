@@ -36,6 +36,26 @@ namespace Pixel {
 		return m_ShowName;
 	}
 
+	ShaderFunction::ShaderFunctionType ShaderFunction::GetFunctionType()
+	{
+		return m_functionType;
+	}
+
+	glm::vec2 ShaderFunction::GetFunctioNodePos()
+	{
+		return m_Pos;
+	}
+
+	void ShaderFunction::SetFunctionNodePos(glm::vec2 pos)
+	{
+		m_Pos = pos;
+	}
+
+	void ShaderFunction::SetShowName(const std::string& showName)
+	{
+		m_ShowName = showName;
+	}
+
 	Ref<InputNode> ShaderFunction::GetInputNode(uint32_t nodeId) const
 	{
 		return m_pInput[nodeId];
@@ -286,6 +306,7 @@ namespace Pixel {
 		:ShaderFunction(showName, pMaterial)
 	{
 		m_bIsCustom = bIsCustom;
+		m_functionType = ShaderFunction::ConstFloat4;
 	}
 
 	ConstValue::~ConstValue()

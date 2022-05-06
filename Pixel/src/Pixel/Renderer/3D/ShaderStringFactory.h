@@ -67,6 +67,10 @@ namespace Pixel {
 		static void CreatePFunction(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
 		//-------Create Pixel Function------
 
+		//------Create PUser Constant------
+		static void CreatePUserConstant(Ref<Shader> pShader, MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
+		//------Create PUser Constant------
+
 		//------Local Position To World Position------
 		static void LocalToWorldPos(const std::string& LocalPos, std::string& OutString);
 		//------Local Position To World Position------

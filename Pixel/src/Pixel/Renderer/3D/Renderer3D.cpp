@@ -106,8 +106,9 @@ namespace Pixel {
 		RenderCommand::StencilTest(0);
 		RenderCommand::ClearStencil();
 
-		//m_GeoPass->SetMat4("u_ViewProjection", viewProj);
-		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
+		//fix:hard code
+		m_GeoPass->SetMat4("u_ViewProjection", viewProj);
+		//m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 		/*-------------------------------------------------------
 		 middle call the DrawModel function to write the gbuffer
 		--------------------------------------------------------*/
@@ -132,8 +133,9 @@ namespace Pixel {
 		RenderCommand::StencilTest(0);
 		RenderCommand::ClearStencil();
 		
-		//m_GeoPass->SetMat4("u_ViewProjection", viewProj);
-		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
+		//fix:hard code
+		m_GeoPass->SetMat4("u_ViewProjection", viewProj);
+		//m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 		/*-------------------------------------------------------
 		 middle call the DrawModel function to write the gbuffer
 		--------------------------------------------------------*/	
@@ -266,7 +268,7 @@ namespace Pixel {
 		RenderCommand::DepthFunc(DepthComp::LEQUAL);
 		m_SkyBoxShader->Bind();
 
-		glm::mat4 view = glm::mat4(glm::mat3(trans.GetTransform()));
+		glm::mat4 view = glm::mat4(glm::mat3(glm::inverse(trans.GetTransform())));
 		glm::mat4 proj = camera.GetProjection();
 		glm::mat4 viewProj = proj * view;
 

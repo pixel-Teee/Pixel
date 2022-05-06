@@ -3,6 +3,7 @@
 #include "StaticMesh.h"
 #include "Pixel/Renderer/RenderCommand.h"
 #include "Pixel/Renderer/UniformBuffer.h"
+#include "Pixel/Renderer/3D/Material.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -120,13 +121,14 @@ namespace Pixel {
 		}
 	}
 
-	void StaticMesh::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer)
+	void StaticMesh::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer, bool bEntityDirty)
 	{
-		SetupMesh(entityID);
+		SetupMesh(entityID, bEntityDirty);
 		shader->Bind();
 		glm::mat4 trans = transform;
-		//shader->SetMat4("u_Model", transform);
-		modelUniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(trans));
+		//fix:hard code
+		shader->SetMat4("u_Model", transform);
+		//modelUniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(trans));
 
 		//Bind Texture
 		shader->SetInt("tex_Albedo", 0);
@@ -165,6 +167,12 @@ namespace Pixel {
 		RenderCommand::DrawIndexed(VAO, IBO->GetCount());
 	}
 
+	void StaticMesh::Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID)
+	{
+		Ref<Material> pMaterial = pMaterialInstance->GetMaterial();
+		
+	}
+
 	Ref<VertexArray> StaticMesh::GetVerterArray()
 	{
 		return VAO;
@@ -176,10 +184,11 @@ namespace Pixel {
 	}
 
 	//setup mesh after load model
-	void StaticMesh::SetupMesh(int entityID)
+	void StaticMesh::SetupMesh(int entityID, bool bHavedSwitched)
 	{
-		if (EntityID == -1)
+		if (EntityID == -1 || bHavedSwitched)
 		{
+			bHavedSwitched = false;
 			EntityID = entityID;
 			VAO->Bind();
 

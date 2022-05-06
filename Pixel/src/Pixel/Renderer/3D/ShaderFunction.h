@@ -2,6 +2,9 @@
 
 #include "Pixel/Core/Core.h"
 #include "PutNode.h"
+
+#include "glm/glm.hpp"
+
 #include <string>
 
 namespace Pixel {
@@ -9,9 +12,18 @@ namespace Pixel {
 	//node logic
 	class ShaderFunction : public std::enable_shared_from_this<ShaderFunction>
 	{
+	public:
+		enum ShaderFunctionType {
+			GeoMetry,
+			ConstFloat4,
+			Mul,
+			Sampler2D
+		};
 	protected:
 		//node name
 		std::string m_ShowName;
+		//function type
+		ShaderFunctionType m_functionType;
 		ShaderFunction(const std::string& ShowName, Ref<Material> pMaterial);
 		//Input
 		std::vector<Ref<InputNode>> m_pInput;
@@ -20,6 +32,9 @@ namespace Pixel {
 
 		//Owner material
 		Ref<Material> m_pOwner;
+
+		//editor:need to fix
+		glm::vec2 m_Pos;
 	public:
 		ShaderFunction() = default;
 		virtual ~ShaderFunction();
@@ -47,6 +62,13 @@ namespace Pixel {
 		//------check have input and output node and get the number------//
 
 		std::string GetShowName();
+
+		ShaderFunctionType GetFunctionType();
+
+		glm::vec2 GetFunctioNodePos();
+		void SetFunctionNodePos(glm::vec2 pos);
+
+		void SetShowName(const std::string& showName);
 
 		//in terms of index get node
 		Ref<InputNode> GetInputNode(uint32_t nodeId) const;
@@ -76,6 +98,8 @@ namespace Pixel {
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;
+
+		friend class SerializerMaterial;
 	};
 
 	class ShaderMainFunction : public ShaderFunction
