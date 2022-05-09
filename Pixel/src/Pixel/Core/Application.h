@@ -34,6 +34,16 @@ namespace Pixel {
 		void Close();
 
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+
+		Layer* GetLayer(int32_t layerIndex)
+		{
+			PX_CORE_ASSERT(layerIndex < m_LayerStack.size(), "Layer Index Out Of Bound");
+
+			std::vector<Layer*>::iterator it = m_LayerStack.begin();
+
+			return *(it + layerIndex);
+		}
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);

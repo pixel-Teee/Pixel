@@ -10,10 +10,10 @@
 
 namespace Pixel {
 
-	std::string FileDialogs::OpenFile(const char* filter)
+	std::wstring FileDialogs::OpenFile(const wchar_t* filter)
 	{
 		OPENFILENAME ofn;
-		CHAR szFile[260] = {0};
+		WCHAR szFile[260] = {0};
 
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
@@ -27,13 +27,13 @@ namespace Pixel {
 		{
 			return ofn.lpstrFile;
 		}
-		return std::string();
+		return std::wstring();
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter)
+	std::wstring FileDialogs::SaveFile(const wchar_t* filter)
 	{
 		OPENFILENAME ofn;
-		CHAR szFile[260] = { 0 };
+		WCHAR szFile[260] = { 0 };
 
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
@@ -47,7 +47,7 @@ namespace Pixel {
 		{
 			return ofn.lpstrFile;
 		}
-		return std::string();
+		return std::wstring();
 	}
 
 }

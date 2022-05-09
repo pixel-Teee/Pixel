@@ -32,7 +32,7 @@ namespace Pixel {
 	}
 	Application::~Application()
 	{
-
+		
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

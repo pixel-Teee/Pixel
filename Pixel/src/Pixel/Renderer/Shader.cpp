@@ -3,6 +3,8 @@
 
 #include "Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Pixel/Renderer/3D/ShaderStringFactory.h"
+#include "Pixel/Renderer/3D/Material.h"
 
 namespace Pixel {
 
@@ -34,39 +36,75 @@ namespace Pixel {
 	///Shader Library///
 	////////////////////
 
-	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
+	ShaderLibrary::ShaderLibrary(const std::string& Name)
 	{
-		PX_CORE_ASSERT(!Exists(name), "Shader already exists!");
-		m_Shaders[name] = shader;
+		m_MapName = Name;
 	}
 
-	void ShaderLibrary::Add(const Ref<Shader>& shader)
+	ShaderLibrary::~ShaderLibrary()
 	{
-		auto& name = shader->GetName();
-		Add(name, shader);
+
+	}
+	
+	void ShaderLibrary::SetShader(const std::string& Name, Ref<ShaderKey> Key, Ref<Shader> pShader)
+	{
+		Ref<ShaderSet> pSet = CreateRef<ShaderSet>();
+		pSet->insert(std::make_pair(Key, pShader));
+		m_ShaderMap[Name] = pSet;
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& filepath)
+	Ref<ShaderLibrary::ShaderSet> ShaderLibrary::GetShaderSet(const std::string& Name)
 	{
-		auto shader = Shader::Create(filepath);
-		Add(shader);
-		return shader;
+		return m_ShaderMap[Name];
 	}
 
-	Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
-	{	
-		auto shader = Shader::Create(filepath);
-		Add(name, shader);
-		return shader;
-	}	
-
-	Ref<Shader> ShaderLibrary::Get(const std::string& name)
+	void ShaderLibrary::DeleteShaderSet(const std::string& Name)
 	{
-		return m_Shaders[name];
+		m_ShaderMap.erase(Name);
 	}
 
-	bool ShaderLibrary::Exists(const std::string& name) const
+	Ref<Shader> ShaderLibrary::GetShader(const std::string& Name, Ref<ShaderKey> Key)
 	{
-		return m_Shaders.find(name) != m_Shaders.end();
+		Ref<ShaderSet> pSet = m_ShaderMap[Name];
+		auto it = pSet->find(Key);
+		return it->second;
 	}
+
+	void ShaderLibrary::DeleteShader(const std::string& Name, Ref<ShaderKey> Key)
+	{
+		Ref<ShaderSet> pSet = m_ShaderMap[Name];
+		pSet->erase(Key);
+	}
+
+	bool ShaderResourceManager::CacheShader()
+	{
+		return true;
+	}
+
+	Ref<Shader> ShaderResourceManager::CreateShader(MaterialShaderPara& MSPara, uint32_t uiPassType, uint32_t uiShaderId)
+	{
+		if (!MSPara.m_pStaticMesh || !MSPara.pMaterialInstance)
+			return nullptr;
+
+		Ref<Shader> pShader;
+
+		Ref<Material> pMaterial = MSPara.pMaterialInstance->GetMaterial();
+		
+		std::string filePath;
+
+		//get the shader filepath
+		//generater the shader text
+		if (!ShaderStringFactory::CreateShaderString(pShader, MSPara, uiPassType, filePath))
+		{
+			return nullptr;
+		}
+
+		//from the disk to load shader and compile the shader
+		pShader = Shader::Create(filePath);
+		pShader->m_pShaderKey = CreateRef<ShaderKey>();
+		ShaderKey::SetMaterialShaderKey(pShader->m_pShaderKey, MSPara, uiPassType);
+
+		return pShader;
+	}
+
 }

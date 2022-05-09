@@ -44,6 +44,63 @@ namespace Pixel {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
+	bool OpenGLVertexBuffer::HavePosition()
+	{
+		return CheckHaveSematics(Semantics::POSITION, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveNormal()
+	{
+		return CheckHaveSematics(Semantics::NORMAL, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveTangent()
+	{
+		return CheckHaveSematics(Semantics::TANGENT, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveBinormal()
+	{
+		return CheckHaveSematics(Semantics::BINORMAL, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveColors(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::COLOR, Level);
+	}
+
+	bool OpenGLVertexBuffer::HaveTexCoord(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::TEXCOORD, 1);
+	}
+
+	bool OpenGLVertexBuffer::HaveBoneIndex(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::BLENDINDICES, Level);
+	}
+
+	bool OpenGLVertexBuffer::HaveBoneWeight(uint32_t Level)
+	{
+		return CheckHaveSematics(Semantics::BLENDWEIGHT, Level);
+	}
+
+	bool OpenGLVertexBuffer::CheckHaveSematics(Semantics semantics, uint32_t level)
+	{
+		uint32_t Level = 0;
+		for (auto it = m_Layout.begin(); it != m_Layout.end(); ++it)
+		{
+			if (it->m_sematics == semantics)
+			{
+				++Level;
+			}
+		}
+		if (Level >= level)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	///////////////////////////
 	//IndicesBuffer////////////
 	///////////////////////////
@@ -53,6 +110,13 @@ namespace Pixel {
 		glCreateBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+	}
+
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count)
+	{
+		glCreateBuffers(1, &m_RendererID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * count, nullptr, GL_DYNAMIC_DRAW);
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -68,6 +132,13 @@ namespace Pixel {
 	void OpenGLIndexBuffer::Unbind() const
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
+	void OpenGLIndexBuffer::SetData(const void* data, uint32_t count)
+	{
+		m_Count = count;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * count, data);
 	}
 
 }

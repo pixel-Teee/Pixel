@@ -14,21 +14,21 @@ namespace Pixel {
 
 	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
-		if (Input::IsKeyPressed(PX_KEY_A))
+		if (Input::IsKeyPressed(KeyCodes::PX_KEY_A))
 			m_CameraPosition.x -= m_CameraTranslationSpeed * ts;
-		else if (Input::IsKeyPressed(PX_KEY_D))
+		else if (Input::IsKeyPressed(KeyCodes::PX_KEY_D))
 			m_CameraPosition.x += m_CameraTranslationSpeed * ts;
 
-		if (Input::IsKeyPressed(PX_KEY_W))
+		if (Input::IsKeyPressed(KeyCodes::PX_KEY_W))
 			m_CameraPosition.y += m_CameraTranslationSpeed * ts;
-		else if (Input::IsKeyPressed(PX_KEY_S))
+		else if (Input::IsKeyPressed(KeyCodes::PX_KEY_S))
 			m_CameraPosition.y -= m_CameraTranslationSpeed * ts;
 
 		if (m_Rotation)
 		{
-			if (Input::IsKeyPressed(PX_KEY_Q))
+			if (Input::IsKeyPressed(KeyCodes::PX_KEY_Q))
 				m_CameraRotation += m_CameraRotationSpeed * ts;
-			if (Input::IsKeyPressed(PX_KEY_E))
+			if (Input::IsKeyPressed(KeyCodes::PX_KEY_E))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
 
 			m_Camera.SetRotation(m_CameraRotation);

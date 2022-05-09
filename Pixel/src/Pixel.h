@@ -23,6 +23,7 @@
 //---Renderer---
 #include "Pixel/Renderer/Renderer.h"
 #include "Pixel/Renderer/Renderer2D.h"
+#include "Pixel/Renderer/3D/Renderer3D.h"
 #include "Pixel/Renderer/RenderCommand.h"
 
 #include "Pixel/Renderer/Shader.h"

@@ -9,6 +9,7 @@ namespace Pixel {
 
 		//Color
 		RGBA8,
+		RGBA16F,
 		RED_INTEGER,
 
 		//Depth/Stencil
@@ -47,6 +48,11 @@ namespace Pixel {
 		bool SwapChainTarget = false;
 	};
 
+	void BindWriteFramebuffer(uint32_t renderId);
+	void BindReadFramebuffer(uint32_t renderId);
+	void BlitFramebuffer(int32_t srcWidth, int32_t srcHeight);
+	void BlitDepthFramebuffer(uint32_t srcWidth, uint32_t srcHeight);
+
 	class Framebuffer
 	{
 	public:
@@ -58,10 +64,18 @@ namespace Pixel {
 
 		virtual void ClearAttachment(uint32_t attachmentIndex, int value) = 0;
 
+		virtual uint32_t GetRenderId() = 0;
 		virtual uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const = 0;
+
+		virtual uint32_t GetDepthAttachmentRendererID() const = 0;
+
+		virtual void SetDepthAttachmentRendererID(uint32_t rendererID) = 0;
 
 		//virtual FramebufferSpecification& GetSpecification() = 0;
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
+
+		virtual void CloseColorAttachmentDraw() = 0;
+		virtual void SetColorAttachmentDraw(uint32_t index) = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
 	};

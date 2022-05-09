@@ -7,6 +7,15 @@ namespace Pixel {
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
 	};
 
+	//------Semantics------
+	enum class Semantics : uint8_t
+	{
+		POSITION = 0, TEXCOORD = 1, NORMAL = 2, TANGENT = 3, BINORMAL = 4, COLOR = 5, BLENDWEIGHT = 6, BLENDINDICES = 7, 
+		Editor = 8, FLOAT = 9,
+		MAX = 10
+	};
+	//------Semantics------
+
 	static uint32_t ShaderDataTypeSize(ShaderDataType type)
 	{
 		switch (type)
@@ -31,13 +40,15 @@ namespace Pixel {
 	{
 		std::string Name;
 		ShaderDataType Type;
-
 		uint32_t Offset;
 		uint32_t Size;
 		bool Normalized;
-		
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
-			:Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
+		//------Semantics------
+		Semantics m_sematics;
+		//------Semantics------
+		BufferElement(ShaderDataType type, const std::string& name, Semantics sematics, bool normalized = false)
+			:Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized),
+			m_sematics(sematics)
 		{
 
 		}
@@ -68,6 +79,10 @@ namespace Pixel {
 	public:
 		BufferLayout(){}
 		BufferLayout(const std::initializer_list<BufferElement>& element) :m_Elements(element)
+		{
+			CalculateOffsetAndStride();
+		}
+		BufferLayout(const std::vector<BufferElement>& element) : m_Elements(element)
 		{
 			CalculateOffsetAndStride();
 		}
@@ -108,6 +123,20 @@ namespace Pixel {
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
+		/*------*/
+		virtual bool HavePosition() = 0;
+		virtual bool HaveNormal() = 0;
+		virtual bool HaveTangent() = 0;
+		virtual bool HaveBinormal() = 0;
+		//may have levels vertex color
+		virtual bool HaveColors(uint32_t Level) = 0;
+		//may have levels vertex texcoord
+		virtual bool HaveTexCoord(uint32_t Level) = 0;
+
+		virtual bool HaveBoneIndex(uint32_t Level) = 0;
+		virtual bool HaveBoneWeight(uint32_t Level) = 0;
+		/*------*/
+
 		static Ref<VertexBuffer> Create(uint32_t size);
 		static VertexBuffer* Create(float* vertices, uint32_t size);
 	};
@@ -118,8 +147,11 @@ namespace Pixel {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
+		virtual void SetData(const void* data, uint32_t count) = 0;
+
 		virtual uint32_t GetCount() const = 0;
 
+		static Ref<IndexBuffer> Create(uint32_t count);
 		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
 	};
 }

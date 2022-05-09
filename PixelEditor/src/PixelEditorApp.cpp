@@ -156,42 +156,42 @@ public:
 
 	void OnUpdate(Pixel::Timestep ts)override
 	{
-		//Update
-		m_CameraController.OnUpdate(ts);
+		////Update
+		//m_CameraController.OnUpdate(ts);
 
-		//Render
-		Pixel::RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
-		Pixel::RenderCommand::Clear();
+		////Render
+		//Pixel::RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
+		//Pixel::RenderCommand::Clear();
 
-		Pixel::Renderer::BeginScene(m_CameraController.GetCamera());
+		//Pixel::Renderer::BeginScene(m_CameraController.GetCamera());
 
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
-		glm::vec4 redColor(0.7f, 0.2f, 0.2f, 1.0f);
-		glm::vec4 blueColor(0.2f, 0.3f, 0.8f, 1.0f);
+		//glm::vec4 redColor(0.7f, 0.2f, 0.2f, 1.0f);
+		//glm::vec4 blueColor(0.2f, 0.3f, 0.8f, 1.0f);
 
-		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_Shader2)->Bind();
-		std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_Shader2)->UploadUniformFloat3("u_Color", m_SquareColor);
+		//std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_Shader2)->Bind();
+		//std::dynamic_pointer_cast<Pixel::OpenGLShader>(m_Shader2)->UploadUniformFloat3("u_Color", m_SquareColor);
 
-		for (int y = 0; y < 20; ++y)
-		{
-			for (int x = 0; x < 20; ++x)
-			{
-				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				Pixel::Renderer::Submit(m_Shader2, m_VertexArray2, transform);
-			}
-		}
+		//for (int y = 0; y < 20; ++y)
+		//{
+		//	for (int x = 0; x < 20; ++x)
+		//	{
+		//		glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+		//		glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
+		//		Pixel::Renderer::Submit(m_Shader2, m_VertexArray2, transform);
+		//	}
+		//}
 
-		auto& textureShader = m_ShaderLibrary.Get("Texture");
+		//auto& textureShader = m_ShaderLibrary.Get("Texture");
 	
-		m_Texture->Bind();
-		Pixel::Renderer::Submit(textureShader, m_VertexArray2, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		//m_Texture->Bind();
+		//Pixel::Renderer::Submit(textureShader, m_VertexArray2, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
-		//Triangle
-		//Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
+		////Triangle
+		////Pixel::Renderer::Submit(m_Shader, m_VertexArray, transform);
 
-		Pixel::Renderer::EndScene();
+		//Pixel::Renderer::EndScene();
 	}
 
 	void OnEvent(Pixel::Event& e)override
