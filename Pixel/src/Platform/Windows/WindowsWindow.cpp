@@ -177,4 +177,31 @@ namespace Pixel {
 	{
 		return m_Data.VSync;
 	}
+
+	void WindowsWindow::SetCursorPos(int32_t x, int32_t y)
+	{
+		glfwSetCursorPos(m_Window, x, y);
+	}
+
+	void WindowsWindow::SetCursorViewPortCenter()
+	{
+		glfwSetCursorPos(m_Window, m_ViewPortCenterPoint.x, m_ViewPortCenterPoint.y);
+	}
+
+	void WindowsWindow::SetViewPortCenterPoint(int32_t x, int32_t y)
+	{
+		m_ViewPortCenterPoint.x = x;
+		m_ViewPortCenterPoint.y = y;
+	}
+
+	void WindowsWindow::SetCursorDisabled()
+	{
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	void WindowsWindow::SetCursorNormal()
+	{
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 }

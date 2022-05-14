@@ -21,7 +21,7 @@ namespace Pixel {
 
 		virtual void BindTexture(int32_t slot, uint32_t textureID) override;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
+		virtual void DrawIndexed(Primitive DrawMode, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
 
 		virtual void Cull(int32_t Bit) override;
 

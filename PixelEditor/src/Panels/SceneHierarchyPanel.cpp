@@ -291,6 +291,12 @@ namespace Pixel
 				ImGui::CloseCurrentPopup();
 			}
 
+			if (ImGui::MenuItem("Rigid3D"))
+			{
+				m_SelectionContext.AddComponent<RigidBody3DComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 		/*----------Add Component----------*/
@@ -573,6 +579,41 @@ namespace Pixel
 				if (ImGui::InputText("Script Path:", buf, 256))
 				{
 					component.m_path = buf;
+				}
+			}
+		);
+
+		DrawComponent<RigidBody3DComponent>("RigiBody3DComponent", entity, [](auto& component)
+			{
+				const char* ShapeTypeString[] = {"BoxShape", "SphereShape", "ConvexHull"};
+				const char* currentShapeTypeString = ShapeTypeString[(int)component.m_shapeType];
+				if (ImGui::BeginCombo("Shape Type", currentShapeTypeString))
+				{
+					for (int i = 0; i < 3; ++i)
+					{
+						bool isSelected = currentShapeTypeString == ShapeTypeString[i];
+						if (ImGui::Selectable(ShapeTypeString[i], isSelected))
+						{
+							currentShapeTypeString = ShapeTypeString[i];
+							component.m_shapeType = (RigidBody3DComponent::ShapeType)i;
+						}
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::DragFloat("Mass", &component.m_bodyMass);
+				ImGui::DragFloat3("BodyInertia", glm::value_ptr(component.m_bodyInertia));
+				ImGui::DragFloat("Restitution", &component.m_restitution);
+				ImGui::DragFloat("Friction", &component.m_friction);
+
+				if (component.m_shapeType == RigidBody3DComponent::ShapeType::BoxShape)
+				{
+					ImGui::DragFloat("HalfLength", &component.m_HalfLength);
+				}
+				else if (component.m_shapeType == RigidBody3DComponent::ShapeType::SphereShape)
+				{
+					ImGui::DragFloat("Radius", &component.m_Radius);
 				}
 			}
 		);

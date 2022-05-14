@@ -147,7 +147,7 @@ namespace Pixel {
 		textures[4]->Bind(4);
 
 		VAO->Bind();
-		RenderCommand::DrawIndexed(VAO, IBO->GetCount());
+		RenderCommand::DrawIndexed(Primitive::TRIANGLE, VAO, IBO->GetCount());
 	}
 
 	void StaticMesh::Draw()
@@ -164,7 +164,7 @@ namespace Pixel {
 			VAO->Unbind();
 		}
 		VAO->Bind();
-		RenderCommand::DrawIndexed(VAO, IBO->GetCount());
+		RenderCommand::DrawIndexed(Primitive::TRIANGLE, VAO, IBO->GetCount());
 	}
 
 	void StaticMesh::Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID)

@@ -5,6 +5,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+
 namespace Pixel {
 	class WindowsWindow : public Window
 	{
@@ -23,12 +25,22 @@ namespace Pixel {
 		bool IsVSync()const override;
 
 		inline void* GetNativeWindow() const{ return m_Window; }
+
+		virtual void SetCursorPos(int32_t x, int32_t y) override;
+		virtual void SetCursorViewPortCenter() override;
+
+		virtual void SetViewPortCenterPoint(int32_t x, int32_t y) override;
+		virtual void SetCursorDisabled() override;
+		virtual void SetCursorNormal() override;
+
 	private:
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
 		GraphicsContext* m_Context;
+
+		glm::vec2 m_ViewPortCenterPoint;
 
 		struct WindowData
 		{

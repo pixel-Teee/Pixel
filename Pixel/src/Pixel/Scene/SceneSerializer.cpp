@@ -340,6 +340,29 @@ namespace Pixel {
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<RigidBody3DComponent>())
+		{
+			out << YAML::Key << "RigidBody3DComponent";
+			out << YAML::BeginMap;
+
+			auto& rdg = entity.GetComponent<RigidBody3DComponent>();
+			out << YAML::Key << "ShapeType" << YAML::Value << rdg.m_shapeType;
+			out << YAML::Key << "BodyMass" << YAML::Value << rdg.m_bodyMass;
+			out << YAML::Key << "BodyInertia" << YAML::Value << rdg.m_bodyInertia;
+			out << YAML::Key << "Restitution" << YAML::Value << rdg.m_restitution;
+			out << YAML::Key << "Friction" << YAML::Value << rdg.m_friction;
+
+			if (rdg.m_shapeType == RigidBody3DComponent::ShapeType::BoxShape)
+			{
+				out << YAML::Key << "HalfLength" << YAML::Value << rdg.m_HalfLength;
+			}
+			else if (rdg.m_shapeType == RigidBody3DComponent::ShapeType::SphereShape)
+			{
+				out << YAML::Key << "Radius" << YAML::Value << rdg.m_Radius;
+			}
+			out << YAML::EndMap;
+		}
+
 		out << YAML::EndMap;
 	}
 
@@ -526,6 +549,25 @@ namespace Pixel {
 				std::string Path = scriptComponent["Path"].as<std::string>();
 				auto& script = deserializedEntity.AddComponent<NativeScriptComponent>();
 				script.m_path = Path;
+			}
+
+			auto rigid3DComponent = entity["RigidBody3DComponent"];
+			if (rigid3DComponent)
+			{
+				auto& rgd = deserializedEntity.AddComponent<RigidBody3DComponent>();
+				rgd.m_shapeType = RigidBody3DComponent::ShapeType(rigid3DComponent["ShapeType"].as<int>());
+				if (rigid3DComponent["ShapeType"].as<int32_t>() == RigidBody3DComponent::ShapeType::BoxShape)
+				{
+					rgd.m_HalfLength = rigid3DComponent["HalfLength"].as<float>();
+				}
+				else if (rigid3DComponent["ShapeType"].as<int32_t>() == RigidBody3DComponent::ShapeType::SphereShape)
+				{
+					rgd.m_Radius = rigid3DComponent["Radius"].as<float>();
+				}
+				rgd.m_bodyMass = rigid3DComponent["BodyMass"].as<float>();
+				rgd.m_bodyInertia = rigid3DComponent["BodyInertia"].as<glm::vec3>();
+				rgd.m_friction = rigid3DComponent["Friction"].as<float>();
+				rgd.m_restitution = rigid3DComponent["Restitution"].as<float>();
 			}
 			}
 		}

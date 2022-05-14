@@ -9,6 +9,7 @@ function UpdateRotate(entityId)
 	--print("y:%f", y)
 	if(firstMouse)
 	then
+		Host_SetCursorHidden()
 		MousePosX = x
 		MousePosY = y
 		firstMouse = false

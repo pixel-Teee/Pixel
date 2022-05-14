@@ -186,7 +186,7 @@ namespace Pixel {
 		{
 			s_Data.TextureSlots[i]->Bind(i);
 		}
-		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+		RenderCommand::DrawIndexed(Primitive::TRIANGLE, s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 		s_Data.Stats.DrawCalls++;
 	}
 

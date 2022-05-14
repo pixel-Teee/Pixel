@@ -5,6 +5,8 @@ namespace Pixel {
 	public:
 		virtual ~UniformBuffer() = default;
 
+		virtual void Bind() = 0;
+
 		virtual void SetData(uint32_t offset, uint32_t size, void* data) = 0;
 
 		//BindIndex

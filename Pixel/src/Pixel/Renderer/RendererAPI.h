@@ -26,6 +26,12 @@ namespace Pixel {
 		LESS
 	};
 
+	enum Primitive
+	{
+		LINE,
+		TRIANGLE
+	};
+
 	class RendererAPI
 	{
 	public:
@@ -40,7 +46,7 @@ namespace Pixel {
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+		virtual void DrawIndexed(const Primitive DrawMode, const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
 
 		//depth
 		virtual void DepthTest(int32_t Bit) = 0;

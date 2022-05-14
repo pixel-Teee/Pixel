@@ -26,6 +26,8 @@ namespace Pixel {
 	//light stencil pass
 	static Ref<Shader> m_LightStencilPass;
 
+	static Ref<Shader> m_LineShader;
+
 	//Point Light Volume(is a sphere)
 	static Model SphereModel;
 
@@ -58,6 +60,7 @@ namespace Pixel {
 		m_LightStencilPass = Shader::Create("assets/shaders/DeferredShading/LightStencilPass.glsl");
 		m_SkyBoxShader = Shader::Create("assets/shaders/SkyBox/SkyBox.glsl");
 		//m_TestShader = Shader::Create("assets/shaders/DeferredShading/Test.glsl");
+		m_LineShader = Shader::Create("assets/shaders/debug/DrawLine.glsl");
 
 		//Light Point
 		SphereModel = Model("assets/models/Sphere.obj");
@@ -472,5 +475,39 @@ namespace Pixel {
 		RenderCommand::Blend(0);
 		RenderCommand::DepthTest(1);
 		m_LightPass->Unbind();
+	}
+
+	void Renderer3D::DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3 color, glm::mat4 viewProjection)
+	{	
+		float vertices[] = {
+			from.x, from.y, from.z,
+			to.x, to.y, to.z
+		};
+
+		uint32_t indices[] = {
+			0, 1
+		};
+
+		BufferElement element{ ShaderDataType::Float3, "a_Pos", Semantics::POSITION };
+		BufferLayout layout{ element };
+
+		Ref<VertexArray> VAO = VertexArray::Create();
+
+		Ref<VertexBuffer> VBO(VertexBuffer::Create(vertices, sizeof(vertices)));
+		VBO->SetLayout(layout);
+
+		Ref<IndexBuffer> IBO(IndexBuffer::Create(indices, 2));
+		VAO->AddVertexBuffer(VBO);
+		VAO->SetIndexBuffer(IBO);
+
+		VAO->Bind();
+		m_LineShader->Bind();
+		m_LineShader->SetMat4("u_ViewProjection", viewProjection);
+		//m_MVPUuniformBuffer->Bind();
+
+		RenderCommand::DrawIndexed(Primitive::LINE, VAO, 2);
+
+		m_LineShader->Unbind();
+		VAO->Unbind();
 	}
 }

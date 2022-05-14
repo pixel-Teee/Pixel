@@ -30,9 +30,9 @@ namespace Pixel {
 			s_RendererAPI->Clear();
 		}
 
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0)
+		inline static void DrawIndexed(Primitive DrawMode, const Ref<VertexArray>& vertexArray, uint32_t count = 0)
 		{
-			s_RendererAPI->DrawIndexed(vertexArray, count);
+			s_RendererAPI->DrawIndexed(DrawMode, vertexArray, count);
 		}
 
 		//Open/Close Depth Write

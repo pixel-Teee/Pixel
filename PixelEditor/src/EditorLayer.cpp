@@ -262,6 +262,17 @@ namespace Pixel
 		m_ViewportBounds[0] = {viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y};
 		m_ViewportBounds[1] = {viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y};
 
+		//PIXEL_CORE_INFO("{0}, {1}", viewportMinRegion.x, viewportMinRegion.y);
+
+		//need to fix this:don't dependent this
+		glm::vec2 ViewPortMidPoint = (m_ViewportBounds[0] + m_ViewportBounds[1]);
+		ViewPortMidPoint.x /= 2;
+		ViewPortMidPoint.y /= 2;
+
+		Application::Get().GetWindow().SetViewPortCenterPoint(ViewPortMidPoint.x, ViewPortMidPoint.y);
+
+		//PIXEL_CORE_INFO("{0}, {1}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
@@ -342,6 +353,12 @@ namespace Pixel
 		ImGui::End();
 		ImGui::PopStyleVar();
 		/*----------Gizmos----------*/
+
+		if (ImGui::IsKeyPressed(KeyCodes::PX_KEY_ESCAPE))
+		{
+			Application::Get().GetWindow().SetCursorNormal();
+		}
+
 		/*----------View port----------*/
 
 		/*---------Environment Panel---------*/
@@ -429,7 +446,7 @@ namespace Pixel
 				break;
 			}
 		}
-		
+
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -595,6 +612,7 @@ namespace Pixel
 
 	void EditorLayer::OnScenePlay()
 	{
+		//ImGui::CaptureMouseFromApp(true);
 		m_SceneState = SceneState::Play;
 
 		m_ActiveScene = Scene::Copy(m_EditorScene);

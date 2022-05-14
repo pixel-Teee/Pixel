@@ -31,6 +31,7 @@ namespace Pixel{
 
 		static void DrawSkyBox(Camera& camera, TransformComponent& trans, Ref<Framebuffer> LightPassFramebuffer, Ref<Framebuffer> geoPassFramebuffer);
 
+		static void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3 color, glm::mat4 viewProjection);
 		//-------shader generator string-------
 		//------type------
 		static std::string Float()

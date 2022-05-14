@@ -10,10 +10,16 @@
 
 class b2World;
 
+class btBroadphaseInterface;
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+
 namespace Pixel
 {
 	class Entity;
-
+	class PhysicsDraw;
 	class Scene
 	{
 	public:
@@ -35,7 +41,7 @@ namespace Pixel
 		void OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
-		void DuplicateEntity(Entity entity);
+		Entity DuplicateEntity(Entity entity);
 
 		Entity GetPrimaryCameraEntity();
 
@@ -48,6 +54,8 @@ namespace Pixel
 
 		//Get Registry
 		entt::registry& GetRegistry() { return m_Registry;  }
+
+		btDiscreteDynamicsWorld* GetPhysicalWorld() { return m_world; }
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
@@ -62,8 +70,16 @@ namespace Pixel
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
-		b2World* m_PhysicsWorld = nullptr;
+		//b2World* m_PhysicsWorld = nullptr;
 
+		//-----Physical------
+		btBroadphaseInterface* m_BroadPhase = nullptr;
+		btDefaultCollisionConfiguration* m_collisionConfiguration = nullptr;
+		btCollisionDispatcher* m_dispatcher = nullptr;
+		btSequentialImpulseConstraintSolver* m_solver = nullptr;
+		btDiscreteDynamicsWorld* m_world = nullptr;
+		PhysicsDraw* m_debugDraw = nullptr;
+		//-----Physical------
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;

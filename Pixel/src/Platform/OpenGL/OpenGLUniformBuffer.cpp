@@ -27,5 +27,11 @@ namespace Pixel {
 		//glBindBufferRange(GL_UNIFORM_BUFFER, BindIndex, m_RendererId, 0, m_BufferSize);
 		//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
+
+	void OpenGLUniformBuffer::Bind()
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
+	}
+
 }
 

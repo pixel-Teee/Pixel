@@ -1,10 +1,19 @@
 Scene: Untitled
 Entities:
-  - Entity: 11578816339498721737
+  - Entity: 1349258619458824453
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      Path: assets/scripts/Test3.lua
+  - Entity: 17119414094491560520
     TagComponent:
       Tag: Camera
     TransformComponent:
-      Translation: [-0.558467865, 0.013367773, 3.32182431]
+      Translation: [-0.549268425, 0.0133677684, 3.32182431]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
@@ -20,7 +29,7 @@ Entities:
       FixedAspectRatio: false
     ScriptComponent:
       Path: assets/scripts/Test.lua
-  - Entity: 5588095960040553686
+  - Entity: 12733836004122912316
     TagComponent:
       Tag: Light2
     TransformComponent:
@@ -32,22 +41,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 10067663351075711406
-    TagComponent:
-      Tag: Box
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Box.fbx
-    MaterialComponent:
-      albedoPath: assets\textures\Material_Albedo.png
-      normalMapPath: assets\textures\Material_normal.png
-      roughnessPath: assets\textures\Material_roughness.png
-      emissivePath: assets\textures\Material_emissive.png
-      metallicPath: assets\textures\Material_metallic.png
-  - Entity: 15786803678771273237
+  - Entity: 4690808275507574258
     TagComponent:
       Tag: Light
     TransformComponent:
@@ -61,6 +55,21 @@ Entities:
       Quadratic: 0.0320000015
     ScriptComponent:
       Path: assets/scripts/Test2.lua
+  - Entity: 36861197019364546
+    TagComponent:
+      Tag: Ball
+    TransformComponent:
+      Translation: [0.232058346, -0.0303932428, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
 Environment:
   - EnvironmentType: SkyBox
     SkyBox:

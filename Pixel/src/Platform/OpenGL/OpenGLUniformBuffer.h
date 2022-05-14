@@ -8,6 +8,8 @@ namespace Pixel {
 
 		virtual void SetData(uint32_t offset, uint32_t size, void* data) override;
 
+		virtual void Bind();
+
 	private:
 		uint32_t m_RendererId;
 		uint32_t m_BufferSize;

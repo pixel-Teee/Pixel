@@ -3,7 +3,6 @@
 #define _CRTDBG_MAP_ALLOC
 #ifdef PX_DEBUG
 #include <crtdbg.h>
-#include <vld.h>
 #endif
 
 #ifdef PX_PLATFORM_WINDOWS
