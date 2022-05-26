@@ -1,5 +1,6 @@
 #pragma once
 
+#define SPDLOG_WCHAR_TO_UTF8_SUPPORT
 #include "Core.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h"

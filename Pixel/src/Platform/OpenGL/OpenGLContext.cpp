@@ -11,7 +11,12 @@ namespace Pixel {
 		PX_CORE_ASSERT(windowHandle, "Window Handle is NULL");
 	}
 
-	void OpenGLContext::Init()
+	OpenGLContext::~OpenGLContext()
+	{
+
+	}
+
+	void OpenGLContext::Initialize()
 	{
 		glfwMakeContextCurrent(m_WindowHandle);
 		//glad¼ÓÔØOpenGLµÄº¯Êý
@@ -27,6 +32,11 @@ namespace Pixel {
 	void OpenGLContext::SwapBuffers()
 	{
 		glfwSwapBuffers(m_WindowHandle);
+	}
+
+	void OpenGLContext::Reset()
+	{
+
 	}
 
 }

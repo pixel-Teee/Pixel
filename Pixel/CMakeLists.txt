@@ -120,6 +120,9 @@ PRIVATE yaml-cpp
 PUBLIC ImGui
 PUBLIC assimp
 PUBLIC lua
+PRIVATE "d3d12.lib"
+PRIVATE "dxgi.lib"
+PRIVATE "d3dcompiler.lib"
 )
 
 

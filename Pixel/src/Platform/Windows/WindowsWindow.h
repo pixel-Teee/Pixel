@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Pixel/Core/Window.h"
-#include "Pixel/Renderer/GraphicsContext.h"
+#include "Pixel/Renderer/Context.h"
 
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
 
 namespace Pixel {
+	class OpenGLContext;
 	class WindowsWindow : public Window
 	{
 	public:
@@ -38,7 +39,10 @@ namespace Pixel {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
-		GraphicsContext* m_Context;
+		Ref<OpenGLContext> m_Context;
+
+		//test:directx context
+		//Context* m_DirectXContext;
 
 		glm::vec2 m_ViewPortCenterPoint;
 

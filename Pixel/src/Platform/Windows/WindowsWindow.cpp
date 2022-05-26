@@ -1,11 +1,16 @@
 #include "pxpch.h"
 #include "WindowsWindow.h"
 
+#if defined(DEBUG) || defined(_DEBUG)
+#include <dxgidebug.h>
+#endif
+
 #include "Pixel/Events/ApplicationEvent.h"
 #include "Pixel/Events/MouseEvent.h"
 #include "Pixel/Events/KeyEvent.h"
 
 #include "Platform/OpenGL/OpenGLContext.h"
+#include "Platform/DirectX/DirectXContext.h"
 
 namespace Pixel {
 	static bool s_GLFWInitialized = false;
@@ -28,6 +33,18 @@ namespace Pixel {
 	WindowsWindow::~WindowsWindow()
 	{
 		Shutdown();
+
+		//delete m_DirectXContext;
+
+//#if defined(_DEBUG)
+//		{
+//			Microsoft::WRL::ComPtr<IDXGIDebug1> pdxgiDebug;
+//			if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(pdxgiDebug.ReleaseAndGetAddressOf()))))
+//			{
+//				pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+//			}
+//		}
+//#endif	
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
@@ -47,11 +64,10 @@ namespace Pixel {
 		}
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		m_Context = new OpenGLContext(m_Window);
+		m_Context = CreateRef<OpenGLContext>(m_Window);
 
-		m_Context->Init();
-
-
+		m_Context->Initialize();
+		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
