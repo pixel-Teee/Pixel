@@ -56,4 +56,10 @@ namespace Pixel {
 		//resource flag
 		D3D12_RESOURCE_FLAGS m_ResourceFlags;
 	};
+
+	class ByteAddressBuffer : public GpuBuffer
+	{
+	public:
+		virtual void CreateDerivedViews() override;
+	};
 }

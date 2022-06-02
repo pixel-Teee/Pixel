@@ -133,4 +133,28 @@ namespace Pixel {
 		return Desc;
 	}
 
+	void ByteAddressBuffer::CreateDerivedViews()
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		SRVDesc.Format = DXGI_FORMAT_R32_TYPELESS;//non type
+		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		SRVDesc.Buffer.NumElements = (uint32_t)m_BufferSize / 4;
+		SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
+
+		if (m_SRV.ptr == -1)
+			m_SRV = DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		DirectXDevice::Get()->GetDevice()->CreateShaderResourceView(m_pResource.Get(), &SRVDesc, m_SRV);
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
+		UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		UAVDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+		UAVDesc.Buffer.NumElements = (uint32_t)m_BufferSize / 4;
+		UAVDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
+
+		if (m_UAV.ptr == -1)
+			m_UAV = DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		DirectXDevice::Get()->GetDevice()->CreateUnorderedAccessView(m_pResource.Get(), nullptr, &UAVDesc, m_UAV);
+	}
+
 }
