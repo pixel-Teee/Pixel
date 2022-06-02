@@ -111,6 +111,7 @@ namespace Pixel {
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> m_CurrComputeRootSingature;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> m_CurrPipelineState;
 
+		//reference dynamic descriptor heap
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_CurrentDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 
 		DynamicDescriptorHeap m_DynamicViewDescriptorHeap;//HEAP_TYPE_CBV_SRV_UAV
