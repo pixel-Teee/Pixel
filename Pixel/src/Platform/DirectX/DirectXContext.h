@@ -97,7 +97,7 @@ namespace Pixel {
 		void SetPipelineState(const PSO& pso);
 
 		GraphicsContext& GetGraphicsContext();
-	private:
+	protected:
 		void BindDescriptorHeaps();
 
 		//command list need to create from the command list manager

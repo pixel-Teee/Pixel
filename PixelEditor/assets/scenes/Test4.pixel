@@ -1,6 +1,6 @@
 Scene: Untitled
 Entities:
-  - Entity: 10787235000107922901
+  - Entity: 12776848162342498616
     TagComponent:
       Tag: Camera
     TransformComponent:
@@ -20,7 +20,7 @@ Entities:
       FixedAspectRatio: false
     ScriptComponent:
       Path: assets/scripts/Test.lua
-  - Entity: 6844547723177099809
+  - Entity: 809694516563003382
     TagComponent:
       Tag: Light2
     TransformComponent:
@@ -32,7 +32,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 9134743095168792054
+  - Entity: 8112777140187649540
     TagComponent:
       Tag: Frame
     TransformComponent:
@@ -53,7 +53,7 @@ Entities:
       BodyInertia: [0.200000003, 0.300000012, 0.200000003]
       Restitution: 1
       Friction: 0.5
-  - Entity: 3231122615864225062
+  - Entity: 14570793806444895929
     TagComponent:
       Tag: Light
     TransformComponent:
@@ -67,7 +67,7 @@ Entities:
       Quadratic: 0.0320000015
     ScriptComponent:
       Path: assets/scripts/Test2.lua
-  - Entity: 3427317856460319754
+  - Entity: 2386155513628271221
     TagComponent:
       Tag: Ball
     TransformComponent:
@@ -89,7 +89,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 2289743899389145309
+  - Entity: 9140370246699535895
     TagComponent:
       Tag: Light1
     TransformComponent:
@@ -101,7 +101,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 14276720181124594830
+  - Entity: 4850716942888383891
     TagComponent:
       Tag: Light2
     TransformComponent:
@@ -113,7 +113,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 1784752061431109703
+  - Entity: 153903041669743003
     TagComponent:
       Tag: Light3
     TransformComponent:
@@ -125,7 +125,7 @@ Entities:
       Constant: 1
       Linear: 0.0900000036
       Quadratic: 0.0320000015
-  - Entity: 2783888837445042160
+  - Entity: 1637114791732552562
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -147,7 +147,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 16006004575495559353
+  - Entity: 17049153907189068919
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -169,7 +169,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 14386980637639435133
+  - Entity: 12895235790776734912
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -191,7 +191,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 3056966827589666751
+  - Entity: 1114162998047570727
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -213,7 +213,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 6603841978063939475
+  - Entity: 3115573010114038891
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -235,7 +235,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 15216825718280972466
+  - Entity: 3850858722242965581
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -257,7 +257,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 1017384442341808482
+  - Entity: 15370548081591421158
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -279,7 +279,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 17893758112022011371
+  - Entity: 10497054191718676031
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -301,7 +301,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 10976780883249424659
+  - Entity: 1617323595899995034
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -323,7 +323,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 18409812670016309097
+  - Entity: 16546116409614569308
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -345,7 +345,7 @@ Entities:
       Restitution: 0.800000012
       Friction: 0
       Radius: 0.5
-  - Entity: 10977642667063339754
+  - Entity: 18268145379927741081
     TagComponent:
       Tag: Ball(0)
     TransformComponent:
@@ -367,6 +367,21 @@ Entities:
       Restitution: 0.800000012
       Friction: 0.300000012
       Radius: 0.5
+  - Entity: 894639531229176874
+    TagComponent:
+      Tag: Test
+    TransformComponent:
+      Translation: [-38.4296875, -5.24904537, 0]
+      Rotation: [0, 0, 0]
+      Scale: [14, 14, 14]
+    StaticMeshComponent:
+      Path: assets\models\QAQ.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
 Environment:
   - EnvironmentType: SkyBox
     SkyBox:

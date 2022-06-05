@@ -3,7 +3,7 @@
 #include "DirectXBuffer.h"
 
 namespace Pixel {
-	class PixelBuffer : public GpuResource
+	class PixelBuffer : public DirectXGpuResource
 	{
 	public:
 		PixelBuffer();

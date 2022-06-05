@@ -37,7 +37,7 @@ namespace Pixel {
 	public:
 		enum class API
 		{
-			None = 0, OpenGL = 1
+			None = 0, OpenGL = 1, DirectX12 = 2
 		};
 	public:
 		virtual void Init() = 0;

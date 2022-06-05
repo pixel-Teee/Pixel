@@ -3,7 +3,7 @@
 #include "GpuResource.h"
 
 namespace Pixel {
-	class UploadBuffer : public GpuResource
+	class UploadBuffer : public DirectXGpuResource
 	{
 	public:
 		virtual ~UploadBuffer() { Destroy(); }

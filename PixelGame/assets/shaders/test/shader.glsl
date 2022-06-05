@@ -39,3 +39,19 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
+
+vec3 FromTangentToWorld(vec3 normal, vec3 worldNormal, vec3 worldPos, vec2 texcoord)
+{
+    vec3 Q1  = dFdx(worldPos);
+    vec3 Q2  = dFdy(worldPos);
+    vec2 st1 = dFdx(texcoord);
+    vec2 st2 = dFdy(texcoord);
+
+    //calculate TBN
+    vec3 N   = normalize(worldNormal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * normal);
+}

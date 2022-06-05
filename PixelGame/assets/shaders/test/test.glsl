@@ -78,11 +78,19 @@ layout(location = 1) in vec3 v_Normal;
 layout(location = 2) in vec2 v_TexCoord;
 layout(location = 3) in flat int v_EntityID;
 
-layout(location = 0) out vec4 Color;
+layout(location = 0) out vec4 OutColor;
 
 
 void main(){
-	vec3 WorldPos = vec3(0, 0, 0);
+vec3 WorldPos = vec3(0, 0, 0);
+vec4  ConstFloatValue1;
+ConstFloatValue1 = vec4(0.000000, 0.000000, 0.000000, 0.000000);
+vec4  Albedo = ConstFloatValue1;
+float  Roughness = 0;
+float  Metallic = 0;
+vec4  Color = vec4(0, 0, 0, 1);
+Albedo = ConstFloatValue1;
+OutColor = Color;
 
 };
 

@@ -9,10 +9,10 @@ namespace Pixel {
 	#define DEFAULT_ALIGN 256
 	struct DynAlloc
 	{
-		DynAlloc(GpuResource& BaseResource, size_t ThisOffset, size_t ThisSize)
+		DynAlloc(DirectXGpuResource& BaseResource, size_t ThisOffset, size_t ThisSize)
 		:Buffer(BaseResource), Offset(ThisOffset), Size(ThisSize) {}
 
-		GpuResource& Buffer; //d3d buffer associated with this memory
+		DirectXGpuResource& Buffer; //d3d buffer associated with this memory
 
 		size_t Offset;//offset from start of buffer resource
 
@@ -22,7 +22,7 @@ namespace Pixel {
 		D3D12_GPU_VIRTUAL_ADDRESS GpuAddress;//the gpu-visible address
 	};
 
-	class LinearAllocationPage : public GpuResource
+	class LinearAllocationPage : public DirectXGpuResource
 	{
 	public:
 		LinearAllocationPage(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Usage);

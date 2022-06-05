@@ -1,0 +1,393 @@
+Scene: Untitled
+Entities:
+  - Entity: 12776848162342498616
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [-1.07127643, 2.60149693, 17.3475571]
+      Rotation: [0, 0, 0]
+      Scale: [1, 0.999987483, 0.999987483]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+    ScriptComponent:
+      Path: assets/scripts/Test.lua
+  - Entity: 809694516563003382
+    TagComponent:
+      Tag: Light2
+    TransformComponent:
+      Translation: [8.07083607, -0.117286459, -7.24117184]
+      Rotation: [0, 0, 0]
+      Scale: [36.9589157, 36.9589157, 36.9589157]
+    LightComponent:
+      Color: [0.756218374, 0.326023787, 0.938223958]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 8112777140187649540
+    TagComponent:
+      Tag: Frame
+    TransformComponent:
+      Translation: [0, -2.30237627, 0.0212647803]
+      Rotation: [-1.58003211, 0, 0]
+      Scale: [1, 1, 0.999999642]
+    StaticMeshComponent:
+      Path: assets\models\frame3.fbx
+    MaterialComponent:
+      albedoPath: assets\textures\DefaultMaterial_Albedo.png
+      normalMapPath: assets\textures\DefaultMaterial_normal.png
+      roughnessPath: assets\textures\DefaultMaterial_roughness.png
+      emissivePath: assets\textures\DefaultMaterial_emissive.png
+      metallicPath: assets\textures\DefaultMaterial_metallic.png
+    RigidBody3DComponent:
+      ShapeType: 2
+      BodyMass: 0
+      BodyInertia: [0.200000003, 0.300000012, 0.200000003]
+      Restitution: 1
+      Friction: 0.5
+  - Entity: 14570793806444895929
+    TagComponent:
+      Tag: Light
+    TransformComponent:
+      Translation: [-0.36022827, 1.80644011, 2.65318418]
+      Rotation: [0, 0, 0]
+      Scale: [33.1465149, 33.1465149, 33.1465149]
+    LightComponent:
+      Color: [0, 0.764478743, 0.489974767]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+    ScriptComponent:
+      Path: assets/scripts/Test2.lua
+  - Entity: 2386155513628271221
+    TagComponent:
+      Tag: Ball
+    TransformComponent:
+      Translation: [-2.25936222, 1.78258038, 2.1180625]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 9140370246699535895
+    TagComponent:
+      Tag: Light1
+    TransformComponent:
+      Translation: [-7.13425446, 0.709909856, 7.71630669]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 4850716942888383891
+    TagComponent:
+      Tag: Light2
+    TransformComponent:
+      Translation: [7.7945838, -0.543168604, 6.22743416]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 153903041669743003
+    TagComponent:
+      Tag: Light3
+    TransformComponent:
+      Translation: [-7.27877092, -0.159900188, -7.47062016]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 1637114791732552562
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [0.0988645554, 2.53133774, 0.404431343]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 17049153907189068919
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [-0.142252922, 2.25312233, 4.78263044]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 12895235790776734912
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [4.46973753, 1.828022, 4.668859]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 1114162998047570727
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [3.59139204, 1.06637192, -0.0205960311]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 3115573010114038891
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [7.11871767, 2.18871427, -2.55588961]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 3850858722242965581
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [-1.92837834, 2.25726056, -4.22226572]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 15370548081591421158
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [4.43852615, 5.85983562, -0.139769077]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 10497054191718676031
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [6.25997448, 5.7609911, 1.49620199]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 1617323595899995034
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [-2.83989716, 5.51516247, 4.31331396]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 16546116409614569308
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [4.59788322, 7.88031816, 0.0744035244]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 0.200000003
+      BodyInertia: [0, 0, 0]
+      Restitution: 0.800000012
+      Friction: 0
+      Radius: 0.5
+  - Entity: 18268145379927741081
+    TagComponent:
+      Tag: Ball(0)
+    TransformComponent:
+      Translation: [-5.76074123, 4.06481838, -2.81671762]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+    RigidBody3DComponent:
+      ShapeType: 1
+      BodyMass: 5
+      BodyInertia: [0.100000001, 0.200000003, 0.300000012]
+      Restitution: 0.800000012
+      Friction: 0.300000012
+      Radius: 0.5
+  - Entity: 894639531229176874
+    TagComponent:
+      Tag: Test
+    TransformComponent:
+      Translation: [-38.4296875, -5.24904537, 0]
+      Rotation: [0, 0, 0]
+      Scale: [14, 14, 14]
+    StaticMeshComponent:
+      Path: assets\models\QAQ.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+Environment:
+  - EnvironmentType: SkyBox
+    SkyBox:
+      Right: assets\textures\skybox\posx.jpg
+      Left: assets\textures\skybox\negx.jpg
+      Top: assets\textures\skybox\posy.jpg
+      Bottom: assets\textures\skybox\negy.jpg
+      Front: assets\textures\skybox\posz.jpg
+      Back: assets\textures\skybox\negz.jpg
