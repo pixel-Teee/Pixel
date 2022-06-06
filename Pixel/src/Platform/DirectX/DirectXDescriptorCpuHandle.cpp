@@ -23,6 +23,7 @@ namespace Pixel {
 	{
 		if (m_CpuHandle.ptr != -1)
 			m_CpuHandle.ptr += OffsetScaledByDescriptorSize;
+		return *this;
 	}
 
 	DescriptorCpuHandle& DirectXDescriptorCpuHandle::operator+(int32_t OffsetScaledByDescriptorSize)

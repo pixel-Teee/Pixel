@@ -100,9 +100,16 @@ namespace Pixel {
 
 		m_DescriptorSize = DirectXDevice::Get()->GetDevice()->GetDescriptorHandleIncrementSize(m_HeapDesc.Type);
 		m_NumFreeDescriptors = m_HeapDesc.NumDescriptors;
+
+		Ref<DirectXDescriptorCpuHandle> cpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
+		cpuHandle->SetCpuHandle(m_Heap->GetCPUDescriptorHandleForHeapStart());
+
+		Ref<DirectXDescriptorGpuHandle> gpuHandle = std::make_shared<DirectXDescriptorGpuHandle>();
+		gpuHandle->SetGpuHandle(m_Heap->GetGPUDescriptorHandleForHeapStart());
+
 		m_FirstHandle = DescriptorHandle(
-			m_Heap->GetCPUDescriptorHandleForHeapStart(),
-			m_Heap->GetGPUDescriptorHandleForHeapStart()
+			cpuHandle,
+			gpuHandle
 		);
 		m_NextFreeHandle = m_FirstHandle;
 	}
@@ -126,7 +133,7 @@ namespace Pixel {
 		return ret;
 	}
 
-	uint32_t DescriptorHeap::GetOffsetOfHandle(const DescriptorHandle& DHandle)
+	uint32_t DescriptorHeap::GetOffsetOfHandle(const DirectXDescriptorCpuHandle& DHandle)
 	{
 		return (uint32_t)(DHandle.GetCpuPtr() - m_FirstHandle.GetCpuPtr()) / m_DescriptorSize;
 	}

@@ -18,4 +18,9 @@ namespace Pixel {
 		m_IndexBufferView.SizeInBytes = m_size;
 	}
 
+	DirectXIBV::DirectXIBV()
+	{
+
+	}
+
 }

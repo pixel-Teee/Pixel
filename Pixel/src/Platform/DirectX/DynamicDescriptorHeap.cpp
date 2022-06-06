@@ -4,6 +4,8 @@
 #include "DirectXDevice.h"
 #include "DirectXRootSignature.h"
 #include "CommandQueue.h"
+#include "DirectXDescriptorCpuHandle.h"
+#include "DirectXDescriptorGpuHandle.h"
 
 namespace Pixel {
 
@@ -88,13 +90,15 @@ namespace Pixel {
 		{
 			RootIndex = RootIndices[i];
 			//SetGraphicsRootDescriptorTable(RootParamter, Heap's Handle)
-			(CmdList->*SetFunc)(RootIndex, DestHandleStart);
+			Ref<DirectXDescriptorGpuHandle> gpuHandle = std::static_pointer_cast<DirectXDescriptorGpuHandle>(DestHandleStart.GetGpuHandle());
+			(CmdList->*SetFunc)(RootIndex, gpuHandle->GetGpuHandle());
 
 			DescriptorTableCache& RootDescTable = m_RootDescriptorTable[RootIndex];
 
 			D3D12_CPU_DESCRIPTOR_HANDLE* SrcHandles = RootDescTable.TableStart;
 			uint64_t SetHandles = (uint64_t)RootDescTable.AssignedHandlesBitMap;
-			D3D12_CPU_DESCRIPTOR_HANDLE CurDest = DestHandleStart;
+			Ref<DirectXDescriptorCpuHandle> cpuHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DestHandleStart.GetCpuHandle());
+			D3D12_CPU_DESCRIPTOR_HANDLE CurDest = cpuHandle->GetCpuHandle();
 			DestHandleStart += TableSize[i] * DescriptorSize;
 
 			uint32_t SkipCount;
@@ -268,9 +272,14 @@ namespace Pixel {
 		DescriptorHandle DestHandle = m_FirstDescriptor + m_CurrentOffset * m_DescriptorSize;
 		m_CurrentOffset += 1;
 
-		DirectXDevice::Get()->GetDevice()->CopyDescriptorsSimple(1, DestHandle, Handles, m_DescriptorType);
+		Ref<DirectXDescriptorCpuHandle> cpuHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DestHandle.GetCpuHandle());
 
-		return DestHandle;
+		D3D12_CPU_DESCRIPTOR_HANDLE tempHandle;
+		DirectXDevice::Get()->GetDevice()->CopyDescriptorsSimple(1, tempHandle, Handles, m_DescriptorType);
+		cpuHandle->SetCpuHandle(tempHandle);
+		
+		Ref<DirectXDescriptorGpuHandle> gpuHandle = std::static_pointer_cast<DirectXDescriptorGpuHandle>(DestHandle.GetGpuHandle());
+		return gpuHandle->GetGpuHandle();
 	}
 
 	void DynamicDescriptorHeap::ParseGraphicsRootSignature(const RootSignature& RootSig)
@@ -371,9 +380,15 @@ namespace Pixel {
 		{
 			PX_CORE_ASSERT(m_CurrentOffset == 0, "current offset must be 0!");
 			m_CurrentHeapPtr = RequestDescriptorHeap(m_DescriptorType);
+
+			Ref<DirectXDescriptorCpuHandle> cpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
+			cpuHandle->SetCpuHandle(m_CurrentHeapPtr->GetCPUDescriptorHandleForHeapStart());
+			Ref<DirectXDescriptorGpuHandle> gpuHandle = std::make_shared<DirectXDescriptorGpuHandle>();
+			gpuHandle->SetGpuHandle(m_CurrentHeapPtr->GetGPUDescriptorHandleForHeapStart());
+
 			m_FirstDescriptor = DescriptorHandle(
-				m_CurrentHeapPtr->GetCPUDescriptorHandleForHeapStart(),
-				m_CurrentHeapPtr->GetGPUDescriptorHandleForHeapStart()
+				std::static_pointer_cast<DescriptorCpuHandle>(cpuHandle),
+				std::static_pointer_cast<DescriptorGpuHandle>(gpuHandle)
 			);		
 		}
 

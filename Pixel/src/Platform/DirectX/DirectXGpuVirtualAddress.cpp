@@ -4,6 +4,11 @@
 
 namespace Pixel {
 
+	DirectXGpuVirtualAddress::DirectXGpuVirtualAddress()
+	{
+
+	}
+
 	void DirectXGpuVirtualAddress::SetGpuVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS GpuVirtualAddress)
 	{
 		m_GpuVirtualAddress = GpuVirtualAddress;

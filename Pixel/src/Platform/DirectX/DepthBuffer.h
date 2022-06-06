@@ -1,18 +1,18 @@
 #pragma once
 
-#include "PixelBuffer.h"
+#include "DirectXPixelBuffer.h"
 
 namespace Pixel {
-	class DepthBuffer : public PixelBuffer
+	class DepthBuffer : public DirectXPixelBuffer
 	{
 	public:
 		DepthBuffer(float ClearDepth = 0.0f, uint8_t ClearStencil = 0);
 
-		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height, DXGI_FORMAT Format,
-			D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr = -1);
+		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height, ImageFormat Format,
+			Ref<GpuVirtualAddress> VideoMemoryPtr);
 
-		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t NumSamples, DXGI_FORMAT Format,
-			D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr = -1);
+		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t NumSamples, ImageFormat Format,
+			Ref<GpuVirtualAddress> VideoMemoryPtr);
 
 		//get pre-created cpu-visible descriptor handles
 		const D3D12_CPU_DESCRIPTOR_HANDLE& GetDSV() const { return m_hDSV[0]; }

@@ -3,6 +3,7 @@
 #include "UploadBuffer.h"
 
 #include "DirectXDevice.h"
+#include "DirectXGpuVirtualAddress.h"
 
 namespace Pixel {
 
@@ -35,7 +36,11 @@ namespace Pixel {
 		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE,
 			&ResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_pResource)) >= 0, "create resource error!");
 
-		m_GpuVirtualAddress = m_pResource->GetGPUVirtualAddress();
+		Ref<GpuVirtualAddress> pGpuVirtualAddress = std::make_shared<DirectXGpuVirtualAddress>();
+
+		std::static_pointer_cast<DirectXGpuVirtualAddress>(pGpuVirtualAddress)->SetGpuVirtualAddress(m_pResource->GetGPUVirtualAddress());
+		//m_GpuVirtualAddress = m_pResource->GetGPUVirtualAddress();
+		m_GpuVirtualAddress = pGpuVirtualAddress;
 
 #ifdef PX_DEBUG
 		m_pResource->SetName(name.c_str());

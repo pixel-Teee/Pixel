@@ -6,12 +6,15 @@
 #include "Pixel/Renderer/GpuResource.h"
 
 namespace Pixel {
+	class GpuVirtualAddress;
 	class DirectXGpuResource : public GpuResource
 	{
 		friend class DirectXContext;
 		friend class GraphicsContext;
 		friend class DirectXGpuBuffer;
 		friend class DirectXByteAddressBuffer;
+		friend class DirectXPixelBuffer;
+		friend class DepthBuffer;
 	public:
 		DirectXGpuResource();
 

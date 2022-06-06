@@ -1,44 +1,56 @@
 #include "pxpch.h"
 
-#include "ColorBuffer.h"
+#include "DirectXColorBuffer.h"
 
 #include "DescriptorAllocator.h"
 #include "DirectXDevice.h"
+#include "DirectXDescriptorCpuHandle.h"
 
 namespace Pixel {
 
-	ColorBuffer::ColorBuffer(glm::vec4 ClearColor /*= glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)*/)
+	DirectXColorBuffer::DirectXColorBuffer(glm::vec4 ClearColor /*= glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)*/)
 		:m_ClearColor(ClearColor), m_NumMipMaps(0), m_FragmentCount(1), m_SampleCount(1)
 	{
-		m_RTVHandle.ptr = -1;//D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN
-		m_SRVHandle.ptr = -1;
+		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RTVHandle);
+		Ref<DirectXDescriptorCpuHandle> srvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRVHandle);
+
+		D3D12_CPU_DESCRIPTOR_HANDLE tempHandle;
+		tempHandle.ptr = -1;
+
+		rtvHandle->SetCpuHandle(tempHandle);//D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN
+		srvHandle->SetCpuHandle(tempHandle);
 		for (size_t i = 0; i < _countof(m_UAVHandle); ++i)
-			m_UAVHandle[i].ptr = -1;
+		{
+			Ref<DirectXDescriptorCpuHandle> uavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAVHandle[i]);
+			uavHandle->SetCpuHandle(tempHandle);
+		}
 	}
 
-	void ColorBuffer::CreateFromSwapChain(const std::wstring& Name, ID3D12Resource* pBaseResouce)
+	void DirectXColorBuffer::CreateFromSwapChain(const std::wstring& Name, GpuResource* pBaseResouce)
 	{
-		AssociateWithResource(Name, pBaseResouce, D3D12_RESOURCE_STATE_PRESENT);
+		AssociateWithResource(Name, static_cast<DirectXGpuResource*>(pBaseResouce)->GetResource(), D3D12_RESOURCE_STATE_PRESENT);
 
-		m_RTVHandle = DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RTVHandle);
 
-		DirectXDevice::Get()->GetDevice()->CreateRenderTargetView(m_pResource.Get(), nullptr, m_RTVHandle);
+		rtvHandle->SetCpuHandle(DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+
+		DirectXDevice::Get()->GetDevice()->CreateRenderTargetView(m_GpuResource.GetResource(), nullptr, rtvHandle->GetCpuHandle());
 	}
 
-	void ColorBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, 
-	uint32_t NumMips, DXGI_FORMAT Format, D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr /*= -1*/)
+	void DirectXColorBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, 
+	uint32_t NumMips, ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
 		NumMips = (NumMips == 0 ? ComputeNumMips(Width, Height) : NumMips);
 
 		D3D12_RESOURCE_FLAGS Flags = CombineResourceFlags();
-		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, 1, NumMips, Format, Flags);
+		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, 1, NumMips, FormatToDXGIFormat(Format), Flags);
 
 		//the number of multisamples per pixel
 		ResourceDesc.SampleDesc.Count = m_FragmentCount;
 		ResourceDesc.SampleDesc.Quality = 0;
 
 		D3D12_CLEAR_VALUE ClearValue = {};
-		ClearValue.Format = Format;
+		ClearValue.Format = FormatToDXGIFormat(Format);
 		ClearValue.Color[0] = m_ClearColor.r;
 		ClearValue.Color[1] = m_ClearColor.g;
 		ClearValue.Color[2] = m_ClearColor.b;
@@ -53,14 +65,14 @@ namespace Pixel {
 	//	Create(Name, Width, Height, NumMips, Format);
 	//}
 
-	void ColorBuffer::CreateArray(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t ArrayCount,
-	DXGI_FORMAT Format, D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr /*= -1*/)
+	void DirectXColorBuffer::CreateArray(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t ArrayCount,
+	ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
 		D3D12_RESOURCE_FLAGS Flags = CombineResourceFlags();
-		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, ArrayCount, 1, Format, Flags);
+		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, ArrayCount, 1, FormatToDXGIFormat(Format), Flags);
 
 		D3D12_CLEAR_VALUE ClearValue = {};
-		ClearValue.Format = Format;
+		ClearValue.Format = FormatToDXGIFormat(Format);
 		ClearValue.Color[0] = m_ClearColor.r;
 		ClearValue.Color[1] = m_ClearColor.g;
 		ClearValue.Color[2] = m_ClearColor.b;
@@ -70,7 +82,7 @@ namespace Pixel {
 		CreateDerivedViews(Format, ArrayCount, 1);
 	}
 
-	void ColorBuffer::SetMsaaMode(uint32_t NumColorSamples, uint32_t NumConverageSamples)
+	void DirectXColorBuffer::SetMsaaMode(uint32_t NumColorSamples, uint32_t NumConverageSamples)
 	{
 		PX_CORE_ASSERT(NumConverageSamples >= NumColorSamples, "converage samplers need don't exceed color samplers!");
 
@@ -79,7 +91,7 @@ namespace Pixel {
 	}
 
 	//need to implement
-	void ColorBuffer::GenerateMipMaps(DirectXContext& context)
+	void DirectXColorBuffer::GenerateMipMaps(DirectXContext& context)
 	{
 		if (m_NumMipMaps == 0)
 			return;
@@ -93,7 +105,7 @@ namespace Pixel {
 	//	Cre
 	//}
 
-	D3D12_RESOURCE_FLAGS ColorBuffer::CombineResourceFlags() const
+	D3D12_RESOURCE_FLAGS DirectXColorBuffer::CombineResourceFlags() const
 	{
 		D3D12_RESOURCE_FLAGS Flags = D3D12_RESOURCE_FLAG_NONE;
 
@@ -103,14 +115,14 @@ namespace Pixel {
 		return D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | Flags;
 	}
 
-	uint32_t ColorBuffer::ComputeNumMips(uint32_t Width, uint32_t Height)
+	uint32_t DirectXColorBuffer::ComputeNumMips(uint32_t Width, uint32_t Height)
 	{
 		uint32_t HightBit;
 		_BitScanReverse((unsigned long*)&HightBit, Width | Height);
 		return HightBit + 1;
 	}
 
-	void ColorBuffer::CreateDerivedViews(DXGI_FORMAT Format, uint32_t ArraySize, uint32_t NumMips /*= 1*/)
+	void DirectXColorBuffer::CreateDerivedViews(ImageFormat Format, uint32_t ArraySize, uint32_t NumMips /*= 1*/)
 	{
 		PX_CORE_ASSERT(ArraySize == 1 || NumMips == 1, "we don't support auto-mips on texture arrays");
 
@@ -120,9 +132,9 @@ namespace Pixel {
 		D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
 
-		RTVDesc.Format = Format;
-		UAVDesc.Format = GetUAVFormat(Format);
-		SRVDesc.Format = Format;
+		RTVDesc.Format = FormatToDXGIFormat(Format);
+		UAVDesc.Format = GetUAVFormat(FormatToDXGIFormat(Format));
+		SRVDesc.Format = FormatToDXGIFormat(Format);
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
 		if (ArraySize > 1)
@@ -161,28 +173,33 @@ namespace Pixel {
 			SRVDesc.Texture2D.MostDetailedMip = 0;
 		}
 
-		if (m_SRVHandle.ptr == -1)
+		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RTVHandle);
+		Ref<DirectXDescriptorCpuHandle> srvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRVHandle);
+
+		if (srvHandle->GetCpuPtr() == -1)
 		{
-			m_RTVHandle = DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-			m_SRVHandle = DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			rtvHandle->SetCpuHandle(DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+			srvHandle->SetCpuHandle(DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 		}
 
-		ID3D12Resource* pResource = m_pResource.Get();
+		ID3D12Resource* pResource = m_GpuResource.GetResource();
 
 		//create the render target view
-		DirectXDevice::Get()->GetDevice()->CreateRenderTargetView(pResource, &RTVDesc, m_RTVHandle);
+		DirectXDevice::Get()->GetDevice()->CreateRenderTargetView(pResource, &RTVDesc, rtvHandle->GetCpuHandle());
 
 		//create the shader resource view
-		DirectXDevice::Get()->GetDevice()->CreateShaderResourceView(pResource, &SRVDesc, m_SRVHandle);
+		DirectXDevice::Get()->GetDevice()->CreateShaderResourceView(pResource, &SRVDesc, srvHandle->GetCpuHandle());
 
 		if (m_FragmentCount > 1) return;
 
 		for (uint32_t i = 0; i < NumMips; ++i)
 		{
-			if (m_UAVHandle[i].ptr == -1)
-				m_UAVHandle[i] = DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			Ref<DirectXDescriptorCpuHandle> uavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAVHandle[i]);
 
-			DirectXDevice::Get()->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &UAVDesc, m_UAVHandle[i]);
+			if (uavHandle->GetCpuPtr() == -1)
+				uavHandle->SetCpuHandle(DescriptorAllocator::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+			DirectXDevice::Get()->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &UAVDesc, uavHandle->GetCpuHandle());
 
 			++UAVDesc.Texture2D.MipSlice;
 		}

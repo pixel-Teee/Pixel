@@ -1,5 +1,6 @@
 #pragma once
 
+#include "d3dx12.h"
 #include "Pixel/Renderer/IndexBufferView.h"
 
 namespace Pixel {
@@ -7,6 +8,7 @@ namespace Pixel {
 	class DirectXIBV : public IBV
 	{
 	public:
+		DirectXIBV();
 		DirectXIBV(Ref<GpuVirtualAddress> pGpuVirtualAddress, size_t OffSet, uint32_t Size, bool b32Bit);
 	private:
 		Ref<GpuVirtualAddress> m_GpuVirtualAddress;

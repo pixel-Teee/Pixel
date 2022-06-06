@@ -14,7 +14,7 @@ namespace Pixel {
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 		case RendererAPI::API::DirectX12:
 		{
-			return std::make_shared<IBV>(pGpuVirtualAddress, OffSet, Size, b32Bit);
+			return std::make_shared<DirectXIBV>(pGpuVirtualAddress, OffSet, Size, b32Bit);
 		}
 		}
 

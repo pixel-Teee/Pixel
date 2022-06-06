@@ -8,7 +8,7 @@
 namespace Pixel {
 
 	LinearAllocationPage::LinearAllocationPage(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Usage)
-		:GpuResource()
+		:DirectXGpuResource()
 	{
 		m_pResource.Attach(pResource);
 		m_UsageState = Usage;

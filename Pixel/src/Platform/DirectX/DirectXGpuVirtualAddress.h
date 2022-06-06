@@ -7,6 +7,7 @@ namespace Pixel {
 	class DirectXGpuVirtualAddress : public GpuVirtualAddress
 	{
 	public:
+		DirectXGpuVirtualAddress();
 		void SetGpuVirtualAddress(D3D12_GPU_VIRTUAL_ADDRESS GpuVirtualAddress);
 		D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress();
 	private:

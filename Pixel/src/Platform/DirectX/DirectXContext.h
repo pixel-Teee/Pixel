@@ -13,13 +13,13 @@
 struct GLFWwindow;
 
 namespace Pixel {
-	class GpuResource;
+	class DirectXGpuResource;
 	class CommandList;
 	class CommandListManager;
 	class DirectXSwapChain;
 	class DescriptorAllocator;
 	class DirectXContext;
-	class GpuBuffer;
+	class DirectXGpuBuffer;
 	class PSO;
 	class GraphicsContext;
 
@@ -71,22 +71,22 @@ namespace Pixel {
 		void FlushResourceBarriers();
 
 		//------Buffer Operation------
-		void CopyBuffer(GpuResource& Dest, GpuResource& Src);
-		void CopyBufferRegion(GpuResource& Dest, size_t DestOffset, GpuResource& Src, size_t SrcOffset, size_t NumBytes);
+		void CopyBuffer(DirectXGpuResource& Dest, DirectXGpuResource& Src);
+		void CopyBufferRegion(DirectXGpuResource& Dest, size_t DestOffset, DirectXGpuResource& Src, size_t SrcOffset, size_t NumBytes);
 
 		//texture copy, 1D texture copy
-		void CopySubresource(GpuResource& Dest, uint32_t DestSubIndex, GpuResource& Src, uint32_t SrcSubIndex);
-		void CopyTextureRegion(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source, RECT& Rect);
+		void CopySubresource(DirectXGpuResource& Dest, uint32_t DestSubIndex, DirectXGpuResource& Src, uint32_t SrcSubIndex);
+		void CopyTextureRegion(DirectXGpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, DirectXGpuResource& Source, RECT& Rect);
 
-		void TransitionResource(GpuResource& Resource, D3D12_RESOURCE_STATES NewState, bool FlushImmediate = false);
-		void InsertUAVBarrier(GpuResource& Resource, bool FlushImmediate);
+		void TransitionResource(DirectXGpuResource& Resource, D3D12_RESOURCE_STATES NewState, bool FlushImmediate = false);
+		void InsertUAVBarrier(DirectXGpuResource& Resource, bool FlushImmediate);
 		//------Buffer Operation------
 
-		static void InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[]);
-		static void InitializeBuffer(GpuBuffer& Dest, const void* Data, size_t NumBytes, size_t DestOffset = 0);
-		static void InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src);
+		static void InitializeTexture(DirectXGpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[]);
+		static void InitializeBuffer(DirectXGpuBuffer& Dest, const void* Data, size_t NumBytes, size_t DestOffset = 0);
+		static void InitializeTextureArraySlice(DirectXGpuResource& Dest, uint32_t SliceIndex, DirectXGpuResource& Src);
 
-		void WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes);
+		void WriteBuffer(DirectXGpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes);
 
 		//------use upload buffer to write------
 		DynAlloc ReserveUploadMemory(size_t SizeInBytes);

@@ -5,7 +5,7 @@
 #include "DirectXContext.h"
 
 namespace Pixel {
-	class ColorBuffer;
+	class DirectXColorBuffer;
 	class DepthBuffer;
 	class GraphicsContext : public DirectXContext
 	{
@@ -13,10 +13,10 @@ namespace Pixel {
 
 		static GraphicsContext& Begin(const std::wstring& ID = L"");
 
-		void ClearUAV(GpuBuffer& Target);
-		void ClearUAV(ColorBuffer& Target);
-		void ClearColor(ColorBuffer& Target, D3D12_RECT* Rect = nullptr);
-		void ClearColor(ColorBuffer& Target, float Color[4], D3D12_RECT* Rect = nullptr);
+		void ClearUAV(DirectXGpuBuffer& Target);
+		void ClearUAV(DirectXColorBuffer& Target);
+		void ClearColor(DirectXColorBuffer& Target, D3D12_RECT* Rect = nullptr);
+		void ClearColor(DirectXColorBuffer& Target, float Color[4], D3D12_RECT* Rect = nullptr);
 		void ClearDepth(DepthBuffer& Target);
 		void ClearStencil(DepthBuffer& Target);
 		void ClearDepthAndStencil(DepthBuffer& Target);
@@ -46,8 +46,8 @@ namespace Pixel {
 		void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z, uint32_t w);
 		void SetConstantBuffer(uint32_t RootIndex, D3D12_GPU_VIRTUAL_ADDRESS CBV);
 		void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData);
-		void SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset = 0);
-		void SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset = 0);
+		void SetBufferSRV(uint32_t RootIndex, const DirectXGpuBuffer& SRV, uint64_t Offset = 0);
+		void SetBufferUAV(uint32_t RootIndex, const DirectXGpuBuffer& UAV, uint64_t Offset = 0);
 		void SetDescriptorTable(uint32_t RootIndex, D3D12_GPU_DESCRIPTOR_HANDLE FirstHandle);
 
 		void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& IBView);

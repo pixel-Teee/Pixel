@@ -42,7 +42,9 @@ namespace Pixel {
 		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, m_GpuResource.m_UsageState,
 			nullptr, IID_PPV_ARGS(&m_GpuResource.m_pResource)) >= 0, "Create Default Resource Error!");
 
-		m_GpuResource.m_GpuVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(m_GpuResource.GetGpuVirtualAddress())->GetGpuVirtualAddress();
+		//m_GpuResource.m_GpuVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(m_GpuResource.GetGpuVirtualAddress())->GetGpuVirtualAddress();
+		m_GpuResource.m_GpuVirtualAddress = std::make_shared<DirectXGpuVirtualAddress>();
+		std::static_pointer_cast<DirectXGpuVirtualAddress>(m_GpuResource.m_GpuVirtualAddress)->SetGpuVirtualAddress(m_GpuResource.m_pResource->GetGPUVirtualAddress());
 
 		if (initialData)
 		{
@@ -137,6 +139,11 @@ namespace Pixel {
 		Desc.Width = (uint64_t)m_BufferSize;
 
 		return Desc;
+	}
+
+	void DirectXGpuBuffer::CreateDerivedViews()
+	{
+
 	}
 
 	void DirectXByteAddressBuffer::CreateDerivedViews()

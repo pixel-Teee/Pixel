@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GpuResource.h"
+#include "DirectXGpuResource.h"
 
 #include <queue>
 

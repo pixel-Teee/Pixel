@@ -20,26 +20,26 @@ namespace Pixel {
 	}
 
 	void DepthBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height,
-		DXGI_FORMAT Format, D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr /*= -1*/)
+		ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
 		Create(Name, Width, Height, 1, Format, VideoMemoryPtr);
 	}
 
 	void DepthBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, 
-		uint32_t NumSamples, DXGI_FORMAT Format, D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr /*= -1*/)
+		uint32_t NumSamples, ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
-		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, 1, 1, Format, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, 1, 1, FormatToDXGIFormat(Format), D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 		ResourceDesc.SampleDesc.Count = NumSamples;
 
 		D3D12_CLEAR_VALUE ClearValue = {};
-		ClearValue.Format = Format;
+		ClearValue.Format = FormatToDXGIFormat(Format);
 		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr);
-		CreateDerivedViews(Format);
+		CreateDerivedViews(FormatToDXGIFormat(Format));
 	}
 
 	void DepthBuffer::CreateDerivedViews(DXGI_FORMAT Format)
 	{
-		ID3D12Resource* pResource = m_pResource.Get();
+		ID3D12Resource* pResource = m_GpuResource.m_pResource.Get();
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 		dsvDesc.Format = GetDSVFormat(Format);

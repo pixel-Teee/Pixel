@@ -13,6 +13,9 @@ namespace Pixel {
 	class DirectXGpuBuffer : public GpuBuffer
 	{
 	public:
+		friend class DirectXContext;
+		friend class GraphicsContext;
+		DirectXGpuBuffer();
 		virtual ~DirectXGpuBuffer();
 
 		virtual Ref<DescriptorCpuHandle> GetUAV() const override { return m_UAV; }
@@ -39,10 +42,8 @@ namespace Pixel {
 		uint32_t GetElementSize() const { return m_ElementSize; }
 	protected:
 
-		DirectXGpuBuffer();
-
 		D3D12_RESOURCE_DESC DescribeBuffer();
-		virtual void CreateDerivedViews() = 0;
+		virtual void CreateDerivedViews();
 
 		//unordered access view
 		Ref<DescriptorCpuHandle> m_UAV;

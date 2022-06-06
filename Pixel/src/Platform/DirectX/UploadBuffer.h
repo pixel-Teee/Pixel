@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GpuResource.h"
+#include "DirectXGpuResource.h"
 
 namespace Pixel {
 	class UploadBuffer : public DirectXGpuResource

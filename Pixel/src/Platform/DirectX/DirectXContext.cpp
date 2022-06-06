@@ -2,11 +2,10 @@
 
 #include "DirectXContext.h"
 #include "CommandQueue.h"
-#include "CommandContext.h"
 #include "DirectXSwapChain.h"
 #include "DescriptorAllocator.h"
-#include "DirectXBuffer.h"
-#include "GpuResource.h"
+#include "DirectXGpuBuffer.h"
+#include "DirectXGpuResource.h"
 #include "GraphicsContext.h"
 #include "PipelineStateObject.h"
 #include "Pixel/Math/Math.h"
@@ -188,7 +187,7 @@ namespace Pixel {
 			m_pCommandList->SetDescriptorHeaps(NonNullHeaps, HeapsToBind);
 	}
 
-	void DirectXContext::CopyBuffer(GpuResource& Dest, GpuResource& Src)
+	void DirectXContext::CopyBuffer(DirectXGpuResource& Dest, DirectXGpuResource& Src)
 	{
 		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
 		TransitionResource(Src, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -199,7 +198,7 @@ namespace Pixel {
 		//------Copy Resource------
 	}
 
-	void DirectXContext::CopyBufferRegion(GpuResource& Dest, size_t DestOffset, GpuResource& Src, size_t SrcOffset, size_t NumBytes)
+	void DirectXContext::CopyBufferRegion(DirectXGpuResource& Dest, size_t DestOffset, DirectXGpuResource& Src, size_t SrcOffset, size_t NumBytes)
 	{
 		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
 		TransitionResource(Src, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -208,7 +207,7 @@ namespace Pixel {
 		m_pCommandList->CopyBufferRegion(Dest.GetResource(), DestOffset, Src.GetResource(), SrcOffset, NumBytes);
 	}
 
-	void DirectXContext::CopySubresource(GpuResource& Dest, uint32_t DestSubIndex, GpuResource& Src, uint32_t SrcSubIndex)
+	void DirectXContext::CopySubresource(DirectXGpuResource& Dest, uint32_t DestSubIndex, DirectXGpuResource& Src, uint32_t SrcSubIndex)
 	{
 		FlushResourceBarriers();
 
@@ -231,7 +230,7 @@ namespace Pixel {
 		m_pCommandList->CopyTextureRegion(&DestLocation, 0, 0, 0, &SrcLocation, nullptr);
 	}
 
-	void DirectXContext::CopyTextureRegion(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source, RECT& Rect)
+	void DirectXContext::CopyTextureRegion(DirectXGpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, DirectXGpuResource& Source, RECT& Rect)
 	{
 		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
 		TransitionResource(Source, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -251,7 +250,7 @@ namespace Pixel {
 		m_pCommandList->CopyTextureRegion(&destLoc, x, y, z, &srcLoc, &box);
 	}
 
-	void DirectXContext::TransitionResource(GpuResource& Resource, D3D12_RESOURCE_STATES NewState, bool FlushImmediate)
+	void DirectXContext::TransitionResource(DirectXGpuResource& Resource, D3D12_RESOURCE_STATES NewState, bool FlushImmediate)
 	{
 		D3D12_RESOURCE_STATES OldState = Resource.m_UsageState;
 
@@ -293,7 +292,7 @@ namespace Pixel {
 			FlushResourceBarriers();
 	}
 
-	void DirectXContext::InsertUAVBarrier(GpuResource& Resource, bool FlushImmediate)
+	void DirectXContext::InsertUAVBarrier(DirectXGpuResource& Resource, bool FlushImmediate)
 	{
 		PX_CORE_ASSERT(m_NumBarriersToFlush < 16, "exceeded arbitrary limit on buffered barriers");
 		D3D12_RESOURCE_BARRIER& BarrierDesc = m_ResourceBarrierBuffer[m_NumBarriersToFlush++];
@@ -306,7 +305,7 @@ namespace Pixel {
 			FlushResourceBarriers();
 	}
 
-	void DirectXContext::InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[])
+	void DirectXContext::InitializeTexture(DirectXGpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[])
 	{
 		//returns the required size of a buffer to be used for data upload
 		uint64_t uploadBufferSize = GetRequiredIntermediateSize(Dest.GetResource(), 0, NumSubresources);
@@ -322,7 +321,7 @@ namespace Pixel {
 		InitContext.Finish(true);
 	}
 
-	void DirectXContext::InitializeBuffer(GpuBuffer& Dest, const void* BufferData, size_t NumBytes, size_t DestOffset /*= 0*/)
+	void DirectXContext::InitializeBuffer(DirectXGpuBuffer& Dest, const void* BufferData, size_t NumBytes, size_t DestOffset /*= 0*/)
 	{
 		DirectXContext& InitContext = DirectXContext::Begin();
 
@@ -330,15 +329,15 @@ namespace Pixel {
 		memcpy(mem.DataPtr, BufferData, Math::DivideByMultiple(NumBytes, 16) * 16);
 		
 		//copy data to the intermediate upload heap and then schedule a copy from the upload heap to the default texture
-		InitContext.TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST, true);
-		InitContext.m_pCommandList->CopyBufferRegion(Dest.GetResource(), DestOffset, mem.Buffer.GetResource(), 0, NumBytes);
-		InitContext.TransitionResource(Dest, D3D12_RESOURCE_STATE_GENERIC_READ, true);
+		InitContext.TransitionResource(Dest.m_GpuResource, D3D12_RESOURCE_STATE_COPY_DEST, true);
+		InitContext.m_pCommandList->CopyBufferRegion(Dest.m_GpuResource.m_pResource.Get(), DestOffset, mem.Buffer.GetResource(), 0, NumBytes);
+		InitContext.TransitionResource(Dest.m_GpuResource, D3D12_RESOURCE_STATE_GENERIC_READ, true);
 
 		//execute the command list and wait for it to finish so we can release the upload buffer
 		InitContext.Finish(true);
 	}
 
-	void DirectXContext::InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src)
+	void DirectXContext::InitializeTextureArraySlice(DirectXGpuResource& Dest, uint32_t SliceIndex, DirectXGpuResource& Src)
 	{
 		DirectXContext& Context = DirectXContext::Begin();
 
@@ -380,7 +379,7 @@ namespace Pixel {
 		Context.Finish(true);
 	}
 
-	void DirectXContext::WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* BufferData, size_t NumBytes)
+	void DirectXContext::WriteBuffer(DirectXGpuResource& Dest, size_t DestOffset, const void* BufferData, size_t NumBytes)
 	{
 		PX_CORE_ASSERT(BufferData != nullptr && Math::IsAligned(BufferData, 16), "buffer data is not aligned!");
 

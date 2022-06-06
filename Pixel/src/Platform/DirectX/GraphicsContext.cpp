@@ -1,12 +1,14 @@
 #include "pxpch.h"
 #include "GraphicsContext.h"
 
-#include "DirectXBuffer.h"
-#include "ColorBuffer.h"
+#include "DirectXGpuBuffer.h"
+#include "DirectXColorBuffer.h"
 #include "DepthBuffer.h"
 #include "DirectXRootSignature.h"
 #include "CommandQueue.h"
 #include "Pixel/Math/Math.h"
+#include "DirectXDescriptorCpuHandle.h"
+#include "DirectXGpuVirtualAddress.h"
 
 namespace Pixel {
 
@@ -15,43 +17,53 @@ namespace Pixel {
 		return DirectXContext::Begin(ID).GetGraphicsContext();
 	}
 
-	void GraphicsContext::ClearUAV(GpuBuffer& Target)
+	void GraphicsContext::ClearUAV(DirectXGpuBuffer& Target)
 	{
 		FlushResourceBarriers();
 
+		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(Target.GetUAV());
+
 		//after binding a uav, we can get a gpu handle that is required to clear it as a uav(because it essentially runs
 		//a shader to set all of the values)
-		D3D12_GPU_DESCRIPTOR_HANDLE GpuVisibileHandle = m_DynamicViewDescriptorHeap.UploadDirect(Target.GetUAV());
+		D3D12_GPU_DESCRIPTOR_HANDLE GpuVisibileHandle = m_DynamicViewDescriptorHeap.UploadDirect(UavHandle->GetCpuHandle());
 
 		const uint32_t ClearColor[4] = {};
 
-		m_pCommandList->ClearUnorderedAccessViewUint(GpuVisibileHandle, Target.GetUAV(), Target.GetResource(), ClearColor, 0, nullptr);
+		m_pCommandList->ClearUnorderedAccessViewUint(GpuVisibileHandle, UavHandle->GetCpuHandle(), Target.m_GpuResource.GetResource(), ClearColor, 0, nullptr);
 	}
 
-	void GraphicsContext::ClearUAV(ColorBuffer& Target)
+	void GraphicsContext::ClearUAV(DirectXColorBuffer& Target)
 	{
 		FlushResourceBarriers();
 
+		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(Target.GetUAV());
+
 		//after binding a uav, we can get a gpu handle that is required to clear it as a uav(because it essentially runs
 		//a shader to set all of the values)
-		D3D12_GPU_DESCRIPTOR_HANDLE GpuVisibleHandle = m_DynamicViewDescriptorHeap.UploadDirect(Target.GetUAV());
+		D3D12_GPU_DESCRIPTOR_HANDLE GpuVisibleHandle = m_DynamicViewDescriptorHeap.UploadDirect(UavHandle->GetCpuHandle());
 		CD3DX12_RECT ClearRect(0, 0, (LONG)Target.GetWidth(), (LONG)Target.GetHeight());
 
 		//TODO: nvidia card is not clearing uavs with either float or uint variants
 		const float* ClearColor = glm::value_ptr(Target.GetClearColor());
-		m_pCommandList->ClearUnorderedAccessViewFloat(GpuVisibleHandle, Target.GetUAV(), Target.GetResource(), ClearColor, 1, &ClearRect);
+		m_pCommandList->ClearUnorderedAccessViewFloat(GpuVisibleHandle, UavHandle->GetCpuHandle(), Target.m_GpuResource.GetResource(), ClearColor, 1, &ClearRect);
 	}
 
-	void GraphicsContext::ClearColor(ColorBuffer& Target, D3D12_RECT* Rect /*= nullptr*/)
+	void GraphicsContext::ClearColor(DirectXColorBuffer& Target, D3D12_RECT* Rect /*= nullptr*/)
 	{
 		FlushResourceBarriers();
-		m_pCommandList->ClearRenderTargetView(Target.GetRTV(), glm::value_ptr(Target.GetClearColor()), (Rect == nullptr) ? 0 : 1, Rect);
+
+		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(Target.GetUAV());
+
+		m_pCommandList->ClearRenderTargetView(UavHandle->GetCpuHandle(), glm::value_ptr(Target.GetClearColor()), (Rect == nullptr) ? 0 : 1, Rect);
 	}
 
-	void GraphicsContext::ClearColor(ColorBuffer& Target, float Color[4], D3D12_RECT* Rect /*= nullptr*/)
+	void GraphicsContext::ClearColor(DirectXColorBuffer& Target, float Color[4], D3D12_RECT* Rect /*= nullptr*/)
 	{
 		FlushResourceBarriers();
-		m_pCommandList->ClearRenderTargetView(Target.GetRTV(), Color, (Rect == nullptr) ? 0 : 1, Rect);
+
+		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(Target.GetUAV());
+
+		m_pCommandList->ClearRenderTargetView(UavHandle->GetCpuHandle(), Color, (Rect == nullptr) ? 0 : 1, Rect);
 	}
 
 	void GraphicsContext::ClearDepth(DepthBuffer& Target)
@@ -207,18 +219,23 @@ namespace Pixel {
 		m_pCommandList->SetGraphicsRootConstantBufferView(RootIndex, cb.GpuAddress);
 	}
 
-	void GraphicsContext::SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset /*= 0*/)
+	void GraphicsContext::SetBufferSRV(uint32_t RootIndex, const DirectXGpuBuffer& SRV, uint64_t Offset /*= 0*/)
 	{
-		PX_CORE_ASSERT((SRV.m_UsageState & (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) != 0,
+		PX_CORE_ASSERT((SRV.m_GpuResource.m_UsageState & (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) != 0,
 			"gpu buffer's state is error!");
 
-		m_pCommandList->SetGraphicsRootShaderResourceView(RootIndex, SRV.GetGpuVirtualAddress() + Offset);
+		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(SRV.m_GpuResource.GetGpuVirtualAddress());
+
+		m_pCommandList->SetGraphicsRootShaderResourceView(RootIndex, pVirtualAddress->GetGpuVirtualAddress() + Offset);
 	}
 
-	void GraphicsContext::SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset /*= 0*/)
+	void GraphicsContext::SetBufferUAV(uint32_t RootIndex, const DirectXGpuBuffer& UAV, uint64_t Offset /*= 0*/)
 	{
-		PX_CORE_ASSERT((UAV.m_UsageState & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0, "gpu buffer's state is error!");
-		m_pCommandList->SetGraphicsRootUnorderedAccessView(RootIndex, UAV.GetGpuVirtualAddress() + Offset);
+		PX_CORE_ASSERT((UAV.m_GpuResource.m_UsageState & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0, "gpu buffer's state is error!");
+
+		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(UAV.m_GpuResource.GetGpuVirtualAddress());
+
+		m_pCommandList->SetGraphicsRootUnorderedAccessView(RootIndex, pVirtualAddress->GetGpuVirtualAddress() + Offset);
 	}
 
 	void GraphicsContext::SetDescriptorTable(uint32_t RootIndex, D3D12_GPU_DESCRIPTOR_HANDLE FirstHandle)

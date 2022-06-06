@@ -2,7 +2,9 @@
 
 #include "DirectXContext.h"
 
-#include "DescriptorHandle.h"
+#include "Pixel/Renderer/DescriptorHandle.h"
+#include "DirectXDescriptorCpuHandle.h"
+#include "DirectXDescriptorGpuHandle.h"
 
 namespace Pixel {
 
@@ -51,9 +53,12 @@ namespace Pixel {
 		bool HasAvailableSpace(uint32_t Count) const;
 		DescriptorHandle Alloc(uint32_t Count = 1);
 
-		DescriptorHandle operator[](uint32_t arrayIndex) const { return m_FirstHandle + arrayIndex * m_DescriptorSize; }
+		DescriptorHandle operator[](uint32_t arrayIndex)
+		{
+			return m_FirstHandle + arrayIndex * m_DescriptorSize;
+		}
 
-		uint32_t GetOffsetOfHandle(const DescriptorHandle& DHandle);
+		uint32_t GetOffsetOfHandle(const DirectXDescriptorCpuHandle& DHandle);
 
 		//check the DHandle is in the [m_FirstHandle, m_NextFreeHandle - 1] range
 		bool ValidateHandle(const DescriptorHandle& DHandle) const;

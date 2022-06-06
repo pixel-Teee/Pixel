@@ -1,12 +1,13 @@
 #pragma once
 
-#include "DirectXBuffer.h"
+#include "Pixel/Renderer/PixelBuffer.h"
+#include "DirectXGpuResource.h"
 
 namespace Pixel {
-	class PixelBuffer : public DirectXGpuResource
+	class DirectXPixelBuffer : public PixelBuffer
 	{
 	public:
-		PixelBuffer();
+		DirectXPixelBuffer();
 
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
@@ -19,6 +20,14 @@ namespace Pixel {
 		//write the raw pixel buffer contents to a file
 		//the data is preceded by a 16-byte header: {DXGI_FORMAT, Pitch(in pixels), Width(in pixels), Height}
 		void ExportToFile(const std::wstring& FilePath);
+
+		//-------Pixel Engine Format To DXGIFormat------
+		DXGI_FORMAT FormatToDXGIFormat(ImageFormat Format);
+		ImageFormat DXGIFormatToImageFormat(DXGI_FORMAT dxgiFormat);
+
+		virtual void CreateFromSwapChain(const std::wstring& Name, GpuResource* pBaseResource) override;
+
+		//-------Pixel Engine Format To DXGIFormat------
 	protected:
 
 		D3D12_RESOURCE_DESC DescribeTex2D(uint32_t Width, uint32_t Height, uint32_t DepthOrArraySize, uint32_t NumMips, DXGI_FORMAT Format,
@@ -27,7 +36,7 @@ namespace Pixel {
 		void AssociateWithResource(const std::wstring& Name, ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState);
 
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,
-			D3D12_CLEAR_VALUE ClearValue, D3D12_GPU_VIRTUAL_ADDRESS VideoMemoryPtr = -1);
+			D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr);
 
 		/*
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,
@@ -47,5 +56,7 @@ namespace Pixel {
 		uint32_t m_ArraySize;
 		DXGI_FORMAT m_Format;
 		uint32_t m_BankRotation;//??
+
+		DirectXGpuResource m_GpuResource;
 	};
 }

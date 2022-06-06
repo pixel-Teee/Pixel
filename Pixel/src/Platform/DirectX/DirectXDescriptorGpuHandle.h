@@ -12,6 +12,9 @@ namespace Pixel {
 		virtual bool IsShaderVisible() const override;
 		virtual uint64_t GetGpuPtr() const override;
 
+		void SetGpuHandle(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle) { m_GpuHandle = gpuHandle; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle() { return m_GpuHandle; }
+
 		operator D3D12_GPU_DESCRIPTOR_HANDLE() const { return m_GpuHandle; }
 		virtual DescriptorGpuHandle& operator+=(int32_t OffsetScaledByDescriptorSize) override;
 		DescriptorGpuHandle& operator+(int32_t OffsetScaledByDescriptorSize);
