@@ -10,7 +10,7 @@
 #include "Pixel/Events/KeyEvent.h"
 
 #include "Platform/OpenGL/OpenGLContext.h"
-#include "Platform/DirectX/DirectXContext.h"
+#include "Platform/DirectX/Context/DirectXContext.h"
 
 namespace Pixel {
 	static bool s_GLFWInitialized = false;

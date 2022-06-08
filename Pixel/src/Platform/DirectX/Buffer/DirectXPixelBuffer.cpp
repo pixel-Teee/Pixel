@@ -1,0 +1,888 @@
+#include "pxpch.h"
+
+#include "DirectXPixelBuffer.h"
+
+#include "Platform/DirectX/DirectXDevice.h"
+
+namespace Pixel {
+
+	DirectXPixelBuffer::DirectXPixelBuffer()
+	{
+
+	}
+
+	void DirectXPixelBuffer::SetBankRotation(uint32_t RotationAmount)
+	{
+		RotationAmount;
+	}
+
+	void DirectXPixelBuffer::ExportToFile(const std::wstring& FilePath)
+	{
+
+	}
+
+	DXGI_FORMAT DirectXPixelBuffer::FormatToDXGIFormat(ImageFormat Format)
+	{
+		switch (Format)
+		{
+		case ImageFormat::PX_FORMAT_UNKNOWN:
+			return DXGI_FORMAT_UNKNOWN;
+		case ImageFormat::PX_FORMAT_R32G32B32A32_TYPELESS:
+			return DXGI_FORMAT_R32G32B32A32_TYPELESS;
+		case ImageFormat::PX_FORMAT_R32G32B32A32_FLOAT:
+			return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case ImageFormat::PX_FORMAT_R32G32B32A32_UINT:
+			return DXGI_FORMAT_R32G32B32A32_UINT;
+		case ImageFormat::PX_FORMAT_R32G32B32A32_SINT:
+			return DXGI_FORMAT_R32G32B32A32_SINT;
+		case ImageFormat::PX_FORMAT_R32G32B32_TYPELESS:
+			return DXGI_FORMAT_R32G32B32_TYPELESS;
+		case ImageFormat::PX_FORMAT_R32G32B32_FLOAT:
+			return DXGI_FORMAT_R32G32B32_FLOAT;
+		case ImageFormat::PX_FORMAT_R32G32B32_UINT:
+			return DXGI_FORMAT_R32G32B32_UINT;
+		case ImageFormat::PX_FORMAT_R32G32B32_SINT:
+			return DXGI_FORMAT_R32G32B32_SINT;
+		case ImageFormat::PX_FORMAT_R16G16B16A16_TYPELESS:
+			return DXGI_FORMAT_R16G16B16A16_TYPELESS;
+		case ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT:
+			return DXGI_FORMAT_R16G16B16A16_FLOAT;
+		case ImageFormat::PX_FORMAT_R16G16B16A16_UNORM:
+			return DXGI_FORMAT_R16G16B16A16_UNORM;
+		case ImageFormat::PX_FORMAT_R16G16B16A16_UINT:
+			return DXGI_FORMAT_R16G16B16A16_UINT;
+		case ImageFormat::PX_FORMAT_R16G16B16A16_SNORM:
+			return DXGI_FORMAT_R16G16B16A16_SNORM;
+		case ImageFormat::PX_FORMAT_R16G16B16A16_SINT:
+			return DXGI_FORMAT_R16G16B16A16_SINT;
+		case ImageFormat::PX_FORMAT_R32G32_TYPELESS:
+			return DXGI_FORMAT_R32G32_TYPELESS;
+		case ImageFormat::PX_FORMAT_R32G32_FLOAT:
+			return DXGI_FORMAT_R32G32_FLOAT;
+		case ImageFormat::PX_FORMAT_R32G32_UINT:
+			return DXGI_FORMAT_R32G32_UINT;
+		case ImageFormat::PX_FORMAT_R32G32_SINT://
+			return DXGI_FORMAT_R32G32_SINT;
+		case ImageFormat::PX_FORMAT_R32G8X24_TYPELESS:
+			return DXGI_FORMAT_R32G8X24_TYPELESS;
+		case ImageFormat::PX_FORMAT_D32_FLOAT_S8X24_UINT:
+			return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+		case ImageFormat::PX_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+			return DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+		case ImageFormat::PX_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
+		case ImageFormat::PX_FORMAT_R10G10B10A2_TYPELESS:
+			return DXGI_FORMAT_R10G10B10A2_TYPELESS;
+		case ImageFormat::PX_FORMAT_R10G10B10A2_UNORM:
+			return DXGI_FORMAT_R10G10B10A2_UNORM;
+		case ImageFormat::PX_FORMAT_R10G10B10A2_UINT:
+			return DXGI_FORMAT_R10G10B10A2_UINT;
+		case ImageFormat::PX_FORMAT_R11G11B10_FLOAT:
+			return DXGI_FORMAT_R11G11B10_FLOAT;//
+		case ImageFormat::PX_FORMAT_R8G8B8A8_TYPELESS:
+			return DXGI_FORMAT_R8G8B8A8_TYPELESS;
+		case ImageFormat::PX_FORMAT_R8G8B8A8_UNORM:
+			return DXGI_FORMAT_R8G8B8A8_UNORM;
+		case ImageFormat::PX_FORMAT_R8G8B8A8_UNORM_SRGB:
+			return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		case ImageFormat::PX_FORMAT_R8G8B8A8_UINT:
+			return DXGI_FORMAT_R8G8B8A8_UINT;
+		case ImageFormat::PX_FORMAT_R8G8B8A8_SNORM:
+			return DXGI_FORMAT_R8G8B8A8_SNORM;
+		case ImageFormat::PX_FORMAT_R8G8B8A8_SINT:
+			return DXGI_FORMAT_R8G8B8A8_SINT;
+		case ImageFormat::PX_FORMAT_R16G16_TYPELESS:
+			return DXGI_FORMAT_R16G16_TYPELESS;
+		case ImageFormat::PX_FORMAT_R16G16_FLOAT:
+			return DXGI_FORMAT_R16G16_FLOAT;
+		case ImageFormat::PX_FORMAT_R16G16_UNORM:
+			return DXGI_FORMAT_R16G16_UNORM;
+		case ImageFormat::PX_FORMAT_R16G16_UINT:
+			return DXGI_FORMAT_R16G16_UINT;//
+		case ImageFormat::PX_FORMAT_R16G16_SNORM:
+			return DXGI_FORMAT_R16G16_SNORM;
+		case ImageFormat::PX_FORMAT_R16G16_SINT:
+			return DXGI_FORMAT_R16G16_SINT;
+		case ImageFormat::PX_FORMAT_R32_TYPELESS:
+			return DXGI_FORMAT_R32_TYPELESS;
+		case ImageFormat::PX_FORMAT_D32_FLOAT:
+			return DXGI_FORMAT_D32_FLOAT;
+		case ImageFormat::PX_FORMAT_R32_FLOAT:
+			return DXGI_FORMAT_R32_FLOAT;
+		case ImageFormat::PX_FORMAT_R32_UINT:
+			return DXGI_FORMAT_R32_UINT;
+		case ImageFormat::PX_FORMAT_R32_SINT:
+			return DXGI_FORMAT_R32_SINT;
+		case ImageFormat::PX_FORMAT_R24G8_TYPELESS:
+			return DXGI_FORMAT_R24G8_TYPELESS;
+		case ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT:
+			return DXGI_FORMAT_D24_UNORM_S8_UINT;
+		case ImageFormat::PX_FORMAT_R24_UNORM_X8_TYPELESS:
+			return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		case ImageFormat::PX_FORMAT_X24_TYPELESS_G8_UINT:
+			return DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+		case ImageFormat::PX_FORMAT_R8G8_TYPELESS:
+			return DXGI_FORMAT_R8G8_TYPELESS;
+		case ImageFormat::PX_FORMAT_R8G8_UNORM:
+			return DXGI_FORMAT_R8G8_UNORM;
+		case ImageFormat::PX_FORMAT_R8G8_UINT:
+			return DXGI_FORMAT_R8G8_UINT;
+		case ImageFormat::PX_FORMAT_R8G8_SNORM:
+			return DXGI_FORMAT_R8G8_SNORM;
+		case ImageFormat::PX_FORMAT_R8G8_SINT:
+			return DXGI_FORMAT_R8G8_SINT;
+		case ImageFormat::PX_FORMAT_R16_TYPELESS:
+			return DXGI_FORMAT_R16_TYPELESS;
+		case ImageFormat::PX_FORMAT_R16_FLOAT:
+			return DXGI_FORMAT_R16_FLOAT;
+		case ImageFormat::PX_FORMAT_D16_UNORM:
+			return DXGI_FORMAT_D16_UNORM;
+		case ImageFormat::PX_FORMAT_R16_UNORM:
+			return DXGI_FORMAT_R16_UNORM;
+		case ImageFormat::PX_FORMAT_R16_UINT:
+			return DXGI_FORMAT_R16_UINT;
+		case ImageFormat::PX_FORMAT_R16_SNORM:
+			return DXGI_FORMAT_R16_SNORM;
+		case ImageFormat::PX_FORMAT_R16_SINT:
+			return DXGI_FORMAT_R16_SINT;
+		case ImageFormat::PX_FORMAT_R8_TYPELESS:
+			return DXGI_FORMAT_R8_TYPELESS;
+		case ImageFormat::PX_FORMAT_R8_UNORM:
+			return DXGI_FORMAT_R8_UNORM;
+		case ImageFormat::PX_FORMAT_R8_UINT:
+			return DXGI_FORMAT_R8_UINT;
+		case ImageFormat::PX_FORMAT_R8_SNORM:
+			return DXGI_FORMAT_R8_SNORM;
+		case ImageFormat::PX_FORMAT_R8_SINT:
+			return DXGI_FORMAT_R8_SINT;
+		case ImageFormat::PX_FORMAT_A8_UNORM:
+			return DXGI_FORMAT_A8_UNORM;
+		case ImageFormat::PX_FORMAT_R1_UNORM:
+			return DXGI_FORMAT_R1_UNORM;
+		case ImageFormat::PX_FORMAT_R9G9B9E5_SHAREDEXP:
+			return DXGI_FORMAT_R9G9B9E5_SHAREDEXP;
+		case ImageFormat::PX_FORMAT_R8G8_B8G8_UNORM:
+			return DXGI_FORMAT_R8G8_B8G8_UNORM;
+		case ImageFormat::PX_FORMAT_G8R8_G8B8_UNORM:
+			return DXGI_FORMAT_G8R8_G8B8_UNORM;
+		case ImageFormat::PX_FORMAT_BC1_TYPELESS:
+			return DXGI_FORMAT_BC1_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC1_UNORM:
+			return DXGI_FORMAT_BC1_UNORM;
+		case ImageFormat::PX_FORMAT_BC1_UNORM_SRGB:
+			return DXGI_FORMAT_BC1_UNORM_SRGB;//
+		case ImageFormat::PX_FORMAT_BC2_TYPELESS:
+			return DXGI_FORMAT_BC2_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC2_UNORM:
+			return DXGI_FORMAT_BC2_UNORM;
+		case ImageFormat::PX_FORMAT_BC2_UNORM_SRGB:
+			return DXGI_FORMAT_BC2_UNORM_SRGB;
+		case ImageFormat::PX_FORMAT_BC3_TYPELESS:
+			return DXGI_FORMAT_BC3_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC3_UNORM:
+			return DXGI_FORMAT_BC3_UNORM;
+		case ImageFormat::PX_FORMAT_BC3_UNORM_SRGB:
+			return DXGI_FORMAT_BC3_UNORM_SRGB;
+		case ImageFormat::PX_FORMAT_BC4_TYPELESS:
+			return DXGI_FORMAT_BC4_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC4_UNORM:
+			return DXGI_FORMAT_BC4_UNORM;
+		case ImageFormat::PX_FORMAT_BC4_SNORM:
+			return DXGI_FORMAT_BC4_SNORM;
+		case ImageFormat::PX_FORMAT_BC5_TYPELESS:
+			return DXGI_FORMAT_BC5_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC5_UNORM:
+			return DXGI_FORMAT_BC5_UNORM;
+		case ImageFormat::PX_FORMAT_BC5_SNORM:
+			return DXGI_FORMAT_BC5_SNORM;
+		case ImageFormat::PX_FORMAT_B5G6R5_UNORM:
+			return DXGI_FORMAT_B5G6R5_UNORM;
+		case ImageFormat::PX_FORMAT_B5G5R5A1_UNORM:
+			return DXGI_FORMAT_B5G5R5A1_UNORM;
+		case ImageFormat::PX_FORMAT_B8G8R8A8_UNORM:
+			return DXGI_FORMAT_B8G8R8A8_UNORM;
+		case ImageFormat::PX_FORMAT_B8G8R8X8_UNORM:
+			return DXGI_FORMAT_B8G8R8X8_UNORM;
+		case ImageFormat::PX_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+			return DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;
+		case ImageFormat::PX_FORMAT_B8G8R8A8_TYPELESS:
+			return DXGI_FORMAT_B8G8R8A8_TYPELESS;
+		case ImageFormat::PX_FORMAT_B8G8R8A8_UNORM_SRGB:
+			return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+		case ImageFormat::PX_FORMAT_B8G8R8X8_TYPELESS:
+			return DXGI_FORMAT_B8G8R8X8_TYPELESS;
+		case ImageFormat::PX_FORMAT_B8G8R8X8_UNORM_SRGB:
+			return DXGI_FORMAT_B8G8R8X8_UNORM_SRGB;
+		case ImageFormat::PX_FORMAT_BC6H_TYPELESS:
+			return DXGI_FORMAT_BC6H_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC6H_UF16:
+			return DXGI_FORMAT_BC6H_UF16;
+		case ImageFormat::PX_FORMAT_BC6H_SF16:
+			return DXGI_FORMAT_BC6H_SF16;
+		case ImageFormat::PX_FORMAT_BC7_TYPELESS:
+			return DXGI_FORMAT_BC7_TYPELESS;
+		case ImageFormat::PX_FORMAT_BC7_UNORM:
+			return DXGI_FORMAT_BC7_UNORM;
+		case ImageFormat::PX_FORMAT_BC7_UNORM_SRGB:
+			return DXGI_FORMAT_BC7_UNORM_SRGB;
+		case ImageFormat::PX_FORMAT_AYUV:
+			return DXGI_FORMAT_AYUV;
+		case ImageFormat::PX_FORMAT_Y410:
+			return DXGI_FORMAT_Y410;
+		case ImageFormat::PX_FORMAT_Y416:
+			return DXGI_FORMAT_Y416;
+		case ImageFormat::PX_FORMAT_NV12:
+			return DXGI_FORMAT_NV12;
+		case ImageFormat::PX_FORMAT_P010:
+			return DXGI_FORMAT_P010;
+		case ImageFormat::PX_FORMAT_P016:
+			return DXGI_FORMAT_P016;
+		case ImageFormat::PX_FORMAT_420_OPAQUE:
+			return DXGI_FORMAT_420_OPAQUE;
+		case ImageFormat::PX_FORMAT_YUY2:
+			return DXGI_FORMAT_YUY2;
+		case ImageFormat::PX_FORMAT_Y210:
+			return DXGI_FORMAT_Y210;
+		case ImageFormat::PX_FORMAT_Y216:
+			return DXGI_FORMAT_Y216;
+		case ImageFormat::PX_FORMAT_NV11:
+			return DXGI_FORMAT_NV11;
+		case ImageFormat::PX_FORMAT_AI44:
+			return DXGI_FORMAT_AI44;
+		case ImageFormat::PX_FORMAT_IA44:
+			return DXGI_FORMAT_IA44;
+		case ImageFormat::PX_FORMAT_P8:
+			return DXGI_FORMAT_P8;
+		case ImageFormat::PX_FORMAT_A8P8:
+			return DXGI_FORMAT_A8P8;
+		case ImageFormat::PX_FORMAT_B4G4R4A4_UNORM:
+			return DXGI_FORMAT_B4G4R4A4_UNORM;
+		case ImageFormat::PX_FORMAT_P208:
+			return DXGI_FORMAT_P208;
+		case ImageFormat::PX_FORMAT_V208:
+			return DXGI_FORMAT_V208;
+		case ImageFormat::PX_FORMAT_V408:
+			return DXGI_FORMAT_V408;
+		case ImageFormat::PX_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE:
+			return DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE;
+		case ImageFormat::PX_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE:
+			return DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE;
+		case ImageFormat::PX_FORMAT_FORCE_UINT:
+			return DXGI_FORMAT_FORCE_UINT;
+		default:
+			break;
+		}
+	}
+
+	ImageFormat DirectXPixelBuffer::DXGIFormatToImageFormat(DXGI_FORMAT dxgiFormat)
+	{
+		switch (dxgiFormat)
+		{
+		case DXGI_FORMAT_UNKNOWN:
+			return ImageFormat::PX_FORMAT_UNKNOWN;
+		case DXGI_FORMAT_R32G32B32A32_TYPELESS:
+			return ImageFormat::PX_FORMAT_R32G32B32A32_TYPELESS;
+		case DXGI_FORMAT_R32G32B32A32_FLOAT:
+			return ImageFormat::PX_FORMAT_R32G32B32A32_FLOAT;
+		case DXGI_FORMAT_R32G32B32A32_UINT:
+			return ImageFormat::PX_FORMAT_R32G32B32A32_UINT;
+		case DXGI_FORMAT_R32G32B32A32_SINT:
+			return ImageFormat::PX_FORMAT_R32G32B32A32_SINT;
+		case DXGI_FORMAT_R32G32B32_TYPELESS:
+			return ImageFormat::PX_FORMAT_R32G32B32_TYPELESS;
+		case DXGI_FORMAT_R32G32B32_FLOAT:
+			return ImageFormat::PX_FORMAT_R32G32B32_FLOAT;
+		case DXGI_FORMAT_R32G32B32_UINT:
+			return ImageFormat::PX_FORMAT_R32G32B32_UINT;
+		case DXGI_FORMAT_R32G32B32_SINT:
+			return ImageFormat::PX_FORMAT_R32G32B32_SINT;
+		case DXGI_FORMAT_R16G16B16A16_TYPELESS:
+			return ImageFormat::PX_FORMAT_R16G16B16A16_TYPELESS;
+		case DXGI_FORMAT_R16G16B16A16_FLOAT:
+			return ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT;
+		case DXGI_FORMAT_R16G16B16A16_UNORM:
+			return ImageFormat::PX_FORMAT_R16G16B16A16_UNORM;
+		case DXGI_FORMAT_R16G16B16A16_UINT:
+			return ImageFormat::PX_FORMAT_R16G16B16A16_UINT;
+		case DXGI_FORMAT_R16G16B16A16_SNORM:
+			return ImageFormat::PX_FORMAT_R16G16B16A16_SNORM;
+		case DXGI_FORMAT_R16G16B16A16_SINT:
+			return ImageFormat::PX_FORMAT_R16G16B16A16_SINT;
+			break;
+		case DXGI_FORMAT_R32G32_TYPELESS:
+			return ImageFormat::PX_FORMAT_R32G32_TYPELESS;
+		case DXGI_FORMAT_R32G32_FLOAT:
+			return ImageFormat::PX_FORMAT_R32G32_FLOAT;
+		case DXGI_FORMAT_R32G32_UINT:
+			return ImageFormat::PX_FORMAT_R32G32_UINT;
+		case DXGI_FORMAT_R32G32_SINT:
+			return ImageFormat::PX_FORMAT_R32G32_SINT;
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+			return ImageFormat::PX_FORMAT_R32G8X24_TYPELESS;
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+			return ImageFormat::PX_FORMAT_D32_FLOAT_S8X24_UINT;
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+			return ImageFormat::PX_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return ImageFormat::PX_FORMAT_X32_TYPELESS_G8X24_UINT;
+		case DXGI_FORMAT_R10G10B10A2_TYPELESS:
+			return ImageFormat::PX_FORMAT_R10G10B10A2_TYPELESS;
+		case DXGI_FORMAT_R10G10B10A2_UNORM:
+			return ImageFormat::PX_FORMAT_R10G10B10A2_UNORM;
+		case DXGI_FORMAT_R10G10B10A2_UINT:
+			return ImageFormat::PX_FORMAT_R10G10B10A2_UINT;
+		case DXGI_FORMAT_R11G11B10_FLOAT:
+			return ImageFormat::PX_FORMAT_R11G11B10_FLOAT;
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+			return ImageFormat::PX_FORMAT_R8G8B8A8_TYPELESS;
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+			return ImageFormat::PX_FORMAT_R8G8B8A8_UNORM;
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_R8G8B8A8_UNORM_SRGB;
+		case DXGI_FORMAT_R8G8B8A8_UINT:
+			return ImageFormat::PX_FORMAT_R8G8B8A8_UINT;
+		case DXGI_FORMAT_R8G8B8A8_SNORM:
+			return ImageFormat::PX_FORMAT_R8G8B8A8_SNORM;
+		case DXGI_FORMAT_R8G8B8A8_SINT:
+			return ImageFormat::PX_FORMAT_R8G8B8A8_SINT;
+		case DXGI_FORMAT_R16G16_TYPELESS:
+			return ImageFormat::PX_FORMAT_R16G16_TYPELESS;
+		case DXGI_FORMAT_R16G16_FLOAT:
+			return ImageFormat::PX_FORMAT_R16G16_FLOAT;
+		case DXGI_FORMAT_R16G16_UNORM:
+			return ImageFormat::PX_FORMAT_R16G16_UNORM;
+		case DXGI_FORMAT_R16G16_UINT:
+			return ImageFormat::PX_FORMAT_R16G16_UINT;
+		case DXGI_FORMAT_R16G16_SNORM:
+			return ImageFormat::PX_FORMAT_R16G16_SNORM;
+		case DXGI_FORMAT_R16G16_SINT:
+			return ImageFormat::PX_FORMAT_R16G16_SINT;
+		case DXGI_FORMAT_R32_TYPELESS:
+			return ImageFormat::PX_FORMAT_R32_TYPELESS;
+		case DXGI_FORMAT_D32_FLOAT:
+			return ImageFormat::PX_FORMAT_D32_FLOAT;
+		case DXGI_FORMAT_R32_FLOAT:
+			return ImageFormat::PX_FORMAT_R32_FLOAT;
+		case DXGI_FORMAT_R32_UINT:
+			return ImageFormat::PX_FORMAT_R32_UINT;
+		case DXGI_FORMAT_R32_SINT:
+			return ImageFormat::PX_FORMAT_R32_SINT;
+		case DXGI_FORMAT_R24G8_TYPELESS:
+			return ImageFormat::PX_FORMAT_R24G8_TYPELESS;
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+			return ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT;
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+			return ImageFormat::PX_FORMAT_R24_UNORM_X8_TYPELESS;
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			return ImageFormat::PX_FORMAT_X24_TYPELESS_G8_UINT;
+		case DXGI_FORMAT_R8G8_TYPELESS:
+			return ImageFormat::PX_FORMAT_R8G8_TYPELESS;
+		case DXGI_FORMAT_R8G8_UNORM:
+			return ImageFormat::PX_FORMAT_R8G8_UNORM;
+		case DXGI_FORMAT_R8G8_UINT:
+			return ImageFormat::PX_FORMAT_R8G8_UINT;
+		case DXGI_FORMAT_R8G8_SNORM:
+			return ImageFormat::PX_FORMAT_R8G8_SNORM;
+		case DXGI_FORMAT_R8G8_SINT:
+			return ImageFormat::PX_FORMAT_R8G8_SINT;
+		case DXGI_FORMAT_R16_TYPELESS:
+			return ImageFormat::PX_FORMAT_R16_TYPELESS;
+		case DXGI_FORMAT_R16_FLOAT:
+			return ImageFormat::PX_FORMAT_R16_FLOAT;
+		case DXGI_FORMAT_D16_UNORM:
+			return ImageFormat::PX_FORMAT_D16_UNORM;
+		case DXGI_FORMAT_R16_UNORM:
+			return ImageFormat::PX_FORMAT_R16_UNORM;
+		case DXGI_FORMAT_R16_UINT:
+			return ImageFormat::PX_FORMAT_R16_UINT;
+		case DXGI_FORMAT_R16_SNORM:
+			return ImageFormat::PX_FORMAT_R16_SNORM;
+		case DXGI_FORMAT_R16_SINT:
+			return ImageFormat::PX_FORMAT_R16_SINT;
+		case DXGI_FORMAT_R8_TYPELESS:
+			return ImageFormat::PX_FORMAT_R8_TYPELESS;
+		case DXGI_FORMAT_R8_UNORM:
+			return ImageFormat::PX_FORMAT_R8_UNORM;
+		case DXGI_FORMAT_R8_UINT:
+			return ImageFormat::PX_FORMAT_R8_UINT;
+		case DXGI_FORMAT_R8_SNORM:
+			return ImageFormat::PX_FORMAT_R8_SNORM;
+		case DXGI_FORMAT_R8_SINT:
+			return ImageFormat::PX_FORMAT_R8_SINT;
+		case DXGI_FORMAT_A8_UNORM:
+			return ImageFormat::PX_FORMAT_A8_UNORM;
+		case DXGI_FORMAT_R1_UNORM:
+			return ImageFormat::PX_FORMAT_R1_UNORM;
+		case DXGI_FORMAT_R9G9B9E5_SHAREDEXP:
+			return ImageFormat::PX_FORMAT_R9G9B9E5_SHAREDEXP;
+		case DXGI_FORMAT_R8G8_B8G8_UNORM:
+			return ImageFormat::PX_FORMAT_R8G8_B8G8_UNORM;
+		case DXGI_FORMAT_G8R8_G8B8_UNORM:
+			return ImageFormat::PX_FORMAT_G8R8_G8B8_UNORM;
+		case DXGI_FORMAT_BC1_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC1_TYPELESS;
+		case DXGI_FORMAT_BC1_UNORM:
+			return ImageFormat::PX_FORMAT_BC1_UNORM;
+			break;
+		case DXGI_FORMAT_BC1_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_BC1_UNORM_SRGB;
+		case DXGI_FORMAT_BC2_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC2_TYPELESS;
+		case DXGI_FORMAT_BC2_UNORM:
+			return ImageFormat::PX_FORMAT_BC2_UNORM;
+		case DXGI_FORMAT_BC2_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_BC2_UNORM_SRGB;
+		case DXGI_FORMAT_BC3_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC3_TYPELESS;
+		case DXGI_FORMAT_BC3_UNORM:
+			return ImageFormat::PX_FORMAT_BC3_UNORM;
+		case DXGI_FORMAT_BC3_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_BC3_UNORM_SRGB;
+		case DXGI_FORMAT_BC4_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC4_TYPELESS;
+		case DXGI_FORMAT_BC4_UNORM:
+			return ImageFormat::PX_FORMAT_BC4_UNORM;
+		case DXGI_FORMAT_BC4_SNORM:
+			return ImageFormat::PX_FORMAT_BC4_SNORM;
+		case DXGI_FORMAT_BC5_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC5_TYPELESS;
+		case DXGI_FORMAT_BC5_UNORM:
+			return ImageFormat::PX_FORMAT_BC5_UNORM;
+		case DXGI_FORMAT_BC5_SNORM:
+			return ImageFormat::PX_FORMAT_BC5_SNORM;
+		case DXGI_FORMAT_B5G6R5_UNORM:
+			return ImageFormat::PX_FORMAT_B5G6R5_UNORM;
+		case DXGI_FORMAT_B5G5R5A1_UNORM:
+			return ImageFormat::PX_FORMAT_B5G5R5A1_UNORM;
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+			return ImageFormat::PX_FORMAT_B8G8R8A8_UNORM;
+		case DXGI_FORMAT_B8G8R8X8_UNORM:
+			return ImageFormat::PX_FORMAT_B8G8R8X8_UNORM;
+		case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+			return ImageFormat::PX_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;
+		case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+			return ImageFormat::PX_FORMAT_B8G8R8A8_TYPELESS;
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_B8G8R8A8_UNORM_SRGB;
+		case DXGI_FORMAT_B8G8R8X8_TYPELESS:
+			return ImageFormat::PX_FORMAT_B8G8R8X8_TYPELESS;
+		case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_B8G8R8X8_UNORM_SRGB;
+		case DXGI_FORMAT_BC6H_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC6H_TYPELESS;
+		case DXGI_FORMAT_BC6H_UF16:
+			return ImageFormat::PX_FORMAT_BC6H_UF16;
+		case DXGI_FORMAT_BC6H_SF16:
+			return ImageFormat::PX_FORMAT_BC6H_SF16;
+		case DXGI_FORMAT_BC7_TYPELESS:
+			return ImageFormat::PX_FORMAT_BC7_TYPELESS;
+		case DXGI_FORMAT_BC7_UNORM:
+			return ImageFormat::PX_FORMAT_BC7_UNORM;
+		case DXGI_FORMAT_BC7_UNORM_SRGB:
+			return ImageFormat::PX_FORMAT_BC7_UNORM_SRGB;
+		case DXGI_FORMAT_AYUV:
+			return ImageFormat::PX_FORMAT_AYUV;
+		case DXGI_FORMAT_Y410:
+			return ImageFormat::PX_FORMAT_Y410;
+		case DXGI_FORMAT_Y416:
+			return ImageFormat::PX_FORMAT_Y416;
+		case DXGI_FORMAT_NV12:
+			return ImageFormat::PX_FORMAT_NV12;
+		case DXGI_FORMAT_P010:
+			return ImageFormat::PX_FORMAT_P010;
+		case DXGI_FORMAT_P016:
+			return ImageFormat::PX_FORMAT_P016;
+		case DXGI_FORMAT_420_OPAQUE:
+			return ImageFormat::PX_FORMAT_420_OPAQUE;
+		case DXGI_FORMAT_YUY2:
+			return ImageFormat::PX_FORMAT_YUY2;
+		case DXGI_FORMAT_Y210:
+			return ImageFormat::PX_FORMAT_Y210;
+		case DXGI_FORMAT_Y216:
+			return ImageFormat::PX_FORMAT_Y216;
+		case DXGI_FORMAT_NV11:
+			return ImageFormat::PX_FORMAT_NV11;
+		case DXGI_FORMAT_AI44:
+			return ImageFormat::PX_FORMAT_AI44;
+		case DXGI_FORMAT_IA44:
+			return ImageFormat::PX_FORMAT_IA44;
+		case DXGI_FORMAT_P8:
+			return ImageFormat::PX_FORMAT_P8;
+		case DXGI_FORMAT_A8P8:
+			return ImageFormat::PX_FORMAT_A8P8;
+		case DXGI_FORMAT_B4G4R4A4_UNORM:
+			return ImageFormat::PX_FORMAT_B4G4R4A4_UNORM;
+		case DXGI_FORMAT_P208:
+			return ImageFormat::PX_FORMAT_P208;
+		case DXGI_FORMAT_V208:
+			return ImageFormat::PX_FORMAT_V208;
+		case DXGI_FORMAT_V408:
+			return ImageFormat::PX_FORMAT_V408;
+		case DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE:
+			return ImageFormat::PX_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE;
+		case DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE:
+			return ImageFormat::PX_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE;
+		case DXGI_FORMAT_FORCE_UINT:
+			return ImageFormat::PX_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE;
+		default:
+			break;
+		}
+	}
+
+	void DirectXPixelBuffer::CreateFromSwapChain(const std::wstring& Name, GpuResource* pBaseResource)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	D3D12_RESOURCE_DESC DirectXPixelBuffer::DescribeTex2D(uint32_t Width, uint32_t Height, uint32_t DepthOrArraySize, uint32_t NumMips, DXGI_FORMAT Format, UINT Flags)
+	{
+		m_Width = Width;
+		m_Height = Height;
+		m_ArraySize = DepthOrArraySize;
+		m_Format = Format;
+
+		D3D12_RESOURCE_DESC Desc = {};
+		Desc.Alignment = 0;
+		Desc.DepthOrArraySize = (uint16_t)DepthOrArraySize;
+		Desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		Desc.Flags = (D3D12_RESOURCE_FLAGS)Flags;
+		Desc.Format = GetBaseFormat(Format);
+		Desc.Height = (uint32_t)Height;
+		Desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		Desc.MipLevels = (uint16_t)NumMips;
+		Desc.SampleDesc.Count = 1;
+		Desc.SampleDesc.Quality = 0;
+		Desc.Width = (uint64_t)Width;
+		return Desc;
+	}
+
+	void DirectXPixelBuffer::AssociateWithResource(const std::wstring& Name, ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState)
+	{
+		PX_CORE_ASSERT(pResource != nullptr, "resource is nullptr");
+
+		D3D12_RESOURCE_DESC ResourceDesc = pResource->GetDesc();
+
+		m_GpuResource.m_pResource.Attach(pResource);
+		m_GpuResource.m_UsageState = CurrentState;
+
+		m_Width = (uint32_t)ResourceDesc.Width;
+		m_Height = ResourceDesc.Height;
+		m_ArraySize = ResourceDesc.DepthOrArraySize;
+		m_Format = ResourceDesc.Format;
+
+#ifdef PX_DEBUG
+		m_GpuResource.m_pResource->SetName(Name.c_str());
+#else
+		Name;
+#endif
+	}
+
+	void DirectXPixelBuffer::CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc, D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
+	{
+		//parent class's destroy
+		m_GpuResource.Destroy();
+
+		CD3DX12_HEAP_PROPERTIES HeapProps(D3D12_HEAP_TYPE_DEFAULT);
+		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateCommittedResource(
+			&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, D3D12_RESOURCE_STATE_COMMON, &ClearValue, IID_PPV_ARGS(&m_GpuResource.m_pResource)
+		) >= 0, "create texture resource error!");
+
+		m_GpuResource.m_UsageState = D3D12_RESOURCE_STATE_COMMON;
+		m_GpuResource.m_GpuVirtualAddress = 0;//D3D12_GPU_VIRTUAL_ADDRESS_NULL
+
+#ifdef PX_DEBUG
+		m_GpuResource.m_pResource->SetName(Name.c_str());
+#else
+		(Name);
+#endif
+	}
+
+	DXGI_FORMAT DirectXPixelBuffer::GetBaseFormat(DXGI_FORMAT Format)
+	{
+		switch (Format)
+		{
+		//type less
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			return DXGI_FORMAT_R8G8B8A8_TYPELESS;
+
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+			return DXGI_FORMAT_B8G8R8A8_TYPELESS;
+
+		case DXGI_FORMAT_B8G8R8X8_UNORM:
+		case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+			return DXGI_FORMAT_B8G8R8X8_TYPELESS;
+		
+		//32-bit z w stencil
+		//x : means unused channel
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return DXGI_FORMAT_R32G8X24_TYPELESS;
+
+		//no stencil
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R32_FLOAT:
+			return DXGI_FORMAT_R32_TYPELESS;
+
+		//24-bit Z
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			return DXGI_FORMAT_R24G8_TYPELESS;
+
+		//16-bit z w/o stencil
+		case DXGI_FORMAT_R16_TYPELESS:
+		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R16_UNORM:
+			return DXGI_FORMAT_R16_TYPELESS;
+
+		default:
+			return Format;
+		}
+	}
+
+	DXGI_FORMAT DirectXPixelBuffer::GetUAVFormat(DXGI_FORMAT Format)
+	{
+		switch (Format)
+		{
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			return DXGI_FORMAT_R8G8B8A8_UNORM;
+
+		case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+			return DXGI_FORMAT_B8G8R8A8_UNORM;
+
+		case DXGI_FORMAT_B8G8R8X8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8X8_UNORM:
+		case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+			return DXGI_FORMAT_B8G8R8X8_UNORM;
+
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_R32_FLOAT:
+			return DXGI_FORMAT_R32_FLOAT;
+
+#ifdef  PX_DEBUG
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+		case DXGI_FORMAT_D16_UNORM:
+
+			PX_CORE_ASSERT(false, "requested a uav format for depth stencil format");
+#endif
+
+		default:
+			return Format;
+		}
+	}
+
+	DXGI_FORMAT DirectXPixelBuffer::GetDSVFormat(DXGI_FORMAT Format)
+	{
+		switch (Format)
+		{
+		// 32-bit z w/ stencil
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+
+		// No Stencil
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R32_FLOAT:
+			return DXGI_FORMAT_D32_FLOAT;
+
+		// 24-bit Z
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			return DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+		//16-bit z w/o Stencil
+		case DXGI_FORMAT_R16_TYPELESS:
+		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R16_UNORM:
+			return DXGI_FORMAT_D16_UNORM;
+
+		default:
+			return Format;
+		}
+	}
+
+	DXGI_FORMAT DirectXPixelBuffer::GetDepthFormat(DXGI_FORMAT Format)
+	{
+		switch (Format)
+		{
+			// 32-bit Z w/ Stencil
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+
+			// No Stencil
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R32_FLOAT:
+			return DXGI_FORMAT_R32_FLOAT;
+
+			// 24-bit Z
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+
+			// 16-bit Z w/o Stencil
+		case DXGI_FORMAT_R16_TYPELESS:
+		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R16_UNORM:
+			return DXGI_FORMAT_R16_UNORM;
+
+		default:
+			return DXGI_FORMAT_UNKNOWN;
+		}
+	}
+
+	DXGI_FORMAT DirectXPixelBuffer::GetStencilFormat(DXGI_FORMAT Format)
+	{
+		switch (Format)
+		{
+			// 32-bit Z w/ Stencil
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
+
+			// 24-bit Z
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			return DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+
+		default:
+			return DXGI_FORMAT_UNKNOWN;
+		}
+	}
+	/*---------------------------------------
+	---return the bpp for a particular format
+	-----------------------------------------*/
+	size_t DirectXPixelBuffer::BytesPerPixel(DXGI_FORMAT Format)
+	{
+		switch (Format)
+		{
+		case DXGI_FORMAT_R32G32B32A32_TYPELESS:
+		case DXGI_FORMAT_R32G32B32A32_FLOAT:
+		case DXGI_FORMAT_R32G32B32A32_UINT:
+		case DXGI_FORMAT_R32G32B32A32_SINT:
+			return 16;
+
+		case DXGI_FORMAT_R32G32B32_TYPELESS:
+		case DXGI_FORMAT_R32G32B32_FLOAT:
+		case DXGI_FORMAT_R32G32B32_UINT:
+		case DXGI_FORMAT_R32G32B32_SINT:
+			return 12;
+
+		case DXGI_FORMAT_R16G16B16A16_TYPELESS:
+		case DXGI_FORMAT_R16G16B16A16_FLOAT:
+		case DXGI_FORMAT_R16G16B16A16_UNORM:
+		case DXGI_FORMAT_R16G16B16A16_UINT:
+		case DXGI_FORMAT_R16G16B16A16_SNORM:
+		case DXGI_FORMAT_R16G16B16A16_SINT:
+		case DXGI_FORMAT_R32G32_TYPELESS:
+		case DXGI_FORMAT_R32G32_FLOAT:
+		case DXGI_FORMAT_R32G32_UINT:
+		case DXGI_FORMAT_R32G32_SINT:
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			return 8;
+
+		case DXGI_FORMAT_R10G10B10A2_TYPELESS:
+		case DXGI_FORMAT_R10G10B10A2_UNORM:
+		case DXGI_FORMAT_R10G10B10A2_UINT:
+		case DXGI_FORMAT_R11G11B10_FLOAT:
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+		case DXGI_FORMAT_R8G8B8A8_UINT:
+		case DXGI_FORMAT_R8G8B8A8_SNORM:
+		case DXGI_FORMAT_R8G8B8A8_SINT:
+		case DXGI_FORMAT_R16G16_TYPELESS:
+		case DXGI_FORMAT_R16G16_FLOAT:
+		case DXGI_FORMAT_R16G16_UNORM:
+		case DXGI_FORMAT_R16G16_UINT:
+		case DXGI_FORMAT_R16G16_SNORM:
+		case DXGI_FORMAT_R16G16_SINT:
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R32_FLOAT:
+		case DXGI_FORMAT_R32_UINT:
+		case DXGI_FORMAT_R32_SINT:
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+		case DXGI_FORMAT_R9G9B9E5_SHAREDEXP:
+		case DXGI_FORMAT_R8G8_B8G8_UNORM:
+		case DXGI_FORMAT_G8R8_G8B8_UNORM:
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+		case DXGI_FORMAT_B8G8R8X8_UNORM:
+		case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+		case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+		case DXGI_FORMAT_B8G8R8X8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+			return 4;
+
+		case DXGI_FORMAT_R8G8_TYPELESS:
+		case DXGI_FORMAT_R8G8_UNORM:
+		case DXGI_FORMAT_R8G8_UINT:
+		case DXGI_FORMAT_R8G8_SNORM:
+		case DXGI_FORMAT_R8G8_SINT:
+		case DXGI_FORMAT_R16_TYPELESS:
+		case DXGI_FORMAT_R16_FLOAT:
+		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R16_UNORM:
+		case DXGI_FORMAT_R16_UINT:
+		case DXGI_FORMAT_R16_SNORM:
+		case DXGI_FORMAT_R16_SINT:
+		case DXGI_FORMAT_B5G6R5_UNORM:
+		case DXGI_FORMAT_B5G5R5A1_UNORM:
+		case DXGI_FORMAT_A8P8:
+		case DXGI_FORMAT_B4G4R4A4_UNORM:
+			return 2;
+
+		case DXGI_FORMAT_R8_TYPELESS:
+		case DXGI_FORMAT_R8_UNORM:
+		case DXGI_FORMAT_R8_UINT:
+		case DXGI_FORMAT_R8_SNORM:
+		case DXGI_FORMAT_R8_SINT:
+		case DXGI_FORMAT_A8_UNORM:
+		case DXGI_FORMAT_P8:
+			return 1;
+
+		default:
+			return 0;
+		}
+	}
+
+}

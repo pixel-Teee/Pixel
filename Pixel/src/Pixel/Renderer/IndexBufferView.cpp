@@ -2,7 +2,7 @@
 #include "IndexBufferView.h"
 
 #include "Renderer.h"
-#include "Platform/DirectX/DirectXIndexBufferView.h"
+#include "Platform/DirectX/View/DirectXIndexBufferView.h"
 #include "Pixel/Renderer/GpuVirtualAddress.h"
 
 namespace Pixel {

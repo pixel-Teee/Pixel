@@ -1,17 +1,23 @@
 #include "pxpch.h"
 
+#include "DescriptorCpuHandle.h"
+
 #include "Pixel/Renderer/Renderer.h"
-#include "GpuVirtualAddress.h"
-#include "Platform/DirectX/Buffer/DirectXGpuVirtualAddress.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 
 namespace Pixel {
 
-	Ref<GpuVirtualAddress> GpuVirtualAddress::Create()
+	DescriptorCpuHandle::~DescriptorCpuHandle()
+	{
+
+	}
+
+	Ref<DescriptorCpuHandle> DescriptorCpuHandle::Create()
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OpenGL: return std::make_shared<DirectXGpuVirtualAddress>();
+		case RendererAPI::API::DirectX12: return std::make_shared<DirectXDescriptorCpuHandle>();
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

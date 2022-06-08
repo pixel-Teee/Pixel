@@ -39,4 +39,51 @@ namespace Pixel {
 
 	}
 
+	void OpenGLContext::SetID(const std::wstring& ID)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::FlushResourceBarriers()
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	uint64_t OpenGLContext::Flush(bool WaitForCompletion)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+		return 0;
+	}
+
+	uint64_t OpenGLContext::Finish(bool WaitForCompletion)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+		return 0;
+	}
+
+	void OpenGLContext::CopyBuffer(GpuResource& Dest, GpuResource& Src)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::CopyBufferRegion(GpuResource& Dest, size_t DestOffset, GpuResource& Src, size_t SrcOffset, size_t NumBytes)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::CopySubresource(GpuResource& Dest, uint32_t DestSubIndex, GpuResource& Src, uint32_t SrcSubIndex)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::InsertUAVBarrier(GpuResource& Resource, bool FlushImmediate)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 }

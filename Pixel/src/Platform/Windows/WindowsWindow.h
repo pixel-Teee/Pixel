@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Pixel/Core/Window.h"
-#include "Pixel/Renderer/Context.h"
+#include "Pixel/Renderer/Context/Context.h"
 
 #include <GLFW/glfw3.h>
 

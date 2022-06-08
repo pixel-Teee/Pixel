@@ -4,7 +4,7 @@
 
 #include "DirectXSwapChain.h"
 #include "DirectXDevice.h"
-#include "CommandQueue.h"
+#include "Platform/DirectX/Command/CommandQueue.h"
 
 namespace Pixel {
 

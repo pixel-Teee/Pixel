@@ -3,7 +3,7 @@
 #include "Renderer.h"
 #include "VertexBufferView.h"
 #include "Pixel/Renderer/GpuVirtualAddress.h"
-#include "Platform/DirectX/DirectXVertexBufferView.h"
+#include "Platform/DirectX/View/DirectXVertexBufferView.h"
 
 namespace Pixel {
 

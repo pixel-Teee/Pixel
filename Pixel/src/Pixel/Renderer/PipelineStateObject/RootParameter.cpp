@@ -1,17 +1,17 @@
 #include "pxpch.h"
 
+#include "RootParameter.h"
 #include "Pixel/Renderer/Renderer.h"
-#include "GpuVirtualAddress.h"
-#include "Platform/DirectX/Buffer/DirectXGpuVirtualAddress.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXRootParameter.h"
 
 namespace Pixel {
 
-	Ref<GpuVirtualAddress> GpuVirtualAddress::Create()
+	Ref<RootParameter> RootParameter::Create()
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OpenGL: return std::make_shared<DirectXGpuVirtualAddress>();
+		case RendererAPI::API::DirectX12: return std::make_shared<DirectXRootParameter>();
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
