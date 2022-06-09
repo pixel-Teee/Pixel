@@ -10,6 +10,9 @@
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorGpuHandle.h"
 #include "Platform/DirectX/Buffer/DirectXGpuVirtualAddress.h"
+#include "Platform/DirectX/View/DirectXIndexBufferView.h"
+#include "Platform/DirectX/View/DirectXVertexBufferView.h"
+#include "Platform/DirectX/TypeUtils.h"
 
 namespace Pixel {
 
@@ -44,40 +47,59 @@ namespace Pixel {
 		m_pCommandList->ClearUnorderedAccessViewFloat(GpuVisibleHandle, UavHandle->GetCpuHandle(), Target.m_GpuResource.GetResource(), ClearColor, 1, &ClearRect);
 	}
 
-	void GraphicsContext::ClearColor(DirectXColorBuffer& Target, D3D12_RECT* Rect /*= nullptr*/)
+	void GraphicsContext::ClearColor(PixelBuffer& Target, PixelRect* Rect)
 	{
 		FlushResourceBarriers();
 
-		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(Target.GetUAV());
+		DirectXColorBuffer& ColorBuffer = static_cast<DirectXColorBuffer&>(Target);
 
-		m_pCommandList->ClearRenderTargetView(UavHandle->GetCpuHandle(), glm::value_ptr(Target.GetClearColor()), (Rect == nullptr) ? 0 : 1, Rect);
+		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(ColorBuffer.GetUAV());
+
+		D3D12_RECT DxRect;
+
+		if(Rect != nullptr)
+			DxRect = RectToDirectXRect(*Rect);
+
+		m_pCommandList->ClearRenderTargetView(UavHandle->GetCpuHandle(), glm::value_ptr(ColorBuffer.GetClearColor()), (Rect == nullptr) ? 0 : 1, &DxRect);
 	}
 
-	void GraphicsContext::ClearColor(DirectXColorBuffer& Target, float Color[4], D3D12_RECT* Rect /*= nullptr*/)
+	void GraphicsContext::ClearColor(PixelBuffer& Target, float Color[4], PixelRect* Rect)
 	{
 		FlushResourceBarriers();
 
-		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(Target.GetUAV());
+		DirectXColorBuffer& ColorBuffer = static_cast<DirectXColorBuffer&>(Target);
 
-		m_pCommandList->ClearRenderTargetView(UavHandle->GetCpuHandle(), Color, (Rect == nullptr) ? 0 : 1, Rect);
+		Ref<DirectXDescriptorCpuHandle> UavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(ColorBuffer.GetUAV());
+
+		D3D12_RECT DxRect;
+		if (Rect != nullptr)
+			DxRect = RectToDirectXRect(*Rect);
+
+		m_pCommandList->ClearRenderTargetView(UavHandle->GetCpuHandle(), Color, (Rect == nullptr) ? 0 : 1, &DxRect);
 	}
 
-	void GraphicsContext::ClearDepth(DepthBuffer& Target)
+	void GraphicsContext::ClearDepth(PixelBuffer& Target)
 	{
 		FlushResourceBarriers();
-		m_pCommandList->ClearDepthStencilView(Target.GetDSV(), D3D12_CLEAR_FLAG_DEPTH, Target.GetClearDepth(), Target.GetClearStencil(), 0, nullptr);
+
+		DepthBuffer& buffer = static_cast<DepthBuffer&>(Target);
+		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_DEPTH, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
-	void GraphicsContext::ClearStencil(DepthBuffer& Target)
+	void GraphicsContext::ClearStencil(PixelBuffer& Target)
 	{
 		FlushResourceBarriers();
-		m_pCommandList->ClearDepthStencilView(Target.GetDSV(), D3D12_CLEAR_FLAG_STENCIL, Target.GetClearDepth(), Target.GetClearStencil(), 0, nullptr);
+
+		DepthBuffer& buffer = static_cast<DepthBuffer&>(Target);
+		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
-	void GraphicsContext::ClearDepthAndStencil(DepthBuffer& Target)
+	void GraphicsContext::ClearDepthAndStencil(PixelBuffer& Target)
 	{
 		FlushResourceBarriers();
-		m_pCommandList->ClearDepthStencilView(Target.GetDSV(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, Target.GetClearDepth(), Target.GetClearStencil(), 0, nullptr);
+
+		DepthBuffer& buffer = static_cast<DepthBuffer&>(Target);
+		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
 	void GraphicsContext::SetRootSignature(const RootSignature& RootSig)
@@ -92,29 +114,56 @@ namespace Pixel {
 		m_DynamicSamplerDescriptorHeap.ParseGraphicsRootSignature(RootSig);
 	}
 
-	void GraphicsContext::SetRenderTargets(uint32_t NumRTVs, const D3D12_CPU_DESCRIPTOR_HANDLE RTVs[])
+	void GraphicsContext::SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs)
 	{
-		m_pCommandList->OMSetRenderTargets(NumRTVs, RTVs, false, nullptr);
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> RtvHandles;
+		for (uint32_t i = 0; i < RTVs.size(); ++i)
+		{
+			RtvHandles.push_back(std::static_pointer_cast<DirectXDescriptorCpuHandle>(RTVs[i])->GetCpuHandle());
+		}
+
+		if (RTVs.size() != 0)
+			m_pCommandList->OMSetRenderTargets(NumRTVs, &RtvHandles[0], false, nullptr);
+		else
+			m_pCommandList->OMSetRenderTargets(NumRTVs, nullptr, false, nullptr);
 	}
 
-	void GraphicsContext::SetRenderTargets(uint32_t NumRTVs, const D3D12_CPU_DESCRIPTOR_HANDLE RTVs[], D3D12_CPU_DESCRIPTOR_HANDLE DSV)
+	void GraphicsContext::SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs, const Ref<DescriptorCpuHandle>& DSV)
 	{
-		m_pCommandList->OMSetRenderTargets(NumRTVs, RTVs, false, &DSV);
+		//m_pCommandList->OMSetRenderTargets(NumRTVs, RTVs, false, &DSV);
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> RtvHandles;
+		D3D12_CPU_DESCRIPTOR_HANDLE DsvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DSV)->GetCpuHandle();
+
+		for (uint32_t i = 0; i < RTVs.size(); ++i)
+		{
+			RtvHandles.push_back(std::static_pointer_cast<DirectXDescriptorCpuHandle>(RTVs[i])->GetCpuHandle());
+		}
+
+		if(RTVs.size() != 0)
+			m_pCommandList->OMSetRenderTargets(NumRTVs, &RtvHandles[0], false, &DsvHandle);
+		else
+			m_pCommandList->OMSetRenderTargets(NumRTVs, nullptr, false, &DsvHandle);
 	}
 
-	void GraphicsContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE RTV)
+	void GraphicsContext::SetRenderTarget(Ref<DescriptorCpuHandle> RTV)
 	{
-		SetRenderTargets(1, &RTV);
+		std::vector<Ref<DescriptorCpuHandle>> v;
+		v.push_back(RTV);
+		SetRenderTargets(1, v);
 	}
 
-	void GraphicsContext::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE RTV, D3D12_CPU_DESCRIPTOR_HANDLE DSV)
+	void GraphicsContext::SetRenderTarget(Ref<DescriptorCpuHandle> RTV, Ref<DescriptorCpuHandle> DSV)
 	{
-		SetRenderTargets(1, &RTV, DSV);
+		std::vector<Ref<DescriptorCpuHandle>> v;
+		v.push_back(RTV);
+		SetRenderTargets(1, v, DSV);
 	}
 
-	void GraphicsContext::SetViewport(const D3D12_VIEWPORT& vp)
+	void GraphicsContext::SetViewport(const ViewPort& vp)
 	{
-		m_pCommandList->RSSetViewports(1, &vp);
+		D3D12_VIEWPORT viewPort = ViewPortToDirectXViewPort(vp);
+
+		m_pCommandList->RSSetViewports(1, &viewPort);
 	}
 
 	void GraphicsContext::SetViewport(float x, float y, float w, float h, float minDepth /*= 0.0f*/, float maxDepth /*= 1.0f*/)
@@ -129,23 +178,32 @@ namespace Pixel {
 		m_pCommandList->RSSetViewports(1, &vp);
 	}
 
-	void GraphicsContext::SetScissor(const D3D12_RECT& rect)
+	void GraphicsContext::SetScissor(const PixelRect& rect)
 	{
-		PX_CORE_ASSERT(rect.left < rect.right&& rect.top < rect.bottom, "scissors's information is error!");
-		m_pCommandList->RSSetScissorRects(1, &rect);
+		D3D12_RECT DxRect = RectToDirectXRect(rect);
+		PX_CORE_ASSERT(DxRect.left < DxRect.right && DxRect.top < DxRect.bottom, "scissors's information is error!");
+		m_pCommandList->RSSetScissorRects(1, &DxRect);
 	}
 
 	void GraphicsContext::SetScissor(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 	{
-		SetScissor(CD3DX12_RECT(left, top, right, bottom));
+		PixelRect Rect;
+		Rect.Left = left;
+		Rect.Right = right;
+		Rect.Top = top;
+		Rect.bottom = bottom;
+		SetScissor(Rect);
 	}
 
-	void GraphicsContext::SetViewportAndScissor(const D3D12_VIEWPORT& vp, const D3D12_RECT& rect)
+	void GraphicsContext::SetViewportAndScissor(const ViewPort& vp, const PixelRect& rect)
 	{
-		PX_CORE_ASSERT(rect.left < rect.right&& rect.top < rect.bottom, "rect's information is error!");
+		PX_CORE_ASSERT(rect.Left < rect.Right&& rect.Top < rect.bottom, "rect's information is error!");
 
-		m_pCommandList->RSSetViewports(1, &vp);
-		m_pCommandList->RSSetScissorRects(1, &rect);
+		D3D12_VIEWPORT ViewPort = ViewPortToDirectXViewPort(vp);
+		D3D12_RECT Rect = RectToDirectXRect(rect);
+
+		m_pCommandList->RSSetViewports(1, &ViewPort);
+		m_pCommandList->RSSetScissorRects(1, &Rect);
 	}
 
 	void GraphicsContext::SetStencilRef(uint32_t StencilRef)
@@ -158,9 +216,10 @@ namespace Pixel {
 		m_pCommandList->OMSetBlendFactor(glm::value_ptr(BlendFactor));
 	}
 
-	void GraphicsContext::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY Topology)
+	void GraphicsContext::SetPrimitiveTopology(PrimitiveTopology Topology)
 	{
-		m_pCommandList->IASetPrimitiveTopology(Topology);
+		D3D12_PRIMITIVE_TOPOLOGY DxPrimitiveToplogy = PrimitiveTopologyToDirectXPrimitiveTopology(Topology);
+		m_pCommandList->IASetPrimitiveTopology(DxPrimitiveToplogy);
 	}
 
 	void GraphicsContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants)
@@ -199,9 +258,10 @@ namespace Pixel {
 		m_pCommandList->SetGraphicsRoot32BitConstant(RootIndex, w, 3);
 	}
 
-	void GraphicsContext::SetConstantBuffer(uint32_t RootIndex, D3D12_GPU_VIRTUAL_ADDRESS CBV)
+	void GraphicsContext::SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV)
 	{
-		m_pCommandList->SetGraphicsRootConstantBufferView(RootIndex, CBV);
+		Ref<DirectXGpuVirtualAddress> DxGpuVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(CBV);
+		m_pCommandList->SetGraphicsRootConstantBufferView(RootIndex, DxGpuVirtualAddress->GetGpuVirtualAddress());
 	}
 
 	void GraphicsContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
@@ -215,43 +275,58 @@ namespace Pixel {
 		m_pCommandList->SetGraphicsRootConstantBufferView(RootIndex, cb.GpuAddress);
 	}
 
-	void GraphicsContext::SetBufferSRV(uint32_t RootIndex, const DirectXGpuBuffer& SRV, uint64_t Offset /*= 0*/)
+	void GraphicsContext::SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset /*= 0*/)
 	{
-		PX_CORE_ASSERT((SRV.m_GpuResource.m_UsageState & (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) != 0,
+		DirectXGpuBuffer& Srv = static_cast<DirectXGpuBuffer&>(const_cast<GpuBuffer&>(SRV));
+		PX_CORE_ASSERT((Srv.m_GpuResource.m_UsageState & (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) != 0,
 			"gpu buffer's state is error!");
 
-		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(SRV.m_GpuResource.GetGpuVirtualAddress());
+		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(Srv.m_GpuResource.GetGpuVirtualAddress());
 
 		m_pCommandList->SetGraphicsRootShaderResourceView(RootIndex, pVirtualAddress->GetGpuVirtualAddress() + Offset);
 	}
 
-	void GraphicsContext::SetBufferUAV(uint32_t RootIndex, const DirectXGpuBuffer& UAV, uint64_t Offset /*= 0*/)
+	void GraphicsContext::SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset /*= 0*/)
 	{
-		PX_CORE_ASSERT((UAV.m_GpuResource.m_UsageState & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0, "gpu buffer's state is error!");
+		DirectXGpuBuffer& Uav = static_cast<DirectXGpuBuffer&>(const_cast<GpuBuffer&>(UAV));
 
-		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(UAV.m_GpuResource.GetGpuVirtualAddress());
+		PX_CORE_ASSERT((Uav.m_GpuResource.m_UsageState & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0, "gpu buffer's state is error!");
+
+		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(Uav.m_GpuResource.GetGpuVirtualAddress());
 
 		m_pCommandList->SetGraphicsRootUnorderedAccessView(RootIndex, pVirtualAddress->GetGpuVirtualAddress() + Offset);
 	}
 
-	void GraphicsContext::SetDescriptorTable(uint32_t RootIndex, D3D12_GPU_DESCRIPTOR_HANDLE FirstHandle)
+	void GraphicsContext::SetDescriptorTable(uint32_t RootIndex, Ref<DescriptorGpuHandle> FirstHandle)
 	{
-		m_pCommandList->SetGraphicsRootDescriptorTable(RootIndex, FirstHandle);
+		D3D12_GPU_DESCRIPTOR_HANDLE handle = std::static_pointer_cast<DirectXDescriptorGpuHandle>(FirstHandle)->GetGpuHandle();
+		m_pCommandList->SetGraphicsRootDescriptorTable(RootIndex, handle);
 	}
 
-	void GraphicsContext::SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& IBView)
+	void GraphicsContext::SetIndexBuffer(const Ref<IBV> IBView)
 	{
-		m_pCommandList->IASetIndexBuffer(&IBView);
+		Ref<DirectXIBV> DxIbv = std::static_pointer_cast<DirectXIBV>(IBView);
+		m_pCommandList->IASetIndexBuffer(&DxIbv->GetIndexBufferView());
 	}
 
-	void GraphicsContext::SetVertexBuffer(uint32_t Slot, const D3D12_VERTEX_BUFFER_VIEW& VBView)
+	void GraphicsContext::SetVertexBuffer(uint32_t Slot, const Ref<VBV> VBView)
 	{
-		SetVertexBuffers(Slot, 1, &VBView);
+		std::vector<Ref<VBV>> VBViews;
+		VBViews.push_back(VBView);
+		//Ref<DirectXVBV> DxVbv = std::static_pointer_cast<DirectXVBV>(VBView);
+		SetVertexBuffers(Slot, 1, VBViews);
 	}
 
-	void GraphicsContext::SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const D3D12_VERTEX_BUFFER_VIEW VBViews[])
+	void GraphicsContext::SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews)
 	{
-		m_pCommandList->IASetVertexBuffers(StartSlot, Count, VBViews);
+		std::vector<D3D12_VERTEX_BUFFER_VIEW> VertexBufferViews;
+		for (uint32_t i = 0; i < VBViews.size(); ++i)
+		{
+			Ref<DirectXVBV> DxVBV = std::static_pointer_cast<DirectXVBV>(VBViews[i]);
+			VertexBufferViews.push_back(DxVBV->GetVertexBufferView());
+		}
+
+		m_pCommandList->IASetVertexBuffers(StartSlot, Count, &VertexBufferViews[0]);
 	}
 
 	void GraphicsContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VertexData)

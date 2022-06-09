@@ -9,6 +9,10 @@
 #include "Platform/DirectX/Buffer/DirectXGpuResource.h"
 #include "Platform/DirectX/Context/GraphicsContext.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXPipelineStateObject.h"
+#include "Platform/DirectX/View/DirectXIndexBufferView.h"
+#include "Platform/DirectX/View/DirectXVertexBufferView.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorGpuHandle.h"
 #include "Pixel/Math/Math.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -392,6 +396,201 @@ namespace Pixel {
 	{
 		PX_CORE_ASSERT(m_Type != D3D12_COMMAND_LIST_TYPE_COMPUTE, "cannot convert async compute context to graphics!");
 		return static_cast<GraphicsContext&>(*this);
+	}
+
+	void DirectXContext::ClearColor(PixelBuffer& Target, PixelRect* Rect)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::ClearColor(PixelBuffer& Target, float Color[4], PixelRect* Rect /*= nullptr*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::ClearDepth(PixelBuffer& Target)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::ClearStencil(PixelBuffer& Target)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::ClearDepthAndStencil(PixelBuffer& Target)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs, const Ref<DescriptorCpuHandle>& DSV)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetRenderTarget(Ref<DescriptorCpuHandle> RTV)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetRenderTarget(Ref<DescriptorCpuHandle> RTV, Ref<DescriptorCpuHandle> DSV)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetDepthStencilTarget(Ref<DescriptorCpuHandle> DSV)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetRootSignature(const RootSignature& RootSig)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetViewport(const ViewPort& vp)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetViewport(float x, float y, float w, float h, float minDepth /*= 0.0f*/, float maxDepth /*= 1.0f*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetScissor(const PixelRect& rect)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetScissor(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetViewportAndScissor(const ViewPort& vp, const PixelRect& rect)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetStencilRef(uint32_t StencilRef)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetBlendFactor(glm::vec4 BlendFactor)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstants(uint32_t RootIndex, uint32_t x)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z, uint32_t w)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetDescriptorTable(uint32_t RootIndex, Ref<DescriptorGpuHandle> FirstHandle)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetIndexBuffer(const Ref<IBV> IBView)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetVertexBuffer(uint32_t Slot, const Ref<VBV> VBView)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetDynamicIB(size_t IndexCount, const uint64_t* IBData)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::Draw(uint32_t VertexCount, uint32_t VertexStartOffset /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::DrawIndexed(uint32_t IndexCount, uint32_t StartIndexLocation /*= 0*/, int32_t BaseVertexLocation /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::DrawInstanced(uint32_t VertexCountPerInstance, uint32_t InstanceCount, uint32_t StartVertexLocation /*= 0*/, uint32_t StartInstanceLocation /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation, int32_t BaseVertexLocation, uint32_t StartInstanceLocation)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 	void DirectXContext::Reset()

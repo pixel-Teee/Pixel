@@ -13,6 +13,7 @@ namespace Pixel {
 		virtual void InitAsDescriptorRange(RangeType Type, uint32_t Register,
 			uint32_t Count, ShaderVisibility Visibility = ShaderVisibility::ALL, uint32_t Space = 0) override;
 		virtual void InitAsDescriptorTable(uint32_t RangeCount, ShaderVisibility Visibility = ShaderVisibility::ALL) override;
+		virtual void InitAsDescriptorTable(std::initializer_list<std::tuple<RangeType, uint32_t, uint32_t>> list, ShaderVisibility Visibility = ShaderVisibility::ALL) override;
 		virtual void SetTableRange(uint32_t RangeIndex, RangeType Type, uint32_t Register, uint32_t Count, uint32_t Space = 0) override;
 
 
@@ -26,7 +27,8 @@ namespace Pixel {
 		virtual void Clear() override;
 
 		D3D12_ROOT_PARAMETER GetNativeRootParameter() { return m_RootParam; }
-	private:	
+
+	private:
 		D3D12_ROOT_PARAMETER m_RootParam;
 	};
 }

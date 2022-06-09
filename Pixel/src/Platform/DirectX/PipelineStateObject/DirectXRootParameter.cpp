@@ -31,6 +31,36 @@ namespace Pixel {
 		m_RootParam.DescriptorTable.pDescriptorRanges = new D3D12_DESCRIPTOR_RANGE[RangeCount];
 	}
 
+	void DirectXRootParameter::InitAsDescriptorTable(std::initializer_list<std::tuple<RangeType, uint32_t, uint32_t>> list, ShaderVisibility Visibility)
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+		uint32_t RangeCount = list.size();
+
+		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+		m_RootParam.ShaderVisibility = ShaderVisibilityToDirectXShaderVisibility(Visibility);
+		m_RootParam.DescriptorTable.NumDescriptorRanges = RangeCount;
+		m_RootParam.DescriptorTable.pDescriptorRanges = new D3D12_DESCRIPTOR_RANGE[RangeCount];
+
+		D3D12_DESCRIPTOR_RANGE* range = const_cast<D3D12_DESCRIPTOR_RANGE*>(m_RootParam.DescriptorTable.pDescriptorRanges);
+
+		for (uint32_t i = 0; i < RangeCount; ++i)
+		{
+			D3D12_DESCRIPTOR_RANGE* pRange = range + i;
+
+			RangeType rangeType = std::get<0>((*(list.begin() + i)));
+
+			uint32_t baseRegister = std::get<1>((*(list.begin() + i)));
+
+			uint32_t registerCount = std::get<2>(*(list.begin() + i));
+			
+			range->RangeType = RangeTypeToDirectXRangeType(rangeType);
+			range->NumDescriptors = registerCount;
+			range->BaseShaderRegister = baseRegister;
+			range->RegisterSpace = 0;
+			range->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		}
+	}
+
 	void DirectXRootParameter::SetTableRange(uint32_t RangeIndex, RangeType Type, uint32_t Register, uint32_t Count, uint32_t Space /*= 0*/)
 	{
 		//get the range index's descriptor table

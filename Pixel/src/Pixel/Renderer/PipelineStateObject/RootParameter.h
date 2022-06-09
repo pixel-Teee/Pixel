@@ -28,6 +28,7 @@ namespace Pixel {
 		virtual void InitAsDescriptorRange(RangeType Type, uint32_t Register,
 		uint32_t Count, ShaderVisibility Visibility = ShaderVisibility::ALL, uint32_t Space = 0) = 0;
 		virtual void InitAsDescriptorTable(uint32_t RangeCount, ShaderVisibility Visibility = ShaderVisibility::ALL) = 0;
+		virtual void InitAsDescriptorTable(std::initializer_list<std::tuple<RangeType, uint32_t, uint32_t>> list, ShaderVisibility Visibility = ShaderVisibility::ALL) = 0;//rangetype, base register, register count
 		virtual void SetTableRange(uint32_t RangeIndex, RangeType Type, uint32_t Register, uint32_t Count, uint32_t Space = 0) = 0; 
 		//------initialize as descriptor range------
 

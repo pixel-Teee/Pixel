@@ -12,4 +12,9 @@ namespace Pixel {
 		m_VBView.StrideInBytes = Stride;
 	}
 
+	D3D12_VERTEX_BUFFER_VIEW DirectXVBV::GetVertexBufferView()
+	{
+		return m_VBView;
+	}
+
 }

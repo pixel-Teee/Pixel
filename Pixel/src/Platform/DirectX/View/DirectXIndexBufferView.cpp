@@ -23,4 +23,9 @@ namespace Pixel {
 
 	}
 
+	D3D12_INDEX_BUFFER_VIEW DirectXIBV::GetIndexBufferView()
+	{
+		return m_IndexBufferView;
+	}
+
 }

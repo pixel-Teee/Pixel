@@ -2,6 +2,7 @@
 
 #include "Pixel/Renderer/Context/Context.h"
 
+#include <vector>
 #include <queue>
 #include <wrl/client.h>
 #include <dxgi1_4.h>
@@ -23,6 +24,10 @@ namespace Pixel {
 	class GraphicsContext;
 	class DirectXPSO;
 	class ContextManager;
+	class IBV;
+	class VBV;
+	class DescriptorCpuHandle;
+	class DescriptorGpuHandle;
 
 	class DirectXContext : public Context, public std::enable_shared_from_this<DirectXContext>
 	{
@@ -75,6 +80,90 @@ namespace Pixel {
 		GraphicsContext& GetGraphicsContext();
 
 		virtual void SetID(const std::wstring& ID) override { m_ID = ID; }
+
+		//TODO:need to clear these functions
+		virtual void ClearColor(PixelBuffer& Target, PixelRect* Rect) override;
+
+		virtual void ClearColor(PixelBuffer& Target, float Color[4], PixelRect* Rect = nullptr) override;
+
+		virtual void ClearDepth(PixelBuffer& Target) override;
+
+		virtual void ClearStencil(PixelBuffer& Target) override;
+
+		virtual void ClearDepthAndStencil(PixelBuffer& Target) override;
+
+		virtual void SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs) override;
+
+		virtual void SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs, const Ref<DescriptorCpuHandle>& DSV) override;
+
+		virtual void SetRenderTarget(Ref<DescriptorCpuHandle> RTV) override;
+
+		virtual void SetRenderTarget(Ref<DescriptorCpuHandle> RTV, Ref<DescriptorCpuHandle> DSV) override;
+
+		virtual void SetDepthStencilTarget(Ref<DescriptorCpuHandle> DSV) override;
+
+		virtual void SetRootSignature(const RootSignature& RootSig) override;
+
+		virtual void SetViewport(const ViewPort& vp) override;
+
+		virtual void SetViewport(float x, float y, float w, float h, float minDepth = 0.0f, float maxDepth = 1.0f) override;
+
+		virtual void SetScissor(const PixelRect& rect) override;
+
+		virtual void SetScissor(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom) override;
+
+		virtual void SetViewportAndScissor(const ViewPort& vp, const PixelRect& rect) override;
+
+		virtual void SetStencilRef(uint32_t StencilRef) override;
+
+		virtual void SetBlendFactor(glm::vec4 BlendFactor) override;
+
+		virtual void SetPrimitiveTopology(PrimitiveTopology Topology);
+
+		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants) override;
+
+		virtual void SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val) override;
+
+		virtual void SetConstants(uint32_t RootIndex, uint32_t x) override;
+
+		virtual void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y) override;
+
+		virtual void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z) override;
+
+		virtual void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z, uint32_t w) override;
+
+		virtual void SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV) override;
+
+		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+
+		virtual void SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset = 0) override;
+
+		virtual void SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset = 0) override;
+
+		virtual void SetDescriptorTable(uint32_t RootIndex, Ref<DescriptorGpuHandle> FirstHandle) override;
+
+		virtual void SetIndexBuffer(const Ref<IBV> IBView) override;
+
+		virtual void SetVertexBuffer(uint32_t Slot, const Ref<VBV> VBView) override;
+
+		virtual void SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews) override;
+
+		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) override;
+
+		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) override;
+
+		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+
+		virtual void Draw(uint32_t VertexCount, uint32_t VertexStartOffset = 0) override;
+
+		virtual void DrawIndexed(uint32_t IndexCount, uint32_t StartIndexLocation = 0, int32_t BaseVertexLocation = 0) override;
+
+		virtual void DrawInstanced(uint32_t VertexCountPerInstance, uint32_t InstanceCount, uint32_t StartVertexLocation = 0, uint32_t StartInstanceLocation = 0) override;
+
+		virtual void DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation, int32_t BaseVertexLocation, uint32_t StartInstanceLocation) override;
+
+		//TODO:need to clear these functions
+
 	protected:
 		void BindDescriptorHeaps();
 

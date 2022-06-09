@@ -10,6 +10,7 @@ namespace Pixel {
 	public:
 		DirectXIBV();
 		DirectXIBV(Ref<GpuVirtualAddress> pGpuVirtualAddress, size_t OffSet, uint32_t Size, bool b32Bit);
+		D3D12_INDEX_BUFFER_VIEW GetIndexBufferView();
 	private:
 		Ref<GpuVirtualAddress> m_GpuVirtualAddress;
 		D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;

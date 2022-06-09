@@ -309,4 +309,44 @@ namespace Pixel {
 		}
 	}
 
+	D3D12_RECT RectToDirectXRect(PixelRect Rect)
+	{
+		D3D12_RECT ReturnRect;
+		ReturnRect.left = Rect.Left;
+		ReturnRect.right = Rect.Right;
+		ReturnRect.top = Rect.Top;
+		ReturnRect.bottom = Rect.bottom;
+		return ReturnRect;
+	}
+
+	D3D12_VIEWPORT ViewPortToDirectXViewPort(ViewPort viewPort)
+	{
+		D3D12_VIEWPORT DxViewPort;
+		DxViewPort.TopLeftX = viewPort.TopLeftX;
+		DxViewPort.TopLeftY = viewPort.TopLeftY;
+		DxViewPort.Width = viewPort.Width;
+		DxViewPort.Height = viewPort.Height;
+		DxViewPort.MaxDepth = viewPort.MaxDepth;
+		DxViewPort.MinDepth = viewPort.MinDepth;
+
+		return DxViewPort;
+	}
+
+	D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopologyToDirectXPrimitiveTopology(PrimitiveTopology Topology)
+	{
+		switch (Topology)
+		{
+		case UNDEFINED:
+			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED;
+		case LINELIST:
+			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST;
+		case LINESTRIP:
+			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP;
+		case TRIANGLELIST:
+			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		case TRIANGLESTRIP:
+			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+		}
+	}
+
 }
