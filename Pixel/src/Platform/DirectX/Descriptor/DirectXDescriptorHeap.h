@@ -6,11 +6,12 @@
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 
 namespace Pixel {
-
+	class Device;
 	class DirectXDescriptorHeap : public DescriptorHeap
 	{
 	public:
-		DirectXDescriptorHeap(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount);
+		DirectXDescriptorHeap(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount, Ref<Device> pDevice);
+		DirectXDescriptorHeap();
 
 		virtual bool HasAvailableSpace(uint32_t Count) const override;
 
@@ -23,6 +24,8 @@ namespace Pixel {
 		virtual bool ValidateHandle(const DescriptorHandle& handle) const override;
 
 		ID3D12DescriptorHeap* GetHeapPointer();
+
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetComPtrHeap();
 
 		virtual uint32_t GetDescriptorSize() const override;
 

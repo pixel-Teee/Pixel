@@ -11,6 +11,8 @@
 
 #include "Platform/OpenGL/OpenGLContext.h"
 #include "Platform/DirectX/Context/DirectXContext.h"
+#include "Platform/DirectX/DirectXDevice.h"
+#include "Platform/DirectX/DirectXSwapChain.h"
 
 namespace Pixel {
 	static bool s_GLFWInitialized = false;
@@ -35,16 +37,6 @@ namespace Pixel {
 		Shutdown();
 
 		//delete m_DirectXContext;
-
-//#if defined(_DEBUG)
-//		{
-//			Microsoft::WRL::ComPtr<IDXGIDebug1> pdxgiDebug;
-//			if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(pdxgiDebug.ReleaseAndGetAddressOf()))))
-//			{
-//				pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
-//			}
-//		}
-//#endif	
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
@@ -66,7 +58,12 @@ namespace Pixel {
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		m_Context = CreateRef<OpenGLContext>(m_Window);
 
-		m_Context->Initialize();
+		//m_Context->Initialize(pDevice);
+		pDevice = Device::Create();
+		//DirectXDevice::Get()->Initialize();
+		std::static_pointer_cast<DirectXDevice>(pDevice)->SetWindowHandle(m_Window);
+		std::static_pointer_cast<DirectXDevice>(pDevice)->SetClientSize(props.Width, props.Height);
+		std::static_pointer_cast<DirectXDevice>(pDevice)->Initialize();
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
@@ -218,6 +215,11 @@ namespace Pixel {
 	void WindowsWindow::SetCursorNormal()
 	{
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	Ref<Pixel::Device> WindowsWindow::GetDevice() const
+	{
+		return pDevice;
 	}
 
 }

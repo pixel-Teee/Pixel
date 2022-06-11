@@ -51,19 +51,20 @@ namespace Pixel {
 		kCpuAllocatorPageSize = 0x20000 //2MB
 	};
 
+	class Device;
 	class LinearAllocatorPageManager
 	{
 	public:
 		LinearAllocatorPageManager();
-		LinearAllocationPage* RequestPage();
-		LinearAllocationPage* CreateNewPage(size_t PageSize = 0);
+		LinearAllocationPage* RequestPage(Ref<Device> pDevice);
+		LinearAllocationPage* CreateNewPage(size_t PageSize, Ref<Device> pDevice);
 
 		//discarded pages will get recyled. this is for fixed size pages
 		void DiscardPages(uint64_t FenceId, const std::vector<LinearAllocationPage*>& Pages);
 
 		//freed pages will be destroyed once their fence has passed
 		//this is for signle-use, "large" pages.
-		void FreeLargePages(uint64_t FenceId, const std::vector<LinearAllocationPage*> Pages);
+		void FreeLargePages(uint64_t FenceId, const std::vector<LinearAllocationPage*> Pages, Ref<Device> pDevice);
 
 		void Destroy();
 
@@ -84,13 +85,13 @@ namespace Pixel {
 	public:
 		LinearAllocator(LinearAllocatorType Type);
 
-		DynAlloc Allocate(size_t SizeInBytes, size_t Alignment = DEFAULT_ALIGN);
+		DynAlloc Allocate(size_t SizeInBytes, size_t Alignment, Ref<Device> pDevice);
 
-		void CleanupUsedPages(uint64_t FenceId);
+		void CleanupUsedPages(uint64_t FenceId, Ref<Device> pDevice);
 
 		static void DestroyAll();
 	private:
-		DynAlloc AllocateLargePage(size_t SizeInBytes);
+		DynAlloc AllocateLargePage(size_t SizeInBytes, Ref<Device> pDevice);
 
 		static LinearAllocatorPageManager sm_PageManager[2];
 

@@ -7,9 +7,11 @@
 namespace Pixel {
 	class DirectXColorBuffer;
 	class DepthBuffer;
+	class Device;
 	class GraphicsContext : public DirectXContext
 	{
 	public:
+		GraphicsContext(CommandListType Type, Ref<ContextManager> pContextManager, Ref<Device> pDevice);
 		void ClearUAV(DirectXGpuBuffer& Target);//TODO:need to add interface
 		void ClearUAV(DirectXColorBuffer& Target);//TODO:need to add interface
 		virtual void ClearColor(PixelBuffer& Target, PixelRect* Rect = nullptr) override;
@@ -42,7 +44,7 @@ namespace Pixel {
 		virtual void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z)  override;
 		virtual void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y, uint32_t z, uint32_t w)  override;
 		virtual void SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV)  override;
-		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData)  override;
+		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)  override;
 		virtual void SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset = 0) override;
 		virtual void SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset = 0) override;
 		virtual void SetDescriptorTable(uint32_t RootIndex, Ref<DescriptorGpuHandle> FirstHandle) override;
@@ -50,9 +52,9 @@ namespace Pixel {
 		virtual void SetIndexBuffer(const Ref<IBV> IBView) override;
 		virtual void SetVertexBuffer(uint32_t Slot, const Ref<VBV> VBView) override;
 		virtual void SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews) override;
-		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) override;
-		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) override;
-		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData, Ref<Device> pDevice) override;
+		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData, Ref<Device> pDevice) override;
+		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
 
 		virtual void Draw(uint32_t VertexCount, uint32_t VertexStartOffset = 0) override;
 		virtual void DrawIndexed(uint32_t IndexCount, uint32_t StartIndexLocation = 0, int32_t BaseVertexLocation = 0) override;
@@ -60,5 +62,8 @@ namespace Pixel {
 			uint32_t StartInstanceLocation = 0) override;
 		virtual void DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation,
 			int32_t BaseVertexLocation, uint32_t StartInstanceLocation) override;
+
+		virtual void WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes) override;
+
 	};
 }

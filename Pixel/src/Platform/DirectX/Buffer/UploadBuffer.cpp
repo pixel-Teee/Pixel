@@ -7,7 +7,7 @@
 
 namespace Pixel {
 
-	void UploadBuffer::Create(const std::wstring& name, size_t BufferSize)
+	void UploadBuffer::Create(const std::wstring& name, size_t BufferSize, Ref<Device> pDevice)
 	{
 		Destroy();
 
@@ -33,7 +33,7 @@ namespace Pixel {
 		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE,
 			&ResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_pResource)) >= 0, "create resource error!");
 
 		Ref<GpuVirtualAddress> pGpuVirtualAddress = std::make_shared<DirectXGpuVirtualAddress>();

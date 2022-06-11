@@ -17,15 +17,16 @@ namespace Pixel {
 		virtual void Reset(uint32_t NumRootParams, uint32_t NumStaticSamplers = 0) override;
 
 		//------access array------
-		RootParameter& operator[](size_t EntryIndex);
+		virtual RootParameter& operator[](size_t EntryIndex) override;
 		const RootParameter& operator[](size_t EntryIndex) const;
 		//------access array------
 
 		void InitStaticSampler(uint32_t Register, const D3D12_SAMPLER_DESC& NonStaticSamplerDesc,
 			D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL);
 
+		//D3D12_ROOT_SIGNATURE_FLAG_NONE
 		//flags:flag counld input assembly etc.
-		void Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAGS Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE);
+		void Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAGS Flags, Ref<Device> pDevice);
 
 		ID3D12RootSignature* GetNativeSignature() const;
 	protected:

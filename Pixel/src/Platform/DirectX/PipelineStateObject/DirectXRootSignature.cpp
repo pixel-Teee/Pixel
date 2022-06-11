@@ -3,8 +3,8 @@
 #include "DirectXRootSignature.h"
 #include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Context/DirectXContext.h"
-#include "Pixel/Utils/Hash.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootParameter.h"
+#include "Pixel/Utils/Hash.h"
 
 namespace Pixel {
 
@@ -118,7 +118,7 @@ namespace Pixel {
 		}
 	}
 
-	void DirectXRootSignature::Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAGS Flags)
+	void DirectXRootSignature::Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAGS Flags, Ref<Device> pDevice)
 	{
 		if (m_finalized)
 			return;
@@ -206,7 +206,7 @@ namespace Pixel {
 				pOutBlob.GetAddressOf(), pErrorBlob.GetAddressOf()) >= 0,
 				"Serialize RootSignature Error!");
 
-			PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
 				IID_PPV_ARGS(&m_Signature)) >= 0, "Create RootSignature Error!");
 
 			//set rootsignature's name

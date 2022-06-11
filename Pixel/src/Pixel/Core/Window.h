@@ -7,6 +7,8 @@
 
 namespace Pixel {
 
+	class Device;
+
 	struct WindowProps
 	{
 		std::string Title;
@@ -46,6 +48,8 @@ namespace Pixel {
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+
+		virtual Ref<Device> GetDevice() const = 0;
 
 		static Window* Create(const WindowProps& props = WindowProps());
 	};

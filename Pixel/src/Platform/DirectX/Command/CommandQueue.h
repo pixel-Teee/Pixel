@@ -14,7 +14,7 @@ namespace Pixel {
 		void ShutDown();
 
 		//from the m_AlloactorPool to extract one alloactor
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> RequestAlloactor(uint64_t CompletedFenceValue);
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> RequestAlloactor(uint64_t CompletedFenceValue, Ref<Device> pDevice);
 
 		//TODO:need to figuare out this function
 		void DiscardAlloactor(uint64_t FenceValue, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> Alloactor);
@@ -40,14 +40,14 @@ namespace Pixel {
 		~CommandQueue();
 
 		//create ID3D12CommandQueue
-		void Create();
+		void Create(Ref<Device> pDevice);
 
 		void ShutDown();
 
 		//this is we need to use, flush command queue
 		void WaitForIdle() { WaitForFence(IncrementFence()); }
 
-		void StallForFence(uint64_t FenceValue);
+		void StallForFence(uint64_t FenceValue, Ref<Device> pDevice);
 		void StallForProducer(CommandQueue& Producer);
 
 		bool IsFenceComplete(uint64_t FenceValue);
@@ -58,7 +58,7 @@ namespace Pixel {
 
 		uint64_t ExecuteCommandList(Microsoft::WRL::ComPtr<ID3D12CommandList> List);
 
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> RequesetAlloactor();
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> RequesetAlloactor(Ref<Device> pDevice);
 
 		void DiscardAlloactor(uint64_t FenceValue, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> Alloactor);
 	private:
@@ -90,14 +90,12 @@ namespace Pixel {
 		CommandListManager();
 		~CommandListManager();
 
-		static Ref<CommandListManager> Get();
-
-		void Create();
+		void Create(Ref<Device> pDevice);
 
 		void ShutDown();
 
 		//second parameter and third parameter is what need to create
-		void CreateNewCommandList(D3D12_COMMAND_LIST_TYPE Type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> List, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> Allocator);
+		void CreateNewCommandList(D3D12_COMMAND_LIST_TYPE Type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& List, Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& Allocator, Ref<Device> pDevice);
 
 		//------Get Qeue------
 		CommandQueue& GetGraphicsQueue() { return m_GraphicsQueue; }
@@ -112,7 +110,7 @@ namespace Pixel {
 		bool IsFenceComplete(uint64_t FenceValue);
 
 		//cpu will wait for a fence to reach a specified value, this we will use
-		void WaitForFence(uint64_t FenceValue);
+		void WaitForFence(uint64_t FenceValue, Ref<Device> pDevice);
 
 		void IdleGPU();
 	private:
@@ -121,7 +119,5 @@ namespace Pixel {
 		CommandQueue m_GraphicsQueue;
 		CommandQueue m_ComputeQueue;
 		CommandQueue m_CopyQueue;
-
-		static Ref<CommandListManager> g_pCommandListManager;
 	};
 }

@@ -22,12 +22,12 @@ namespace Pixel {
 		virtual Ref<DescriptorCpuHandle> GetSRV() const override { return m_SRV; }
 
 		//create a buffer. if initial data is provided, it will be copied into the buffer
-		void Create(const std::wstring& name, uint32_t NumElements, uint32_t ElementSize, const void* initialData = nullptr);
+		void Create(const std::wstring& name, uint32_t NumElements, uint32_t ElementSize, Ref<Device> pDevice, const void* initialData);
 
 		//root descriptor, cound directly used as virtual address
-		Ref<GpuVirtualAddress> RootConstantBufferView() const { return m_GpuResource.m_GpuVirtualAddress; }
+		Ref<GpuVirtualAddress> RootConstantBufferView() const { return std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_GpuVirtualAddress; }
 
-		Ref<DescriptorCpuHandle> CreateConstantBufferView(uint32_t Offset, uint32_t Size) const;
+		Ref<DescriptorCpuHandle> CreateConstantBufferView(uint32_t Offset, uint32_t Size, Ref<Device> pDevice) const;
 
 		//vertex buffer view and index buffer view
 		Ref<VBV> VertexBufferView(size_t Offset, uint32_t Size, uint32_t Stride) const;
@@ -40,10 +40,12 @@ namespace Pixel {
 		size_t GetBufferSize() const { return m_BufferSize; }
 		uint32_t GetElementCount() const { return m_ElementCount; }
 		uint32_t GetElementSize() const { return m_ElementSize; }
+
+		virtual void SetGpuResource(Ref<GpuResource> pGpuBuffer) override;
 	protected:
 
 		D3D12_RESOURCE_DESC DescribeBuffer();
-		virtual void CreateDerivedViews();
+		virtual void CreateDerivedViews(Ref<Device> pDevice);
 
 		//unordered access view
 		Ref<DescriptorCpuHandle> m_UAV;
@@ -62,12 +64,12 @@ namespace Pixel {
 		//resource flag
 		D3D12_RESOURCE_FLAGS m_ResourceFlags;
 
-		DirectXGpuResource m_GpuResource;
+		Ref<DirectXGpuResource> m_GpuResource;
 	};
 
 	class DirectXByteAddressBuffer : public DirectXGpuBuffer
 	{
 	public:
-		virtual void CreateDerivedViews() override;
+		virtual void CreateDerivedViews(Ref<Device> pDevice) override;
 	};
 }

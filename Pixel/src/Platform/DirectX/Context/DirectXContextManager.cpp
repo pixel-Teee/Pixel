@@ -1,47 +1,41 @@
 #include "pxpch.h"
 
 #include "DirectXContextManager.h"
-#include "DirectXContext.h"
-#include "Platform/DirectX/d3dx12.h"
+#include "Platform/DirectX/TypeUtils.h"
+
+#include "GraphicsContext.h"
 
 namespace Pixel {
 
-	D3D12_COMMAND_LIST_TYPE DirectXContextManager::CommandListTypeToDirectXCommandListType(CommandListType CmdListType)
+	DirectXContextManager::~DirectXContextManager()
 	{
-		switch (CmdListType)
-		{
-		case CommandListType::Graphics:
-			return D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT;
-		case CommandListType::Compute:
-			return D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_COMPUTE;
-		case CommandListType::Copy:
-			return D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_COPY;
-		default:
-			PX_CORE_ASSERT(false, "unkonwn context type!");
-			break;
-		}
+		DestroyAllContexts();
 	}
 
-	Ref<Context> DirectXContextManager::AllocateContext(CommandListType CmdListType)
+	Ref<Context> DirectXContextManager::AllocateContext(CommandListType CmdListType, Ref<Device> pDevice)
 	{
-		D3D12_COMMAND_LIST_TYPE DirectXCmdListType = CommandListTypeToDirectXCommandListType(CmdListType);
+		D3D12_COMMAND_LIST_TYPE DirectXCmdListType = CmdListTypeToDirectXCmdListType(CmdListType);
 
 		std::lock_guard<std::mutex> LockGuard(sm_ContextAllocationMutex);
 
 		auto& AvaiableContext = sm_AvailableContexts[DirectXCmdListType];
 
-		Ref<DirectXContext> ReturnContext;
+		Ref<Context> ReturnContext;
 		if (AvaiableContext.empty())
 		{
-			ReturnContext = CreateRef<DirectXContext>(CmdListType, shared_from_this());
+			//Test
+			//Ref<GraphicsContext> Test = std::make_shared<GraphicsContext>(CmdListType, shared_from_this());
+			//if(CmdListType == CommandListType::Graphics)
+				//ReturnContext = std::make_shared<GraphicsContext>(CmdListType, shared_from_this());
+			ReturnContext = std::make_shared<GraphicsContext>(CmdListType, shared_from_this(), pDevice);
 			sm_ContextPool[DirectXCmdListType].emplace_back(ReturnContext);
-			ReturnContext->Initialize();
+			ReturnContext->Initialize(pDevice);
 		}
 		else
 		{
 			ReturnContext = AvaiableContext.front();
 			AvaiableContext.pop();
-			ReturnContext->Reset();
+			ReturnContext->Reset(pDevice);
 		}
 
 		return ReturnContext;
@@ -51,9 +45,9 @@ namespace Pixel {
 	{
 		std::lock_guard<std::mutex> LockGuard(sm_ContextAllocationMutex);
 
-		Ref<DirectXContext> pDirectXContext = std::static_pointer_cast<DirectXContext>(UsedContext);
+		//Ref<DirectXContext> pDirectXContext = std::static_pointer_cast<DirectXContext>(UsedContext);
 
-		sm_AvailableContexts[pDirectXContext->m_Type].push(pDirectXContext);
+		sm_AvailableContexts[CmdListTypeToDirectXCmdListType(UsedContext->GetType())].push(UsedContext);
 	}
 
 	void DirectXContextManager::DestroyAllContexts()

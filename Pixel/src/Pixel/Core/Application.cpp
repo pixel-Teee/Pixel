@@ -12,6 +12,16 @@
 
 #include "GLFW/glfw3.h"
 
+#if defined(_DEBUG)
+#include <dxgi1_3.h>
+#include <dxgidebug.h>
+#endif
+
+#ifndef PX_OPENGL
+#include <wrl/client.h>
+#include "Platform/DirectX/d3dx12.h"
+#endif
+
 namespace Pixel {
 
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -25,14 +35,14 @@ namespace Pixel {
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
-		Renderer::Init();
+		//Renderer::Init();
 
-		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer = new ImGuiLayer(m_Window->GetDevice());
 		PushOverlay(m_ImGuiLayer);	
 	}
 	Application::~Application()
 	{
-		
+
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

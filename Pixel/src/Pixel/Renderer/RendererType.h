@@ -19,12 +19,35 @@ namespace Pixel {
 		float MaxDepth;
 	};
 
-	enum PrimitiveTopology
+	enum class PrimitiveTopology
 	{
 		UNDEFINED,
 		LINELIST,
 		LINESTRIP,
 		TRIANGLELIST,
 		TRIANGLESTRIP
+	};
+
+	enum class ResourceStates
+	{
+		Common,
+		VertexAndConstantBuffer,
+		IndexBuffer,
+		RenderTarget,
+		UnorderedAccess,
+		DepthWrite,
+		DepthRead,
+		NonPixelShaderResource,
+		PixelShaderResource,
+		StreamOut,
+		IndirectArgument,
+		CopyDest,
+		CopySource,
+		ResolveDest,
+		ResolveSource,
+		RaytracingAccelerationStructure,
+		ShadingRateSource,
+		GenericRead,
+		Present
 	};
 }

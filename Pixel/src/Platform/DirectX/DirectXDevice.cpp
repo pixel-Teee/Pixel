@@ -13,17 +13,26 @@
 #endif
 
 #include "DirectXSwapChain.h"
+#include "Platform/DirectX/Command/CommandQueue.h"
 
 namespace Pixel {
 
-	DirectXDevice::DirectXDevice(GLFWwindow* windowHandle)
+	
+	//DirectXDevice::DirectXDevice(GLFWwindow* windowHandle)
+	//{
+	//	m_pWindowHandle = windowHandle;
+	//}
+
+	DirectXDevice::DirectXDevice()
 	{
-		m_pWindowHandle = windowHandle;
+
 	}
 
 	DirectXDevice::~DirectXDevice()
 	{
-
+#ifdef PX_DEBUG
+		PIXEL_CORE_INFO("Release Device");
+#endif
 	}
 
 	void DirectXDevice::Initialize()
@@ -88,17 +97,20 @@ namespace Pixel {
 #if defined(DEBUG) || defined(_DEBUG)
 		LogAdapters();
 #endif
+		m_pCommandListManager = std::make_shared<CommandListManager>();
+		m_pCommandListManager->Create(shared_from_this());
+
 		//------Create Swap Chain------
-		m_pSwapChain = CreateRef<DirectXSwapChain>(*this);
+		m_pSwapChain = CreateRef<DirectXSwapChain>(shared_from_this());
 
 		//recreate the swap chain buffer rtv handle and depth stencil handle
-		m_pSwapChain->OnResize(*this);
+		m_pSwapChain->OnResize(shared_from_this());
 		//------Create Swap Chain------
 	}
 
-	Ref<DirectXDevice> DirectXDevice::Get()
+	void DirectXDevice::SetWindowHandle(GLFWwindow* windowHandle)
 	{
-		return m_gpDevice;
+		m_pWindowHandle = windowHandle;
 	}
 
 	Microsoft::WRL::ComPtr<ID3D12Device> DirectXDevice::GetDevice()
@@ -109,6 +121,11 @@ namespace Pixel {
 	Microsoft::WRL::ComPtr<IDXGIFactory4> DirectXDevice::GetDxgiFactory()
 	{
 		return m_pDxgiFactory;
+	}
+
+	Ref<CommandListManager> DirectXDevice::GetCommandListManager()
+	{
+		return m_pCommandListManager;
 	}
 
 	void DirectXDevice::SetClientSize(uint32_t width, uint32_t height)
@@ -136,8 +153,8 @@ namespace Pixel {
 			//recreate the swap chain and buffers with new multisample settings
 
 			//recreate the swap chain
-			m_pSwapChain->CreateSwapChain(*this);
-			m_pSwapChain->OnResize(*this);
+			m_pSwapChain->CreateSwapChain(shared_from_this());
+			m_pSwapChain->OnResize(shared_from_this());
 		}
 	}
 
@@ -166,6 +183,12 @@ namespace Pixel {
 	{
 		return m_DepthStencilFormat;
 	}
+
+	Ref<DirectXSwapChain> DirectXDevice::GetSwapChain()
+	{
+		return m_pSwapChain;
+	}
+
 	//------Get Buffer Format------
 
 	void DirectXDevice::LogAdapters()
@@ -302,6 +325,6 @@ namespace Pixel {
 		return &output[0];
 	}
 
-	Ref<DirectXDevice> DirectXDevice::m_gpDevice;
+	//Ref<DirectXDevice> DirectXDevice::m_gpDevice;
 
 }

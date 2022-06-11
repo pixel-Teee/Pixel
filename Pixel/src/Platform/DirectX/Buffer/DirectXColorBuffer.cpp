@@ -11,6 +11,8 @@ namespace Pixel {
 	DirectXColorBuffer::DirectXColorBuffer(glm::vec4 ClearColor /*= glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)*/)
 		:m_ClearColor(ClearColor), m_NumMipMaps(0), m_FragmentCount(1), m_SampleCount(1)
 	{
+		m_RTVHandle = DescriptorCpuHandle::Create();
+		m_SRVHandle = DescriptorCpuHandle::Create();
 		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RTVHandle);
 		Ref<DirectXDescriptorCpuHandle> srvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRVHandle);
 
@@ -21,24 +23,25 @@ namespace Pixel {
 		srvHandle->SetCpuHandle(tempHandle);
 		for (size_t i = 0; i < _countof(m_UAVHandle); ++i)
 		{
+			m_UAVHandle[i] = DescriptorCpuHandle::Create();
 			Ref<DirectXDescriptorCpuHandle> uavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAVHandle[i]);
 			uavHandle->SetCpuHandle(tempHandle);
 		}
 	}
 
-	void DirectXColorBuffer::CreateFromSwapChain(const std::wstring& Name, GpuResource* pBaseResouce)
+	void DirectXColorBuffer::CreateFromSwapChain(const std::wstring& Name, Ref<Device> pDevice)
 	{
-		AssociateWithResource(Name, static_cast<DirectXGpuResource*>(pBaseResouce)->GetResource(), D3D12_RESOURCE_STATE_PRESENT);
+		//AssociateWithResource(Name, static_cast<DirectXGpuResource*>(pBaseResouce)->GetResource(), D3D12_RESOURCE_STATE_PRESENT);
 
 		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RTVHandle);
 
-		rtvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::RTV))->GetCpuHandle());
+		rtvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::RTV, 1, pDevice))->GetCpuHandle());
 
-		DirectXDevice::Get()->GetDevice()->CreateRenderTargetView(m_GpuResource.GetResource(), nullptr, rtvHandle->GetCpuHandle());
+		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateRenderTargetView(std::static_pointer_cast<DirectXGpuResource>(m_pResource)->GetResource(), nullptr, rtvHandle->GetCpuHandle());
 	}
 
 	void DirectXColorBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, 
-	uint32_t NumMips, ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
+	uint32_t NumMips, ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice)
 	{
 		NumMips = (NumMips == 0 ? ComputeNumMips(Width, Height) : NumMips);
 
@@ -56,8 +59,8 @@ namespace Pixel {
 		ClearValue.Color[2] = m_ClearColor.b;
 		ClearValue.Color[3] = m_ClearColor.a;
 
-		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr);
-		CreateDerivedViews(Format, 1, NumMips);
+		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr, pDevice);
+		CreateDerivedViews(Format, 1, NumMips, pDevice);
 	}
 
 	//void ColorBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t NumMips, DXGI_FORMAT Format)
@@ -66,7 +69,7 @@ namespace Pixel {
 	//}
 
 	void DirectXColorBuffer::CreateArray(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t ArrayCount,
-	ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
+	ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice)
 	{
 		D3D12_RESOURCE_FLAGS Flags = CombineResourceFlags();
 		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, ArrayCount, 1, FormatToDXGIFormat(Format), Flags);
@@ -78,8 +81,8 @@ namespace Pixel {
 		ClearValue.Color[2] = m_ClearColor.b;
 		ClearValue.Color[3] = m_ClearColor.a;
 
-		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr);
-		CreateDerivedViews(Format, ArrayCount, 1);
+		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr, pDevice);
+		CreateDerivedViews(Format, ArrayCount, 1, pDevice);
 	}
 
 	void DirectXColorBuffer::SetMsaaMode(uint32_t NumColorSamples, uint32_t NumConverageSamples)
@@ -122,7 +125,7 @@ namespace Pixel {
 		return HightBit + 1;
 	}
 
-	void DirectXColorBuffer::CreateDerivedViews(ImageFormat Format, uint32_t ArraySize, uint32_t NumMips /*= 1*/)
+	void DirectXColorBuffer::CreateDerivedViews(ImageFormat Format, uint32_t ArraySize, uint32_t NumMips, Ref<Device> pDevice)
 	{
 		PX_CORE_ASSERT(ArraySize == 1 || NumMips == 1, "we don't support auto-mips on texture arrays");
 
@@ -178,17 +181,17 @@ namespace Pixel {
 
 		if (srvHandle->GetCpuPtr() == -1)
 		{
-			rtvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::RTV))->GetCpuHandle());
-			srvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV))->GetCpuHandle());
+			rtvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::RTV, 1, pDevice))->GetCpuHandle());
+			srvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice))->GetCpuHandle());
 		}
 
-		ID3D12Resource* pResource = m_GpuResource.GetResource();
+		ID3D12Resource* pResource = std::static_pointer_cast<DirectXGpuResource>(m_pResource)->GetResource();
 
 		//create the render target view
-		DirectXDevice::Get()->GetDevice()->CreateRenderTargetView(pResource, &RTVDesc, rtvHandle->GetCpuHandle());
+		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateRenderTargetView(pResource, &RTVDesc, rtvHandle->GetCpuHandle());
 
 		//create the shader resource view
-		DirectXDevice::Get()->GetDevice()->CreateShaderResourceView(pResource, &SRVDesc, srvHandle->GetCpuHandle());
+		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateShaderResourceView(pResource, &SRVDesc, srvHandle->GetCpuHandle());
 
 		if (m_FragmentCount > 1) return;
 
@@ -197,9 +200,9 @@ namespace Pixel {
 			Ref<DirectXDescriptorCpuHandle> uavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAVHandle[i]);
 
 			if (uavHandle->GetCpuPtr() == -1)
-				uavHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV))->GetCpuHandle());
+				uavHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice))->GetCpuHandle());
 
-			DirectXDevice::Get()->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &UAVDesc, uavHandle->GetCpuHandle());
+			std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &UAVDesc, uavHandle->GetCpuHandle());
 
 			++UAVDesc.Texture2D.MipSlice;
 		}

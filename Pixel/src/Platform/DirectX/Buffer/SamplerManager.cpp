@@ -42,7 +42,7 @@ namespace Pixel {
 		m_SamplerDesc.BorderColor[3] = BorderColor.a;
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE SamplerDesc::CreateDescriptor()
+	D3D12_CPU_DESCRIPTOR_HANDLE SamplerDesc::CreateDescriptor(Ref<Device> pDevice)
 	{
 		size_t hashValue = Utility::HashState(&m_SamplerDesc);
 		auto iter = s_SamplerCache.find(hashValue);
@@ -51,8 +51,8 @@ namespace Pixel {
 			return iter->second;
 		}
 
-		D3D12_CPU_DESCRIPTOR_HANDLE handle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DescriptorAllocator::AllocateDescriptor(DescriptorHeapType::SAMPLER))->GetCpuHandle();
-		DirectXDevice::Get()->GetDevice()->CreateSampler(&m_SamplerDesc, handle);
+		D3D12_CPU_DESCRIPTOR_HANDLE handle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DescriptorAllocator::AllocateDescriptor(DescriptorHeapType::SAMPLER, 1, pDevice))->GetCpuHandle();
+		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateSampler(&m_SamplerDesc, handle);
 		return handle;
 	}
 

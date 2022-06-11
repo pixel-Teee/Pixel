@@ -643,7 +643,7 @@ namespace Pixel
 
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
 	{
-		Renderer3D::BeginScene(camera, m_GeoPassFramebuffer);
+		//Renderer3D::BeginScene(camera, m_GeoPassFramebuffer);
 
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 		
@@ -652,7 +652,7 @@ namespace Pixel
 			auto [transform, material, mesh] = group.get<TransformComponent, MaterialComponent, StaticMeshComponent>(entity);
 
 			//auto material = group.<MaterialComponent>(entity);
-			Renderer3D::DrawModel(transform.GetTransform(), mesh, material, (int)entity);
+			//Renderer3D::DrawModel(transform.GetTransform(), mesh, material, (int)entity);
 		}
 
 		//TODO:Point Light
@@ -669,9 +669,9 @@ namespace Pixel
 			//Trans.back().SetScale(glm::vec3(Lights.back().GetSphereLightVolumeRadius()));
 		}
 		
-		Renderer3D::EndScene(camera, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
+		//Renderer3D::EndScene(camera, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
 
-		Renderer3D::DrawSkyBox(camera, m_LightPassFramebuffer, m_GeoPassFramebuffer);
+		//Renderer3D::DrawSkyBox(camera, m_LightPassFramebuffer, m_GeoPassFramebuffer);
 	}
 
 	void Scene::OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
@@ -806,7 +806,7 @@ namespace Pixel
 
 		if (mainCamera)
 		{
-			Renderer3D::BeginScene(*mainCamera, *cameraTransform, m_GeoPassFramebuffer);
+			//Renderer3D::BeginScene(*mainCamera, *cameraTransform, m_GeoPassFramebuffer);
 			auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
 			for (auto entity : group)
@@ -814,7 +814,7 @@ namespace Pixel
 				auto [transform, material, mesh] = group.get<TransformComponent, MaterialComponent, StaticMeshComponent>(entity);
 
 				//auto material = group.<MaterialComponent>(entity);
-				Renderer3D::DrawModel(transform.GetTransform(), mesh, material, (int)entity);
+				//Renderer3D::DrawModel(transform.GetTransform(), mesh, material, (int)entity);
 			}
 
 			//TODO:Point Light
@@ -831,9 +831,9 @@ namespace Pixel
 				//Trans.back().SetScale(glm::vec3(Lights.back().GetSphereLightVolumeRadius()));
 			}
 
-			Renderer3D::EndScene(*mainCamera, *cameraTransform, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
+			//Renderer3D::EndScene(*mainCamera, *cameraTransform, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
 
-			Renderer3D::DrawSkyBox(*mainCamera, *cameraTransform, m_LightPassFramebuffer, m_GeoPassFramebuffer);
+			//Renderer3D::DrawSkyBox(*mainCamera, *cameraTransform, m_LightPassFramebuffer, m_GeoPassFramebuffer);
 
 			/*m_LightPassFramebuffer->Bind();
 			m_LightPassFramebuffer->SetColorAttachmentDraw(0);

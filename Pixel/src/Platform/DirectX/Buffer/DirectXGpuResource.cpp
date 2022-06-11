@@ -3,6 +3,7 @@
 #include "DirectXGpuResource.h"
 
 #include "Platform/DirectX/d3dx12.h"
+#include "Platform/DirectX/TypeUtils.h"
 
 namespace Pixel {
 	
@@ -20,6 +21,11 @@ namespace Pixel {
 
 	}
 
+	DirectXGpuResource::DirectXGpuResource(ResourceStates CurrentState)
+	{
+		m_UsageState = ResourceStatesToDirectXResourceStates(CurrentState);
+	}
+
 	DirectXGpuResource::~DirectXGpuResource()
 	{
 
@@ -30,6 +36,11 @@ namespace Pixel {
 		m_pResource = nullptr;
 		m_GpuVirtualAddress = 0;
 		++m_VersionID;
+	}
+
+	void DirectXGpuResource::SetResource(void* resource)
+	{
+		m_pResource = (ID3D12Resource*)resource;
 	}
 
 }

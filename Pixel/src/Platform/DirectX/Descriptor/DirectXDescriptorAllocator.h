@@ -9,13 +9,13 @@
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 
 namespace Pixel {
-
+	class Device;
 	class DirectXDescriptorAllocator : public DescriptorAllocator
 	{
 	public:
 		DirectXDescriptorAllocator(DescriptorHeapType Type);
 
-		virtual Ref<DescriptorCpuHandle> Allocate(uint32_t Count) override;
+		virtual Ref<DescriptorCpuHandle> Allocate(uint32_t Count, Ref<Device> pDevice) override;
 
 		virtual void DestroyDescriptor() override;
 
@@ -27,7 +27,7 @@ namespace Pixel {
 		std::vector<Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>> sm_DescriptorHeapPool;
 
 		//request new descriptor heap, parameter is new type
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RequestNewHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type);
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> RequestNewHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, Ref<Device> pDevice);
 
 		D3D12_DESCRIPTOR_HEAP_TYPE m_Type;
 

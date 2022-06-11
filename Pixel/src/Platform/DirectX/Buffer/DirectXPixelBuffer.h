@@ -4,6 +4,7 @@
 #include "DirectXGpuResource.h"
 
 namespace Pixel {
+	class Device;
 	class DirectXPixelBuffer : public PixelBuffer
 	{
 	public:
@@ -21,11 +22,14 @@ namespace Pixel {
 		//the data is preceded by a 16-byte header: {DXGI_FORMAT, Pitch(in pixels), Width(in pixels), Height}
 		void ExportToFile(const std::wstring& FilePath);
 
+
 		//-------Pixel Engine Format To DXGIFormat------
 		DXGI_FORMAT FormatToDXGIFormat(ImageFormat Format);
 		ImageFormat DXGIFormatToImageFormat(DXGI_FORMAT dxgiFormat);
 
-		virtual void CreateFromSwapChain(const std::wstring& Name, GpuResource* pBaseResource) override;
+		virtual void CreateFromSwapChain(const std::wstring& Name, Ref<Device> pDevice) override;
+
+		virtual void SetGpuResource(Ref<GpuResource> pResource) override;
 
 		//-------Pixel Engine Format To DXGIFormat------
 	protected:
@@ -36,7 +40,7 @@ namespace Pixel {
 		void AssociateWithResource(const std::wstring& Name, ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState);
 
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,
-			D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr);
+			D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr, Ref<Device> pDevice);
 
 		/*
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,
@@ -57,6 +61,6 @@ namespace Pixel {
 		DXGI_FORMAT m_Format;
 		uint32_t m_BankRotation;//??
 
-		DirectXGpuResource m_GpuResource;
+		Ref<GpuResource> m_pResource;
 	};
 }

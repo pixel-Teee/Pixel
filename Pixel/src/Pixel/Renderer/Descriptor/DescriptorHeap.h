@@ -4,7 +4,7 @@
 #include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
 
 namespace Pixel {
-
+	class Device;
 	class DescriptorHeap {
 	public:
 		virtual bool HasAvailableSpace(uint32_t Count) const = 0;
@@ -19,6 +19,8 @@ namespace Pixel {
 
 		virtual uint32_t GetDescriptorSize() const = 0;
 
-		static Ref<DescriptorHeap> Create(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount);
+		static Ref<DescriptorHeap> Create(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount, Ref<Device> pDevice);
+
+		static Ref<DescriptorHeap> Create();
 	};
 }

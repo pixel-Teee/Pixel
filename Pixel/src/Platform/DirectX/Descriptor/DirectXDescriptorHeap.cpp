@@ -54,12 +54,17 @@ namespace Pixel {
 		return m_Heap.Get();
 	}
 
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXDescriptorHeap::GetComPtrHeap()
+	{
+		return m_Heap;
+	}
+
 	uint32_t DirectXDescriptorHeap::GetDescriptorSize() const
 	{
 		return m_DescriptorSize;
 	}
 
-	DirectXDescriptorHeap::DirectXDescriptorHeap(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount)
+	DirectXDescriptorHeap::DirectXDescriptorHeap(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount, Ref<Device> pDevice)
 	{
 		m_HeapDesc.Type = DescriptorHeapTypeToDirectXDescriptorHeapType(Type);
 		m_HeapDesc.NumDescriptors = MaxCount;
@@ -67,7 +72,7 @@ namespace Pixel {
 		m_HeapDesc.NodeMask = 1;
 
 
-		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateDescriptorHeap(&m_HeapDesc, IID_PPV_ARGS(m_Heap.ReleaseAndGetAddressOf())) >= 0,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDescriptorHeap(&m_HeapDesc, IID_PPV_ARGS(m_Heap.GetAddressOf())) >= 0,
 			"Create Descriptor Heap Error!");
 
 #ifdef PX_DEBUG
@@ -76,17 +81,22 @@ namespace Pixel {
 		(void)DebugHeapName;
 #endif
 
-		m_DescriptorSize = DirectXDevice::Get()->GetDevice()->GetDescriptorHandleIncrementSize(m_HeapDesc.Type);
+		m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->GetDescriptorHandleIncrementSize(m_HeapDesc.Type);
 		m_NumFreeDescriptors = m_HeapDesc.NumDescriptors;
 
 		Ref<DirectXDescriptorCpuHandle> cpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
 		cpuHandle->SetCpuHandle(m_Heap->GetCPUDescriptorHandleForHeapStart());
-
+ 
 		Ref<DirectXDescriptorGpuHandle> gpuHandle = std::make_shared<DirectXDescriptorGpuHandle>();
 		gpuHandle->SetGpuHandle(m_Heap->GetGPUDescriptorHandleForHeapStart());
 
 		m_FirstHandle = std::make_shared<DescriptorHandle>(cpuHandle, gpuHandle);
 		m_NextFreeHandle = m_FirstHandle;
+	}
+
+	DirectXDescriptorHeap::DirectXDescriptorHeap()
+	{
+
 	}
 
 }

@@ -12,22 +12,25 @@ namespace Pixel {
 	class GpuBuffer;
 	class IBV;
 	class VBV;
+	class ContextManager;
+	enum class DescriptorHeapType;
+	class DescriptorHeap;
 	class OpenGLContext : public Context
 	{
 	public:
 		OpenGLContext(GLFWwindow* windowHandle);
 		virtual ~OpenGLContext();
-		virtual void Initialize() override;
+		virtual void Initialize(Ref<Device> pDevice) override;
 		virtual void SwapBuffers() override;
-		virtual void Reset() override;
+		virtual void Reset(Ref<Device> pDevice) override;
 
 		virtual void SetID(const std::wstring& ID) override;
 
 		virtual void FlushResourceBarriers() override;
 
-		virtual uint64_t Flush(bool WaitForCompletion) override;
+		virtual uint64_t Flush(bool WaitForCompletion, Ref<Device> pDevice) override;
 
-		virtual uint64_t Finish(bool WaitForCompletion) override;
+		virtual uint64_t Finish(bool WaitForCompletion, Ref<ContextManager> pContextManager, Ref<Device> pDevice) override;
 
 		virtual void CopyBuffer(GpuResource& Dest, GpuResource& Src) override;
 
@@ -89,7 +92,7 @@ namespace Pixel {
 
 		virtual void SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV) override;
 
-		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
 
 		virtual void SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset = 0) override;
 
@@ -103,11 +106,11 @@ namespace Pixel {
 
 		virtual void SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews) override;
 
-		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) override;
+		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData, Ref<Device> pDevice) override;
 
-		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) override;
+		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData, Ref<Device> pDevice) override;
 
-		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
 
 		virtual void Draw(uint32_t VertexCount, uint32_t VertexStartOffset = 0) override;
 
@@ -118,6 +121,14 @@ namespace Pixel {
 		virtual void DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation, int32_t BaseVertexLocation, uint32_t StartInstanceLocation) override;
 
 		virtual void SetPrimitiveTopology(PrimitiveTopology Topology) override;
+
+		virtual void SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr) override;
+
+		virtual void TransitionResource(GpuResource& Resource, ResourceStates NewState, bool FlushImmediate = false) override;
+
+		virtual CommandListType GetType() override;
+
+		virtual void* GetNativeCommandList() override;
 
 	private:
 		GLFWwindow* m_WindowHandle;

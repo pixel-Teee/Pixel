@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Pixel/Renderer/RendererType.h"
+
 namespace Pixel {
 
 	class GpuResource
@@ -9,6 +11,10 @@ namespace Pixel {
 		
 		virtual void Destroy() = 0;
 
-		Ref<GpuResource> Create();
+		virtual void SetResource(void* resource) = 0;
+
+		static Ref<GpuResource> Create();
+
+		static Ref<GpuResource> Create(ResourceStates CurrentState);
 	};
 }

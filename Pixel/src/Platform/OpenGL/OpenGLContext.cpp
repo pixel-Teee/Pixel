@@ -20,7 +20,7 @@ namespace Pixel {
 
 	}
 
-	void OpenGLContext::Initialize()
+	void OpenGLContext::Initialize(Ref<Device> pDevice)
 	{
 		glfwMakeContextCurrent(m_WindowHandle);
 		//glad¼ÓÔØOpenGLµÄº¯Êý
@@ -38,7 +38,7 @@ namespace Pixel {
 		glfwSwapBuffers(m_WindowHandle);
 	}
 
-	void OpenGLContext::Reset()
+	void OpenGLContext::Reset(Ref<Device> pDevice)
 	{
 
 	}
@@ -53,13 +53,13 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	uint64_t OpenGLContext::Flush(bool WaitForCompletion)
+	uint64_t OpenGLContext::Flush(bool WaitForCompletion, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 		return 0;
 	}
 
-	uint64_t OpenGLContext::Finish(bool WaitForCompletion)
+	uint64_t OpenGLContext::Finish(bool WaitForCompletion, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 		return 0;
@@ -215,7 +215,7 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void OpenGLContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
+	void OpenGLContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
@@ -250,17 +250,17 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void OpenGLContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData)
+	void OpenGLContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void OpenGLContext::SetDynamicIB(size_t IndexCount, const uint64_t* IBData)
+	void OpenGLContext::SetDynamicIB(size_t IndexCount, const uint64_t* IBData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void OpenGLContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
+	void OpenGLContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
@@ -286,6 +286,26 @@ namespace Pixel {
 	}
 
 	void OpenGLContext::SetPrimitiveTopology(PrimitiveTopology Topology)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::TransitionResource(GpuResource& Resource, ResourceStates NewState, bool FlushImmediate /*= false*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	Pixel::CommandListType OpenGLContext::GetType()
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void* OpenGLContext::GetNativeCommandList()
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}

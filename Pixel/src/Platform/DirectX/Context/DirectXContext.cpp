@@ -14,6 +14,8 @@
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorGpuHandle.h"
 #include "Pixel/Math/Math.h"
+#include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/Descriptor/DirectXDescriptorHeap.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #include <dxgidebug.h>
@@ -31,24 +33,23 @@ namespace Pixel {
 //-------a marco------
 
 	//-------DirectX Context------
-	DirectXContext::DirectXContext(CommandListType Type, Ref<ContextManager> pContextManager)
-		:m_Type(DirectXContextManager::CommandListTypeToDirectXCommandListType(Type)),
+	DirectXContext::DirectXContext(CommandListType Type, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
+		:m_Type(CmdListTypeToDirectXCmdListType(Type)),
 		m_CpuLinearAllocator(kCpuWritable),
 		m_GpuLinearAllocator(kGpuExclusive),
-		m_DynamicViewDescriptorHeap(*this, DescriptorHeapType::CBV_UAV_SRV),
-		m_DynamicSamplerDescriptorHeap(*this, DescriptorHeapType::SAMPLER),
-		m_OwingContextManager(pContextManager)
+		m_DynamicViewDescriptorHeap(*this, DescriptorHeapType::CBV_UAV_SRV, pDevice),
+		m_DynamicSamplerDescriptorHeap(*this, DescriptorHeapType::SAMPLER, pDevice)
 	{
-		
+		m_NumBarriersToFlush = 0;
 	}
 
 	DirectXContext::~DirectXContext()
 	{
 	}
 
-	void DirectXContext::Initialize()
+	void DirectXContext::Initialize(Ref<Device> pDevice)
 	{
-		CommandListManager::Get()->CreateNewCommandList(m_Type, m_pCommandList, m_pCurrentAllocator);
+		std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->CreateNewCommandList(m_Type, m_pCommandList, m_pCurrentAllocator, pDevice);
 	}
 
 	void DirectXContext::SwapBuffers()
@@ -56,14 +57,14 @@ namespace Pixel {
 	
 	}
 
-	uint64_t DirectXContext::Flush(bool WaitForCompletion)
+	uint64_t DirectXContext::Flush(bool WaitForCompletion, Ref<Device> pDevice)
 	{
 		FlushResourceBarriers();
 
-		uint64_t FenceValue = CommandListManager::Get()->GetQueue(m_Type).ExecuteCommandList(m_pCommandList);
+		uint64_t FenceValue = std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->GetQueue(m_Type).ExecuteCommandList(m_pCommandList);
 
 		if (WaitForCompletion)
-			CommandListManager::Get()->WaitForFence(FenceValue);
+			std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->WaitForFence(FenceValue, pDevice);
 
 		//reset command list and restore previous state
 		m_pCommandList->Reset(m_pCurrentAllocator.Get(), nullptr);
@@ -89,24 +90,28 @@ namespace Pixel {
 		return FenceValue;
 	}
 
-	uint64_t DirectXContext::Finish(bool WaitForCompletion)
+	uint64_t DirectXContext::Finish(bool WaitForCompletion, Ref<ContextManager> contextManager, Ref<Device> pDevice)
 	{
 		FlushResourceBarriers();
 
-		CommandQueue& Queue = CommandListManager::Get()->GetQueue(m_Type);
+		CommandQueue& Queue = std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->GetQueue(m_Type);
 
 		uint64_t FenceValue = Queue.ExecuteCommandList(m_pCommandList);
 		Queue.DiscardAlloactor(FenceValue, m_pCurrentAllocator);
+
+		m_pCurrentAllocator = nullptr;
+		m_CpuLinearAllocator.CleanupUsedPages(FenceValue, pDevice);
+		m_GpuLinearAllocator.CleanupUsedPages(FenceValue, pDevice);
+		m_DynamicSamplerDescriptorHeap.CleanupUsedHeaps(FenceValue);
+		m_DynamicSamplerDescriptorHeap.CleanupUsedHeaps(FenceValue);
 		//release and call the instance's release function
-		m_pCurrentAllocator->Reset();
+		//m_pCurrentAllocator->Reset();
 
 		if (WaitForCompletion)
-			CommandListManager::Get()->WaitForFence(FenceValue);
+			std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->WaitForFence(FenceValue, pDevice);
 
 		//g_ContextManager.FreeContext(shared_from_this());
-
-		m_OwingContextManager->FreeContext(shared_from_this());
-
+		contextManager->FreeContext(shared_from_this());
 		return FenceValue;
 	}
 
@@ -139,8 +144,8 @@ namespace Pixel {
 
 	void DirectXContext::CopyBuffer(GpuResource& Dest, GpuResource& Src)
 	{
-		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
-		TransitionResource(Src, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		TransitionResource(Dest, ResourceStates::CopyDest);
+		TransitionResource(Src, ResourceStates::CopySource);
 		FlushResourceBarriers();
 
 		DirectXGpuResource& DestResource = static_cast<DirectXGpuResource&>(Dest);
@@ -153,8 +158,8 @@ namespace Pixel {
 
 	void DirectXContext::CopyBufferRegion(GpuResource& Dest, size_t DestOffset, GpuResource& Src, size_t SrcOffset, size_t NumBytes)
 	{
-		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
-		TransitionResource(Src, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		TransitionResource(Dest, ResourceStates::CopyDest);
+		TransitionResource(Src, ResourceStates::CopySource);
 		FlushResourceBarriers();
 
 		DirectXGpuResource& DestResource = static_cast<DirectXGpuResource&>(Dest);
@@ -191,8 +196,8 @@ namespace Pixel {
 
 	void DirectXContext::CopyTextureRegion(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source, RECT& Rect)
 	{
-		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
-		TransitionResource(Source, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		TransitionResource(Dest, ResourceStates::CopyDest);
+		TransitionResource(Source, ResourceStates::CopySource);
 		FlushResourceBarriers();
 
 		DirectXGpuResource& DestResource = static_cast<DirectXGpuResource&>(Dest);
@@ -212,10 +217,12 @@ namespace Pixel {
 		m_pCommandList->CopyTextureRegion(&destLoc, x, y, z, &srcLoc, &box);
 	}
 
-	void DirectXContext::TransitionResource(GpuResource& Resource, D3D12_RESOURCE_STATES NewState, bool FlushImmediate)
+	void DirectXContext::TransitionResource(GpuResource& Resource, ResourceStates State, bool FlushImmediate)
 	{
 		DirectXGpuResource& DirectXResource = static_cast<DirectXGpuResource&>(Resource);
 		D3D12_RESOURCE_STATES OldState = DirectXResource.m_UsageState;
+
+		D3D12_RESOURCE_STATES NewState = ResourceStatesToDirectXResourceStates(State);
 
 		if (m_Type == D3D12_COMMAND_LIST_TYPE_COMPUTE)
 		{
@@ -268,40 +275,40 @@ namespace Pixel {
 			FlushResourceBarriers();
 	}
 
-	void DirectXContext::InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[])
+	void DirectXContext::InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[], Ref<ContextManager> pContextManager, Ref<Device> pDevice)
 	{
 		DirectXGpuResource& DestResource = static_cast<DirectXGpuResource&>(Dest);
 		//returns the required size of a buffer to be used for data upload
 		uint64_t uploadBufferSize = GetRequiredIntermediateSize(DestResource.GetResource(), 0, NumSubresources);
 
 		//copy data to the intermediate upload heap and then schedule a copy from the upload heap to the default texture
-		DynAlloc mem = ReserveUploadMemory(uploadBufferSize);
+		DynAlloc mem = ReserveUploadMemory(uploadBufferSize, pDevice);
 		UpdateSubresources(m_pCommandList.Get(), DestResource.GetResource(), mem.Buffer.GetResource(), 0, 0, NumSubresources, SubData);
-		TransitionResource(Dest, D3D12_RESOURCE_STATE_GENERIC_READ);
+		TransitionResource(Dest, ResourceStates::GenericRead);
 		//execute the command list and wait for it to finish so we can release the upload buffer
 		//finish can release upload buffer
-		Finish(true);
+		Finish(true, pContextManager, pDevice);
 	}
 
-	void DirectXContext::InitializeBuffer(GpuBuffer& Dest, const void* BufferData, size_t NumBytes, size_t DestOffset /*= 0*/)
+	void DirectXContext::InitializeBuffer(GpuBuffer& Dest, const void* BufferData, size_t NumBytes, size_t DestOffset /*= 0*/, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
 	{
 		DirectXGpuBuffer& DestBuffer = static_cast<DirectXGpuBuffer&>(Dest);
 
-		DynAlloc mem = ReserveUploadMemory(NumBytes);
+		DynAlloc mem = ReserveUploadMemory(NumBytes, pDevice);
 		memcpy(mem.DataPtr, BufferData, Math::DivideByMultiple(NumBytes, 16) * 16);
 		
 		//copy data to the intermediate upload heap and then schedule a copy from the upload heap to the default texture
-		TransitionResource(DestBuffer.m_GpuResource, D3D12_RESOURCE_STATE_COPY_DEST, true);
-		m_pCommandList->CopyBufferRegion(DestBuffer.m_GpuResource.m_pResource.Get(), DestOffset, mem.Buffer.GetResource(), 0, NumBytes);
-		TransitionResource(DestBuffer.m_GpuResource, D3D12_RESOURCE_STATE_GENERIC_READ, true);
+		TransitionResource(*DestBuffer.m_GpuResource, ResourceStates::CopyDest, true);
+		m_pCommandList->CopyBufferRegion(std::static_pointer_cast<DirectXGpuResource>(DestBuffer.m_GpuResource)->m_pResource.Get(), DestOffset, mem.Buffer.GetResource(), 0, NumBytes);
+		TransitionResource(*DestBuffer.m_GpuResource, ResourceStates::GenericRead, true);
 
 		//execute the command list and wait for it to finish so we can release the upload buffer
-		Finish(true);
+		Finish(true, pContextManager, pDevice);
 	}
 
-	void DirectXContext::InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src)
+	void DirectXContext::InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
 	{
-		TransitionResource(Dest, D3D12_RESOURCE_STATE_COPY_DEST);
+		TransitionResource(Dest, ResourceStates::CopyDest);
 		FlushResourceBarriers();
 
 		DirectXGpuResource& DestResource = static_cast<DirectXGpuResource&>(Dest);
@@ -337,28 +344,38 @@ namespace Pixel {
 			m_pCommandList->CopyTextureRegion(&destCopyLocation, 0, 0, 0, &srcCopyLocation, nullptr);
 		};
 
-		TransitionResource(Dest, D3D12_RESOURCE_STATE_GENERIC_READ);
+		TransitionResource(Dest, ResourceStates::GenericRead);
 
-		Finish(true);
+		Finish(true, pContextManager, pDevice);
 	}
 
-	void DirectXContext::WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* BufferData, size_t NumBytes)
+	void DirectXContext::WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* BufferData, size_t NumBytes, Ref<Device> pDevice)
 	{
 		PX_CORE_ASSERT(BufferData != nullptr && Math::IsAligned(BufferData, 16), "buffer data is not aligned!");
 
-		DynAlloc TempSpace = m_CpuLinearAllocator.Allocate(NumBytes, 512);
+		DynAlloc TempSpace = m_CpuLinearAllocator.Allocate(NumBytes, 512, pDevice);
 		memcpy(TempSpace.DataPtr, BufferData, Math::DivideByMultiple(NumBytes, 16) * 16);
 		CopyBufferRegion(Dest, DestOffset, TempSpace.Buffer, TempSpace.Offset, NumBytes);
 	}
 
-	DynAlloc DirectXContext::ReserveUploadMemory(size_t SizeInBytes)
+	DynAlloc DirectXContext::ReserveUploadMemory(size_t SizeInBytes, Ref<Device> pDevice)
 	{
-		return m_CpuLinearAllocator.Allocate(SizeInBytes);
+		return m_CpuLinearAllocator.Allocate(SizeInBytes, 256, pDevice);
 	}
 
-	void DirectXContext::SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> HeapPtr)
+	void DirectXContext::SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr)
 	{
-		if (m_CurrentDescriptorHeaps[Type] != HeapPtr)
+		Ref<DirectXDescriptorHeap> Heap = std::static_pointer_cast<DirectXDescriptorHeap>(HeapPtr);
+		if (m_CurrentDescriptorHeaps[DescriptorHeapTypeToDirectXDescriptorHeapType(Type)].Get() != Heap->GetHeapPointer())
+		{
+			m_CurrentDescriptorHeaps[DescriptorHeapTypeToDirectXDescriptorHeapType(Type)] = Heap->GetComPtrHeap();
+			BindDescriptorHeaps();
+		}
+	}
+
+	void DirectXContext::SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, ID3D12DescriptorHeap* HeapPtr)
+	{
+		if (m_CurrentDescriptorHeaps[Type].Get() != HeapPtr)
 		{
 			m_CurrentDescriptorHeaps[Type] = HeapPtr;
 			BindDescriptorHeaps();
@@ -488,6 +505,11 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	void DirectXContext::SetPrimitiveTopology(PrimitiveTopology Topology)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 	void DirectXContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
@@ -523,7 +545,7 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void DirectXContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
+	void DirectXContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
@@ -558,17 +580,17 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void DirectXContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData)
+	void DirectXContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void DirectXContext::SetDynamicIB(size_t IndexCount, const uint64_t* IBData)
+	void DirectXContext::SetDynamicIB(size_t IndexCount, const uint64_t* IBData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void DirectXContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
+	void DirectXContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
@@ -593,9 +615,15 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void DirectXContext::Reset()
+	CommandListType DirectXContext::GetType()
 	{
-		m_pCurrentAllocator = CommandListManager::Get()->GetQueue(m_Type).RequesetAlloactor();
+		//throw std::logic_error("The method or operation is not implemented.");
+		return DirectXCmdListTypeToCmdListType(m_Type);
+	}
+
+	void DirectXContext::Reset(Ref<Device> pDevice)
+	{
+		m_pCurrentAllocator = std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->GetQueue(m_Type).RequesetAlloactor(pDevice);
 		m_pCommandList->Reset(m_pCurrentAllocator.Get(), nullptr);
 
 		m_CurrGraphicsRootSignature = nullptr;
@@ -609,6 +637,11 @@ namespace Pixel {
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> DirectXContext::GetCommandList()
 	{
 		return m_pCommandList;
+	}
+
+	void* DirectXContext::GetNativeCommandList()
+	{
+		return m_pCommandList.Get();
 	}
 
 	//-------DirectX Context------

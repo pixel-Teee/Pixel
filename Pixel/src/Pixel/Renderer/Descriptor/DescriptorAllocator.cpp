@@ -18,9 +18,9 @@ namespace Pixel {
 		return nullptr;
 	}
 
-	Ref<DescriptorCpuHandle> DescriptorAllocator::AllocateDescriptor(DescriptorHeapType Type, uint32_t Count /*= 1*/)
+	Ref<DescriptorCpuHandle> DescriptorAllocator::AllocateDescriptor(DescriptorHeapType Type, uint32_t Count /*= 1*/, Ref<Device> pDevice)
 	{
-		return g_Descriptor[(uint64_t)Type]->Allocate(Count);
+		return g_Descriptor[(uint64_t)Type]->Allocate(Count, pDevice);
 	}
 
 	void DescriptorAllocator::DestroyDescriptorPools()

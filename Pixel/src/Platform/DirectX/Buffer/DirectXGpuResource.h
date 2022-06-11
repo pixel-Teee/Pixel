@@ -18,6 +18,8 @@ namespace Pixel {
 	public:
 		DirectXGpuResource();
 
+		DirectXGpuResource(ResourceStates CurrentState);
+
 		DirectXGpuResource(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState);
 
 		virtual ~DirectXGpuResource();
@@ -33,6 +35,11 @@ namespace Pixel {
 		Ref<GpuVirtualAddress> GetGpuVirtualAddress() const { return m_GpuVirtualAddress; }
 
 		uint32_t GetVersionID() const { return m_VersionID; }
+
+		//void SetResource(ID3D12Resource* pResource) { m_pResource = pResource; }
+
+		//ID3D12Resource
+		virtual void SetResource(void* resource) override;
 	protected:
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_pResource;

@@ -9,6 +9,8 @@
 
 namespace Pixel {
 	class OpenGLContext;
+	class DirectXDevice;
+	class DirectXContext;
 	class WindowsWindow : public Window
 	{
 	public:
@@ -34,12 +36,15 @@ namespace Pixel {
 		virtual void SetCursorDisabled() override;
 		virtual void SetCursorNormal() override;
 
+		virtual Ref<Device> GetDevice() const override;
+
 	private:
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
 		Ref<OpenGLContext> m_Context;
+		Ref<Device> pDevice;
 
 		//test:directx context
 		//Context* m_DirectXContext;

@@ -7,22 +7,29 @@
 
 #include <string>
 
+#include "Pixel/Renderer/Device/Device.h"
+
 struct GLFWwindow;
 
 namespace Pixel {
 	class DirectXSwapChain;
+	class CommandListManager;
 
-	class DirectXDevice
+	class DirectXDevice : public Device
 	{
 	public:
-		DirectXDevice(GLFWwindow* windowHandle);
-		~DirectXDevice();
+		//DirectXDevice(GLFWwindow* windowHandle);
+		DirectXDevice();
+		virtual ~DirectXDevice();
 
 		void Initialize();
-		static Ref<DirectXDevice> Get();
+		void SetWindowHandle(GLFWwindow* windowHandle);
+		//static Ref<DirectXDevice> Get();
 
 		Microsoft::WRL::ComPtr<ID3D12Device> GetDevice();
 		Microsoft::WRL::ComPtr<IDXGIFactory4> GetDxgiFactory();
+
+		Ref<CommandListManager> GetCommandListManager();
 
 		//------set and get client size------
 		void SetClientSize(uint32_t width, uint32_t height);
@@ -45,6 +52,8 @@ namespace Pixel {
 		DXGI_FORMAT GetBackBufferFormat();
 		DXGI_FORMAT GetDepthBufferFormat();
 		//------Get Buffer Format------
+
+		Ref<DirectXSwapChain> GetSwapChain();
 	private:
 		//------output hard device------
 		void LogAdapters();
@@ -77,6 +86,7 @@ namespace Pixel {
 
 		Ref<DirectXSwapChain> m_pSwapChain;
 
-		static Ref<DirectXDevice> m_gpDevice;
+		Ref<CommandListManager> m_pCommandListManager;
+		//static Ref<DirectXDevice> m_gpDevice;
 	};
 }

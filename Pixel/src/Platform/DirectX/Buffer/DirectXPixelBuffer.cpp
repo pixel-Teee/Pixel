@@ -529,9 +529,14 @@ namespace Pixel {
 		}
 	}
 
-	void DirectXPixelBuffer::CreateFromSwapChain(const std::wstring& Name, GpuResource* pBaseResource)
+	void DirectXPixelBuffer::CreateFromSwapChain(const std::wstring& Name, Ref<Device> pDevice)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXPixelBuffer::SetGpuResource(Ref<GpuResource> pResource)
+	{
+		m_pResource = pResource;
 	}
 
 	D3D12_RESOURCE_DESC DirectXPixelBuffer::DescribeTex2D(uint32_t Width, uint32_t Height, uint32_t DepthOrArraySize, uint32_t NumMips, DXGI_FORMAT Format, UINT Flags)
@@ -562,8 +567,8 @@ namespace Pixel {
 
 		D3D12_RESOURCE_DESC ResourceDesc = pResource->GetDesc();
 
-		m_GpuResource.m_pResource.Attach(pResource);
-		m_GpuResource.m_UsageState = CurrentState;
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource.Attach(pResource);
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_UsageState = CurrentState;
 
 		m_Width = (uint32_t)ResourceDesc.Width;
 		m_Height = ResourceDesc.Height;
@@ -571,27 +576,27 @@ namespace Pixel {
 		m_Format = ResourceDesc.Format;
 
 #ifdef PX_DEBUG
-		m_GpuResource.m_pResource->SetName(Name.c_str());
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource->SetName(Name.c_str());
 #else
 		Name;
 #endif
 	}
 
-	void DirectXPixelBuffer::CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc, D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
+	void DirectXPixelBuffer::CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc, D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice)
 	{
 		//parent class's destroy
-		m_GpuResource.Destroy();
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->Destroy();
 
 		CD3DX12_HEAP_PROPERTIES HeapProps(D3D12_HEAP_TYPE_DEFAULT);
-		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateCommittedResource(
-			&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, D3D12_RESOURCE_STATE_COMMON, &ClearValue, IID_PPV_ARGS(&m_GpuResource.m_pResource)
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommittedResource(
+			&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, D3D12_RESOURCE_STATE_COMMON, &ClearValue, IID_PPV_ARGS(&std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource)
 		) >= 0, "create texture resource error!");
 
-		m_GpuResource.m_UsageState = D3D12_RESOURCE_STATE_COMMON;
-		m_GpuResource.m_GpuVirtualAddress = 0;//D3D12_GPU_VIRTUAL_ADDRESS_NULL
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_UsageState = D3D12_RESOURCE_STATE_COMMON;
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_GpuVirtualAddress = 0;//D3D12_GPU_VIRTUAL_ADDRESS_NULL
 
 #ifdef PX_DEBUG
-		m_GpuResource.m_pResource->SetName(Name.c_str());
+		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource->SetName(Name.c_str());
 #else
 		(Name);
 #endif

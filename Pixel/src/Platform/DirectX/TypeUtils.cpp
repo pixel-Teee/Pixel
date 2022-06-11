@@ -18,6 +18,21 @@ namespace Pixel {
 		}
 	}
 
+	DescriptorHeapType DirectXDescriptorHeapTypeToDescriptorHeapType(D3D12_DESCRIPTOR_HEAP_TYPE Type)
+	{
+		switch (Type)
+		{
+		case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
+			return DescriptorHeapType::CBV_UAV_SRV;
+		case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
+			return DescriptorHeapType::SAMPLER;
+		case D3D12_DESCRIPTOR_HEAP_TYPE_RTV:
+			return DescriptorHeapType::RTV;
+		case D3D12_DESCRIPTOR_HEAP_TYPE_DSV:
+			return DescriptorHeapType::DSV;
+		}
+	}
+
 	D3D12_SHADER_VISIBILITY ShaderVisibilityToDirectXShaderVisibility(ShaderVisibility Visibility)
 	{
 		switch (Visibility)
@@ -336,16 +351,87 @@ namespace Pixel {
 	{
 		switch (Topology)
 		{
-		case UNDEFINED:
+		case PrimitiveTopology::UNDEFINED:
 			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED;
-		case LINELIST:
+		case PrimitiveTopology::LINELIST:
 			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST;
-		case LINESTRIP:
+		case PrimitiveTopology::LINESTRIP:
 			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP;
-		case TRIANGLELIST:
+		case PrimitiveTopology::TRIANGLELIST:
 			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		case TRIANGLESTRIP:
+		case PrimitiveTopology::TRIANGLESTRIP:
 			return D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+		}
+	}
+
+	D3D12_RESOURCE_STATES ResourceStatesToDirectXResourceStates(ResourceStates States)
+	{
+		switch (States)
+		{
+		case ResourceStates::Common:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+		case ResourceStates::VertexAndConstantBuffer:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		case ResourceStates::IndexBuffer:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
+		case ResourceStates::RenderTarget:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RENDER_TARGET;
+		case ResourceStates::UnorderedAccess:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		case ResourceStates::DepthWrite:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		case ResourceStates::DepthRead:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+		case ResourceStates::NonPixelShaderResource:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+		case ResourceStates::PixelShaderResource:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		case ResourceStates::StreamOut:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_STREAM_OUT;
+		case ResourceStates::IndirectArgument:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+		case ResourceStates::CopyDest:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+		case ResourceStates::CopySource:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
+		case ResourceStates::ResolveDest:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RESOLVE_DEST;
+		case ResourceStates::ResolveSource:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+		case ResourceStates::RaytracingAccelerationStructure:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+		case ResourceStates::ShadingRateSource:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE;
+		case ResourceStates::GenericRead:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+		case ResourceStates::Present:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PRESENT;
+		}
+	}
+
+	D3D12_COMMAND_LIST_TYPE CmdListTypeToDirectXCmdListType(CommandListType CmdListType)
+	{
+		switch (CmdListType)
+		{
+		case CommandListType::Graphics:
+			return D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT;
+		case CommandListType::Compute:
+			return D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_COMPUTE;
+		case CommandListType::Copy:
+			return D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_COPY;
+		}
+	}
+
+	CommandListType DirectXCmdListTypeToCmdListType(D3D12_COMMAND_LIST_TYPE Type)
+	{
+		switch (Type)
+		{
+		case D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT:
+			return CommandListType::Graphics;
+		case D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_COMPUTE:
+			return CommandListType::Compute;
+		case D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_COPY:
+			return CommandListType::Copy;
 		}
 	}
 

@@ -3,9 +3,14 @@
 namespace Pixel {
 	namespace Utility {
 
-		inline size_t HashRange(const uint32_t* const Begin, const uint32_t* const End, size_t Hash);
+		size_t HashRange(const uint32_t* const Begin, const uint32_t* const End, size_t Hash)
+		{
+			for (const uint32_t* Iter = Begin; Iter < End; ++Iter)
+				Hash = 16777619U * Hash ^ *Iter;
 
-		//third number is hash code
+			return Hash;
+		}
+
 		template<typename T>
 		inline size_t HashState(const T* StateDesc, size_t Count = 1, size_t Hash = 2166136261U)
 		{

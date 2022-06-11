@@ -11,7 +11,7 @@
 namespace Pixel {
 	class DirectXContext;
 	class RootSignature;
-
+	class Device;
 	//describes a descriptor table entry : a region of handle cache and which handles have been set
 	struct DescriptorTableCache
 	{
@@ -38,7 +38,7 @@ namespace Pixel {
 		uint32_t ComputeStagedSize();
 		void CopyAndBindStaleTables(D3D12_DESCRIPTOR_HEAP_TYPE Type, uint32_t DescriptorSize,
 			DescriptorHandle DestHandleStart, ID3D12GraphicsCommandList* CmdList,
-			void(STDMETHODCALLTYPE ID3D12GraphicsCommandList::* SetFunc)(UINT, D3D12_GPU_DESCRIPTOR_HANDLE));
+			void(STDMETHODCALLTYPE ID3D12GraphicsCommandList::* SetFunc)(UINT, D3D12_GPU_DESCRIPTOR_HANDLE), Ref<Device> pDevice);
 
 		DescriptorTableCache m_RootDescriptorTable[kMaxNumDescriptorTables];
 		D3D12_CPU_DESCRIPTOR_HANDLE m_HandleCache[kMaxNumDescriptors];
@@ -55,7 +55,7 @@ namespace Pixel {
 	class DirectXDynamicDescriptorHeap : public DynamicDescriptorHeap
 	{
 	public:
-		DirectXDynamicDescriptorHeap(Context& OwningContext, DescriptorHeapType HeapType);
+		DirectXDynamicDescriptorHeap(Context& OwningContext, DescriptorHeapType HeapType, Ref<Device> pDevice);
 
 		~DirectXDynamicDescriptorHeap();
 
@@ -89,7 +89,7 @@ namespace Pixel {
 		static std::queue<ID3D12DescriptorHeap*> sm_AvailableDescriptorHeaps[2];
 
 		//static methods
-		static ID3D12DescriptorHeap* RequestDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE HeapType);
+		static ID3D12DescriptorHeap* RequestDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE HeapType, Ref<Device> pDevice);
 		static void DiscardDescriptorHeaps(D3D12_DESCRIPTOR_HEAP_TYPE HeapType, uint64_t FenceValueForReset, const std::vector<ID3D12DescriptorHeap*>& UsedHeaps);
 
 		//non-static members
@@ -117,5 +117,7 @@ namespace Pixel {
 
 		//mark all descriptors in the cache as stale and in need of re-uploading
 		void UnBindAllValid();
+
+		Ref<Device> m_pDevice;
 	};
 }

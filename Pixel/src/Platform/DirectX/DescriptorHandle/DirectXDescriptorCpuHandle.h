@@ -9,6 +9,8 @@ namespace Pixel {
 	public:
 		DirectXDescriptorCpuHandle();
 
+		//D3D12_CPU_DESCRIPTOR_HANDLE
+		virtual void SetCpuHandle(void* handle) override { m_CpuHandle = *((D3D12_CPU_DESCRIPTOR_HANDLE*)handle); }
 		void SetCpuHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle) { m_CpuHandle = handle; }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle() { return m_CpuHandle; }
 		operator D3D12_CPU_DESCRIPTOR_HANDLE() const { return m_CpuHandle; }

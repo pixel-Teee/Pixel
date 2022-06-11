@@ -4,12 +4,13 @@
 
 namespace Pixel {
 	class RootSignature;
+	class Device;
 	class PSO
 	{
 	public:
 		virtual void SetRootSignature(Ref<RootSignature> pRootSignature) = 0;
 
-		virtual void Finalize() = 0;
+		virtual void Finalize(Ref<Device> pDevice) = 0;
 
 		virtual void SetDepthTargetFormat(ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) = 0;
 

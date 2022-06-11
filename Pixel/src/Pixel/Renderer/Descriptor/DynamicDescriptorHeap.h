@@ -7,6 +7,7 @@ namespace Pixel {
 	class DescriptorCpuHandle;
 	class DescriptorGpuHandle;
 	class RootSignature;
+	class Device;
 	class DynamicDescriptorHeap {
 	public:
 		virtual void CleanupUsedHeaps(uint64_t fenceValue) = 0;
@@ -21,6 +22,6 @@ namespace Pixel {
 
 		virtual void ParseComputeRootSignature(const RootSignature& RootSig) = 0;
 
-		static Ref<DynamicDescriptorHeap> Create(Context& OwingContext, DescriptorHeapType HeapType);
+		static Ref<DynamicDescriptorHeap> Create(Context& OwingContext, DescriptorHeapType HeapType, Ref<Device> pDevice);
 	};
 }

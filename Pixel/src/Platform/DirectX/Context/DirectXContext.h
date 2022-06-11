@@ -28,26 +28,30 @@ namespace Pixel {
 	class VBV;
 	class DescriptorCpuHandle;
 	class DescriptorGpuHandle;
+	class DescriptorHeap;
 
-	class DirectXContext : public Context, public std::enable_shared_from_this<DirectXContext>
+	class DirectXContext : public Context
 	{
 		friend class DirectXContextManager;
 	public:
-		DirectXContext(CommandListType Type, Ref<ContextManager> pContextManager);
+		DirectXContext(CommandListType Type, Ref<ContextManager> pContextManager, Ref<Device> pDevice);
 		virtual ~DirectXContext();	
 
 		//flush existing commands to the gpu but keep the context alive
-		virtual uint64_t Flush(bool WaitForCompletion) override;
+		virtual uint64_t Flush(bool WaitForCompletion, Ref<Device> pDevice) override;
 
 		//flush existing commands and release the current context
-		virtual uint64_t Finish(bool WaitForCompletion) override;
+		virtual uint64_t Finish(bool WaitForCompletion, Ref<ContextManager> contextManager, Ref<Device> pDevice) override;
 		
 		//request a new command list and a allocator
-		virtual void Initialize() override;
+		virtual void Initialize(Ref<Device> pDevice) override;
 		virtual void SwapBuffers() override;
-		virtual void Reset() override;
+		virtual void Reset(Ref<Device> pDevice) override;
 
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList();
+
+		//ID3D12GraphicsCommandList
+		virtual void* GetNativeCommandList() override;
 
 		virtual void FlushResourceBarriers() override;
 
@@ -59,21 +63,22 @@ namespace Pixel {
 		virtual void CopySubresource(GpuResource& Dest, uint32_t DestSubIndex, GpuResource& Src, uint32_t SrcSubIndex);
 		void CopyTextureRegion(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source, RECT& Rect);
 
-		void TransitionResource(GpuResource& Resource, D3D12_RESOURCE_STATES NewState, bool FlushImmediate = false);
+		virtual void TransitionResource(GpuResource& Resource, ResourceStates NewState, bool FlushImmediate = false) override;
 		virtual void InsertUAVBarrier(GpuResource& Resource, bool FlushImmediate);
 		//------Buffer Operation------
 
-		void InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[]);
-		void InitializeBuffer(GpuBuffer& Dest, const void* Data, size_t NumBytes, size_t DestOffset = 0);
-		void InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src);
+		void InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[], Ref<ContextManager> m_pContextManager, Ref<Device> pDevice);
+		void InitializeBuffer(GpuBuffer& Dest, const void* Data, size_t NumBytes, size_t DestOffset, Ref<ContextManager> m_pContextManager, Ref<Device> pDevice);
+		void InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src, Ref<ContextManager> m_pContextManager, Ref<Device> pDevice);
 
-		virtual void WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes);
+		virtual void WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes, Ref<Device> pDevice);
 
 		//------use upload buffer to write------
-		DynAlloc ReserveUploadMemory(size_t SizeInBytes);
+		DynAlloc ReserveUploadMemory(size_t SizeInBytes, Ref<Device> pDevice);
 		//------use upload buffer to write------
 
-		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> HeapPtr);
+		virtual void SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr) override;
+		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, ID3D12DescriptorHeap* HeapPtr);
 		void SetDescriptorHeaps(uint32_t HeapCount, D3D12_DESCRIPTOR_HEAP_TYPE Type[], Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> HeapPtrs[]);
 		void SetPipelineState(const DirectXPSO& pso);
 
@@ -118,7 +123,7 @@ namespace Pixel {
 
 		virtual void SetBlendFactor(glm::vec4 BlendFactor) override;
 
-		virtual void SetPrimitiveTopology(PrimitiveTopology Topology);
+		virtual void SetPrimitiveTopology(PrimitiveTopology Topology) override;
 
 		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants) override;
 
@@ -134,7 +139,7 @@ namespace Pixel {
 
 		virtual void SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV) override;
 
-		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
 
 		virtual void SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset = 0) override;
 
@@ -148,11 +153,11 @@ namespace Pixel {
 
 		virtual void SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews) override;
 
-		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) override;
+		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData, Ref<Device> pDevice) override;
 
-		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) override;
+		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData, Ref<Device> pDevice) override;
 
-		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
+		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
 
 		virtual void Draw(uint32_t VertexCount, uint32_t VertexStartOffset = 0) override;
 
@@ -162,13 +167,12 @@ namespace Pixel {
 
 		virtual void DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation, int32_t BaseVertexLocation, uint32_t StartInstanceLocation) override;
 
+		virtual CommandListType GetType() override;
+
 		//TODO:need to clear these functions
 
 	protected:
 		void BindDescriptorHeaps();
-
-		Ref<ContextManager> m_OwingContextManager;
-
 		//command list need to create from the command list manager
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_pCommandList;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_pCurrentAllocator;

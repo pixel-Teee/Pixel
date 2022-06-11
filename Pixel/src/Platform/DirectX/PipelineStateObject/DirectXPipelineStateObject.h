@@ -65,7 +65,7 @@ namespace Pixel {
 		virtual void SetRootSignature(Ref<RootSignature> pRootSignature) override;
 
 		//perform validation and compute a hash value for fast state block comparisons
-		virtual void Finalize() override;
+		virtual void Finalize(Ref<Device> pDevice) override;
 
 	private:
 

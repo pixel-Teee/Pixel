@@ -24,12 +24,12 @@ namespace Pixel {
 		return nullptr;
 	}
 
-	Context& ContextManager::CreateGraphicsContext(const std::wstring& ID)
+	Ref<Context> ContextManager::CreateGraphicsContext(const std::wstring& ID, Ref<Device> pDevice)
 	{
-		Ref<Context> NewContext = AllocateContext(CommandListType::Graphics);
+		Ref<Context> NewContext = AllocateContext(CommandListType::Graphics, pDevice);
 		NewContext->SetID(ID);
 		//------g_ContextManager's pool reference this context------
-		return *NewContext.get();
+		return NewContext;
 	}
 
 }

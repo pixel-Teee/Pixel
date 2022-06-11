@@ -19,18 +19,18 @@ namespace Pixel {
 		
 	}
 
-	Ref<DescriptorCpuHandle> DirectXDescriptorAllocator::Allocate(uint32_t Count)
+	Ref<DescriptorCpuHandle> DirectXDescriptorAllocator::Allocate(uint32_t Count, Ref<Device> pDevice)
 	{
 		if (m_CurrentHeap == nullptr || m_RemainingFreeHandles < Count)
 		{
-			m_CurrentHeap = RequestNewHeap(m_Type);
+			m_CurrentHeap = RequestNewHeap(m_Type, pDevice);
 			//------important------
 			m_CurrentHandle = m_CurrentHeap->GetCPUDescriptorHandleForHeapStart();
 			//------important------
 			m_RemainingFreeHandles = sm_NumDescriptorPerHeap;
 
 			if (m_DescriptorSize == 0)
-				m_DescriptorSize = DirectXDevice::Get()->GetDevice()->GetDescriptorHandleIncrementSize(m_Type);
+				m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->GetDescriptorHandleIncrementSize(m_Type);
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE ret = m_CurrentHandle;
@@ -47,7 +47,7 @@ namespace Pixel {
 		sm_DescriptorHeapPool.clear();
 	}
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXDescriptorAllocator::RequestNewHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type)
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXDescriptorAllocator::RequestNewHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, Ref<Device> pDevice)
 	{
 		std::lock_guard<std::mutex> LockGuard(sm_AllocationMutex);
 
@@ -59,7 +59,7 @@ namespace Pixel {
 
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> pHeap;
 		//PX_CORE_ASSERT()
-		PX_CORE_ASSERT(DirectXDevice::Get()->GetDevice()->CreateDescriptorHeap(&Desc, IID_PPV_ARGS(pHeap.GetAddressOf())), "Create Descriptor Heap Error!");
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDescriptorHeap(&Desc, IID_PPV_ARGS(pHeap.GetAddressOf())) >= 0, "Create Descriptor Heap Error!");
 		sm_DescriptorHeapPool.emplace_back(pHeap);
 		return pHeap;
 	}
