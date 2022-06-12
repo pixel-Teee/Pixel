@@ -30,7 +30,7 @@ namespace Pixel {
 
 		//D3D12_ROOT_SIGNATURE_FLAG_NONE
 		//flags:flag counld input assembly etc.
-		virtual void Finalize(const std::wstring& name, RootSignatureFlag Flags, Ref<Device> pDevice) override;
+		virtual void Finalize(const std::wstring& name, RootSignatureFlag Flags) override;
 
 		ID3D12RootSignature* GetNativeSignature() const;
 	protected:

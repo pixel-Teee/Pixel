@@ -40,7 +40,7 @@ namespace Pixel {
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height, TextureFormat textureFormat);
 		static Ref<Texture2D> Create(const std::string& path);
-		static Ref<Texture2D> Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat, Ref<ContextManager> pContextManager, Ref<Device> pDevice);
+		static Ref<Texture2D> Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat);
 
 		virtual bool operator==(const Texture& other) const = 0;
 	};

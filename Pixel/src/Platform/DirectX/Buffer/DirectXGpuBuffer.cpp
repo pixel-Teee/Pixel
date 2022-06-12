@@ -16,12 +16,12 @@ namespace Pixel {
 
 	DirectXGpuBuffer::~DirectXGpuBuffer()
 	{
-		std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->Destroy();
+		
 	}
 
-	void DirectXGpuBuffer::Create(const std::wstring& name, uint32_t NumElements, uint32_t ElementSize, Ref<Device> pDevice, const void* initialData)
+	void DirectXGpuBuffer::Create(const std::wstring& name, uint32_t NumElements, uint32_t ElementSize, const void* initialData)
 	{
-		std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->Destroy();
+		Destroy();
 
 		m_ElementCount = NumElements;
 		m_ElementSize = ElementSize;
@@ -30,7 +30,7 @@ namespace Pixel {
 		//get a buffer create describe
 		D3D12_RESOURCE_DESC ResourceDesc = DescribeBuffer();
 
-		std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_UsageState = D3D12_RESOURCE_STATE_COMMON;
+		m_UsageState = D3D12_RESOURCE_STATE_COMMON;
 
 		D3D12_HEAP_PROPERTIES HeapProps;
 		HeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -40,12 +40,12 @@ namespace Pixel {
 		HeapProps.VisibleNodeMask = 1;
 
 		//Create Buffer Resource
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_UsageState,
-			nullptr, IID_PPV_ARGS(&std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_pResource)) >= 0, "Create Default Resource Error!");
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, m_UsageState,
+			nullptr, IID_PPV_ARGS(m_pResource.GetAddressOf())) >= 0, "Create Default Resource Error!");
 
-		//std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_GpuVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->GetGpuVirtualAddress())->GetGpuVirtualAddress();
-		std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_GpuVirtualAddress = std::make_shared<DirectXGpuVirtualAddress>();
-		std::static_pointer_cast<DirectXGpuVirtualAddress>(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_GpuVirtualAddress)->SetGpuVirtualAddress(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_pResource->GetGPUVirtualAddress());
+		//std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_GpuVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(std::static_pointer_cast<DirectXGpuResource>(m_pResource)->GetGpuVirtualAddress())->GetGpuVirtualAddress();
+		m_GpuVirtualAddress = std::make_shared<DirectXGpuVirtualAddress>();
+		std::static_pointer_cast<DirectXGpuVirtualAddress>(m_GpuVirtualAddress)->SetGpuVirtualAddress(m_pResource->GetGPUVirtualAddress());
 
 		if (initialData)
 		{
@@ -53,7 +53,7 @@ namespace Pixel {
 		}
 
 #ifdef PX_DEBUG
-		std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_pResource->SetName(name.c_str());
+		m_pResource->SetName(name.c_str());
 #else
 		(name);
 #endif
@@ -61,7 +61,7 @@ namespace Pixel {
 		
 	}
 
-	Ref<DescriptorCpuHandle> DirectXGpuBuffer::CreateConstantBufferView(uint32_t Offset, uint32_t Size, Ref<Device> pDevice) const
+	Ref<DescriptorCpuHandle> DirectXGpuBuffer::CreateConstantBufferView(uint32_t Offset, uint32_t Size) const
 	{
 		PX_CORE_ASSERT(Offset + Size <= m_BufferSize, "Out of the buffer range!");
 
@@ -69,12 +69,12 @@ namespace Pixel {
 		Size = Math::AlignUp(Size, 16);
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc;
-		CBVDesc.BufferLocation = std::static_pointer_cast<DirectXGpuVirtualAddress>(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->GetGpuVirtualAddress())->GetGpuVirtualAddress() + (size_t)Offset;
+		CBVDesc.BufferLocation = m_pResource->GetGPUVirtualAddress() + (size_t)Offset;
 		CBVDesc.SizeInBytes = Size;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE hCBV = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice))->GetCpuHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE hCBV = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1))->GetCpuHandle();
 
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateConstantBufferView(&CBVDesc, hCBV);
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateConstantBufferView(&CBVDesc, hCBV);
 
 		Ref<DescriptorCpuHandle> pCpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
 		std::static_pointer_cast<DirectXDescriptorCpuHandle>(pCpuHandle)->SetCpuHandle(hCBV);
@@ -85,7 +85,7 @@ namespace Pixel {
 	Ref<VBV> DirectXGpuBuffer::VertexBufferView(size_t Offset, uint32_t Size, uint32_t Stride) const
 	{
 		Ref<VBV> pVbv;
-		pVbv = std::make_shared<DirectXVBV>(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->GetGpuVirtualAddress(), Offset, Size, Stride);
+		pVbv = std::make_shared<DirectXVBV>(m_GpuVirtualAddress, Offset, Size, Stride);
 		return pVbv;
 	}
 
@@ -98,7 +98,7 @@ namespace Pixel {
 	Ref<IBV> DirectXGpuBuffer::IndexBufferView(size_t Offset, uint32_t Size, bool b32Bit /*= false*/) const
 	{
 		Ref<IBV> pIbv;
-		pIbv = std::make_shared<DirectXIBV>(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->GetGpuVirtualAddress(), Offset, Size, b32Bit);
+		pIbv = std::make_shared<DirectXIBV>(m_GpuVirtualAddress, Offset, Size, b32Bit);
 		return pIbv;
 	}
 
@@ -107,11 +107,6 @@ namespace Pixel {
 		size_t Offset = StartIndex * m_ElementSize;
 		//if m_ElementSize == 4, then 32bit, else 16bit
 		return IndexBufferView(Offset, (uint32_t)(m_BufferSize - Offset), m_ElementSize == 4);
-	}
-
-	void DirectXGpuBuffer::SetGpuResource(Ref<GpuResource> pGpuBuffer)
-	{
-		m_GpuResource = std::static_pointer_cast<DirectXGpuResource>(pGpuBuffer);
 	}
 
 	DirectXGpuBuffer::DirectXGpuBuffer()
@@ -147,12 +142,12 @@ namespace Pixel {
 		return Desc;
 	}
 
-	void DirectXGpuBuffer::CreateDerivedViews(Ref<Device> pDevice)
+	void DirectXGpuBuffer::CreateDerivedViews()
 	{
 
 	}
 
-	void DirectXByteAddressBuffer::CreateDerivedViews(Ref<Device> pDevice)
+	void DirectXByteAddressBuffer::CreateDerivedViews()
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
@@ -163,8 +158,8 @@ namespace Pixel {
 
 		//TODO:need to simplify
 		if (std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRV)->GetCpuHandle().ptr == -1)
-			std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAV)->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice))->GetCpuHandle());
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateShaderResourceView(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_pResource.Get(), &SRVDesc, std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRV)->GetCpuHandle());
+			std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAV)->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1))->GetCpuHandle());
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateShaderResourceView(m_pResource.Get(), &SRVDesc, std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRV)->GetCpuHandle());
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
 		UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
@@ -175,8 +170,8 @@ namespace Pixel {
 		Ref<DirectXDescriptorCpuHandle> TempUavHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAV);
 
 		if(TempUavHandle->GetCpuHandle().ptr == -1)
-			TempUavHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice))->GetCpuHandle());
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateUnorderedAccessView(std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_pResource.Get(), nullptr, &UAVDesc, TempUavHandle->GetCpuHandle());
+			TempUavHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1))->GetCpuHandle());
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateUnorderedAccessView(m_pResource.Get(), nullptr, &UAVDesc, TempUavHandle->GetCpuHandle());
 	}
 
 }

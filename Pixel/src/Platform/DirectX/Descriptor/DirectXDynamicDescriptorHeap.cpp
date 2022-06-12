@@ -47,7 +47,7 @@ namespace Pixel {
 
 	void DescriptorHandleCache::CopyAndBindStaleTables(D3D12_DESCRIPTOR_HEAP_TYPE Type, uint32_t DescriptorSize,
 	DescriptorHandle DestHandleStart, ID3D12GraphicsCommandList* CmdList, 
-	void(STDMETHODCALLTYPE ID3D12GraphicsCommandList::* SetFunc)(UINT, D3D12_GPU_DESCRIPTOR_HANDLE), Ref<Device> pDevice)
+	void(STDMETHODCALLTYPE ID3D12GraphicsCommandList::* SetFunc)(UINT, D3D12_GPU_DESCRIPTOR_HANDLE))
 	{
 		uint32_t StaleParamCount = 0;
 
@@ -118,7 +118,7 @@ namespace Pixel {
 				//if we run out of temp room, copy what we've got so for
 				if (NumSrcDescriptorRanges + DescriptorCount > kMaxDescriptorsPerCopy)
 				{
-					std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CopyDescriptors(
+					std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CopyDescriptors(
 						NumDestDescriptorRanges, pDestDescriptorRangeStarts, pDestDescriptorRangeSizes,
 						NumSrcDescriptorRanges, pSrcDescriptorRangeStarts, pSrcDescriptorRangeSizes,
 						Type
@@ -147,7 +147,7 @@ namespace Pixel {
 			}
 		}
 
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CopyDescriptors(
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CopyDescriptors(
 			NumDestDescriptorRanges, pDestDescriptorRangeStarts, pDestDescriptorRangeSizes,
 			NumSrcDescriptorRanges, pSrcDescriptorRangeStarts, pSrcDescriptorRangeSizes,
 			Type
@@ -229,13 +229,12 @@ namespace Pixel {
 	std::vector<Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>> DirectXDynamicDescriptorHeap::sm_DescriptorHeapPool[2];
 	std::queue<ID3D12DescriptorHeap*> DirectXDynamicDescriptorHeap::sm_AvailableDescriptorHeaps[2];
 
-	DirectXDynamicDescriptorHeap::DirectXDynamicDescriptorHeap(Context& OwningContext, DescriptorHeapType HeapType, Ref<Device> pDevice)
+	DirectXDynamicDescriptorHeap::DirectXDynamicDescriptorHeap(Context& OwningContext, DescriptorHeapType HeapType)
 		:m_OwingContext(static_cast<DirectXContext&>(OwningContext)), m_DescriptorType(DescriptorHeapTypeToDirectXDescriptorHeapType(HeapType))
 	{
 		m_CurrentHeapPtr = nullptr;
 		m_CurrentOffset = 0;
-		m_pDevice = pDevice;
-		m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->GetDescriptorHandleIncrementSize(m_DescriptorType);
+		m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->GetDescriptorHandleIncrementSize(m_DescriptorType);
 	}
 
 	DirectXDynamicDescriptorHeap::~DirectXDynamicDescriptorHeap()
@@ -301,7 +300,7 @@ namespace Pixel {
 		Ref<DirectXDescriptorCpuHandle> cpuHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DestHandle.GetCpuHandle());
 
 		D3D12_CPU_DESCRIPTOR_HANDLE tempHandle;
-		std::static_pointer_cast<DirectXDevice>(m_pDevice)->GetDevice()->CopyDescriptorsSimple(1, tempHandle, std::static_pointer_cast<DirectXDescriptorCpuHandle>(Handles)->GetCpuHandle(), m_DescriptorType);
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CopyDescriptorsSimple(1, tempHandle, std::static_pointer_cast<DirectXDescriptorCpuHandle>(Handles)->GetCpuHandle(), m_DescriptorType);
 		cpuHandle->SetCpuHandle(tempHandle);
 		
 		return DestHandle.GetGpuHandle();
@@ -329,13 +328,13 @@ namespace Pixel {
 			CopyAndBindStagedTables(m_ComputeHandleCache, CmdList, &ID3D12GraphicsCommandList::SetComputeRootDescriptorTable);
 	}
 
-	ID3D12DescriptorHeap* DirectXDynamicDescriptorHeap::RequestDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE HeapType, Ref<Device> pDevice)
+	ID3D12DescriptorHeap* DirectXDynamicDescriptorHeap::RequestDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
 	{
 		std::lock_guard<std::mutex> LockGuard(sm_Mutex);
 
 		uint32_t idx = HeapType == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER ? 1 : 0;
 
-		while (!sm_RetiredDescriptorHeaps[idx].empty() && std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->IsFenceComplete(sm_RetiredDescriptorHeaps[idx].front().first))
+		while (!sm_RetiredDescriptorHeaps[idx].empty() && std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetCommandListManager()->IsFenceComplete(sm_RetiredDescriptorHeaps[idx].front().first))
 		{
 			sm_AvailableDescriptorHeaps[idx].push(sm_RetiredDescriptorHeaps[idx].front().second);
 			sm_RetiredDescriptorHeaps[idx].pop();
@@ -355,7 +354,7 @@ namespace Pixel {
 			HeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			HeapDesc.NodeMask = 1;
 			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> HeapPtr;
-			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDescriptorHeap(&HeapDesc, IID_PPV_ARGS(HeapPtr.GetAddressOf())) >= 0,
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateDescriptorHeap(&HeapDesc, IID_PPV_ARGS(HeapPtr.GetAddressOf())) >= 0,
 			"create descriptor heap error!");
 			sm_DescriptorHeapPool[idx].emplace_back(HeapPtr);
 			return HeapPtr.Get();
@@ -404,7 +403,7 @@ namespace Pixel {
 		if (m_CurrentHeapPtr == nullptr)
 		{
 			PX_CORE_ASSERT(m_CurrentOffset == 0, "current offset must be 0!");
-			m_CurrentHeapPtr = RequestDescriptorHeap(m_DescriptorType, m_pDevice);
+			m_CurrentHeapPtr = RequestDescriptorHeap(m_DescriptorType);
 
 			Ref<DirectXDescriptorCpuHandle> cpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
 			cpuHandle->SetCpuHandle(m_CurrentHeapPtr->GetCPUDescriptorHandleForHeapStart());
@@ -440,7 +439,7 @@ namespace Pixel {
 
 		//this can trigger the creation of a new hap
 		m_OwingContext.SetDescriptorHeap(m_DescriptorType, GetHeapPointer());
-		HandleCache.CopyAndBindStaleTables(m_DescriptorType, m_DescriptorSize, Allocate(NeededSize), CmdList, SetFunc, m_pDevice);
+		HandleCache.CopyAndBindStaleTables(m_DescriptorType, m_DescriptorSize, Allocate(NeededSize), CmdList, SetFunc);
 	}
 
 	void DirectXDynamicDescriptorHeap::UnBindAllValid()

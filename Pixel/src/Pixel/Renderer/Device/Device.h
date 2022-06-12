@@ -7,6 +7,9 @@ namespace Pixel {
 	{
 	public:
 		virtual ~Device();
-		static Ref<Device> Create();
+
+		static Ref<Device> Get();
+
+		static Ref<Device> m_pDevice;
 	};
 }

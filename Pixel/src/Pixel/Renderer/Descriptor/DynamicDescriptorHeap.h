@@ -22,6 +22,6 @@ namespace Pixel {
 
 		virtual void ParseComputeRootSignature(const RootSignature& RootSig) = 0;
 
-		static Ref<DynamicDescriptorHeap> Create(Context& OwingContext, DescriptorHeapType HeapType, Ref<Device> pDevice);
+		static Ref<DynamicDescriptorHeap> Create(Context& OwingContext, DescriptorHeapType HeapType);
 	};
 }

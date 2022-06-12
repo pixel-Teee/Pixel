@@ -98,7 +98,7 @@ namespace Pixel {
 		LogAdapters();
 #endif
 		m_pCommandListManager = std::make_shared<CommandListManager>();
-		m_pCommandListManager->Create(shared_from_this());
+		m_pCommandListManager->Create();
 
 		//------Create Swap Chain------
 		m_pSwapChain = CreateRef<DirectXSwapChain>(shared_from_this());

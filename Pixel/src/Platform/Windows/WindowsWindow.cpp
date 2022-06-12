@@ -59,11 +59,10 @@ namespace Pixel {
 		m_Context = CreateRef<OpenGLContext>(m_Window);
 
 		//m_Context->Initialize(pDevice);
-		pDevice = Device::Create();
 		//DirectXDevice::Get()->Initialize();
-		std::static_pointer_cast<DirectXDevice>(pDevice)->SetWindowHandle(m_Window);
-		std::static_pointer_cast<DirectXDevice>(pDevice)->SetClientSize(props.Width, props.Height);
-		std::static_pointer_cast<DirectXDevice>(pDevice)->Initialize();
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->SetWindowHandle(m_Window);
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->SetClientSize(props.Width, props.Height);
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->Initialize();
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);

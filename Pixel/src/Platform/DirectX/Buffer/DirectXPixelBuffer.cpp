@@ -529,14 +529,9 @@ namespace Pixel {
 		}
 	}
 
-	void DirectXPixelBuffer::CreateFromSwapChain(const std::wstring& Name, Ref<Device> pDevice)
+	void DirectXPixelBuffer::CreateFromSwapChain(const std::wstring& Name)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
-	}
-
-	void DirectXPixelBuffer::SetGpuResource(Ref<GpuResource> pResource)
-	{
-		m_pResource = pResource;
 	}
 
 	D3D12_RESOURCE_DESC DirectXPixelBuffer::DescribeTex2D(uint32_t Width, uint32_t Height, uint32_t DepthOrArraySize, uint32_t NumMips, DXGI_FORMAT Format, UINT Flags)
@@ -582,13 +577,13 @@ namespace Pixel {
 #endif
 	}
 
-	void DirectXPixelBuffer::CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc, D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice)
+	void DirectXPixelBuffer::CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc, D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
 		//parent class's destroy
 		std::static_pointer_cast<DirectXGpuResource>(m_pResource)->Destroy();
 
 		CD3DX12_HEAP_PROPERTIES HeapProps(D3D12_HEAP_TYPE_DEFAULT);
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommittedResource(
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommittedResource(
 			&HeapProps, D3D12_HEAP_FLAG_NONE, &ResourceDesc, D3D12_RESOURCE_STATE_COMMON, &ClearValue, IID_PPV_ARGS(&std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource)
 		) >= 0, "create texture resource error!");
 

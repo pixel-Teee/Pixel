@@ -10,10 +10,10 @@ namespace Pixel {
 		DepthBuffer(float ClearDepth = 0.0f, uint8_t ClearStencil = 0);
 
 		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height,
-			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice);
+			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/);
 
 		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t NumSamples, ImageFormat Format,
-			Ref<GpuVirtualAddress> VideoMemoryPtr, Ref<Device> pDevice);
+			Ref<GpuVirtualAddress> VideoMemoryPtr);
 
 		//get pre-created cpu-visible descriptor handles
 		const D3D12_CPU_DESCRIPTOR_HANDLE& GetDSV() const { return m_hDSV[0]; }
@@ -28,7 +28,7 @@ namespace Pixel {
 
 	protected:
 
-		void CreateDerivedViews(DXGI_FORMAT Format, Ref<Device> pDevice);
+		void CreateDerivedViews(DXGI_FORMAT Format);
 
 		float m_ClearDepth;
 		uint8_t m_ClearStencil;

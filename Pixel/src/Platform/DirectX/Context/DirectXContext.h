@@ -1,13 +1,16 @@
 #pragma once
 
-#include "Pixel/Renderer/Context/Context.h"
+
 
 #include <vector>
 #include <queue>
+
 #include <wrl/client.h>
 #include <dxgi1_4.h>
+#include <glm/glm.hpp>
 
 #include "Platform/DirectX/d3dx12.h"
+#include "Pixel/Renderer/Context/Context.h"
 #include "Platform/DirectX/Buffer/LinearAllocator.h"
 #include "Platform/DirectX/Descriptor/DirectXDynamicDescriptorHeap.h"
 #include "Pixel/Renderer/Context/ContextType.h"
@@ -20,7 +23,6 @@ namespace Pixel {
 	class DirectXSwapChain;
 	class DirectXDescriptorAllocator;
 	class GpuResource;
-	class GpuBuffer;
 	class GraphicsContext;
 	class DirectXPSO;
 	class ContextManager;
@@ -34,19 +36,19 @@ namespace Pixel {
 	{
 		friend class DirectXContextManager;
 	public:
-		DirectXContext(CommandListType Type, Ref<ContextManager> pContextManager, Ref<Device> pDevice);
+		DirectXContext(CommandListType Type);
 		virtual ~DirectXContext();	
 
 		//flush existing commands to the gpu but keep the context alive
-		virtual uint64_t Flush(bool WaitForCompletion, Ref<Device> pDevice) override;
+		virtual uint64_t Flush(bool WaitForCompletion) override;
 
 		//flush existing commands and release the current context
-		virtual uint64_t Finish(bool WaitForCompletion, Ref<ContextManager> contextManager, Ref<Device> pDevice) override;
+		virtual uint64_t Finish(bool WaitForCompletion) override;
 		
 		//request a new command list and a allocator
-		virtual void Initialize(Ref<Device> pDevice) override;
+		virtual void Initialize() override;
 		virtual void SwapBuffers() override;
-		virtual void Reset(Ref<Device> pDevice) override;
+		virtual void Reset() override;
 
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList();
 
@@ -67,14 +69,14 @@ namespace Pixel {
 		virtual void InsertUAVBarrier(GpuResource& Resource, bool FlushImmediate);
 		//------Buffer Operation------
 
-		void InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[], Ref<ContextManager> m_pContextManager, Ref<Device> pDevice);
-		void InitializeBuffer(GpuBuffer& Dest, const void* Data, size_t NumBytes, size_t DestOffset, Ref<ContextManager> m_pContextManager, Ref<Device> pDevice);
-		void InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src, Ref<ContextManager> m_pContextManager, Ref<Device> pDevice);
+		void InitializeTexture(GpuResource& Dest, uint32_t NumSubresources, D3D12_SUBRESOURCE_DATA SubData[]);
+		void InitializeBuffer(GpuResource& Dest, const void* Data, size_t NumBytes, size_t DestOffset);
+		void InitializeTextureArraySlice(GpuResource& Dest, uint32_t SliceIndex, GpuResource& Src);
 
-		virtual void WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes, Ref<Device> pDevice);
+		virtual void WriteBuffer(GpuResource& Dest, size_t DestOffset, const void* Data, size_t NumBytes);
 
 		//------use upload buffer to write------
-		DynAlloc ReserveUploadMemory(size_t SizeInBytes, Ref<Device> pDevice);
+		DynAlloc ReserveUploadMemory(size_t SizeInBytes);
 		//------use upload buffer to write------
 
 		virtual void SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr) override;
@@ -87,15 +89,15 @@ namespace Pixel {
 		virtual void SetID(const std::wstring& ID) override { m_ID = ID; }
 
 		//TODO:need to clear these functions
-		virtual void ClearColor(PixelBuffer& Target, PixelRect* Rect) override;
+		virtual void ClearColor(GpuResource& Target, PixelRect* Rect) override;
 
-		virtual void ClearColor(PixelBuffer& Target, float Color[4], PixelRect* Rect = nullptr) override;
+		virtual void ClearColor(GpuResource& Target, float Color[4], PixelRect* Rect = nullptr) override;
 
-		virtual void ClearDepth(PixelBuffer& Target) override;
+		virtual void ClearDepth(GpuResource& Target) override;
 
-		virtual void ClearStencil(PixelBuffer& Target) override;
+		virtual void ClearStencil(GpuResource& Target) override;
 
-		virtual void ClearDepthAndStencil(PixelBuffer& Target) override;
+		virtual void ClearDepthAndStencil(GpuResource& Target) override;
 
 		virtual void SetRenderTargets(uint32_t NumRTVs, const std::vector<Ref<DescriptorCpuHandle>>& RTVs) override;
 
@@ -139,11 +141,11 @@ namespace Pixel {
 
 		virtual void SetConstantBuffer(uint32_t RootIndex, Ref<GpuVirtualAddress> CBV) override;
 
-		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
+		virtual void SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
 
-		virtual void SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset = 0) override;
+		virtual void SetBufferSRV(uint32_t RootIndex, const GpuResource& SRV, uint64_t Offset = 0) override;
 
-		virtual void SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset = 0) override;
+		virtual void SetBufferUAV(uint32_t RootIndex, const GpuResource& UAV, uint64_t Offset = 0) override;
 
 		virtual void SetDescriptorTable(uint32_t RootIndex, Ref<DescriptorGpuHandle> FirstHandle) override;
 
@@ -153,11 +155,11 @@ namespace Pixel {
 
 		virtual void SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews) override;
 
-		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData, Ref<Device> pDevice) override;
+		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) override;
 
-		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData, Ref<Device> pDevice) override;
+		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) override;
 
-		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice) override;
+		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;
 
 		virtual void Draw(uint32_t VertexCount, uint32_t VertexStartOffset = 0) override;
 

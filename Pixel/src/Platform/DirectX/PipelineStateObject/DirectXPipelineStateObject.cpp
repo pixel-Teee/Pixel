@@ -162,7 +162,7 @@ namespace Pixel {
 		};
 	}
 
-	void GraphicsPSO::Finalize(Ref<Device> pDevice)
+	void GraphicsPSO::Finalize()
 	{
 		m_PSODesc.pRootSignature = std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature();
 		PX_CORE_ASSERT(std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature() != nullptr, "root signature is nullptr!");
@@ -198,7 +198,7 @@ namespace Pixel {
 			PX_CORE_ASSERT(m_PSODesc.DepthStencilState.DepthEnable != (m_PSODesc.DSVFormat == DXGI_FORMAT_UNKNOWN),
 				"unknown depth stencil view format");
 
-			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateGraphicsPipelineState(&m_PSODesc, IID_PPV_ARGS(m_pPSO.GetAddressOf())) >= 0,
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateGraphicsPipelineState(&m_PSODesc, IID_PPV_ARGS(m_pPSO.GetAddressOf())) >= 0,
 				"Create Pipeline State Object Error!");
 
 			s_GraphicsPSOHashMap[HashCode].Attach(m_pPSO.Get());

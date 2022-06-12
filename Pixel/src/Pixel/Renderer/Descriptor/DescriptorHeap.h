@@ -19,7 +19,7 @@ namespace Pixel {
 
 		virtual uint32_t GetDescriptorSize() const = 0;
 
-		static Ref<DescriptorHeap> Create(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount, Ref<Device> pDevice);
+		static Ref<DescriptorHeap> Create(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount);
 
 		static Ref<DescriptorHeap> Create();
 	};

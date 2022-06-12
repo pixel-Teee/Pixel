@@ -3,7 +3,6 @@
 #include "Pixel/Renderer/RendererType.h"
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/PipelineStateObject/RootParameter.h"
-#include "Pixel/Renderer/Buffer/PixelBuffer.h"
 #include "Platform/DirectX/d3dx12.h"
 #include "Pixel/Renderer/Context/ContextType.h"
 

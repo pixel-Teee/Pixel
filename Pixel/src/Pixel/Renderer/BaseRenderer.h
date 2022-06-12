@@ -11,6 +11,6 @@ namespace Pixel {
 
 		virtual void CreatePso(BufferLayout& layout) = 0;
 
-		static Ref<BaseRenderer> Create(Ref<Device> pDevice);
+		static Ref<BaseRenderer> Create();
 	};
 }

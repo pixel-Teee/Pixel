@@ -182,7 +182,7 @@ namespace Pixel {
 		}
 	}
 
-	void DirectXRootSignature::Finalize(const std::wstring& name, RootSignatureFlag Flags, Ref<Device> pDevice)
+	void DirectXRootSignature::Finalize(const std::wstring& name, RootSignatureFlag Flags)
 	{
 		if (m_finalized)
 			return;
@@ -270,7 +270,7 @@ namespace Pixel {
 				pOutBlob.GetAddressOf(), pErrorBlob.GetAddressOf()) >= 0,
 				"Serialize RootSignature Error!");
 
-			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
 				IID_PPV_ARGS(&m_Signature)) >= 0, "Create RootSignature Error!");
 
 			//set rootsignature's name

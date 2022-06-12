@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Pixel/Renderer/Buffer/GpuBuffer.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorCpuHandle.h"
 
 #include "DirectXGpuResource.h"
@@ -10,7 +9,7 @@ namespace Pixel {
 	class IBV;
 	class VBV;
 	//normal gpu buffer
-	class DirectXGpuBuffer : public GpuBuffer
+	class DirectXGpuBuffer : public DirectXGpuResource
 	{
 	public:
 		friend class DirectXContext;
@@ -22,12 +21,12 @@ namespace Pixel {
 		virtual Ref<DescriptorCpuHandle> GetSRV() const override { return m_SRV; }
 
 		//create a buffer. if initial data is provided, it will be copied into the buffer
-		void Create(const std::wstring& name, uint32_t NumElements, uint32_t ElementSize, Ref<Device> pDevice, const void* initialData);
+		void Create(const std::wstring& name, uint32_t NumElements, uint32_t ElementSize, const void* initialData);
 
 		//root descriptor, cound directly used as virtual address
-		Ref<GpuVirtualAddress> RootConstantBufferView() const { return std::static_pointer_cast<DirectXGpuResource>(m_GpuResource)->m_GpuVirtualAddress; }
+		Ref<GpuVirtualAddress> RootConstantBufferView() const { return m_GpuVirtualAddress; }
 
-		Ref<DescriptorCpuHandle> CreateConstantBufferView(uint32_t Offset, uint32_t Size, Ref<Device> pDevice) const;
+		Ref<DescriptorCpuHandle> CreateConstantBufferView(uint32_t Offset, uint32_t Size) const;
 
 		//vertex buffer view and index buffer view
 		Ref<VBV> VertexBufferView(size_t Offset, uint32_t Size, uint32_t Stride) const;
@@ -41,11 +40,11 @@ namespace Pixel {
 		uint32_t GetElementCount() const { return m_ElementCount; }
 		uint32_t GetElementSize() const { return m_ElementSize; }
 
-		virtual void SetGpuResource(Ref<GpuResource> pGpuBuffer) override;
+		//virtual void SetGpuResource(Ref<GpuResource> pGpuBuffer) override;
 	protected:
 
 		D3D12_RESOURCE_DESC DescribeBuffer();
-		virtual void CreateDerivedViews(Ref<Device> pDevice);
+		virtual void CreateDerivedViews();
 
 		//unordered access view
 		Ref<DescriptorCpuHandle> m_UAV;
@@ -63,13 +62,11 @@ namespace Pixel {
 
 		//resource flag
 		D3D12_RESOURCE_FLAGS m_ResourceFlags;
-
-		Ref<DirectXGpuResource> m_GpuResource;
 	};
 
 	class DirectXByteAddressBuffer : public DirectXGpuBuffer
 	{
 	public:
-		virtual void CreateDerivedViews(Ref<Device> pDevice) override;
+		virtual void CreateDerivedViews() override;
 	};
 }

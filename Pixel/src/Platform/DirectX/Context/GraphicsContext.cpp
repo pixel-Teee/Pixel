@@ -2,6 +2,7 @@
 #include "GraphicsContext.h"
 
 #include "Platform/DirectX/Buffer/DirectXGpuBuffer.h"
+#include "Platform/DirectX/Buffer/DirectXGpuResource.h"
 #include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
 #include "Platform/DirectX/Buffer/DepthBuffer.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootSignature.h"
@@ -16,8 +17,8 @@
 
 namespace Pixel {
 
-	GraphicsContext::GraphicsContext(CommandListType Type, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
-		:DirectXContext(Type, pContextManager, pDevice)
+	GraphicsContext::GraphicsContext(CommandListType Type)
+		:DirectXContext(Type)
 	{
 
 	}
@@ -34,7 +35,7 @@ namespace Pixel {
 
 		const uint32_t ClearColor[4] = {};
 
-		m_pCommandList->ClearUnorderedAccessViewUint(GpuVisibileHandle, UavHandle->GetCpuHandle(), std::static_pointer_cast<DirectXGpuResource>(Target.m_GpuResource)->GetResource(), ClearColor, 0, nullptr);
+		m_pCommandList->ClearUnorderedAccessViewUint(GpuVisibileHandle, UavHandle->GetCpuHandle(), Target.GetResource(), ClearColor, 0, nullptr);
 	}
 
 	void GraphicsContext::ClearUAV(DirectXColorBuffer& Target)
@@ -53,7 +54,7 @@ namespace Pixel {
 		m_pCommandList->ClearUnorderedAccessViewFloat(GpuVisibleHandle, UavHandle->GetCpuHandle(), std::static_pointer_cast<DirectXGpuResource>(Target.m_pResource)->GetResource(), ClearColor, 1, &ClearRect);
 	}
 
-	void GraphicsContext::ClearColor(PixelBuffer& Target, PixelRect* Rect)
+	void GraphicsContext::ClearColor(GpuResource& Target, PixelRect* Rect)
 	{
 		FlushResourceBarriers();
 
@@ -69,7 +70,7 @@ namespace Pixel {
 		m_pCommandList->ClearRenderTargetView(RtvHandle->GetCpuHandle(), glm::value_ptr(ColorBuffer.GetClearColor()), (Rect == nullptr) ? 0 : 1, &DxRect);
 	}
 
-	void GraphicsContext::ClearColor(PixelBuffer& Target, float Color[4], PixelRect* Rect)
+	void GraphicsContext::ClearColor(GpuResource& Target, float Color[4], PixelRect* Rect)
 	{
 		FlushResourceBarriers();
 
@@ -84,7 +85,7 @@ namespace Pixel {
 		m_pCommandList->ClearRenderTargetView(RtvHandle->GetCpuHandle(), Color, (Rect == nullptr) ? 0 : 1, &DxRect);
 	}
 
-	void GraphicsContext::ClearDepth(PixelBuffer& Target)
+	void GraphicsContext::ClearDepth(GpuResource& Target)
 	{
 		FlushResourceBarriers();
 
@@ -92,7 +93,7 @@ namespace Pixel {
 		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_DEPTH, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
-	void GraphicsContext::ClearStencil(PixelBuffer& Target)
+	void GraphicsContext::ClearStencil(GpuResource& Target)
 	{
 		FlushResourceBarriers();
 
@@ -100,7 +101,7 @@ namespace Pixel {
 		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
-	void GraphicsContext::ClearDepthAndStencil(PixelBuffer& Target)
+	void GraphicsContext::ClearDepthAndStencil(GpuResource& Target)
 	{
 		FlushResourceBarriers();
 
@@ -197,13 +198,13 @@ namespace Pixel {
 		Rect.Left = left;
 		Rect.Right = right;
 		Rect.Top = top;
-		Rect.bottom = bottom;
+		Rect.Bottom = bottom;
 		SetScissor(Rect);
 	}
 
 	void GraphicsContext::SetViewportAndScissor(const ViewPort& vp, const PixelRect& rect)
 	{
-		PX_CORE_ASSERT(rect.Left < rect.Right&& rect.Top < rect.bottom, "rect's information is error!");
+		PX_CORE_ASSERT(rect.Left < rect.Right&& rect.Top < rect.Bottom, "rect's information is error!");
 
 		D3D12_VIEWPORT ViewPort = ViewPortToDirectXViewPort(vp);
 		D3D12_RECT Rect = RectToDirectXRect(rect);
@@ -270,35 +271,35 @@ namespace Pixel {
 		m_pCommandList->SetGraphicsRootConstantBufferView(RootIndex, DxGpuVirtualAddress->GetGpuVirtualAddress());
 	}
 
-	void GraphicsContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)
+	void GraphicsContext::SetDynamicConstantBufferView(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
 	{
 		PX_CORE_ASSERT(BufferData != nullptr && Math::IsAligned(BufferData, 16), "buffer data is nullptr or buffer data is not aligned 16");
 		//temp allocate ID3D12Resource
-		DynAlloc cb = m_CpuLinearAllocator.Allocate(BufferSize, 256, pDevice);
+		DynAlloc cb = m_CpuLinearAllocator.Allocate(BufferSize, 256);
 
 		memcpy(cb.DataPtr, BufferData, BufferSize);
 
 		m_pCommandList->SetGraphicsRootConstantBufferView(RootIndex, cb.GpuAddress);
 	}
 
-	void GraphicsContext::SetBufferSRV(uint32_t RootIndex, const GpuBuffer& SRV, uint64_t Offset /*= 0*/)
+	void GraphicsContext::SetBufferSRV(uint32_t RootIndex, const GpuResource& SRV, uint64_t Offset /*= 0*/)
 	{
-		DirectXGpuBuffer& Srv = static_cast<DirectXGpuBuffer&>(const_cast<GpuBuffer&>(SRV));
-		PX_CORE_ASSERT((Srv.m_GpuResource->m_UsageState & (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) != 0,
+		DirectXGpuBuffer& Srv = static_cast<DirectXGpuBuffer&>(const_cast<GpuResource&>(SRV));
+		PX_CORE_ASSERT((Srv.m_UsageState & (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) != 0,
 			"gpu buffer's state is error!");
 
-		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(Srv.m_GpuResource->GetGpuVirtualAddress());
+		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(Srv.m_GpuVirtualAddress);
 
 		m_pCommandList->SetGraphicsRootShaderResourceView(RootIndex, pVirtualAddress->GetGpuVirtualAddress() + Offset);
 	}
 
-	void GraphicsContext::SetBufferUAV(uint32_t RootIndex, const GpuBuffer& UAV, uint64_t Offset /*= 0*/)
+	void GraphicsContext::SetBufferUAV(uint32_t RootIndex, const GpuResource& UAV, uint64_t Offset /*= 0*/)
 	{
-		DirectXGpuBuffer& Uav = static_cast<DirectXGpuBuffer&>(const_cast<GpuBuffer&>(UAV));
+		DirectXGpuBuffer& Uav = static_cast<DirectXGpuBuffer&>(const_cast<GpuResource&>(UAV));
 
-		PX_CORE_ASSERT((Uav.m_GpuResource->m_UsageState & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0, "gpu buffer's state is error!");
+		PX_CORE_ASSERT((Uav.m_UsageState & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0, "gpu buffer's state is error!");
 
-		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(Uav.m_GpuResource->GetGpuVirtualAddress());
+		Ref<DirectXGpuVirtualAddress> pVirtualAddress = std::static_pointer_cast<DirectXGpuVirtualAddress>(Uav.GetGpuVirtualAddress());
 
 		m_pCommandList->SetGraphicsRootUnorderedAccessView(RootIndex, pVirtualAddress->GetGpuVirtualAddress() + Offset);
 	}
@@ -335,13 +336,13 @@ namespace Pixel {
 		m_pCommandList->IASetVertexBuffers(StartSlot, Count, &VertexBufferViews[0]);
 	}
 
-	void GraphicsContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VertexData, Ref<Device> pDevice)
+	void GraphicsContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VertexData)
 	{
 		PX_CORE_ASSERT(VertexData != nullptr && Math::IsAligned(VertexData, 16), "vertex data is nullptr or vertex data is not aligned!");
 
 		//temp allocate
 		size_t BufferSize = Math::AlignUp(NumVertices * VertexStride, 16);
-		DynAlloc vb = m_CpuLinearAllocator.Allocate(BufferSize, 256, pDevice);
+		DynAlloc vb = m_CpuLinearAllocator.Allocate(BufferSize, 256);
 
 		memcpy(vb.DataPtr, VertexData, BufferSize);
 
@@ -353,12 +354,12 @@ namespace Pixel {
 		m_pCommandList->IASetVertexBuffers(Slot, 1, &VBView);
 	}
 
-	void GraphicsContext::SetDynamicIB(size_t IndexCount, const uint64_t* IndexData, Ref<Device> pDevice)
+	void GraphicsContext::SetDynamicIB(size_t IndexCount, const uint64_t* IndexData)
 	{
 		PX_CORE_ASSERT(IndexData != nullptr && Math::IsAligned(IndexData, 16), "IndexData is nullptr or IndexData is not aligned 16!");
 
 		size_t BufferSize = Math::AlignUp(IndexCount * sizeof(uint16_t), 16);
-		DynAlloc ib = m_CpuLinearAllocator.Allocate(BufferSize, 256, pDevice);
+		DynAlloc ib = m_CpuLinearAllocator.Allocate(BufferSize, 256);
 
 		memcpy(ib.DataPtr, IndexData, BufferSize);
 
@@ -370,11 +371,11 @@ namespace Pixel {
 		m_pCommandList->IASetIndexBuffer(&IBView);
 	}
 
-	void GraphicsContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData, Ref<Device> pDevice)
+	void GraphicsContext::SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData)
 	{
 		PX_CORE_ASSERT(BufferData != nullptr && Math::IsAligned(BufferData, 16), "buffer data is null ptr and is not aligned");
 
-		DynAlloc cb = m_CpuLinearAllocator.Allocate(BufferSize, 256, pDevice);
+		DynAlloc cb = m_CpuLinearAllocator.Allocate(BufferSize, 256);
 		memcpy(cb.DataPtr, BufferData, Math::AlignUp(BufferSize, 16));
 
 		m_pCommandList->SetGraphicsRootShaderResourceView(RootIndex, cb.GpuAddress);

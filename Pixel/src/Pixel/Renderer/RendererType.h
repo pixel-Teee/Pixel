@@ -6,7 +6,7 @@ namespace Pixel {
 		int32_t Left;
 		int32_t Right;
 		int32_t Top;
-		int32_t bottom;
+		int32_t Bottom;
 	};
 
 	struct ViewPort
@@ -197,4 +197,23 @@ namespace Pixel {
 		PX_FORMAT_FORCE_UINT = 0xfffffff
 	};
 
+	enum class RangeType
+	{
+		SRV = 0,
+		UAV,
+		CBV,
+		SAMPLER
+	};
+
+	enum class RootBindings
+	{
+		MeshConstants,
+		MaterialConstants,
+		MaterialSRVs,
+		MaterialSamplers,
+		CommonSRVs,
+		CommonCBV,
+		SkinMatrices,
+		NumRootBindings
+	};
 }

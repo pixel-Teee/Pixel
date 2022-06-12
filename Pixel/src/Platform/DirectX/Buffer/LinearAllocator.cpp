@@ -50,12 +50,12 @@ namespace Pixel {
 		PX_CORE_ASSERT(sm_AutoType <= kNumAllocatorTypes, "allocator page type exceeds range!");
 	}
 
-	LinearAllocationPage* LinearAllocatorPageManager::RequestPage(Ref<Device> pDevice)
+	LinearAllocationPage* LinearAllocatorPageManager::RequestPage()
 	{
 		std::lock_guard<std::mutex> LockGuard(m_Mutex);
 
 		//from the retried pages extract have completed's pages
-		while (!m_RetriedPages.empty() && std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->IsFenceComplete(m_RetriedPages.front().first))
+		while (!m_RetriedPages.empty() && std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetCommandListManager()->IsFenceComplete(m_RetriedPages.front().first))
 		{
 			m_AvailablePages.push(m_RetriedPages.front().second);
 			m_RetriedPages.pop();
@@ -69,14 +69,14 @@ namespace Pixel {
 		}
 		else
 		{
-			PagePtr = CreateNewPage(0, pDevice);
+			PagePtr = CreateNewPage(0);
 			m_PagePool.emplace_back(PagePtr);
 		}
 
 		return PagePtr;
 	}
 
-	LinearAllocationPage* LinearAllocatorPageManager::CreateNewPage(size_t PageSize, Ref<Device> pDevice)
+	LinearAllocationPage* LinearAllocatorPageManager::CreateNewPage(size_t PageSize)
 	{
 		D3D12_HEAP_PROPERTIES HeapProps;
 		HeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -114,7 +114,7 @@ namespace Pixel {
 		}
 
 		ID3D12Resource* pBuffer;
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommittedResource(&HeapProps, D3D12_HEAP_FLAG_NONE,
 			&ResourceDesc, DefaultUsage, nullptr, IID_PPV_ARGS(&pBuffer)) >= 0, "create resource error!");
 
 		pBuffer->SetName(L"LinearAllocator Page");
@@ -130,11 +130,11 @@ namespace Pixel {
 			m_RetriedPages.push(std::make_pair(FenceValue, *iter));
 	}
 
-	void LinearAllocatorPageManager::FreeLargePages(uint64_t FenceValue, const std::vector<LinearAllocationPage*> LargePages, Ref<Device> pDevice)
+	void LinearAllocatorPageManager::FreeLargePages(uint64_t FenceValue, const std::vector<LinearAllocationPage*> LargePages)
 	{
 		std::lock_guard<std::mutex> LockGuard(m_Mutex);
 
-		while (!m_DeletionQueue.empty() && std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->IsFenceComplete(m_DeletionQueue.front().first))
+		while (!m_DeletionQueue.empty() && std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetCommandListManager()->IsFenceComplete(m_DeletionQueue.front().first))
 		{
 			delete m_DeletionQueue.front().second;
 			m_DeletionQueue.pop();
@@ -166,7 +166,7 @@ namespace Pixel {
 		m_PageSize = (Type == kGpuExclusive ? kGpuAllocatorPageSize : kCpuAllocatorPageSize);
 	}
 
-	Pixel::DynAlloc LinearAllocator::Allocate(size_t SizeInBytes, size_t Alignment, Ref<Device> pDevice)
+	Pixel::DynAlloc LinearAllocator::Allocate(size_t SizeInBytes, size_t Alignment)
 	{
 		//2^n - 1
 		const size_t AlignmentMask = Alignment - 1;
@@ -177,7 +177,7 @@ namespace Pixel {
 		const size_t AlignedSize = Math::AlignUpWithMask(SizeInBytes, AlignmentMask);
 
 		if (AlignedSize > m_PageSize)
-			return AllocateLargePage(AlignedSize, pDevice);
+			return AllocateLargePage(AlignedSize);
 
 
 		//------AlignedSize < m_PageSize------
@@ -192,7 +192,7 @@ namespace Pixel {
 
 		if (m_CurrPage == nullptr)
 		{
-			m_CurrPage = sm_PageManager[m_AllocationType].RequestPage(pDevice);
+			m_CurrPage = sm_PageManager[m_AllocationType].RequestPage();
 			m_CurrOffset = 0;
 		}
 
@@ -205,7 +205,7 @@ namespace Pixel {
 		return ret;
 	}
 
-	void LinearAllocator::CleanupUsedPages(uint64_t FenceId, Ref<Device> pDevice)
+	void LinearAllocator::CleanupUsedPages(uint64_t FenceId)
 	{
 		if (m_CurrPage == nullptr) return;
 
@@ -216,7 +216,7 @@ namespace Pixel {
 		sm_PageManager[m_AllocationType].DiscardPages(FenceId, m_RetiredPages);
 		m_RetiredPages.clear();
 
-		sm_PageManager[m_AllocationType].FreeLargePages(FenceId, m_LargetPageList, pDevice);
+		sm_PageManager[m_AllocationType].FreeLargePages(FenceId, m_LargetPageList);
 		m_LargetPageList.clear();
 	}
 
@@ -226,9 +226,9 @@ namespace Pixel {
 		sm_PageManager[1].Destroy();
 	}
 
-	Pixel::DynAlloc LinearAllocator::AllocateLargePage(size_t SizeInBytes, Ref<Device> pDevice)
+	Pixel::DynAlloc LinearAllocator::AllocateLargePage(size_t SizeInBytes)
 	{
-		LinearAllocationPage* OneOff = sm_PageManager[m_AllocationType].CreateNewPage(SizeInBytes, pDevice);
+		LinearAllocationPage* OneOff = sm_PageManager[m_AllocationType].CreateNewPage(SizeInBytes);
 		m_LargetPageList.push_back(OneOff);
 
 		DynAlloc ret(*OneOff, 0, SizeInBytes);

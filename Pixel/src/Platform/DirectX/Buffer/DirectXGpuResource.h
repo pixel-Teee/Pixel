@@ -7,6 +7,7 @@
 
 namespace Pixel {
 	class GpuVirtualAddress;
+	class DirectXDescriptorCpuHandle;
 	class DirectXGpuResource : public GpuResource
 	{
 		friend class DirectXContext;
@@ -41,6 +42,11 @@ namespace Pixel {
 
 		//ID3D12Resource
 		virtual void SetResource(void* resource) override;
+
+		virtual Ref<DescriptorCpuHandle> GetUAV() const override;
+		virtual Ref<DescriptorCpuHandle> GetSRV() const override;
+
+		virtual void CreateFromSwapChain(const std::wstring& Name) override;
 	protected:
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_pResource;

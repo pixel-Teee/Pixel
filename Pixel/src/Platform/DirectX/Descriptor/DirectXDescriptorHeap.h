@@ -10,7 +10,7 @@ namespace Pixel {
 	class DirectXDescriptorHeap : public DescriptorHeap
 	{
 	public:
-		DirectXDescriptorHeap(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount, Ref<Device> pDevice);
+		DirectXDescriptorHeap(const std::wstring& DebugName, DescriptorHeapType Type, uint32_t MaxCount);
 		DirectXDescriptorHeap();
 
 		virtual bool HasAvailableSpace(uint32_t Count) const override;

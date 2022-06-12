@@ -1,6 +1,7 @@
 #include "pxpch.h"
 
 #include "Device.h"
+
 #include "Pixel/Renderer/Renderer.h"
 #include "Platform/DirectX/DirectXDevice.h"
 
@@ -11,16 +12,13 @@ namespace Pixel {
 
 	}
 
-	Ref<Device> Device::Create()
+	Ref<Device> Device::Get()
 	{
-		switch (Renderer::GetAPI())
-		{
-		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::DirectX12: return std::make_shared<DirectXDevice>();
-		}
-
-		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
+		if (m_pDevice == nullptr)
+			m_pDevice = CreateRef<DirectXDevice>();
+		return m_pDevice;
 	}
+
+	Ref<Device> Device::m_pDevice = nullptr;
 
 }

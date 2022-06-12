@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Pixel/Renderer/Buffer/PixelBuffer.h"
-
 #include "Pixel/Renderer/RendererType.h"
 
 namespace Pixel {
-	class RootSignature;
 	class Device;
+	class RootSignature;
+	
+	//------many state------
 	class BlenderState;
 	class RasterState;
 	class DepthState;
+	//------many state------
 	class PSO
 	{
 	public:
@@ -18,7 +19,7 @@ namespace Pixel {
 		virtual void SetRasterizerState(Ref<RasterState> pRasterState) = 0;
 		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
 
-		virtual void Finalize(Ref<Device> pDevice) = 0;
+		virtual void Finalize() = 0;
 
 		virtual void SetDepthTargetFormat(ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) = 0;
 

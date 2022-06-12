@@ -1,6 +1,7 @@
 #include "pxpch.h"
 
 #include "GpuResource.h"
+
 #include "Pixel/Renderer/Renderer.h"
 #include "Platform/DirectX/Buffer/DirectXGpuResource.h"
 

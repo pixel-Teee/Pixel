@@ -22,7 +22,7 @@ namespace Pixel {
 		m_AlloactorPool.clear();
 	}
 
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandAllocatorPool::RequestAlloactor(uint64_t CompletedFenceValue, Ref<Device> pDevice)
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandAllocatorPool::RequestAlloactor(uint64_t CompletedFenceValue)
 	{
 		std::lock_guard<std::mutex> LockGuard(m_AlloactorMutex);
 
@@ -43,7 +43,7 @@ namespace Pixel {
 		//if allocator were not ready to be reused, create a new one
 		if (pAllocator == nullptr)
 		{
-			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommandAllocator(m_CommandListType, IID_PPV_ARGS(pAllocator.ReleaseAndGetAddressOf())) >= 0,
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommandAllocator(m_CommandListType, IID_PPV_ARGS(pAllocator.ReleaseAndGetAddressOf())) >= 0,
 				"Create Command Alloactor Error!");
 
 			//------debug name------
@@ -79,17 +79,17 @@ namespace Pixel {
 	{
 	}
 
-	void CommandQueue::Create(Ref<Device> pDevice)
+	void CommandQueue::Create()
 	{
 
 		D3D12_COMMAND_QUEUE_DESC QueueDesc = {};
 		QueueDesc.Type = m_Type;
 		QueueDesc.NodeMask = 1;
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommandQueue(&QueueDesc, IID_PPV_ARGS(m_pCommandQueue.ReleaseAndGetAddressOf())) >= 0,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommandQueue(&QueueDesc, IID_PPV_ARGS(m_pCommandQueue.ReleaseAndGetAddressOf())) >= 0,
 			"Create Command Queue Error!");
 		m_pCommandQueue->SetName(L"CommandListManager::m_CommandQueue");
 
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_pFence.ReleaseAndGetAddressOf())) >= 0,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_pFence.ReleaseAndGetAddressOf())) >= 0,
 		"Create Fence Error!");
 
 		m_pFence->SetName(L"CommandListManager::m_pFence");
@@ -106,9 +106,9 @@ namespace Pixel {
 		CloseHandle(m_FenceEventHandle);
 	}
 
-	void CommandQueue::StallForFence(uint64_t FenceValue, Ref<Device> pDevice)
+	void CommandQueue::StallForFence(uint64_t FenceValue)
 	{
-		CommandQueue& Producer = std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->GetQueue((D3D12_COMMAND_LIST_TYPE)(FenceValue >> 56));
+		CommandQueue& Producer = std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetCommandListManager()->GetQueue((D3D12_COMMAND_LIST_TYPE)(FenceValue >> 56));
 
 		m_pCommandQueue->Wait(Producer.m_pFence.Get(), FenceValue);
 	}
@@ -142,12 +142,12 @@ namespace Pixel {
 		return m_NextFenceValue++;
 	}
 
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandQueue::RequesetAlloactor(Ref<Device> pDevice)
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandQueue::RequesetAlloactor()
 	{
 		uint64_t CompletedFence = m_pFence->GetCompletedValue();
 
 		//return a alloactor, that's fence value is less than completed value
-		return m_pAlloactorPool.RequestAlloactor(CompletedFence, pDevice);
+		return m_pAlloactorPool.RequestAlloactor(CompletedFence);
 	}
 
 	void CommandQueue::DiscardAlloactor(uint64_t FenceValue, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> Alloactor)
@@ -192,22 +192,22 @@ namespace Pixel {
 		ShutDown();
 	}
 
-	//Ref<CommandListManager> CommandListManager::Get(Ref<Device> pDevice)
+	//Ref<CommandListManager> CommandListManager::Get(Ref<Device> DirectXDevice::Get())
 	//{
 	//	//return g_pCommandListManager;
 	//	if (g_pCommandListManager == nullptr)
 	//	{
 	//		g_pCommandListManager = std::make_shared<CommandListManager>();
-	//		g_pCommandListManager->Create(pDevice);
+	//		g_pCommandListManager->Create(DirectXDevice::Get());
 	//	}
 	//	return g_pCommandListManager;
 	//}
 
-	void CommandListManager::Create(Ref<Device> pDevice)
+	void CommandListManager::Create()
 	{
-		m_GraphicsQueue.Create(pDevice);
-		m_ComputeQueue.Create(pDevice);
-		m_CopyQueue.Create(pDevice);
+		m_GraphicsQueue.Create();
+		m_ComputeQueue.Create();
+		m_CopyQueue.Create();
 	}
 
 	void CommandListManager::ShutDown()
@@ -218,19 +218,19 @@ namespace Pixel {
 	}
 
 	void CommandListManager::CreateNewCommandList(D3D12_COMMAND_LIST_TYPE Type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& List, 
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& Allocator, Ref<Device> pDevice)
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& Allocator)
 	{
 		PX_CORE_ASSERT(Type != D3D12_COMMAND_LIST_TYPE_BUNDLE, "Bundles are not yet supported!");
 
 		//return a allocator
 		switch (Type)
 		{
-		case D3D12_COMMAND_LIST_TYPE_DIRECT: Allocator = m_GraphicsQueue.RequesetAlloactor(pDevice); break;
-		case D3D12_COMMAND_LIST_TYPE_COMPUTE: Allocator = m_ComputeQueue.RequesetAlloactor(pDevice); break;
-		case D3D12_COMMAND_LIST_TYPE_COPY: Allocator = m_CopyQueue.RequesetAlloactor(pDevice); break;
+		case D3D12_COMMAND_LIST_TYPE_DIRECT: Allocator = m_GraphicsQueue.RequesetAlloactor(); break;
+		case D3D12_COMMAND_LIST_TYPE_COMPUTE: Allocator = m_ComputeQueue.RequesetAlloactor(); break;
+		case D3D12_COMMAND_LIST_TYPE_COPY: Allocator = m_CopyQueue.RequesetAlloactor(); break;
 		}
 
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommandList(1, Type, Allocator.Get(), nullptr, IID_PPV_ARGS(List.GetAddressOf())) >= 0,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommandList(1, Type, Allocator.Get(), nullptr, IID_PPV_ARGS(List.GetAddressOf())) >= 0,
 		"Create Command List Error!");
 #if PX_DEBUG
 		List->SetName(L"CommandListManager::CommandList");
@@ -255,9 +255,9 @@ namespace Pixel {
 		return GetQueue(D3D12_COMMAND_LIST_TYPE(FenceValue >> 56)).IsFenceComplete(FenceValue);
 	}
 
-	void CommandListManager::WaitForFence(uint64_t FenceValue, Ref<Device> pDevice)
+	void CommandListManager::WaitForFence(uint64_t FenceValue)
 	{
-		CommandQueue& Producer = std::static_pointer_cast<DirectXDevice>(pDevice)->GetCommandListManager()->GetQueue((D3D12_COMMAND_LIST_TYPE)(FenceValue >> 56));
+		CommandQueue& Producer = std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetCommandListManager()->GetQueue((D3D12_COMMAND_LIST_TYPE)(FenceValue >> 56));
 		Producer.WaitForFence(FenceValue);
 	}
 

@@ -12,7 +12,7 @@ namespace Pixel {
 	{
 	public:
 		~DirectXContextManager();
-		virtual Ref<Context> AllocateContext(CommandListType CmdListType, Ref<Device> pDevice) override;
+		virtual Ref<Context> AllocateContext(CommandListType CmdListType) override;
 		virtual void FreeContext(Ref<Context> UsedContext) override;
 		virtual void DestroyAllContexts() override;
 

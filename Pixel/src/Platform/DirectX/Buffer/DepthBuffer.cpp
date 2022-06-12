@@ -23,24 +23,24 @@ namespace Pixel {
 	}
 
 	void DepthBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height,
-		ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice)
+		ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
-		Create(Name, Width, Height, 1, Format, VideoMemoryPtr, pDevice);
+		Create(Name, Width, Height, 1, Format, VideoMemoryPtr);
 	}
 
 	void DepthBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, 
-		uint32_t NumSamples, ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/, Ref<Device> pDevice)
+		uint32_t NumSamples, ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/)
 	{
 		D3D12_RESOURCE_DESC ResourceDesc = DescribeTex2D(Width, Height, 1, 1, FormatToDXGIFormat(Format), D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 		ResourceDesc.SampleDesc.Count = NumSamples;
 
 		D3D12_CLEAR_VALUE ClearValue = {};
 		ClearValue.Format = FormatToDXGIFormat(Format);
-		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr, pDevice);
-		CreateDerivedViews(FormatToDXGIFormat(Format), pDevice);
+		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr);
+		CreateDerivedViews(FormatToDXGIFormat(Format));
 	}
 
-	void DepthBuffer::CreateDerivedViews(DXGI_FORMAT Format, Ref<Device> pDevice)
+	void DepthBuffer::CreateDerivedViews(DXGI_FORMAT Format)
 	{
 		ID3D12Resource* pResource = std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource.Get();
 
@@ -59,30 +59,30 @@ namespace Pixel {
 
 		if (m_hDSV[0].ptr == -1)
 		{
-			m_hDSV[0] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1, pDevice))->GetCpuHandle();
-			m_hDSV[1] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1, pDevice))->GetCpuHandle();
+			m_hDSV[0] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1))->GetCpuHandle();
+			m_hDSV[1] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1))->GetCpuHandle();
 		}
 
 		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[0]);
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[0]);
 
 		dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_DEPTH;
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[1]);
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[1]);
 
 		DXGI_FORMAT StencilReadFormat = GetStencilFormat(Format);
 		if (StencilReadFormat != DXGI_FORMAT_UNKNOWN)
 		{
 			if (m_hDSV[2].ptr == -1)
 			{
-				m_hDSV[2] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1, pDevice))->GetCpuHandle();
-				m_hDSV[3] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1, pDevice))->GetCpuHandle();
+				m_hDSV[2] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1))->GetCpuHandle();
+				m_hDSV[3] = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::DSV, 1))->GetCpuHandle();
 			}
 
 			dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_STENCIL;
-			std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[2]);
+			std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[2]);
 
 			dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_DEPTH | D3D12_DSV_FLAG_READ_ONLY_STENCIL;
-			std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[3]);
+			std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, m_hDSV[3]);
 		}
 		else
 		{
@@ -91,7 +91,7 @@ namespace Pixel {
 		}
 
 		if (m_hDepthSRV.ptr == -1)
-			m_hDepthSRV = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice))->GetCpuHandle();
+			m_hDepthSRV = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1))->GetCpuHandle();
 
 		//create the shader resource view
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
@@ -108,7 +108,7 @@ namespace Pixel {
 		}
 
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateShaderResourceView(pResource, &SRVDesc, m_hDepthSRV);
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateShaderResourceView(pResource, &SRVDesc, m_hDepthSRV);
 	}
 
 }

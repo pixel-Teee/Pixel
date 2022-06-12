@@ -10,7 +10,7 @@ namespace Pixel {
 	class DirectXTexture : public Texture2D
 	{
 	public:
-		DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat, Ref<ContextManager> pContextManager, Ref<Device> pDevice);
+		DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat);
 		DirectXTexture(const std::string& path);
 
 		virtual bool operator ==(const Texture& other) const override

@@ -37,15 +37,15 @@ namespace Pixel {
 		float m_Time = 0.0f;
 
 #ifndef PX_OPENGL
-		Ref<DescriptorHeap> m_srvHeap;
-		//TODO:need to fix
-		//ID3D12DescriptorHeap* m_SrvHeap;
-		Ref<ContextManager> m_contextManager;
-		Ref<Device> m_pDevice;
+		//Ref<DescriptorHeap> m_srvHeap;
+		////TODO:need to fix
+		////ID3D12DescriptorHeap* m_SrvHeap;
+		//Ref<ContextManager> m_contextManager;
+		//Ref<Device> m_pDevice;
 
-		Ref<PixelBuffer> m_BackBuffer[2];
-		Ref<GpuResource> m_pGpuResource[2];
-		//Ref<Context> m_DrawContext;
+		//Ref<PixelBuffer> m_BackBuffer[2];
+		//Ref<GpuResource> m_pGpuResource[2];
+		////Ref<Context> m_DrawContext;
 #endif
 	};
 }

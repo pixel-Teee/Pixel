@@ -330,7 +330,7 @@ namespace Pixel {
 		ReturnRect.left = Rect.Left;
 		ReturnRect.right = Rect.Right;
 		ReturnRect.top = Rect.Top;
-		ReturnRect.bottom = Rect.bottom;
+		ReturnRect.bottom = Rect.Bottom;
 		return ReturnRect;
 	}
 

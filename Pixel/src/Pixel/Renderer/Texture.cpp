@@ -34,12 +34,12 @@ namespace Pixel {
 		return nullptr;
 	}
 
-	Ref<Texture2D> Texture2D::Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
+	Ref<Texture2D> Texture2D::Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::DirectX12: return CreateRef<DirectXTexture>(RowPitch, width, height, imageFormat, pContextManager, pDevice);
+		case RendererAPI::API::DirectX12: return CreateRef<DirectXTexture>(RowPitch, width, height, imageFormat);
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

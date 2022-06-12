@@ -3,13 +3,6 @@
 #include "Pixel/Renderer/RendererType.h"
 
 namespace Pixel {
-	enum class RangeType
-	{
-		SRV = 0,
-		UAV,
-		CBV,
-		SAMPLER
-	};
 
 	class RootParameter
 	{

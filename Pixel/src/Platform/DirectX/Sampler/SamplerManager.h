@@ -19,7 +19,7 @@ namespace Pixel {
 
 		//allocate new descriptor as needed
 		//return handle to existing descriptor when possible
-		D3D12_CPU_DESCRIPTOR_HANDLE CreateDescriptor(Ref<Device> pDevice);
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateDescriptor();
 
 		D3D12_SAMPLER_DESC m_SamplerDesc;
 

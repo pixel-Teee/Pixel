@@ -13,12 +13,12 @@ namespace Pixel {
 
 	}
 
-	Ref<BaseRenderer> BaseRenderer::Create(Ref<Device> pDevice)
+	Ref<BaseRenderer> BaseRenderer::Create()
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:	  PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::DirectX12: return CreateRef<DirectXRenderer>(pDevice);
+		case RendererAPI::API::DirectX12: return CreateRef<DirectXRenderer>();
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

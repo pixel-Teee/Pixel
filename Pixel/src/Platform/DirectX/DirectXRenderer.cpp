@@ -12,9 +12,8 @@
 
 namespace Pixel {
 
-	DirectXRenderer::DirectXRenderer(Ref<Device> pDevice)
+	DirectXRenderer::DirectXRenderer()
 	{
-		m_pDevice = pDevice;
 		
 		//------Create Default Pso------
 		m_defaultPso = PSO::CreateGraphicsPso(L"ForwardRendererPso");
@@ -27,7 +26,7 @@ namespace Pixel {
 		(*m_rootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(0, ShaderVisibility::ALL);
 		(*m_rootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
 		(*m_rootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 0, 10, ShaderVisibility::ALL);
-		m_rootSignature->Finalize(L"RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout, m_pDevice);
+		m_rootSignature->Finalize(L"RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 		//------Create Root Signature------
 
 		//-----Create Blend State------

@@ -12,7 +12,7 @@
 
 namespace Pixel {
 
-	DirectXTexture::DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat, Ref<ContextManager> pContextManager, Ref<Device> pDevice)
+	DirectXTexture::DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat)
 	{
 		m_pGpuResource->m_UsageState = D3D12_RESOURCE_STATE_COPY_DEST;
 
@@ -37,7 +37,7 @@ namespace Pixel {
 		HeapProps.CreationNodeMask = 1;
 		HeapProps.VisibleNodeMask = 1;
 
-		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateCommittedResource(&HeapProps,
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommittedResource(&HeapProps,
 			D3D12_HEAP_FLAG_NONE, &texDesc, m_pGpuResource->m_UsageState, nullptr, IID_PPV_ARGS(m_pGpuResource->m_pResource.ReleaseAndGetAddressOf())) >= 0, "create texture 2d error!");
 
 		m_pGpuResource->m_pResource->SetName(L"Texture");
@@ -48,13 +48,13 @@ namespace Pixel {
 		//texResource.RowPitch = RowPitch;
 		//texResource.SlicePitch = RowPitch * width;
 
-		//Ref<Context> pContext = pContextManager->AllocateContext(CommandListType::Graphics, pDevice);
-		//std::static_pointer_cast<GraphicsContext>(pContext)->InitializeTexture(*m_pGpuResource, 1, &texResource, pContextManager, pDevice);
+		//Ref<Context> pContext = pContextManager->AllocateContext(CommandListType::Graphics, DirectXDevice::Get());
+		//std::static_pointer_cast<GraphicsContext>(pContext)->InitializeTexture(*m_pGpuResource, 1, &texResource, pContextManager, DirectXDevice::Get());
 
-		m_pCpuDescriptorHandle = DescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1, pDevice);
+		m_pCpuDescriptorHandle = DescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE destHandle;
-		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateShaderResourceView(m_pGpuResource->m_pResource.Get(), nullptr, destHandle);
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateShaderResourceView(m_pGpuResource->m_pResource.Get(), nullptr, destHandle);
 		m_pCpuDescriptorHandle->SetCpuHandle((void*)&destHandle);
 	}
 

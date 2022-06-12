@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Pixel/Renderer/Buffer/PixelBuffer.h"
 #include "DirectXGpuResource.h"
 
 namespace Pixel {
 	class Device;
-	class DirectXPixelBuffer : public PixelBuffer
+	class DirectXPixelBuffer : public DirectXGpuResource
 	{
 	public:
 		DirectXPixelBuffer();
@@ -27,10 +26,7 @@ namespace Pixel {
 		DXGI_FORMAT FormatToDXGIFormat(ImageFormat Format);
 		ImageFormat DXGIFormatToImageFormat(DXGI_FORMAT dxgiFormat);
 
-		virtual void CreateFromSwapChain(const std::wstring& Name, Ref<Device> pDevice) override;
-
-		virtual void SetGpuResource(Ref<GpuResource> pResource) override;
-
+		virtual void CreateFromSwapChain(const std::wstring& Name) override;
 		//-------Pixel Engine Format To DXGIFormat------
 	protected:
 
@@ -40,7 +36,7 @@ namespace Pixel {
 		void AssociateWithResource(const std::wstring& Name, ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState);
 
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,
-			D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr, Ref<Device> pDevice);
+			D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr);
 
 		/*
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,

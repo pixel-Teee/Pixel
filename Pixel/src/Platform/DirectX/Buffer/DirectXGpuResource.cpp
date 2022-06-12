@@ -4,6 +4,7 @@
 
 #include "Platform/DirectX/d3dx12.h"
 #include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 
 namespace Pixel {
 	
@@ -41,6 +42,21 @@ namespace Pixel {
 	void DirectXGpuResource::SetResource(void* resource)
 	{
 		m_pResource = (ID3D12Resource*)resource;
+	}
+
+	Ref<DescriptorCpuHandle> DirectXGpuResource::GetUAV() const
+	{
+		return std::make_shared<DirectXDescriptorCpuHandle>();
+	}
+
+	Ref<DescriptorCpuHandle> DirectXGpuResource::GetSRV() const
+	{
+		return std::make_shared<DirectXDescriptorCpuHandle>();
+	}
+
+	void DirectXGpuResource::CreateFromSwapChain(const std::wstring& Name)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 }

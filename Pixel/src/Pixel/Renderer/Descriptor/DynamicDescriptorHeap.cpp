@@ -7,12 +7,12 @@
 
 namespace Pixel {
 
-	Ref<DynamicDescriptorHeap> DynamicDescriptorHeap::Create(Context& OwingContext, DescriptorHeapType HeapType, Ref<Device> pDevice)
+	Ref<DynamicDescriptorHeap> DynamicDescriptorHeap::Create(Context& OwingContext, DescriptorHeapType HeapType)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::DirectX12: return std::make_shared<DirectXDynamicDescriptorHeap>(OwingContext, HeapType, pDevice);
+		case RendererAPI::API::DirectX12: return std::make_shared<DirectXDynamicDescriptorHeap>(OwingContext, HeapType);
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

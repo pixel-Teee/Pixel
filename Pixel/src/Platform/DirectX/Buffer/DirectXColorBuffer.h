@@ -16,13 +16,13 @@ namespace Pixel {
 
 		//create a color buffer from a swap chain buffer
 		//unordered access is restricted
-		virtual void CreateFromSwapChain(const std::wstring& Name, Ref<Device> pDevice) override;
+		virtual void CreateFromSwapChain(const std::wstring& Name) override;
 
 		//create a color buffer
 		//if an address is supplied, memory will not be allocated
 		//the video memory address allows you to alias buffers(which can be especially userful for reusing ESRAM across a frame)
 		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t NumMips,
-			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr, Ref<Device> pDevice);
+			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr);
 
 		//create a color buffer
 		//memory will be allocated in esram(on xbox one)
@@ -34,7 +34,7 @@ namespace Pixel {
 		//if an address is supplied, memory will not be allocated
 		//the video memory address allows you to alias buffers(which can be especially userful for reusing ESRAM across a frame)
 		void CreateArray(const std::wstring& Name, uint32_t Width, uint32_t Height, uint32_t ArrayCount,
-			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr, Ref<Device> pDevice);
+			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr);
 
 		//create a color buffer
 		//memory will be allocated in esram(on xbox one)
@@ -43,9 +43,9 @@ namespace Pixel {
 		//	DXGI_FORMAT Format);
 
 		//get pre-created cpu-visible descriptor handles
-		const Ref<DescriptorCpuHandle> GetSRV() const { return m_SRVHandle; }
-		const Ref<DescriptorCpuHandle> GetRTV() const { return m_RTVHandle; }
-		const Ref<DescriptorCpuHandle> GetUAV() const { return m_UAVHandle[0]; }
+		virtual Ref<DescriptorCpuHandle> GetSRV() const { return m_SRVHandle; }
+		virtual Ref<DescriptorCpuHandle> GetRTV() const { return m_RTVHandle; }
+		virtual Ref<DescriptorCpuHandle> GetUAV() const { return m_UAVHandle[0]; }
 
 		void SetClearColor(glm::vec4 ClearColor) { m_ClearColor = ClearColor; }
 
@@ -63,7 +63,7 @@ namespace Pixel {
 
 		static inline uint32_t ComputeNumMips(uint32_t Width, uint32_t Height);
 
-		void CreateDerivedViews(ImageFormat Format, uint32_t ArraySize, uint32_t NumMips, Ref<Device> pDevice);
+		void CreateDerivedViews(ImageFormat Format, uint32_t ArraySize, uint32_t NumMips);
 
 		glm::vec4 m_ClearColor;
 

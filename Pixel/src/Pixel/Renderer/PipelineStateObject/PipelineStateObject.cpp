@@ -1,6 +1,7 @@
 #include "pxpch.h"
 
 #include "PipelineStateObject.h"
+
 #include "Pixel/Renderer/Renderer.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXPipelineStateObject.h"
 

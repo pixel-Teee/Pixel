@@ -12,7 +12,7 @@ namespace Pixel {
 		DestroyAllContexts();
 	}
 
-	Ref<Context> DirectXContextManager::AllocateContext(CommandListType CmdListType, Ref<Device> pDevice)
+	Ref<Context> DirectXContextManager::AllocateContext(CommandListType CmdListType)
 	{
 		D3D12_COMMAND_LIST_TYPE DirectXCmdListType = CmdListTypeToDirectXCmdListType(CmdListType);
 
@@ -27,15 +27,15 @@ namespace Pixel {
 			//Ref<GraphicsContext> Test = std::make_shared<GraphicsContext>(CmdListType, shared_from_this());
 			//if(CmdListType == CommandListType::Graphics)
 				//ReturnContext = std::make_shared<GraphicsContext>(CmdListType, shared_from_this());
-			ReturnContext = std::make_shared<GraphicsContext>(CmdListType, shared_from_this(), pDevice);
+			ReturnContext = std::make_shared<GraphicsContext>(CmdListType);
 			sm_ContextPool[DirectXCmdListType].emplace_back(ReturnContext);
-			ReturnContext->Initialize(pDevice);
+			ReturnContext->Initialize();
 		}
 		else
 		{
 			ReturnContext = AvaiableContext.front();
 			AvaiableContext.pop();
-			ReturnContext->Reset(pDevice);
+			ReturnContext->Reset();
 		}
 
 		return ReturnContext;
