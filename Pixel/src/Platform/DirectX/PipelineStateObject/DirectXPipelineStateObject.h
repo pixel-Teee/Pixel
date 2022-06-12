@@ -9,12 +9,16 @@ namespace Pixel {
 	class DirectXPSO : public PSO
 	{
 	public:
+		DirectXPSO();
 		DirectXPSO(const wchar_t* Name) : m_Name(Name) {}
 
 		//clear hash map
 		static void DestroyAll();
 
 		virtual void SetRootSignature(Ref<RootSignature> pRootSignature) = 0;
+		virtual void SetBlendState(Ref<BlenderState> pBlendState) = 0;
+		virtual void SetRasterizerState(Ref<RasterState> pRasterState) = 0;
+		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
 
 		Ref<RootSignature> GetRootSignature() const;
 
@@ -30,12 +34,23 @@ namespace Pixel {
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pPSO;
 	};
 
+	class BlenderState;
+	class DepthState;
+
 	class GraphicsPSO : public DirectXPSO
 	{
 	public:
 
 		//start with empty state
 		GraphicsPSO(const wchar_t* Name = L"Unnamed Graphics PSO");
+
+		GraphicsPSO(const GraphicsPSO& pso);
+
+		virtual void SetBlendState(Ref<BlenderState> pBlendState) override;
+
+		virtual void SetRasterizerState(Ref<RasterState> pRasterState) override;
+
+		virtual void SetDepthState(Ref<DepthState> pDepthState) override;
 
 		void SetBlendState(const D3D12_BLEND_DESC& BlendDesc);
 

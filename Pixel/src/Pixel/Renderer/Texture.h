@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Pixel/Core/Core.h"
+#include "Pixel/Renderer/RendererType.h"
 
 namespace Pixel {
 
@@ -23,6 +24,8 @@ namespace Pixel {
 
 		virtual void SetData(void* data, uint32_t size) = 0;
 
+		//virtual void SetData(void* data, )
+
 		virtual void Bind(uint32_t slot = 0) const = 0;
 
 		virtual bool operator==(const Texture& other) const = 0;
@@ -30,11 +33,14 @@ namespace Pixel {
 		virtual std::string& GetPath() = 0;
 	};
 
+	class Device;
+	class ContextManager;
 	class Texture2D : public Texture
 	{
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height, TextureFormat textureFormat);
 		static Ref<Texture2D> Create(const std::string& path);
+		static Ref<Texture2D> Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat, Ref<ContextManager> pContextManager, Ref<Device> pDevice);
 
 		virtual bool operator==(const Texture& other) const = 0;
 	};

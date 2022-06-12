@@ -30,4 +30,6 @@ namespace Pixel {
 	D3D12_COMMAND_LIST_TYPE CmdListTypeToDirectXCmdListType(CommandListType CmdListType);
 
 	CommandListType DirectXCmdListTypeToCmdListType(D3D12_COMMAND_LIST_TYPE CmdListType);
+
+	D3D12_ROOT_SIGNATURE_FLAGS RootSignatureFlagToDirectXRootSignatureFlag(RootSignatureFlag flag);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Pixel/Renderer/RendererType.h"
+
 namespace Pixel {
 	enum class RangeType
 	{
@@ -7,18 +9,6 @@ namespace Pixel {
 		UAV,
 		CBV,
 		SAMPLER
-	};
-
-	enum class ShaderVisibility
-	{
-		ALL = 0,
-		Vertex,
-		Hull,
-		Domain,
-		Geometry,
-		Pixel,
-		Amplification,
-		Mesh
 	};
 
 	class RootParameter

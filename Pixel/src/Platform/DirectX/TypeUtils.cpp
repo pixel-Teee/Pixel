@@ -435,4 +435,13 @@ namespace Pixel {
 		}
 	}
 
+	D3D12_ROOT_SIGNATURE_FLAGS RootSignatureFlagToDirectXRootSignatureFlag(RootSignatureFlag flag)
+	{
+		switch (flag)
+		{
+		case RootSignatureFlag::AllowInputAssemblerInputLayout:
+			return D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		}
+	}
+
 }

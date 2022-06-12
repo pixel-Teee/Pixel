@@ -1,6 +1,7 @@
 #include "pxpch.h"
 
 #include "SamplerManager.h"
+#include "Pixel/Renderer/Renderer.h"
 #include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Descriptor/DirectXDescriptorAllocator.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
@@ -10,7 +11,7 @@ namespace Pixel {
 
 	std::map<size_t, D3D12_CPU_DESCRIPTOR_HANDLE> s_SamplerCache;
 
-	SamplerDesc::SamplerDesc()
+	DirectXSamplerDesc::DirectXSamplerDesc()
 	{
 		m_SamplerDesc.Filter = D3D12_FILTER_ANISOTROPIC;
 		m_SamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -27,14 +28,14 @@ namespace Pixel {
 		m_SamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 	}
 
-	void SamplerDesc::SetTextureAddressMode(D3D12_TEXTURE_ADDRESS_MODE AddressMode)
+	void DirectXSamplerDesc::SetTextureAddressMode(D3D12_TEXTURE_ADDRESS_MODE AddressMode)
 	{
 		m_SamplerDesc.AddressU = AddressMode;
 		m_SamplerDesc.AddressV = AddressMode;
 		m_SamplerDesc.AddressW = AddressMode;
 	}
 
-	void SamplerDesc::SetBoarderColor(glm::vec4 BorderColor)
+	void DirectXSamplerDesc::SetBoarderColor(glm::vec4 BorderColor)
 	{
 		m_SamplerDesc.BorderColor[0] = BorderColor.r;
 		m_SamplerDesc.BorderColor[1] = BorderColor.g;
@@ -42,7 +43,7 @@ namespace Pixel {
 		m_SamplerDesc.BorderColor[3] = BorderColor.a;
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE SamplerDesc::CreateDescriptor(Ref<Device> pDevice)
+	D3D12_CPU_DESCRIPTOR_HANDLE DirectXSamplerDesc::CreateDescriptor(Ref<Device> pDevice)
 	{
 		size_t hashValue = Utility::HashState(&m_SamplerDesc);
 		auto iter = s_SamplerCache.find(hashValue);
@@ -55,5 +56,7 @@ namespace Pixel {
 		std::static_pointer_cast<DirectXDevice>(pDevice)->GetDevice()->CreateSampler(&m_SamplerDesc, handle);
 		return handle;
 	}
+
+
 
 } 

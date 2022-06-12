@@ -2,13 +2,21 @@
 
 #include "Pixel/Renderer/Buffer/PixelBuffer.h"
 
+#include "Pixel/Renderer/RendererType.h"
+
 namespace Pixel {
 	class RootSignature;
 	class Device;
+	class BlenderState;
+	class RasterState;
+	class DepthState;
 	class PSO
 	{
 	public:
 		virtual void SetRootSignature(Ref<RootSignature> pRootSignature) = 0;
+		virtual void SetBlendState(Ref<BlenderState> pBlendState) = 0;
+		virtual void SetRasterizerState(Ref<RasterState> pRasterState) = 0;
+		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
 
 		virtual void Finalize(Ref<Device> pDevice) = 0;
 

@@ -5,6 +5,8 @@
 #include "Platform/DirectX/Context/DirectXContext.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootParameter.h"
 #include "Pixel/Utils/Hash.h"
+#include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/Sampler/SamplerManager.h"
 
 namespace Pixel {
 
@@ -118,7 +120,69 @@ namespace Pixel {
 		}
 	}
 
-	void DirectXRootSignature::Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAGS Flags, Ref<Device> pDevice)
+	void DirectXRootSignature::InitStaticSampler(uint32_t Register, Ref<SamplerDesc> NonStaticSamplerDesc, ShaderVisibility Visibility /*= ShaderVisibility::ALL*/)
+	{
+		PX_CORE_ASSERT(m_NumInitializedStaticSamplers < m_NumSamplers, "Already initialized static samplers out of the limit!");
+
+		//from this index to initialize the static sampler
+		D3D12_STATIC_SAMPLER_DESC& StaticSamplerDesc = m_SamplerArray[m_NumInitializedStaticSamplers++];
+
+		D3D12_SAMPLER_DESC& samplerDesc = std::static_pointer_cast<DirectXSamplerDesc>(NonStaticSamplerDesc)->m_SamplerDesc;
+
+		StaticSamplerDesc.Filter = samplerDesc.Filter;
+		//------address way------
+		StaticSamplerDesc.AddressU = samplerDesc.AddressU;
+		StaticSamplerDesc.AddressV = samplerDesc.AddressV;
+		StaticSamplerDesc.AddressW = samplerDesc.AddressW;
+		//------address way------
+
+		StaticSamplerDesc.MipLODBias = samplerDesc.MipLODBias;
+		StaticSamplerDesc.MaxAnisotropy = samplerDesc.MaxAnisotropy;
+		StaticSamplerDesc.ComparisonFunc = samplerDesc.ComparisonFunc;
+		StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+		StaticSamplerDesc.MinLOD = samplerDesc.MinLOD;
+		StaticSamplerDesc.MaxLOD = samplerDesc.MaxLOD;
+
+		//Shader Start Register
+		StaticSamplerDesc.ShaderRegister = Register;
+		StaticSamplerDesc.RegisterSpace = 0;
+		StaticSamplerDesc.ShaderVisibility = ShaderVisibilityToDirectXShaderVisibility(Visibility);
+
+		if (StaticSamplerDesc.AddressU == D3D12_TEXTURE_ADDRESS_MODE_BORDER ||
+			StaticSamplerDesc.AddressV == D3D12_TEXTURE_ADDRESS_MODE_BORDER ||
+			StaticSamplerDesc.AddressW == D3D12_TEXTURE_ADDRESS_MODE_BORDER)
+		{
+			PX_CORE_ASSERT(
+				//transparent black
+				samplerDesc.BorderColor[0] == 0.0f &&
+				samplerDesc.BorderColor[1] == 0.0f &&
+				samplerDesc.BorderColor[2] == 0.0f &&
+				samplerDesc.BorderColor[3] == 0.0f ||
+				//opaque black
+				samplerDesc.BorderColor[0] == 0.0f &&
+				samplerDesc.BorderColor[1] == 0.0f &&
+				samplerDesc.BorderColor[2] == 0.0f &&
+				samplerDesc.BorderColor[3] == 1.0f ||
+				//opaque white
+				samplerDesc.BorderColor[0] == 1.0f &&
+				samplerDesc.BorderColor[1] == 1.0f &&
+				samplerDesc.BorderColor[2] == 1.0f &&
+				samplerDesc.BorderColor[3] == 1.0f
+				, "Sampler border color doest not match the static sampler limitations!");
+
+			if (samplerDesc.BorderColor[3] == 1.0f)
+			{
+				if (samplerDesc.BorderColor[0] == 1.0f)
+					StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+				else
+					StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+			}
+			else
+				StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		}
+	}
+
+	void DirectXRootSignature::Finalize(const std::wstring& name, RootSignatureFlag Flags, Ref<Device> pDevice)
 	{
 		if (m_finalized)
 			return;
@@ -141,7 +205,7 @@ namespace Pixel {
 		//static sampler
 		RootDesc.NumStaticSamplers = m_NumParameters;
 		RootDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_SamplerArray.get();
-		RootDesc.Flags = Flags;
+		RootDesc.Flags = RootSignatureFlagToDirectXRootSignatureFlag(Flags);
 
 		size_t HashCode = Utility::HashState(&RootDesc.Flags);
 		//hash the pStaticSamplers array

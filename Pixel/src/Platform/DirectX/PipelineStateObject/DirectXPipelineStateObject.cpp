@@ -5,6 +5,9 @@
 #include "Platform/DirectX/DirectXDevice.h"
 
 #include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/State/DirectXBlenderState.h"
+#include "Platform/DirectX/State/DirectXRasterState.h"
+#include "Platform/DirectX/State/DirectXDepthState.h"
 #include "Pixel/Utils/Hash.h"
 
 namespace Pixel {
@@ -14,6 +17,11 @@ namespace Pixel {
 
 	//compute pipeline state object hash map
 	static std::map<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>> s_ComputePSOHashMap;
+
+	DirectXPSO::DirectXPSO()
+	{
+
+	}
 
 	void DirectXPSO::DestroyAll()
 	{
@@ -38,14 +46,41 @@ namespace Pixel {
 
 	}
 
+	GraphicsPSO::GraphicsPSO(const GraphicsPSO& pso)
+	{
+		m_PSODesc = pso.m_PSODesc;
+		m_InputLayouts = pso.m_InputLayouts;
+	}
+
 	void GraphicsPSO::SetBlendState(const D3D12_BLEND_DESC& BlendDesc)
 	{
 		m_PSODesc.BlendState = BlendDesc;
 	}
 
+	void GraphicsPSO::SetBlendState(Ref<BlenderState> pBlendState)
+	{
+		Ref<DirectXBlenderState> dxBlendState = std::static_pointer_cast<DirectXBlenderState>(pBlendState);
+
+		m_PSODesc.BlendState = dxBlendState->m_CurrentBlend;
+	}
+
 	void GraphicsPSO::SetRasterizerState(const D3D12_RASTERIZER_DESC& RasterizerDesc)
 	{
 		m_PSODesc.RasterizerState = RasterizerDesc;
+	}
+
+	void GraphicsPSO::SetRasterizerState(Ref<RasterState> pRasterState)
+	{
+		Ref<DirectXRasterState> dxRasterState = std::static_pointer_cast<DirectXRasterState>(pRasterState);
+
+		m_PSODesc.RasterizerState = dxRasterState->m_RasterizerDefault;
+	}
+
+	void GraphicsPSO::SetDepthState(Ref<DepthState> pDepthState)
+	{
+		Ref<DirectXDepthState> dxDepthState = std::static_pointer_cast<DirectXDepthState>(pDepthState);
+
+		m_PSODesc.DepthStencilState = dxDepthState->m_DepthStencilDesc;
 	}
 
 	void GraphicsPSO::SetDepthStencilState(const D3D12_DEPTH_STENCIL_DESC& DepthStencilDesc)

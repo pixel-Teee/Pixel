@@ -3,9 +3,11 @@
 #include "Platform/DirectX/Context/DirectXContext.h"
 #include "Pixel/Renderer/PipelineStateObject/RootSignature.h"
 #include "Pixel/Renderer/PipelineStateObject/RootParameter.h"
+#include "Pixel/Renderer/RendererType.h"
 
 namespace Pixel { 
 
+	class SamplerDesc;
 	class DirectXRootSignature : public RootSignature
 	{
 		friend class DirectXDynamicDescriptorHeap;
@@ -24,9 +26,11 @@ namespace Pixel {
 		void InitStaticSampler(uint32_t Register, const D3D12_SAMPLER_DESC& NonStaticSamplerDesc,
 			D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL);
 
+		virtual void InitStaticSampler(uint32_t Register, Ref<SamplerDesc> NonStaticSamplerDesc, ShaderVisibility Visibility = ShaderVisibility::ALL) override;
+
 		//D3D12_ROOT_SIGNATURE_FLAG_NONE
 		//flags:flag counld input assembly etc.
-		void Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAGS Flags, Ref<Device> pDevice);
+		virtual void Finalize(const std::wstring& name, RootSignatureFlag Flags, Ref<Device> pDevice) override;
 
 		ID3D12RootSignature* GetNativeSignature() const;
 	protected:

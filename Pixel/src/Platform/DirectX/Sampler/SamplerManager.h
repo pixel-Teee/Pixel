@@ -3,12 +3,15 @@
 #include "Platform/DirectX/d3dx12.h"
 #include <glm/glm.hpp>
 
+#include "Pixel/Renderer/Sampler/Sampler.h"
+
 namespace Pixel {
 	class Device;
-	class SamplerDesc {
+	class DirectXSamplerDesc : SamplerDesc {
+	public:
 		//these defaults match the default values for hlsl-defined root signature static samplers
 		//so not overriding them here means you can safely not define then in hlsl
-		SamplerDesc();
+		DirectXSamplerDesc();
 
 		void SetTextureAddressMode(D3D12_TEXTURE_ADDRESS_MODE AddressMode);
 
@@ -19,5 +22,7 @@ namespace Pixel {
 		D3D12_CPU_DESCRIPTOR_HANDLE CreateDescriptor(Ref<Device> pDevice);
 
 		D3D12_SAMPLER_DESC m_SamplerDesc;
+
+		//static Ref<SamplerDesc> Create();
 	};
 }
