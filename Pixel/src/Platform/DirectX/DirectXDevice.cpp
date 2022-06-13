@@ -14,6 +14,10 @@
 
 #include "DirectXSwapChain.h"
 #include "Platform/DirectX/Command/CommandQueue.h"
+#include "Platform/DirectX/Context/DirectXContextManager.h"
+#include "Platform/DirectX/Descriptor/DirectXDescriptorAllocator.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
+#include "Platform/DirectX/TypeUtils.h"
 
 namespace Pixel {
 
@@ -25,12 +29,15 @@ namespace Pixel {
 
 	DirectXDevice::DirectXDevice()
 	{
-
+		
 	}
 
 	DirectXDevice::~DirectXDevice()
 	{
 #ifdef PX_DEBUG
+		//m_pCommandListManager->ShutDown();
+		
+		m_pContextManager->DestroyAllContexts();
 		PIXEL_CORE_INFO("Release Device");
 #endif
 	}
@@ -106,6 +113,13 @@ namespace Pixel {
 		//recreate the swap chain buffer rtv handle and depth stencil handle
 		m_pSwapChain->OnResize(shared_from_this());
 		//------Create Swap Chain------
+
+		m_pContextManager = ContextManager::Create();
+
+		m_DescriptorAllocator[0] = DescriptorAllocator::Create(DescriptorHeapType::CBV_UAV_SRV);
+		m_DescriptorAllocator[1] = DescriptorAllocator::Create(DescriptorHeapType::SAMPLER);
+		m_DescriptorAllocator[2] = DescriptorAllocator::Create(DescriptorHeapType::RTV);
+		m_DescriptorAllocator[3] = DescriptorAllocator::Create(DescriptorHeapType::DSV);
 	}
 
 	void DirectXDevice::SetWindowHandle(GLFWwindow* windowHandle)
@@ -126,6 +140,11 @@ namespace Pixel {
 	Ref<CommandListManager> DirectXDevice::GetCommandListManager()
 	{
 		return m_pCommandListManager;
+	}
+
+	Ref<ContextManager> DirectXDevice::GetContextManager()
+	{
+		return m_pContextManager;
 	}
 
 	void DirectXDevice::SetClientSize(uint32_t width, uint32_t height)
@@ -187,6 +206,18 @@ namespace Pixel {
 	Ref<DirectXSwapChain> DirectXDevice::GetSwapChain()
 	{
 		return m_pSwapChain;
+	}
+
+	Ref<DescriptorAllocator> DirectXDevice::GetDescriptorAllocator(uint32_t index)
+	{
+		return m_DescriptorAllocator[index];
+	}
+
+	void DirectXDevice::CopyDescriptorsSimple(uint32_t NumDescriptors, Ref<DescriptorCpuHandle> DestHandle, Ref<DescriptorCpuHandle> SrcHandle, DescriptorHeapType Type)
+	{
+		Ref<DirectXDescriptorCpuHandle> pDestHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DestHandle);
+		Ref<DirectXDescriptorCpuHandle> pSrcHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(SrcHandle);
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CopyDescriptorsSimple(NumDescriptors, pDestHandle->GetCpuHandle(), pSrcHandle->GetCpuHandle(), DescriptorHeapTypeToDirectXDescriptorHeapType(Type));
 	}
 
 	//------Get Buffer Format------

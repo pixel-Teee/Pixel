@@ -29,15 +29,15 @@ namespace Pixel {
 		}
 	}
 
-	void DirectXColorBuffer::CreateFromSwapChain(const std::wstring& Name)
+	void DirectXColorBuffer::CreateFromSwapChain(Microsoft::WRL::ComPtr<ID3D12Resource> pResource, const std::wstring& Name)
 	{
-		//AssociateWithResource(Name, static_cast<DirectXGpuResource*>(pBaseResouce)->GetResource(), D3D12_RESOURCE_STATE_PRESENT);
+		AssociateWithResource(Name, pResource, D3D12_RESOURCE_STATE_PRESENT);
 
 		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RTVHandle);
 
 		rtvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::RTV, 1))->GetCpuHandle());
 
-		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateRenderTargetView(std::static_pointer_cast<DirectXGpuResource>(m_pResource)->GetResource(), nullptr, rtvHandle->GetCpuHandle());
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateRenderTargetView(m_pResource.Get(), nullptr, rtvHandle->GetCpuHandle());
 	}
 
 	void DirectXColorBuffer::Create(const std::wstring& Name, uint32_t Width, uint32_t Height, 
@@ -185,7 +185,7 @@ namespace Pixel {
 			srvHandle->SetCpuHandle(std::static_pointer_cast<DirectXDescriptorCpuHandle>(DirectXDescriptorAllocator::AllocateDescriptor(DescriptorHeapType::CBV_UAV_SRV, 1))->GetCpuHandle());
 		}
 
-		ID3D12Resource* pResource = std::static_pointer_cast<DirectXGpuResource>(m_pResource)->GetResource();
+		ID3D12Resource* pResource = m_pResource.Get();
 
 		//create the render target view
 		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateRenderTargetView(pResource, &RTVDesc, rtvHandle->GetCpuHandle());

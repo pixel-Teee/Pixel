@@ -42,7 +42,7 @@ namespace Pixel {
 
 	void DepthBuffer::CreateDerivedViews(DXGI_FORMAT Format)
 	{
-		ID3D12Resource* pResource = std::static_pointer_cast<DirectXGpuResource>(m_pResource)->m_pResource.Get();
+		ID3D12Resource* pResource = m_pResource.Get();
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 		dsvDesc.Format = GetDSVFormat(Format);

@@ -15,7 +15,7 @@ namespace Pixel {
 
 		virtual uint32_t GetWidth() const override { return m_Width;}
 		virtual uint32_t GetHeight() const override { return m_Height;}
-		virtual uint32_t GetRendererID() const override { return m_RendererID; }
+		virtual uint64_t GetRendererID() const override { return m_RendererID; }
 
 		virtual void SetData(void* data, uint32_t size) override;
 
@@ -27,6 +27,8 @@ namespace Pixel {
 		}
 
 		virtual std::string& GetPath() override;
+
+		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() const override;
 
 	private:
 		std::string m_path;

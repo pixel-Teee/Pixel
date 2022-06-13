@@ -41,7 +41,7 @@ namespace Pixel {
 
 	void DirectXGpuResource::SetResource(void* resource)
 	{
-		m_pResource = (ID3D12Resource*)resource;
+		m_pResource.Attach((ID3D12Resource*)resource);
 	}
 
 	Ref<DescriptorCpuHandle> DirectXGpuResource::GetUAV() const
@@ -54,9 +54,9 @@ namespace Pixel {
 		return std::make_shared<DirectXDescriptorCpuHandle>();
 	}
 
-	void DirectXGpuResource::CreateFromSwapChain(const std::wstring& Name)
-	{
-		throw std::logic_error("The method or operation is not implemented.");
-	}
+	//void DirectXGpuResource::CreateFromSwapChain(const std::wstring& Name)
+	//{
+	//	throw std::logic_error("The method or operation is not implemented.");
+	//}
 
 }

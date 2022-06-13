@@ -14,7 +14,7 @@ namespace Pixel {
 		virtual void SetResource(void* resource) = 0;
 
 		//------Pixel Buffer Interface------
-		virtual void CreateFromSwapChain(const std::wstring& Name) = 0;
+		//virtual void CreateFromSwapChain(Ref<GpuResource> pResource, const std::wstring& Name) = 0;
 		//------Pixel Buffer Interface------
 
 		//------Gpu Buffer Interface------
@@ -25,5 +25,7 @@ namespace Pixel {
 		static Ref<GpuResource> Create();
 
 		static Ref<GpuResource> Create(ResourceStates CurrentState);
+
+		static Ref<GpuResource> CreateColorBuffer();
 	};
 }

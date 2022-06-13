@@ -46,6 +46,8 @@ namespace Pixel {
 
 	DirectXContext::~DirectXContext()
 	{
+		m_CpuLinearAllocator.DestroyAll();
+		m_GpuLinearAllocator.DestroyAll();
 	}
 
 	void DirectXContext::Initialize()
@@ -113,6 +115,7 @@ namespace Pixel {
 
 		//g_ContextManager.FreeContext(shared_from_this());
 		//DirectXDevice::Get()->FreeContext(shared_from_this());
+		DirectXDevice::Get()->GetContextManager()->FreeContext(shared_from_this());
 		return FenceValue;
 	}
 
@@ -367,7 +370,7 @@ namespace Pixel {
 	void DirectXContext::SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr)
 	{
 		Ref<DirectXDescriptorHeap> Heap = std::static_pointer_cast<DirectXDescriptorHeap>(HeapPtr);
-		if (m_CurrentDescriptorHeaps[DescriptorHeapTypeToDirectXDescriptorHeapType(Type)].Get() != Heap->GetHeapPointer())
+		if (m_CurrentDescriptorHeaps[DescriptorHeapTypeToDirectXDescriptorHeapType(Type)] != Heap->GetComPtrHeap())
 		{
 			m_CurrentDescriptorHeaps[DescriptorHeapTypeToDirectXDescriptorHeapType(Type)] = Heap->GetComPtrHeap();
 			BindDescriptorHeaps();

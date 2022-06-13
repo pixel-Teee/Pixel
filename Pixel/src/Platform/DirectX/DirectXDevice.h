@@ -13,7 +13,9 @@ struct GLFWwindow;
 
 namespace Pixel {
 	class DirectXSwapChain;
+	class ContextManager;
 	class CommandListManager;
+	class DescriptorAllocator;
 
 	class DirectXDevice : public Device
 	{
@@ -30,6 +32,7 @@ namespace Pixel {
 		Microsoft::WRL::ComPtr<IDXGIFactory4> GetDxgiFactory();
 
 		Ref<CommandListManager> GetCommandListManager();
+		virtual Ref<ContextManager> GetContextManager() override;
 
 		//------set and get client size------
 		void SetClientSize(uint32_t width, uint32_t height);
@@ -54,6 +57,10 @@ namespace Pixel {
 		//------Get Buffer Format------
 
 		Ref<DirectXSwapChain> GetSwapChain();
+
+		Ref<DescriptorAllocator> GetDescriptorAllocator(uint32_t index);
+
+		virtual void CopyDescriptorsSimple(uint32_t NumDescriptors, Ref<DescriptorCpuHandle> DestHandle, Ref<DescriptorCpuHandle> SrcHandle, DescriptorHeapType Type) override;
 	private:
 		//------output hard device------
 		void LogAdapters();
@@ -87,6 +94,10 @@ namespace Pixel {
 		Ref<DirectXSwapChain> m_pSwapChain;
 
 		Ref<CommandListManager> m_pCommandListManager;
+
+		Ref<ContextManager> m_pContextManager;
+
+		Ref<DescriptorAllocator> m_DescriptorAllocator[4];
 		//static Ref<DirectXDevice> m_gpDevice;
 	};
 }

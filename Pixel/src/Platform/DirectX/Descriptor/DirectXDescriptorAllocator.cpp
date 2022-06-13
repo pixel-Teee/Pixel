@@ -3,6 +3,7 @@
 
 #include "Platform/DirectX/TypeUtils.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorGpuHandle.h"
 #include "Platform/DirectX/DirectXDevice.h"
 
 namespace Pixel {
@@ -29,6 +30,33 @@ namespace Pixel {
 			//------important------
 			m_RemainingFreeHandles = sm_NumDescriptorPerHeap;
 
+			m_Offset = 0;
+
+			if (m_DescriptorSize == 0)
+				m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->GetDescriptorHandleIncrementSize(m_Type);
+		}
+
+		D3D12_CPU_DESCRIPTOR_HANDLE ret = m_CurrentHandle;
+		m_CurrentHandle.ptr += Count * m_DescriptorSize;
+		m_RemainingFreeHandles -= Count;
+		m_Offset += Count;
+		
+		Ref<DirectXDescriptorCpuHandle> pCpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
+		pCpuHandle->SetCpuHandle(ret);
+		return pCpuHandle;
+	}
+
+	Ref<DescriptorHandle> DirectXDescriptorAllocator::AllocateCpuAndGpuHandle(uint32_t Count)
+	{
+		if (m_CurrentHeap == nullptr || m_RemainingFreeHandles < Count)
+		{
+			m_CurrentHeap = RequestNewHeap(m_Type);
+			//------important------
+			m_CurrentHandle = m_CurrentHeap->GetCPUDescriptorHandleForHeapStart();
+			//------important------
+			m_RemainingFreeHandles = sm_NumDescriptorPerHeap;
+			m_Offset = 0;
+
 			if (m_DescriptorSize == 0)
 				m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->GetDescriptorHandleIncrementSize(m_Type);
 		}
@@ -39,7 +67,16 @@ namespace Pixel {
 		
 		Ref<DirectXDescriptorCpuHandle> pCpuHandle = std::make_shared<DirectXDescriptorCpuHandle>();
 		pCpuHandle->SetCpuHandle(ret);
-		return pCpuHandle;
+
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = m_CurrentHeap->GetGPUDescriptorHandleForHeapStart();
+		gpuHandle.ptr += m_Offset * m_DescriptorSize;
+		
+		Ref<DirectXDescriptorGpuHandle> pGpuHandle = std::make_shared<DirectXDescriptorGpuHandle>();
+		m_Offset += Count;
+		pGpuHandle->SetGpuHandle(gpuHandle);
+
+		Ref<DescriptorHandle> pHandle = std::make_shared<DescriptorHandle>(pCpuHandle, pGpuHandle);
+		return pHandle;
 	}
 
 	void DirectXDescriptorAllocator::DestroyDescriptor()

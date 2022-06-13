@@ -17,7 +17,7 @@ namespace Pixel {
 
 		D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView();
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandle(uint32_t index, Ref<Device> pDevice);
+		D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandle(uint32_t index);
 
 		uint32_t GetCurrentBackBufferIndex();
 

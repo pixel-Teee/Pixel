@@ -12,11 +12,12 @@ namespace Pixel {
 	{
 	public:
 		friend class GraphicsContext;
+
 		DirectXColorBuffer(glm::vec4 ClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 		//create a color buffer from a swap chain buffer
 		//unordered access is restricted
-		virtual void CreateFromSwapChain(const std::wstring& Name) override;
+		void CreateFromSwapChain(Microsoft::WRL::ComPtr<ID3D12Resource> pResource, const std::wstring& Name);
 
 		//create a color buffer
 		//if an address is supplied, memory will not be allocated

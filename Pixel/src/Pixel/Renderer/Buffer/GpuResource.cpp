@@ -4,6 +4,7 @@
 
 #include "Pixel/Renderer/Renderer.h"
 #include "Platform/DirectX/Buffer/DirectXGpuResource.h"
+#include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
 
 namespace Pixel {
 
@@ -30,6 +31,18 @@ namespace Pixel {
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 		case RendererAPI::API::DirectX12: return std::make_shared<DirectXGpuResource>(CurrentState);
+		}
+
+		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
+	Ref<GpuResource> GpuResource::CreateColorBuffer()
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+		case RendererAPI::API::DirectX12: return std::make_shared<DirectXColorBuffer>();
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

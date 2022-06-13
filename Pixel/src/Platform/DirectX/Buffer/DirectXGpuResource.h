@@ -34,6 +34,8 @@ namespace Pixel {
 		ID3D12Resource* GetResource() { return m_pResource.Get(); }
 		const ID3D12Resource* GetResource() const { return m_pResource.Get(); }
 
+		Microsoft::WRL::ComPtr<ID3D12Resource> GetComPtrResource() { return m_pResource; }
+
 		Ref<GpuVirtualAddress> GetGpuVirtualAddress() const { return m_GpuVirtualAddress; }
 
 		uint32_t GetVersionID() const { return m_VersionID; }
@@ -46,7 +48,7 @@ namespace Pixel {
 		virtual Ref<DescriptorCpuHandle> GetUAV() const override;
 		virtual Ref<DescriptorCpuHandle> GetSRV() const override;
 
-		virtual void CreateFromSwapChain(const std::wstring& Name) override;
+		//virtual void CreateFromSwapChain(const std::wstring& Name) override;
 	protected:
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_pResource;

@@ -17,6 +17,8 @@ namespace Pixel {
 
 		virtual Ref<DescriptorCpuHandle> Allocate(uint32_t Count) override;
 
+		virtual Ref<DescriptorHandle> AllocateCpuAndGpuHandle(uint32_t Count) override;
+
 		virtual void DestroyDescriptor() override;
 
 	protected:
@@ -40,6 +42,9 @@ namespace Pixel {
 
 		//handle size
 		uint32_t m_DescriptorSize;
+
+		//offset
+		uint32_t m_Offset;
 
 		//remaining free handle
 		uint32_t m_RemainingFreeHandles;

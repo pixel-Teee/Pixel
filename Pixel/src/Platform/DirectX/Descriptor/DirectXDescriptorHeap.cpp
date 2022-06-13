@@ -20,7 +20,7 @@ namespace Pixel {
 	{
 		PX_CORE_ASSERT(HasAvailableSpace(Count), "descriptor heap out of space, increase heap size!");
 
-		Ref<DescriptorHandle> Ret = m_NextFreeHandle;
+		Ref<DescriptorHandle> Ret = CreateRef<DescriptorHandle>(*m_NextFreeHandle);
 		(*m_NextFreeHandle) += Count * m_DescriptorSize;
 		m_NumFreeDescriptors -= Count;
 		return Ret;
@@ -92,7 +92,7 @@ namespace Pixel {
 		gpuHandle->SetGpuHandle(m_Heap->GetGPUDescriptorHandleForHeapStart());
 
 		m_FirstHandle = std::make_shared<DescriptorHandle>(cpuHandle, gpuHandle);
-		m_NextFreeHandle = m_FirstHandle;
+		m_NextFreeHandle = std::make_shared<DescriptorHandle>(*m_FirstHandle);//copy construct
 	}
 
 	DirectXDescriptorHeap::DirectXDescriptorHeap()

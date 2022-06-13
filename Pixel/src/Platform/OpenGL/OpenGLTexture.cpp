@@ -3,6 +3,8 @@
 
 #include "stb_image.h"
 
+#include "Pixel/Renderer/DescriptorHandle/DescriptorCpuHandle.h"
+
 namespace Pixel {
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path):m_path(path)
@@ -106,9 +108,18 @@ namespace Pixel {
 	}
 
 	std::string& OpenGLTexture2D::GetPath()
-	{
+{
 		//throw std::logic_error("The method or operation is not implemented.");
 		return m_path;
+	}
+
+	Ref<DescriptorCpuHandle> OpenGLTexture2D::GetCpuDescriptorHandle() const
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+
+		Ref<DescriptorCpuHandle> handle = DescriptorCpuHandle::Create();
+
+		return handle;
 	}
 
 }

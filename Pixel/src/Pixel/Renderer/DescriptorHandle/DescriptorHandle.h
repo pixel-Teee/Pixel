@@ -9,6 +9,7 @@ namespace Pixel {
 	public:
 		DescriptorHandle();
 		DescriptorHandle(Ref<DescriptorCpuHandle> cpuHandle, Ref<DescriptorGpuHandle> gpuHandle);
+		DescriptorHandle(const DescriptorHandle& rhs);//deep copy
 
 		DescriptorHandle& operator+=(int32_t OffsetScaledByDescriptorSize);
 		DescriptorHandle operator+(uint32_t OffsetScaledByDescriptorSize);

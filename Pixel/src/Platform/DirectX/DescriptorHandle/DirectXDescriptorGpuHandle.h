@@ -8,6 +8,7 @@ namespace Pixel {
 	{
 	public:
 		DirectXDescriptorGpuHandle();
+		DirectXDescriptorGpuHandle(const DirectXDescriptorGpuHandle& rhs) { m_GpuHandle = rhs.m_GpuHandle; }
 
 		virtual bool IsShaderVisible() const override;
 		virtual uint64_t GetGpuPtr() const override;

@@ -8,6 +8,7 @@ namespace Pixel {
 	{
 	public:
 		DirectXDescriptorCpuHandle();
+		DirectXDescriptorCpuHandle(const DirectXDescriptorCpuHandle& rhs) { m_CpuHandle = rhs.m_CpuHandle; }
 
 		//D3D12_CPU_DESCRIPTOR_HANDLE
 		virtual void SetCpuHandle(void* handle) override { m_CpuHandle = *((D3D12_CPU_DESCRIPTOR_HANDLE*)handle); }

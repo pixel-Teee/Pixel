@@ -3,6 +3,7 @@
 
 #include "Pixel/Renderer/Renderer.h"
 #include "Platform/DirectX/Descriptor/DirectXDescriptorAllocator.h"
+#include "Platform/DirectX/DirectXDevice.h"
 
 namespace Pixel {
 
@@ -20,22 +21,20 @@ namespace Pixel {
 
 	Ref<DescriptorCpuHandle> DescriptorAllocator::AllocateDescriptor(DescriptorHeapType Type, uint32_t Count /*= 1*/)
 	{
-		return g_Descriptor[(uint64_t)Type]->Allocate(Count);
+		return Device::Get()->GetDescriptorAllocator((uint32_t)Type)->Allocate(Count);
 	}
 
-	void DescriptorAllocator::DestroyDescriptorPools()
+	Ref<DescriptorHandle> DescriptorAllocator::AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType Type, uint32_t Count)
 	{
-		for (uint32_t i = 0; i < 4; ++i)
-		{
-			g_Descriptor[i]->DestroyDescriptorPools();
-		}
+		return Device::Get()->GetDescriptorAllocator((uint32_t)Type)->AllocateCpuAndGpuHandle(Count);
 	}
 
-	Ref<DescriptorAllocator> DescriptorAllocator::g_Descriptor[4] = {
-		DescriptorAllocator::Create(DescriptorHeapType::CBV_UAV_SRV),
-		DescriptorAllocator::Create(DescriptorHeapType::SAMPLER),
-		DescriptorAllocator::Create(DescriptorHeapType::RTV),
-		DescriptorAllocator::Create(DescriptorHeapType::DSV)
-	};
+	//void DescriptorAllocator::DestroyDescriptorPools()
+	//{
+	//	for (uint32_t i = 0; i < 4; ++i)
+	//	{
+	//		g_Descriptor[i]->DestroyDescriptor();
+	//	}
+	//}
 
 }

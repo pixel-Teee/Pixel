@@ -4,6 +4,9 @@
 #include "DescriptorCpuHandle.h"
 #include "DescriptorGpuHandle.h"
 
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorGpuHandle.h"
+
 namespace Pixel {
 
 	DescriptorHandle::DescriptorHandle()
@@ -16,6 +19,12 @@ namespace Pixel {
 	{
 		m_CpuHandle = cpuHandle;
 		m_GpuHandle = gpuHandle;
+	}
+
+	DescriptorHandle::DescriptorHandle(const DescriptorHandle& rhs)
+	{
+		m_CpuHandle = CreateRef<DirectXDescriptorCpuHandle>(*std::static_pointer_cast<DirectXDescriptorCpuHandle>(rhs.m_CpuHandle));
+		m_GpuHandle = CreateRef<DirectXDescriptorGpuHandle>(*std::static_pointer_cast<DirectXDescriptorGpuHandle>(rhs.m_GpuHandle));
 	}
 
 	DescriptorHandle& DescriptorHandle::operator+=(int32_t OffsetScaledByDescriptorSize)

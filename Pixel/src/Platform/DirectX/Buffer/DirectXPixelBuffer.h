@@ -26,14 +26,14 @@ namespace Pixel {
 		DXGI_FORMAT FormatToDXGIFormat(ImageFormat Format);
 		ImageFormat DXGIFormatToImageFormat(DXGI_FORMAT dxgiFormat);
 
-		virtual void CreateFromSwapChain(const std::wstring& Name) override;
+		//virtual void CreateFromSwapChain(Ref<GpuResource> pResource, const std::wstring& Name) override;
 		//-------Pixel Engine Format To DXGIFormat------
 	protected:
 
 		D3D12_RESOURCE_DESC DescribeTex2D(uint32_t Width, uint32_t Height, uint32_t DepthOrArraySize, uint32_t NumMips, DXGI_FORMAT Format,
 			UINT Flags);
 
-		void AssociateWithResource(const std::wstring& Name, ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState);
+		void AssociateWithResource(const std::wstring& Name, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, D3D12_RESOURCE_STATES CurrentState);
 
 		void CreateTextureResource(const std::wstring& Name, const D3D12_RESOURCE_DESC& ResourceDesc,
 			D3D12_CLEAR_VALUE ClearValue, Ref<GpuVirtualAddress> VideoMemoryPtr);
@@ -56,7 +56,5 @@ namespace Pixel {
 		uint32_t m_ArraySize;
 		DXGI_FORMAT m_Format;
 		uint32_t m_BankRotation;//??
-
-		Ref<GpuResource> m_pResource;
 	};
 }

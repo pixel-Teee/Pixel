@@ -100,10 +100,10 @@ namespace Pixel {
 		return m_dsvHeap->GetCPUDescriptorHandleForHeapStart();
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE DirectXSwapChain::GetRtvHandle(uint32_t index, Ref<Device> pDevice)
+	D3D12_CPU_DESCRIPTOR_HANDLE DirectXSwapChain::GetRtvHandle(uint32_t index)
 	{
 		D3D12_CPU_DESCRIPTOR_HANDLE RtvHandle;
-		RtvHandle.ptr = m_rtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + index * std::static_pointer_cast<DirectXDevice>(pDevice)->GetRtvDescriptorSize();
+		RtvHandle.ptr = m_rtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + index * std::static_pointer_cast<DirectXDevice>(Device::Get())->GetRtvDescriptorSize();
 		return RtvHandle;
 	}
 

@@ -14,6 +14,7 @@
 #include "Platform/DirectX/View/DirectXIndexBufferView.h"
 #include "Platform/DirectX/View/DirectXVertexBufferView.h"
 #include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/DirectXDevice.h"
 
 namespace Pixel {
 
@@ -51,7 +52,7 @@ namespace Pixel {
 
 		//TODO: nvidia card is not clearing uavs with either float or uint variants
 		const float* ClearColor = glm::value_ptr(Target.GetClearColor());
-		m_pCommandList->ClearUnorderedAccessViewFloat(GpuVisibleHandle, UavHandle->GetCpuHandle(), std::static_pointer_cast<DirectXGpuResource>(Target.m_pResource)->GetResource(), ClearColor, 1, &ClearRect);
+		m_pCommandList->ClearUnorderedAccessViewFloat(GpuVisibleHandle, UavHandle->GetCpuHandle(), Target.GetResource(), ClearColor, 1, &ClearRect);
 	}
 
 	void GraphicsContext::ClearColor(GpuResource& Target, PixelRect* Rect)

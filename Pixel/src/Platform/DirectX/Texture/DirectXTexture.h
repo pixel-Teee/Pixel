@@ -7,9 +7,11 @@ namespace Pixel {
 	class DirectXGpuResource;
 	class DescriptorCpuHandle;
 	class Device;
+	class DescriptorHandle;
 	class DirectXTexture : public Texture2D
 	{
 	public:
+		friend class Context;
 		DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat);
 		DirectXTexture(const std::string& path);
 
@@ -23,7 +25,9 @@ namespace Pixel {
 
 		virtual uint32_t GetHeight() const override;
 
-		virtual uint32_t GetRendererID() const override;
+		virtual uint64_t GetRendererID() const override;
+
+		Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() const override;
 
 		//need to refractor
 		virtual void SetData(void* data, uint32_t size) override;
@@ -31,13 +35,12 @@ namespace Pixel {
 		virtual void Bind(uint32_t slot = 0) const override;
 
 		virtual std::string& GetPath() override;
-	
-	private:
+
 		std::string m_path;
 		uint32_t m_Width, m_Height;
 
 		Ref<DirectXGpuResource> m_pGpuResource;
 
-		Ref<DescriptorCpuHandle> m_pCpuDescriptorHandle;
+		Ref<DescriptorHandle> m_pHandle;
 	};
 }
