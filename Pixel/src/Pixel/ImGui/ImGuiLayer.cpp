@@ -44,12 +44,12 @@ namespace Pixel {
 
 	ImGuiLayer::ImGuiLayer(Ref<Device> pDevice)
 	{
-		//m_pDevice = pDevice;
+		
 	}
 
 	ImGuiLayer::~ImGuiLayer()
 	{
-		//m_contextManager->DestroyAllContexts();
+		
 	}
 
 	void ImGuiLayer::OnAttach()
@@ -93,7 +93,7 @@ namespace Pixel {
 #else
 		//m_contextManager = ContextManager::Create();
 
-		m_srvHeap = DescriptorHeap::Create(L"ImGuiLayerSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 2);
+		m_srvHeap = DescriptorHeap::Create(L"ImGuiLayerSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 256);
 		//m_imageSrvHeap = DescriptorHeap::Create(L"ImageSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		
 
@@ -108,7 +108,7 @@ namespace Pixel {
 			std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetHeapPointer()->GetGPUDescriptorHandleForHeapStart()
 		);
 		
-		m_imageHandle = m_srvHeap->Alloc(1)->GetCpuHandle();
+		//m_imageHandle = m_srvHeap->Alloc(1)->GetCpuHandle();
 		
 		////------Create Back Buffer-------
 		m_BackBuffer[0] = GpuResource::CreateColorBuffer();
@@ -120,11 +120,11 @@ namespace Pixel {
 		std::static_pointer_cast<DirectXColorBuffer>(m_BackBuffer[1])->CreateFromSwapChain(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetBackBufferSource(1), L"BackBuffer[1]");
 		////-------Create Back Buffer Resource------
 
-		m_pTexture = Texture2D::Create("assets//textures//Material_Albedo.dds");
+		//m_pTexture = Texture2D::Create("assets//textures//Material_Albedo.dds");
 		
 		//copy the texture's handle to descriptor heap's handle, then bind the heap
 
-		Device::Get()->CopyDescriptorsSimple(1, m_imageHandle, m_pTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);;
+		//Device::Get()->CopyDescriptorsSimple(1, m_imageHandle, m_pTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);;
 		//Device::Get()->CopyDescriptorsSimple(1, std::static_pointer_cast<DirectXDescriptorHeap>(m_imageSrvHe)
 #endif
 	}
@@ -146,21 +146,21 @@ namespace Pixel {
 
 	void ImGuiLayer::OnImGuiRender()
 	{
-		ImGui::ShowDemoWindow();
-		
-		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		//ImGui::ShowDemoWindow();
+		//
+		//Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 
-		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_srvHeap);
-		//pContext->SetDescriptorHeap()
-		//Ref<Context> 
-		ImGui::Begin("DirectX12 Texture Test");
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_srvHeap);
+		////pContext->SetDescriptorHeap()
+		////Ref<Context> 
+		//ImGui::Begin("DirectX12 Texture Test");
 
-		Ref<DescriptorGpuHandle> handle = (*m_srvHeap)[1].GetGpuHandle();
-		//EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
-		ImGui::Image((ImTextureID)(handle->GetGpuPtr()), ImVec2(256, 256));
-		ImGui::End();
+		//Ref<DescriptorGpuHandle> handle = (*m_srvHeap)[1].GetGpuHandle();
+		////EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
+		//ImGui::Image((ImTextureID)(handle->GetGpuPtr()), ImVec2(256, 256));
+		//ImGui::End();
 
-		pContext->Finish(true);
+		//pContext->Finish(true);
 	}
 
 	void ImGuiLayer::OnEvent(Event& e)
@@ -271,6 +271,11 @@ namespace Pixel {
 		colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+	}
+
+	Ref<DescriptorHeap> ImGuiLayer::GetSrvHeap()
+	{
+		return m_srvHeap;
 	}
 
 }

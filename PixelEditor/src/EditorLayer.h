@@ -80,7 +80,7 @@ namespace Pixel
 		//Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
-		EnvironmentPanel m_environmentPanel;
+		//EnvironmentPanel m_environmentPanel;
 
 		enum class SceneState
 		{
@@ -91,6 +91,8 @@ namespace Pixel
 
 		//Editor Resources
 		Ref<Texture2D> m_IconPlay, m_IconStop;
+
+		Ref<DescriptorHandle> m_IconPlayHandle, m_IconStopHandle;
 
 		//----------test
 		Ref<Shader> m_testShader;

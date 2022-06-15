@@ -81,10 +81,18 @@ namespace Pixel {
 	{
 		m_pGpuResource = CreateRef<DirectXGpuResource>(ResourceStates::CopyDest);
 
+		//get extension
+
+		//size_t dotPlace = path.find_last_of('.');
+
+		//std::string ddsFilePath = path.substr(0, dotPlace - 1) + ".dds";
+
+		//------need to refractor------
 		Ref<GpuResource> pResource = m_pGpuResource;
 		PX_CORE_ASSERT(DirectX::CreateDDSTextureForPixelEngine(*pResource, StringToWString(path).c_str()) >= 0,
 			"create texture 2d error!");
 
+		//------need to refractor------
 		//create handle
 		m_pHandle = DescriptorAllocator::AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType::CBV_UAV_SRV, 1);
 		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateShaderResourceView(m_pGpuResource->m_pResource.Get(), nullptr, std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_pHandle->GetCpuHandle())->GetCpuHandle());
@@ -103,7 +111,7 @@ namespace Pixel {
 	uint64_t DirectXTexture::GetRendererID() const 
 {
 		//return static_cast<uint32_t>(std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_pCpuDescriptorHandle)->GetCpuHandle().ptr);
-		return static_cast<uint32_t>(m_pHandle->GetGpuPtr());
+		return static_cast<uint64_t>(m_pHandle->GetGpuPtr());
 	}
 
 	Ref<DescriptorCpuHandle> DirectXTexture::GetCpuDescriptorHandle() const

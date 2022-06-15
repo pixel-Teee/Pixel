@@ -91,7 +91,7 @@ namespace Pixel {
 		FlushResourceBarriers();
 
 		DepthBuffer& buffer = static_cast<DepthBuffer&>(Target);
-		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_DEPTH, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
+		m_pCommandList->ClearDepthStencilView(std::static_pointer_cast<DirectXDescriptorCpuHandle>(buffer.GetDSV())->GetCpuHandle(), D3D12_CLEAR_FLAG_DEPTH, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
 	void GraphicsContext::ClearStencil(GpuResource& Target)
@@ -99,7 +99,7 @@ namespace Pixel {
 		FlushResourceBarriers();
 
 		DepthBuffer& buffer = static_cast<DepthBuffer&>(Target);
-		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
+		m_pCommandList->ClearDepthStencilView(std::static_pointer_cast<DirectXDescriptorCpuHandle>(buffer.GetDSV())->GetCpuHandle(), D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
 	void GraphicsContext::ClearDepthAndStencil(GpuResource& Target)
@@ -107,7 +107,7 @@ namespace Pixel {
 		FlushResourceBarriers();
 
 		DepthBuffer& buffer = static_cast<DepthBuffer&>(Target);
-		m_pCommandList->ClearDepthStencilView(buffer.GetDSV(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
+		m_pCommandList->ClearDepthStencilView(std::static_pointer_cast<DirectXDescriptorCpuHandle>(buffer.GetDSV())->GetCpuHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, buffer.GetClearDepth(), buffer.GetClearStencil(), 0, nullptr);
 	}
 
 	void GraphicsContext::SetRootSignature(const RootSignature& RootSig)

@@ -368,7 +368,7 @@ namespace Pixel
 		//m_Registry.on_construct<CameraComponent>().connect<&Function>();
 
 		//Create Geometry Pass
-		m_pGeometryPass = CreateRef<GeometryPass>();
+		//m_pGeometryPass = CreateRef<GeometryPass>();
 	}
 
 	Scene::~Scene()
@@ -406,7 +406,7 @@ namespace Pixel
 
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
-		newScene->m_pGeometryPass = other->m_pGeometryPass;
+		//newScene->m_pGeometryPass = other->m_pGeometryPass;
 
 		std::unordered_map<UUID, entt::entity> enttMap;
 
@@ -863,7 +863,7 @@ namespace Pixel
 			if (!cameraComponent.FixedAspectRatio)
 			{
 				cameraComponent.camera.SetViewportSize(width, height);
-				m_pGeometryPass->Resize(width, height);
+				//m_pGeometryPass->Resize(width, height);
 			}
 		}
 	}

@@ -10,7 +10,7 @@ namespace Pixel {
 	LinearAllocationPage::LinearAllocationPage(ID3D12Resource* pResource, D3D12_RESOURCE_STATES Usage)
 		:DirectXGpuResource()
 	{
-		m_pResource.Attach(pResource);
+		m_pResource.Attach(pResource);//leak??
 		m_UsageState = Usage;
 		m_GpuVirtualAddress = m_pResource->GetGPUVirtualAddress();
 		m_pResource->Map(0, nullptr, &m_CpuVirtualAddress);
@@ -166,7 +166,7 @@ namespace Pixel {
 		m_PageSize = (Type == kGpuExclusive ? kGpuAllocatorPageSize : kCpuAllocatorPageSize);
 	}
 
-	Pixel::DynAlloc LinearAllocator::Allocate(size_t SizeInBytes, size_t Alignment)
+	DynAlloc LinearAllocator::Allocate(size_t SizeInBytes, size_t Alignment)
 	{
 		//2^n - 1
 		const size_t AlignmentMask = Alignment - 1;
@@ -207,11 +207,12 @@ namespace Pixel {
 
 	void LinearAllocator::CleanupUsedPages(uint64_t FenceId)
 	{
-		if (m_CurrPage == nullptr) return;
-
-		m_RetiredPages.push_back(m_CurrPage);
-		m_CurrPage = nullptr;
-		m_CurrOffset = 0;
+		if (m_CurrPage != nullptr)
+		{
+			m_RetiredPages.push_back(m_CurrPage);
+			m_CurrPage = nullptr;
+			m_CurrOffset = 0;
+		}
 
 		sm_PageManager[m_AllocationType].DiscardPages(FenceId, m_RetiredPages);
 		m_RetiredPages.clear();

@@ -7,6 +7,10 @@
 #include "Pixel/Scene/SceneSerializer.h"
 
 #include "Pixel/Utils/PlatformUtils.h"
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/Device/Device.h"
 
 #include <chrono>
 
@@ -27,9 +31,14 @@ namespace Pixel
 	void EditorLayer::OnAttach()
 	{
 		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
-		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
+		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.dds");
+		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.dds");
 
+		m_IconPlayHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+		m_IconStopHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
+		Device::Get()->CopyDescriptorsSimple(1, m_IconPlayHandle->GetCpuHandle(), m_IconPlay->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_IconStopHandle->GetCpuHandle(), m_IconStop->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		m_CameraController.SetZoomLevel(5.5f);
 		/*------Create Geometry Framebuffer------*/
 
@@ -46,14 +55,14 @@ namespace Pixel
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
-		/*------Create Geometry Framebuffer------*/
+		///*------Create Geometry Framebuffer------*/
 
-		/*------Create Framebuffer------*/	
+		///*------Create Framebuffer------*/	
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
-		/*------Create Framebuffer------*/
+		///*------Create Framebuffer------*/
 
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
@@ -112,9 +121,9 @@ namespace Pixel
 
 		//Set Sky Box
 		//ownership is belgon to Renderer3D
-		m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
-		m_EditorScene->SetSkyBox(Renderer3D::GetSkyBox());
-		m_environmentPanel.SetSkyBox(Renderer3D::GetSkyBox());
+		//m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
+		//m_EditorScene->SetSkyBox(Renderer3D::GetSkyBox());
+		//m_environmentPanel.SetSkyBox(Renderer3D::GetSkyBox());
 
 		//SceneSerializer serializer(m_ActiveScene);
 		//serializer.Serialize("assets/scenes/Example.pixel");
@@ -279,8 +288,8 @@ namespace Pixel
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
 
-		uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image(reinterpret_cast<void*>(textureId), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
+		//uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
+		//ImGui::Image(reinterpret_cast<void*>(textureId), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
 
 		//PIXEL_CORE_INFO("{0}, {1}", minBound.x, minBound.y);
 
@@ -362,27 +371,27 @@ namespace Pixel
 		/*----------View port----------*/
 
 		/*---------Environment Panel---------*/
-		bool IsDirty = Renderer3D::GetSkyBox()->IsDirty();
-		if (IsDirty)
-		{	
-			Renderer3D::GetSkyBox()->SetDirty(false);
-			std::vector<std::string>& paths = Renderer3D::GetSkyBox()->GetPaths();
+		//bool IsDirty = Renderer3D::GetSkyBox()->IsDirty();
+		//if (IsDirty)
+		//{	
+		//	Renderer3D::GetSkyBox()->SetDirty(false);
+		//	std::vector<std::string>& paths = Renderer3D::GetSkyBox()->GetPaths();
 
-			for (uint32_t i = 0; i < 6; ++i)
-			{
-				if (paths[i] != m_environmentPanel.GetPath((FaceTarget)i))
-				{
-					m_environmentPanel.SetVisualizeFacesTexture((FaceTarget)i, paths[i]);
-				}
-			}
-		}
-		
-		m_environmentPanel.OnImGuiRender();
+		//	for (uint32_t i = 0; i < 6; ++i)
+		//	{
+		//		if (paths[i] != m_environmentPanel.GetPath((FaceTarget)i))
+		//		{
+		//			m_environmentPanel.SetVisualizeFacesTexture((FaceTarget)i, paths[i]);
+		//		}
+		//	}
+		//}
+		//
+		//m_environmentPanel.OnImGuiRender();
 		/*---------Environment Panel---------*/
 
 		/*---------Deferred Shading Viewport---------*/
 		
-		ImGui::Begin("Deferred Shading Viewport");
+	/*	ImGui::Begin("Deferred Shading Viewport");
 
 		ImVec2 DeferredViewPortSize = ImVec2(m_ViewportSize.x / 4.0f, m_ViewportSize.y / 4.0f);
 
@@ -398,7 +407,7 @@ namespace Pixel
 		ImGui::Text("depth");
 		deferredTextureID = m_GeoFramebuffer->GetDepthAttachmentRendererID();
 		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));	
-		ImGui::End();
+		ImGui::End();*/
 		/*---------Deferred Shading Viewport---------*/
 
 		/*---------Play Button And Pause Button---------*/
@@ -437,12 +446,12 @@ namespace Pixel
 					m_EditorCamera.OnUpdate(ts);
 				}
 				//Update scene
-				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
+				//m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
 				break;
 			}
 			case EditorLayer::SceneState::Play:
 			{
-				m_ActiveScene->OnUpdateRuntime(ts, m_GeoFramebuffer, m_Framebuffer);
+				//m_ActiveScene->OnUpdateRuntime(ts, m_GeoFramebuffer, m_Framebuffer);
 				break;
 			}
 		}
@@ -458,14 +467,14 @@ namespace Pixel
 		int mouseY = (int)my;
 		//PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
 
-		m_GeoFramebuffer->Bind();
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
-		{
-			int pixelData = m_GeoFramebuffer->ReadPixel(4, mouseX, mouseY);
-			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
-		}
-		m_GeoFramebuffer->UnBind();
+		//m_GeoFramebuffer->Bind();
+		//if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		//{
+		//	int pixelData = m_GeoFramebuffer->ReadPixel(4, mouseX, mouseY);
+		//	//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
+		//	m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+		//}
+		//m_GeoFramebuffer->UnBind();
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -549,7 +558,7 @@ namespace Pixel
 	void EditorLayer::NewScene()
 	{
 		m_EditorScene = CreateRef<Scene>();
-		m_EditorScene->SetSkyBox(Renderer3D::GetDefaultSkyBox());
+		//m_EditorScene->SetSkyBox(Renderer3D::GetDefaultSkyBox());
 		m_ActiveScene = m_EditorScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -570,7 +579,7 @@ namespace Pixel
 		Ref<Scene> newScene = CreateRef<Scene>();
 		glm::vec2 viewPortSize = m_EditorScene->GetViewPortSize();
 		newScene->SetViewPortSize(viewPortSize.x, viewPortSize.y);
-		newScene->SetSkyBox(Renderer3D::GetSkyBox());
+		//newScene->SetSkyBox(Renderer3D::GetSkyBox());
 		SceneSerializer serializer(newScene);
 
 		if (serializer.Deserialize(filepath.string()))
@@ -658,12 +667,15 @@ namespace Pixel
 		float size = ImGui::GetWindowHeight() - 4.0f;
 		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
 		ImGui::SameLine(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
-		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+
+		Ref<DescriptorGpuHandle> pHandle = icon == m_IconPlay ? m_IconPlayHandle->GetGpuHandle() : m_IconStopHandle->GetGpuHandle();
+
+		if (ImGui::ImageButton((ImTextureID)(pHandle->GetGpuPtr()), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
-		if(m_SceneState == SceneState::Edit)
-			OnScenePlay();
-		else if(m_SceneState == SceneState::Play)
-			OnSceneStop();
+			if (m_SceneState == SceneState::Edit)
+				OnScenePlay();
+			else if (m_SceneState == SceneState::Play)
+				OnSceneStop();
 		}
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor(3);

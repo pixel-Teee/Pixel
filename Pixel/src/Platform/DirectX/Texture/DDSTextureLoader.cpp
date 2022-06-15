@@ -2316,6 +2316,7 @@ HRESULT DirectX::CreateDDSTextureForPixelEngine(Pixel::GpuResource& dest,
 
 	std::unique_ptr<uint8_t[]> ddsData;
 	HRESULT hr = LoadTextureDataFromFile(szFileName, ddsData, &header, &bitData, &bitSize);
+    
 	if (FAILED(hr))
 	{
 		return hr;

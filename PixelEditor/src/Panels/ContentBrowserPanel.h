@@ -6,7 +6,7 @@
 #include "../NodeGraph/NodeGraph.h"
 
 namespace Pixel {
-
+	class DescriptorHandle;
 	class ContentBrowserPanel
 	{
 	public:
@@ -30,5 +30,8 @@ namespace Pixel {
 
 		Ref<Texture2D> m_Directory;
 		Ref<Texture2D> m_File;
+
+		Ref<DescriptorHandle> m_DirectoryHandle;
+		Ref<DescriptorHandle> m_FileHandle;
 	};
 }

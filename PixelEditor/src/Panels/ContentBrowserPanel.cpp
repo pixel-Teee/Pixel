@@ -2,6 +2,10 @@
 #include "ContentBrowserPanel.h"
 
 #include "Pixel/Scene/SerializerMaterial.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 
 #include <imgui/imgui.h>
 
@@ -13,8 +17,15 @@ namespace Pixel {
 	ContentBrowserPanel::ContentBrowserPanel()
 	:m_CurrentDirectory(g_AssetPath)
 	{
-		m_Directory = Texture2D::Create(g_AssetPath.string() + "/icons/directory.png");
-		m_File = Texture2D::Create(g_AssetPath.string() + "/icons/file.png");
+		m_Directory = Texture2D::Create(g_AssetPath.string() + "/icons/directory.dds");
+		m_File = Texture2D::Create(g_AssetPath.string() + "/icons/file.dds");
+
+		//copy the these thexture's descriptor to descriptor heap
+		m_DirectoryHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+		m_FileHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
+		Device::Get()->CopyDescriptorsSimple(1, m_DirectoryHandle->GetCpuHandle(), m_Directory->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 	}
 
 	void ContentBrowserPanel::OpenAssetEditor(const std::string& filename)
@@ -87,7 +98,11 @@ namespace Pixel {
 			Ref<Texture2D> icon = directoryEntry.is_directory() ? m_Directory : m_File; 
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), {ThumbnailSize, ThumbnailSize}, {0, 1}, {1, 0});
+
+			if(icon == m_Directory)
+				ImGui::ImageButton((ImTextureID)(m_DirectoryHandle->GetGpuHandle()->GetGpuPtr()), {ThumbnailSize, ThumbnailSize}, {0, 1}, {1, 0});
+			else
+				ImGui::ImageButton((ImTextureID)(m_FileHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
 			ImGui::PopStyleColor();
 
 			if (ImGui::BeginDragDropSource())

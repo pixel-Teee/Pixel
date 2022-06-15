@@ -3,6 +3,7 @@
 namespace Pixel {
 	class DescriptorCpuHandle {
 	public:
+		DescriptorCpuHandle() {}
 		virtual ~DescriptorCpuHandle();
 
 		//------interface------

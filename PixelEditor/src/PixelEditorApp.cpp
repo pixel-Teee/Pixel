@@ -240,7 +240,7 @@ namespace Pixel {
 		PixelEditor():Application("Pixel Editor")
 		{
 			//PushLayer(new ExampleLayer());
-			//PushLayer(new EditorLayer());
+			PushLayer(new EditorLayer());
 			//PushOverlay(new Pixel::ImGuiLayer());
 		}
 
