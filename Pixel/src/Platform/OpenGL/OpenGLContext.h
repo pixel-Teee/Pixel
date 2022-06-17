@@ -185,6 +185,9 @@ namespace Pixel {
 
 		virtual void DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation, int32_t BaseVertexLocation, uint32_t StartInstanceLocation) override;
 
+
+		virtual void SetPipelineState(const PSO& pso) override;
+
 	private:
 		GLFWwindow* m_WindowHandle;
 	};

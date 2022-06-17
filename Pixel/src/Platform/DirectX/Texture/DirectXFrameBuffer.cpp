@@ -7,6 +7,7 @@
 #include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Context/DirectXContextManager.h"
 #include "Platform/DirectX/Context/DirectXContext.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 
 namespace Pixel {
 
@@ -178,6 +179,11 @@ namespace Pixel {
 	void DirectXFrameBuffer::SetColorAttachmentDraw(uint32_t index)
 	{
 		//None
+	}
+
+	Ref<DescriptorCpuHandle> DirectXFrameBuffer::GetColorAttachmentDescriptorCpuHandle(uint32_t index)
+	{
+		return std::static_pointer_cast<DirectXColorBuffer>(m_pColorBuffers[index])->GetSRV();
 	}
 
 }

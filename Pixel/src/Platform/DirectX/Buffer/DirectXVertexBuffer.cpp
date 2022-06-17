@@ -1,12 +1,31 @@
 #include "pxpch.h"
 #include "DirectXVertexBuffer.h"
 
+#include "Platform/DirectX/Buffer/DirectXGpuBuffer.h"
+#include "Platform/DirectX/View/DirectXVertexBufferView.h"
+
 namespace Pixel {
 
+	//TODO:need to complete
 	DirectXVertexBuffer::DirectXVertexBuffer(float* vertices, uint32_t ByteSize)
 	{
 		//get the device and command list
+		m_pResource = CreateRef<DirectXByteAddressBuffer>();
+		//std::static_pointer_cast<DirectXByteAddressBuffer>(m_pResource)->Create(L"VertexBuffer", , ByteSize, );
+	}
 
+	DirectXVertexBuffer::DirectXVertexBuffer(float* vertices, uint32_t ElementCount, uint32_t ElementSize)
+	{
+		m_pResource = CreateRef<DirectXByteAddressBuffer>();
+		std::static_pointer_cast<DirectXByteAddressBuffer>(m_pResource)->Create(L"VertexBuffer", ElementCount, ElementSize, vertices);
+
+		m_pVBV = CreateRef<DirectXVBV>(std::static_pointer_cast<DirectXByteAddressBuffer>(m_pResource)->GetGpuVirtualAddress(),
+		0, ElementCount * ElementSize, ElementSize);
+	}
+
+	Ref<VBV> DirectXVertexBuffer::GetVBV()
+	{
+		return m_pVBV;
 	}
 
 	void DirectXVertexBuffer::Bind() const
@@ -26,12 +45,12 @@ namespace Pixel {
 
 	const Pixel::BufferLayout& DirectXVertexBuffer::GetLayout() const
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		return m_Layout;
 	}
 
 	void DirectXVertexBuffer::SetLayout(const BufferLayout& layout)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		m_Layout = layout;
 	}
 
 	bool DirectXVertexBuffer::HavePosition()

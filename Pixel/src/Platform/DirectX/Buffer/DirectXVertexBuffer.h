@@ -7,11 +7,16 @@
 
 namespace Pixel {
 	class GpuResource;
+	class VBV;
 	//TODO:need to inherit from vertex buffer
 	class DirectXVertexBuffer : public VertexBuffer 
 	{
 	public:
+		DirectXVertexBuffer(float* vertices, uint32_t ElementCount, uint32_t ElementSize);
 		DirectXVertexBuffer(float* vertices, uint32_t ByteSize);
+
+		//return vertex view
+		virtual Ref<VBV> GetVBV() override;
 
 		virtual void Bind() const override;
 
@@ -39,6 +44,8 @@ namespace Pixel {
 
 		virtual bool HaveBoneWeight(uint32_t Level) override;
 	private:
-		Ref<GpuResource> pResource;
+		BufferLayout m_Layout;
+		Ref<GpuResource> m_pResource;
+		Ref<VBV> m_pVBV;
 	};
 }

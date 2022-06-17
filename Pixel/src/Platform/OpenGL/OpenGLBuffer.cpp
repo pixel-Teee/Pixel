@@ -84,6 +84,11 @@ namespace Pixel {
 		return CheckHaveSematics(Semantics::BLENDWEIGHT, Level);
 	}
 
+	Ref<VBV> OpenGLVertexBuffer::GetVBV()
+	{
+		return nullptr;
+	}
+
 	bool OpenGLVertexBuffer::CheckHaveSematics(Semantics semantics, uint32_t level)
 	{
 		uint32_t Level = 0;
@@ -139,6 +144,12 @@ namespace Pixel {
 		m_Count = count;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * count, data);
+	}
+
+	Ref<IBV> OpenGLIndexBuffer::GetIBV()
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+		return nullptr;
 	}
 
 }

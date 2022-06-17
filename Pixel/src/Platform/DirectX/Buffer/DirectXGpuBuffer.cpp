@@ -11,6 +11,8 @@
 #include "Platform/DirectX/View/DirectXIndexBufferView.h"
 #include "Platform/DirectX/View/DirectXVertexBufferView.h"
 #include "Platform/DirectX/DirectXDevice.h"
+#include "Platform/DirectX/Context/DirectXContextManager.h"
+#include "Platform/DirectX/Context/GraphicsContext.h"
 
 namespace Pixel {
 
@@ -49,7 +51,8 @@ namespace Pixel {
 
 		if (initialData)
 		{
-			//TODO:copy the data into the buffer
+			Ref<Context> pContext = DirectXDevice::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+			std::static_pointer_cast<GraphicsContext>(pContext)->InitializeBuffer(*this, initialData, m_BufferSize, 0);
 		}
 
 #ifdef PX_DEBUG
@@ -116,6 +119,9 @@ namespace Pixel {
 
 		D3D12_CPU_DESCRIPTOR_HANDLE UnknownHandle;
 		UnknownHandle.ptr = -1;
+
+		m_UAV = DescriptorCpuHandle::Create();
+		m_SRV = DescriptorCpuHandle::Create();
 
 		std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_UAV)->SetCpuHandle(UnknownHandle);
 		std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_SRV)->SetCpuHandle(UnknownHandle);

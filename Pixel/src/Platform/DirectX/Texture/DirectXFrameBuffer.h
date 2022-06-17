@@ -7,9 +7,11 @@
 namespace Pixel {
 	class DirectXColorBuffer;
 	class DepthBuffer;
+	class DescriptorCpuHandle;
 	class DirectXFrameBuffer : public Framebuffer
 	{
 	public:
+		friend class DirectXRenderer;
 		DirectXFrameBuffer(const FramebufferSpecification& spec);
 
 		virtual ~DirectXFrameBuffer();
@@ -41,6 +43,7 @@ namespace Pixel {
 
 		virtual void SetColorAttachmentDraw(uint32_t index) override;
 
+		virtual Ref<DescriptorCpuHandle> GetColorAttachmentDescriptorCpuHandle(uint32_t index) override;
 	private:
 		FramebufferSpecification m_Specification;
 

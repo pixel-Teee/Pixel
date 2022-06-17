@@ -12,7 +12,7 @@ namespace Pixel {
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::DirectX12: return std::make_shared<SamplerDesc>();
+		case RendererAPI::API::DirectX12: return std::make_shared<DirectXSamplerDesc>();
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

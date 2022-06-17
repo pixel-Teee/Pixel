@@ -19,6 +19,7 @@ namespace Pixel {
 		virtual void SetBlendState(Ref<BlenderState> pBlendState) = 0;
 		virtual void SetRasterizerState(Ref<RasterState> pRasterState) = 0;
 		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
+		virtual void SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType) = 0;
 
 		Ref<RootSignature> GetRootSignature() const;
 
@@ -60,7 +61,7 @@ namespace Pixel {
 
 		void SetSampleMask(uint32_t SampleMask);
 
-		void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE TopologyType);
+		virtual void SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType);
 
 		virtual void SetDepthTargetFormat(ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) override;
 

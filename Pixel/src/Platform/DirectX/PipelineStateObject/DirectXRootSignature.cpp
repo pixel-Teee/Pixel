@@ -4,7 +4,6 @@
 #include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Context/DirectXContext.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootParameter.h"
-#include "Pixel/Utils/Hash.h"
 #include "Platform/DirectX/TypeUtils.h"
 #include "Platform/DirectX/Sampler/SamplerManager.h"
 
@@ -203,24 +202,28 @@ namespace Pixel {
 		RootDesc.pParameters = (const D3D12_ROOT_PARAMETER*)(&ParameterArray[0]);
 
 		//static sampler
-		RootDesc.NumStaticSamplers = m_NumParameters;
+		RootDesc.NumStaticSamplers = m_NumSamplers;
 		RootDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_SamplerArray.get();
 		RootDesc.Flags = RootSignatureFlagToDirectXRootSignatureFlag(Flags);
 
-		size_t HashCode = Utility::HashState(&RootDesc.Flags);
+		m_DescriptorTableBitMap = 0;
+		m_SamplerTableBitMap = 0;
+
+		size_t HashCode = Utility::HashState((const uint32_t*)&RootDesc.Flags);
 		//hash the pStaticSamplers array
-		HashCode = Utility::HashState(RootDesc.pStaticSamplers, m_NumSamplers, HashCode);
+		HashCode = Utility::HashState((const uint32_t*)RootDesc.pStaticSamplers, m_NumSamplers, HashCode);
 
 		for (uint32_t Param = 0; Param < m_NumParameters; ++Param)
 		{
 			const D3D12_ROOT_PARAMETER& RootParam = RootDesc.pParameters[Param];
+			m_DescriptorTableSize[Param] = 0;
 
 			//descriptor table
 			if (RootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
 			{
 				PX_CORE_ASSERT(RootParam.DescriptorTable.pDescriptorRanges != nullptr, "RootSignature's descriptor table need equal to nullptr");
 
-				HashCode = Utility::HashState(RootParam.DescriptorTable.pDescriptorRanges,
+				HashCode = Utility::HashState((const uint32_t*)RootParam.DescriptorTable.pDescriptorRanges,
 					RootParam.DescriptorTable.NumDescriptorRanges, HashCode);
 
 				if (RootParam.DescriptorTable.pDescriptorRanges->RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER)
@@ -234,13 +237,14 @@ namespace Pixel {
 			}
 			else
 			{
-				HashCode = Utility::HashState(&RootParam, 1, HashCode);
+				HashCode = Utility::HashState((const uint32_t*)&RootParam, 1, HashCode);
 			}
 		}
 
 		//root signature's reference
 		ID3D12RootSignature** RSRef = nullptr;
 
+		//Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 		bool firstCompile = false;
 		{
 			//mutex and lock_guard
@@ -252,6 +256,7 @@ namespace Pixel {
 			if (iter == s_RootSignatureHashMap.end())
 			{
 				RSRef = s_RootSignatureHashMap[HashCode].GetAddressOf();
+				//pRootSignature = s_RootSignatureHashMap[HashCode];
 				firstCompile = true;
 			}
 			else
@@ -266,25 +271,30 @@ namespace Pixel {
 			//Blob:binary byte code
 			Microsoft::WRL::ComPtr<ID3DBlob> pOutBlob, pErrorBlob;
 
-			PX_CORE_ASSERT(D3D12SerializeRootSignature(&RootDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-				pOutBlob.GetAddressOf(), pErrorBlob.GetAddressOf()) >= 0,
-				"Serialize RootSignature Error!");
+			D3D12SerializeRootSignature(&RootDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+				pOutBlob.GetAddressOf(), pErrorBlob.GetAddressOf());
 
+			//PIXEL_CORE_INFO("{0}", *(pErrorBlob->GetBufferPointer()));
+			if (pErrorBlob != nullptr)
+			{
+				PIXEL_CORE_INFO("{0}", (char*)(pErrorBlob->GetBufferPointer()));
+			}
+			
 			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
-				IID_PPV_ARGS(&m_Signature)) >= 0, "Create RootSignature Error!");
+				IID_PPV_ARGS(m_pRootSig.GetAddressOf())) >= 0, "Create RootSignature Error!");
 
 			//set rootsignature's name
-			m_Signature->SetName(name.c_str());
+			m_pRootSig->SetName(name.c_str());
 
-			s_RootSignatureHashMap[HashCode].Attach(m_Signature);
+			s_RootSignatureHashMap[HashCode] = m_pRootSig;
 
-			PX_CORE_ASSERT(*RSRef == m_Signature, "Create RootSignature Error!");
+			PX_CORE_ASSERT(*RSRef == m_pRootSig.Get(), "Create RootSignature Error!");
 		}
 		else
 		{
 			while (*RSRef == nullptr)
 				std::this_thread::yield();
-			m_Signature = *RSRef;
+			m_pRootSig = s_RootSignatureHashMap[HashCode];
 		}
 
 		m_finalized = true;
@@ -292,7 +302,17 @@ namespace Pixel {
 
 	ID3D12RootSignature* DirectXRootSignature::GetNativeSignature() const
 	{
-		return m_Signature;
+		return m_pRootSig.Get();
+	}
+
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> DirectXRootSignature::GetComPtrSignature()
+	{
+		return m_pRootSig;
+	}
+
+	void DirectXRootSignature::DestroyAll()
+	{
+		s_RootSignatureHashMap.clear();
 	}
 
 }

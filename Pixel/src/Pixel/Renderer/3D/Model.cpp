@@ -4,6 +4,8 @@
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/UniformBuffer.h"
 #include "Pixel/Renderer/3D/Material.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/BaseRenderer.h"
 
 namespace Pixel {
 
@@ -23,6 +25,12 @@ namespace Pixel {
 	{	
 		for(unsigned int i = 0; i < m_Meshes.size(); ++i)
 			m_Meshes[i].Draw();
+	}
+
+	void Model::Draw(const glm::mat4& transform, Ref<Context> pContext)
+	{
+		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
+			m_Meshes[i].Draw(pContext, transform);
 	}
 
 	/*------------------------------------------------------
@@ -108,7 +116,7 @@ namespace Pixel {
 		//------Editor------
 		//------Allocator Memory------
 
-		staticMesh.VBO = VertexBuffer::Create(bufferSize);
+		//staticMesh.m_VertexBuffer = VertexBuffer::Create(bufferSize);
 
 		int32_t id = -1;
 		for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
@@ -153,9 +161,6 @@ namespace Pixel {
 		//Calculate Offset
 		elements = layout.GetElements();
 
-		staticMesh.VAO = VertexArray::Create();
-		staticMesh.VAO->Bind();
-
 		//------Alternation Copy TO VRM------
 		staticMesh.m_AlternationDataBuffer = new unsigned char[bufferSize];
 		for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
@@ -170,10 +175,10 @@ namespace Pixel {
 		}
 		//------Alternation Copy TO VRM------
 			
-		staticMesh.VBO->SetData(staticMesh.m_AlternationDataBuffer, bufferSize);
-		staticMesh.VBO->SetLayout(layout);
+		staticMesh.m_VertexBuffer = VertexBuffer::Create((float*)staticMesh.m_AlternationDataBuffer, mesh->mNumVertices, layout.GetStride());
+		//staticMesh.m_VertexBuffer->SetData(staticMesh.m_AlternationDataBuffer, bufferSize);
+		staticMesh.m_VertexBuffer->SetLayout(layout);
 		staticMesh.m_AlternationDataBufferSize = bufferSize;
-		staticMesh.VAO->AddVertexBuffer(staticMesh.VBO);
 
 		uint32_t IndexOffset = 0;
 		uint32_t IndexNums = 0;
@@ -191,8 +196,10 @@ namespace Pixel {
 			}
 		}
 
-		staticMesh.IBO = IndexBuffer::Create((uint32_t*)staticMesh.m_Index, IndexNums);
-		staticMesh.VAO->SetIndexBuffer(staticMesh.IBO);
+		staticMesh.m_IndexBuffer = IndexBuffer::Create((uint32_t*)staticMesh.m_Index, IndexNums);
+
+		//create pso
+		staticMesh.PsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
 
 		//std::vector<Vertex> vertices;
 		//std::vector<uint32_t> indices;

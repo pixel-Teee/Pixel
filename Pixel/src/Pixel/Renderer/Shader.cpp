@@ -5,20 +5,21 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Pixel/Renderer/3D/ShaderStringFactory.h"
 #include "Pixel/Renderer/3D/Material.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXShader.h"
 
 namespace Pixel {
 
-	Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
-	{
-		switch (Renderer::GetAPI())
-		{
-			case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
-		}
+	//Ref<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+	//{
+	//	switch (Renderer::GetAPI())
+	//	{
+	//		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+	//		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
+	//	}
 
-		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
-	}
+	//	PX_CORE_ASSERT(false, "Unknown RendererAPI!");
+	//	return nullptr;
+	//}
 
 	Ref<Shader> Shader::Create(const std::string& filepath)
 	{
@@ -26,6 +27,18 @@ namespace Pixel {
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(filepath);
+		}
+
+		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
+	Ref<Shader> Shader::Create(const std::string& filepath, const std::string& EntryPoint, const std::string& target)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+		case RendererAPI::API::DirectX12: return std::make_shared<DirectXShader>(filepath, EntryPoint, target);
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

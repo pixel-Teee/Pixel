@@ -111,7 +111,7 @@ namespace Pixel {
 		std::vector<BufferElement> m_Elements;
 		uint32_t m_Stride = 0;
 	};
-
+	class VBV;
 	class VertexBuffer
 	{
 	public:
@@ -137,10 +137,13 @@ namespace Pixel {
 		virtual bool HaveBoneWeight(uint32_t Level) = 0;
 		/*------*/
 
+		virtual Ref<VBV> GetVBV() = 0;
+
 		static Ref<VertexBuffer> Create(uint32_t size);
 		static VertexBuffer* Create(float* vertices, uint32_t size);
+		static Ref<VertexBuffer> Create(float* vertices, uint32_t ElementCount, uint32_t ElementSize);
 	};
-
+	class IBV;
 	class IndexBuffer
 	{
 	public:
@@ -150,6 +153,8 @@ namespace Pixel {
 		virtual void SetData(const void* data, uint32_t count) = 0;
 
 		virtual uint32_t GetCount() const = 0;
+
+		virtual Ref<IBV> GetIBV() = 0;
 
 		static Ref<IndexBuffer> Create(uint32_t count);
 		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);

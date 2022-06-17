@@ -19,6 +19,15 @@ namespace Pixel {
 		float MaxDepth;
 	};
 
+	enum class PiplinePrimitiveTopology
+	{
+		UNDEFINED,
+		POINT,
+		LINE,
+		TRIANGLE,
+		PATCH
+	};
+
 	enum class PrimitiveTopology
 	{
 		UNDEFINED,

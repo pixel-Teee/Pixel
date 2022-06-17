@@ -248,6 +248,12 @@ namespace Pixel {
 		return m_RendererID;
 	}
 
+	Pixel::Ref<Pixel::DescriptorCpuHandle> OpenGLFramebuffer::GetColorAttachmentDescriptorCpuHandle(uint32_t index)
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+		return nullptr;
+	}
+
 	void BindReadFramebuffer(uint32_t renderId)
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderId);

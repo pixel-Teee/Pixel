@@ -37,8 +37,11 @@ namespace Pixel
 		m_IconPlayHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 		m_IconStopHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 
+		m_FrameBufferHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
 		Device::Get()->CopyDescriptorsSimple(1, m_IconPlayHandle->GetCpuHandle(), m_IconPlay->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_IconStopHandle->GetCpuHandle(), m_IconStop->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		
 		m_CameraController.SetZoomLevel(5.5f);
 		/*------Create Geometry Framebuffer------*/
 
@@ -50,11 +53,11 @@ namespace Pixel
 		roughness	metallic	emissive	x
 		--------------------------------------*/
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
-		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
-		fbSpec.Width = 1280;
-		fbSpec.Height = 720;
-		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
+		//fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
+		//FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		//fbSpec.Width = 1280;
+		//fbSpec.Height = 720;
+		//m_GeoFramebuffer = Framebuffer::Create(fbSpec);
 		///*------Create Geometry Framebuffer------*/
 
 		///*------Create Framebuffer------*/	
@@ -62,6 +65,7 @@ namespace Pixel
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
 		///*------Create Framebuffer------*/
 
 		m_EditorScene = CreateRef<Scene>();
@@ -288,8 +292,9 @@ namespace Pixel
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
 
-		//uint32_t textureId = m_Framebuffer->GetColorAttachmentRendererID();
-		//ImGui::Image(reinterpret_cast<void*>(textureId), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
+		//uint64_t textureId = m_FrameBufferHandle->GetGpuPtr();
+		Ref<DescriptorGpuHandle> pHandle = m_FrameBufferHandle->GetGpuHandle();
+		ImGui::Image((ImTextureID)(pHandle->GetGpuPtr()), ImVec2{m_ViewportSize.x, m_ViewportSize.y});	
 
 		//PIXEL_CORE_INFO("{0}, {1}", minBound.x, minBound.y);
 
@@ -330,7 +335,7 @@ namespace Pixel
 
 			//entity transform
 			auto& tc = selectedEntity.GetComponent<TransformComponent>();
-			glm::mat4& transform = tc.GetTransform();
+			glm::mat4 transform = tc.GetTransform();
 			glm::vec3 originalRotation = tc.Rotation;
 
 			//snap
@@ -346,6 +351,10 @@ namespace Pixel
 
 			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION(m_GizmoType),
 			ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+			glm::mat4 cubeMatrix = glm::mat4(1.0f);
+
+			ImGuizmo::DrawCubes(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(cubeMatrix), 1);
 			
 			if (ImGuizmo::IsUsing())
 			{
@@ -427,7 +436,9 @@ namespace Pixel
 		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			//recopy to descriptor
+			Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+			//m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -446,7 +457,7 @@ namespace Pixel
 					m_EditorCamera.OnUpdate(ts);
 				}
 				//Update scene
-				//m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
+				m_ActiveScene->OnUpdateEditorForward(ts, m_EditorCamera, m_Framebuffer);
 				break;
 			}
 			case EditorLayer::SceneState::Play:
@@ -543,6 +554,8 @@ namespace Pixel
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 		}
+
+		return true;
 	}
 
 	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)

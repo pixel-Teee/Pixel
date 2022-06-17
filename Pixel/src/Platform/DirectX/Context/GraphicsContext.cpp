@@ -115,7 +115,7 @@ namespace Pixel {
 		if (static_cast<DirectXRootSignature&>(const_cast<RootSignature&>(RootSig)).GetNativeSignature() == m_CurrGraphicsRootSignature.Get())
 			return;
 
-		m_CurrGraphicsRootSignature.Attach(static_cast<DirectXRootSignature&>(const_cast<RootSignature&>(RootSig)).GetNativeSignature());
+		m_CurrGraphicsRootSignature = static_cast<DirectXRootSignature&>(const_cast<RootSignature&>(RootSig)).GetComPtrSignature();
 		m_pCommandList->SetGraphicsRootSignature(m_CurrGraphicsRootSignature.Get());
 
 		m_DynamicViewDescriptorHeap.ParseGraphicsRootSignature(RootSig);
@@ -389,7 +389,7 @@ namespace Pixel {
 
 	void GraphicsContext::DrawIndexed(uint32_t IndexCount, uint32_t StartIndexLocation /*= 0*/, int32_t BaseVertexLocation /*= 0*/)
 	{
-		
+		DrawIndexedInstanced(IndexCount, 1, StartIndexLocation, BaseVertexLocation, 0);
 	}
 
 	void GraphicsContext::DrawInstanced(uint32_t VertexCountPerInstance, uint32_t InstanceCount, uint32_t StartVertexLocation /*= 0*/,

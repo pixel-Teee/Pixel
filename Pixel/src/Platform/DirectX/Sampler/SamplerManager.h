@@ -7,7 +7,7 @@
 
 namespace Pixel {
 	class Device;
-	class DirectXSamplerDesc : SamplerDesc {
+	class DirectXSamplerDesc : public SamplerDesc {
 	public:
 		//these defaults match the default values for hlsl-defined root signature static samplers
 		//so not overriding them here means you can safely not define then in hlsl

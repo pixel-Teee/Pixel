@@ -13,6 +13,7 @@
 
 
 namespace Pixel {
+	class BaseRenderer;
 	class PIXEL_API Application
 	{
 	public:
@@ -44,10 +45,13 @@ namespace Pixel {
 			return *(it + layerIndex);
 		}
 
+		Ref<BaseRenderer> GetRenderer();
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:
+		Ref<BaseRenderer> m_pRenderer;
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;

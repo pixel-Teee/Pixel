@@ -21,7 +21,7 @@ namespace Pixel {
 	void EditorCamera::UpdateProjection()
 	{
 		m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
-		m_Projection = glm::perspective(glm::radians(m_FOV), m_AspectRatio, m_NearClip, m_FarClip);
+		m_Projection = glm::perspectiveLH_ZO(glm::radians(m_FOV), m_AspectRatio, m_NearClip, m_FarClip);
 	}
 
 	void EditorCamera::UpdateView()
@@ -128,7 +128,7 @@ namespace Pixel {
 
 	glm::vec3 EditorCamera::GetForwardDirection() const
 	{
-		return glm::rotate(GetOrientation(), glm::vec3(0.0f, 0.0f, -1.0f));
+		return glm::rotate(GetOrientation(), glm::vec3(0.0f, 0.0f, 1.0f));
 	}
 
 	glm::vec3 EditorCamera::CalculatePosition() const

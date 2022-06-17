@@ -8,6 +8,7 @@ namespace Pixel {
 	class DirectXVBV : public VBV
 	{
 	public:
+		friend class DirectXVertexBuffer;
 		DirectXVBV(Ref<GpuVirtualAddress> pGpuVirtualAddress, size_t OffSet, uint32_t Size, uint32_t Stride);
 		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView();
 	private:

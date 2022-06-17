@@ -402,9 +402,9 @@ namespace Pixel {
 			BindDescriptorHeaps();
 	}
 
-	void DirectXContext::SetPipelineState(const DirectXPSO& pso)
+	void DirectXContext::SetPipelineState(const PSO& pso)
 	{
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> PipelineState = pso.GetPipelineStateObject();
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> PipelineState = static_cast<const GraphicsPSO&>(pso).GetPipelineStateObject();
 
 		if (PipelineState == m_CurrPipelineState)
 			return;

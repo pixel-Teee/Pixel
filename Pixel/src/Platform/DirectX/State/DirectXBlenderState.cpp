@@ -6,6 +6,8 @@ namespace Pixel {
 
 	DirectXBlenderState::DirectXBlenderState()
 	{
+		//m_DefaultBlendDesc = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+		ZeroMemory(&m_DefaultBlendDesc, sizeof(D3D12_BLEND_DESC));
 		//------Blend Describe------
 		m_DefaultBlendDesc.AlphaToCoverageEnable = false;
 		m_DefaultBlendDesc.IndependentBlendEnable = false;

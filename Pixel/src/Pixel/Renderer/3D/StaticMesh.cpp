@@ -4,6 +4,10 @@
 #include "Pixel/Renderer/RenderCommand.h"
 #include "Pixel/Renderer/UniformBuffer.h"
 #include "Pixel/Renderer/3D/Material.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/BaseRenderer.h"
+#include "Pixel/Renderer/Context/Context.h"
+#include "Pixel/Renderer/RendererType.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -53,9 +57,9 @@ namespace Pixel {
 
 	StaticMesh::StaticMesh(const StaticMesh& others)
 	{
-		VAO = others.VAO;
-		VBO = others.VBO;
-		IBO = others.IBO;
+		//TODO:need to refractor
+		m_VertexBuffer = others.m_VertexBuffer;
+		m_IndexBuffer = others.m_IndexBuffer;
 
 		for (uint32_t i = 0; i < (uint32_t)Semantics::MAX; ++i)
 		{
@@ -95,6 +99,8 @@ namespace Pixel {
 			m_AlternationDataBuffer = nullptr;
 			m_AlternationDataBufferSize = 0;
 		}
+
+		PsoIndex = others.PsoIndex;
 	}
 
 	StaticMesh::~StaticMesh()
@@ -123,31 +129,31 @@ namespace Pixel {
 
 	void StaticMesh::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer, bool bEntityDirty)
 	{
-		SetupMesh(entityID, bEntityDirty);
-		shader->Bind();
-		glm::mat4 trans = transform;
-		//fix:hard code
-		shader->SetMat4("u_Model", transform);
-		//modelUniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(trans));
+		//SetupMesh(entityID, bEntityDirty);
+		//shader->Bind();
+		//glm::mat4 trans = transform;
+		////fix:hard code
+		//shader->SetMat4("u_Model", transform);
+		////modelUniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(trans));
 
-		//Bind Texture
-		shader->SetInt("tex_Albedo", 0);
-		textures[0]->Bind(0);
+		////Bind Texture
+		//shader->SetInt("tex_Albedo", 0);
+		//textures[0]->Bind(0);
 
-		shader->SetInt("tex_normalMap", 1);
-		textures[1]->Bind(1);
+		//shader->SetInt("tex_normalMap", 1);
+		//textures[1]->Bind(1);
 
-		shader->SetInt("tex_Specular", 2);
-		textures[2]->Bind(2);
+		//shader->SetInt("tex_Specular", 2);
+		//textures[2]->Bind(2);
 
-		shader->SetInt("tex_metallic", 3);
-		textures[3]->Bind(3);
+		//shader->SetInt("tex_metallic", 3);
+		//textures[3]->Bind(3);
 
-		shader->SetInt("tex_emissive", 4);
-		textures[4]->Bind(4);
+		//shader->SetInt("tex_emissive", 4);
+		//textures[4]->Bind(4);
 
-		VAO->Bind();
-		RenderCommand::DrawIndexed(Primitive::TRIANGLE, VAO, IBO->GetCount());
+		//VAO->Bind();
+		//RenderCommand::DrawIndexed(Primitive::TRIANGLE, VAO, IBO->GetCount());
 	}
 
 	void StaticMesh::Draw()
@@ -155,16 +161,15 @@ namespace Pixel {
 		if (!isFirst)
 		{
 			isFirst = true;
-			VAO->Bind();
 
-			VBO->SetData(m_AlternationDataBuffer, m_AlternationDataBufferSize);
 
-			IBO->SetData(m_Index, m_IndexSize / 4);
+			m_VertexBuffer->SetData(m_AlternationDataBuffer, m_AlternationDataBufferSize);
 
-			VAO->Unbind();
+			m_IndexBuffer->SetData(m_Index, m_IndexSize / 4);
+
 		}
-		VAO->Bind();
-		RenderCommand::DrawIndexed(Primitive::TRIANGLE, VAO, IBO->GetCount());
+
+		//RenderCommand::DrawIndexed(Primitive::TRIANGLE, VAO, IBO->GetCount());
 	}
 
 	void StaticMesh::Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID)
@@ -173,14 +178,27 @@ namespace Pixel {
 		
 	}
 
-	Ref<VertexArray> StaticMesh::GetVerterArray()
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform)
 	{
-		return VAO;
+		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
+
+		m_MeshConstant.world = glm::transpose(transform);
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+
+		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_IndexBuffer->GetCount());
 	}
+
+	//Ref<VertexArray> StaticMesh::GetVerterArray()
+	//{
+	//	return VAO;
+	//}
 
 	Ref<VertexBuffer> StaticMesh::GetVertexBuffer()
 	{
-		return VBO;
+		return m_VertexBuffer;
 	}
 
 	//setup mesh after load model
@@ -190,13 +208,12 @@ namespace Pixel {
 		{
 			bHavedSwitched = false;
 			EntityID = entityID;
-			VAO->Bind();
 
 			uint32_t numVertices = m_DataBufferSize[(uint64_t)Semantics::POSITION] / 12;
 
 			uint32_t offset = 0;
 			uint32_t size = 0;
-			for (auto element : VBO->GetLayout())
+			for (auto element : m_VertexBuffer->GetLayout())
 			{
 				if (element.m_sematics == Semantics::Editor)
 				{
@@ -213,7 +230,7 @@ namespace Pixel {
 			}
 
 			//unsigned char* dataBuffer = new unsigned char[bufferSize];
-			BufferLayout layout = VBO->GetLayout();
+			BufferLayout layout = m_VertexBuffer->GetLayout();
 			const std::vector<BufferElement>& elements = layout.GetElements();
 			for (uint32_t i = 0; i < numVertices; ++i)
 			{
@@ -225,11 +242,9 @@ namespace Pixel {
 			}
 			//delete []dataBuffer;
 
-			VBO->SetData(m_AlternationDataBuffer, m_AlternationDataBufferSize);
+			m_VertexBuffer->SetData(m_AlternationDataBuffer, m_AlternationDataBufferSize);
 
-			IBO->SetData(m_Index, m_IndexSize / 4);
-
-			VAO->Unbind();
+			m_IndexBuffer->SetData(m_Index, m_IndexSize / 4);
 		}	
 	}
 

@@ -18,6 +18,7 @@ namespace Pixel {
 		virtual void SetBlendState(Ref<BlenderState> pBlendState) = 0;
 		virtual void SetRasterizerState(Ref<RasterState> pRasterState) = 0;
 		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
+		virtual void SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType) = 0;
 
 		virtual void Finalize() = 0;
 

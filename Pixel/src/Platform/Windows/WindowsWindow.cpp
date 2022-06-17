@@ -38,15 +38,6 @@ namespace Pixel {
 
 		Device::SetNull();
 		//delete m_DirectXContext;
-#if PX_DEBUG
-		{
-			Microsoft::WRL::ComPtr<IDXGIDebug1> pdxgiDebug;
-			if (DXGIGetDebugInterface1(0, IID_PPV_ARGS(pdxgiDebug.ReleaseAndGetAddressOf())) >= 0)
-			{
-				pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
-			}
-		}
-#endif	
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)

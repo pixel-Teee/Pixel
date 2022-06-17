@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <vector>
 #include <queue>
 
@@ -31,6 +29,7 @@ namespace Pixel {
 	class DescriptorCpuHandle;
 	class DescriptorGpuHandle;
 	class DescriptorHeap;
+	class PSO;
 
 	class DirectXContext : public Context
 	{
@@ -82,7 +81,7 @@ namespace Pixel {
 		virtual void SetDescriptorHeap(DescriptorHeapType Type, Ref<DescriptorHeap> HeapPtr) override;
 		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type, ID3D12DescriptorHeap* HeapPtr);
 		void SetDescriptorHeaps(uint32_t HeapCount, D3D12_DESCRIPTOR_HEAP_TYPE Type[], Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> HeapPtrs[]);
-		void SetPipelineState(const DirectXPSO& pso);
+		virtual void SetPipelineState(const PSO& pso) override;
 
 		GraphicsContext& GetGraphicsContext();
 

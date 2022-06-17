@@ -24,6 +24,8 @@ namespace Pixel {
 
 	D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopologyToDirectXPrimitiveTopology(PrimitiveTopology Topology);
 
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE PiplinePrimitiveTopologyToDirectXPrimitiveTopology(PiplinePrimitiveTopology Topology);
+
 	D3D12_RESOURCE_STATES ResourceStatesToDirectXResourceStates(ResourceStates States);
 
 	D3D12_COMMAND_LIST_TYPE CmdListTypeToDirectXCmdListType(CommandListType CmdListType);

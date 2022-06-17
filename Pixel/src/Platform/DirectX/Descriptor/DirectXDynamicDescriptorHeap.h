@@ -9,6 +9,7 @@
 #include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
 
 namespace Pixel {
+	class Context;
 	class DirectXContext;
 	class RootSignature;
 	class Device;

@@ -364,6 +364,23 @@ namespace Pixel {
 		}
 	}
 
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE PiplinePrimitiveTopologyToDirectXPrimitiveTopology(PiplinePrimitiveTopology Topology)
+	{
+		switch (Topology)
+		{
+		case PiplinePrimitiveTopology::UNDEFINED:
+			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
+		case PiplinePrimitiveTopology::POINT:
+			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+		case PiplinePrimitiveTopology::LINE:
+			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+		case PiplinePrimitiveTopology::TRIANGLE:
+			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		case PiplinePrimitiveTopology::PATCH:
+			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+		}
+	}
+
 	D3D12_RESOURCE_STATES ResourceStatesToDirectXResourceStates(ResourceStates States)
 	{
 		switch (States)

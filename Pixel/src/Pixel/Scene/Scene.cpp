@@ -7,6 +7,11 @@
 #include "Pixel/Core/Input.h"
 #include "Pixel/Renderer/Renderer2D.h"
 #include "Pixel/Renderer/3D/Renderer3D.h"
+#include "Pixel/Renderer/Context/Context.h"
+#include "Pixel/Renderer/Context/ContextManager.h"
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/BaseRenderer.h"
 
 #include <glm/glm.hpp>
 
@@ -641,6 +646,38 @@ namespace Pixel
 		g_Scene = nullptr;
 	}
 
+	void Scene::OnUpdateEditorForward(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pFrameBuffer)
+	{
+		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent>);
+
+		std::vector<TransformComponent> trans;
+		std::vector<StaticMeshComponent> meshs;
+		for (auto entity : group)
+		{
+			auto [transform, mesh] = group.get<TransformComponent, StaticMeshComponent>(entity);
+
+			//in terms of transform and mesh to draw
+			trans.push_back(transform);
+			meshs.push_back(mesh);
+		}
+
+		std::vector<LightComponent> lights;
+		std::vector<TransformComponent> lightTrans;
+		auto lightGroup = m_Registry.group<LightComponent>(entt::get<TransformComponent>);
+		for (auto entity : lightGroup)
+		{
+			auto [trans, light] = lightGroup.get<TransformComponent, LightComponent>(entity);
+
+			//in terms of transform and mesh to draw
+			lightTrans.push_back(trans);
+			lights.push_back(light);
+		}
+
+		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		Application::Get().GetRenderer()->ForwardRendering(pContext, camera, trans, meshs, lights, lightTrans, pFrameBuffer);
+		pContext->Finish(true);
+	}
+
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
 	{
 		//Renderer3D::BeginScene(camera, m_GeoPassFramebuffer);
@@ -668,7 +705,7 @@ namespace Pixel
 			Trans.push_back(transform);
 			//Trans.back().SetScale(glm::vec3(Lights.back().GetSphereLightVolumeRadius()));
 		}
-		
+
 		//Renderer3D::EndScene(camera, glm::vec2(m_ViewportWidth, m_ViewportHeight), Trans, Lights, m_GeoPassFramebuffer, m_LightPassFramebuffer);
 
 		//Renderer3D::DrawSkyBox(camera, m_LightPassFramebuffer, m_GeoPassFramebuffer);

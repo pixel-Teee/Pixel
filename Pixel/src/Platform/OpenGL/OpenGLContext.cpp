@@ -308,4 +308,9 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	void OpenGLContext::SetPipelineState(const PSO& pso)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 }

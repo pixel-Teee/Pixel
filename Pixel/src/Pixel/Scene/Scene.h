@@ -37,6 +37,9 @@ namespace Pixel
 
 		entt::registry& Reg() { return m_Registry; }
 
+		void OnUpdateEditorForward(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pFrameBuffer);
+
+		//TODO:need to refractor
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
 		void OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
 		void OnViewportResize(uint32_t width, uint32_t height);

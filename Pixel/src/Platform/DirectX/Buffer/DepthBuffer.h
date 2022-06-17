@@ -10,7 +10,7 @@ namespace Pixel {
 	{
 	public:
 		//DepthBuffer();
-		DepthBuffer(float ClearDepth = 0.0f, uint8_t ClearStencil = 0);
+		DepthBuffer(float ClearDepth = 1.0f, uint8_t ClearStencil = 0);
 
 		void Create(const std::wstring& Name, uint32_t Width, uint32_t Height,
 			ImageFormat Format, Ref<GpuVirtualAddress> VideoMemoryPtr /*= -1*/);

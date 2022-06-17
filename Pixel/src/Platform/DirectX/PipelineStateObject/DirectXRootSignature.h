@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Platform/DirectX/Context/DirectXContext.h"
+#include <wrl/client.h>
+#include "Platform/DirectX/d3dx12.h"
+
 #include "Pixel/Renderer/PipelineStateObject/RootSignature.h"
 #include "Pixel/Renderer/PipelineStateObject/RootParameter.h"
 #include "Pixel/Renderer/RendererType.h"
@@ -33,6 +35,10 @@ namespace Pixel {
 		virtual void Finalize(const std::wstring& name, RootSignatureFlag Flags) override;
 
 		ID3D12RootSignature* GetNativeSignature() const;
+
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> GetComPtrSignature();
+
+		static void DestroyAll();
 	protected:
 		//have already initialized?
 		bool m_finalized;
@@ -49,7 +55,7 @@ namespace Pixel {
 		//static sampler desc array
 		std::unique_ptr<D3D12_STATIC_SAMPLER_DESC[]> m_SamplerArray;
 
-		ID3D12RootSignature* m_Signature;
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> m_pRootSig;
 
 		uint32_t m_DescriptorTableBitMap; //one bit is set for root parameters that are non-sampler descriptor tables
 		uint32_t m_SamplerTableBitMap; //one bit is set for root parameters that are sampler descriptor tables

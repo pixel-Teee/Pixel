@@ -45,6 +45,8 @@ namespace Pixel {
 		ResourceDesc.SampleDesc.Count = NumSamples;
 
 		D3D12_CLEAR_VALUE ClearValue = {};
+		ClearValue.DepthStencil.Depth = m_ClearDepth;
+		ClearValue.DepthStencil.Stencil = m_ClearStencil;
 		ClearValue.Format = FormatToDXGIFormat(Format);
 		CreateTextureResource(Name, ResourceDesc, ClearValue, VideoMemoryPtr);
 		CreateDerivedViews(FormatToDXGIFormat(Format));

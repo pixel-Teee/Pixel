@@ -8,7 +8,6 @@
 #include "Platform/DirectX/State/DirectXBlenderState.h"
 #include "Platform/DirectX/State/DirectXRasterState.h"
 #include "Platform/DirectX/State/DirectXDepthState.h"
-#include "Pixel/Utils/Hash.h"
 
 namespace Pixel {
 
@@ -43,13 +42,18 @@ namespace Pixel {
 	GraphicsPSO::GraphicsPSO(const wchar_t* Name)
 	:DirectXPSO(Name)
 	{
-
+		//m_pPSO = {};
+		ZeroMemory(&m_PSODesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+		m_PSODesc.SampleMask = UINT_MAX;
+		//m_Name = Name;
 	}
 
 	GraphicsPSO::GraphicsPSO(const GraphicsPSO& pso)
 	{
 		m_PSODesc = pso.m_PSODesc;
 		m_InputLayouts = pso.m_InputLayouts;
+		m_pRootSignature = pso.m_pRootSignature;
+		m_Name = pso.m_Name;
 	}
 
 	void GraphicsPSO::SetBlendState(const D3D12_BLEND_DESC& BlendDesc)
@@ -93,10 +97,15 @@ namespace Pixel {
 		m_PSODesc.SampleMask = SampleMask;
 	}
 
-	void GraphicsPSO::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE TopologyType)
+	//void GraphicsPSO::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE TopologyType)
+	//{
+	//	PX_CORE_ASSERT(TopologyType != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED, "can't draw with undefined topology");
+	//	m_PSODesc.PrimitiveTopologyType = TopologyType;
+	//}
+
+	void GraphicsPSO::SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType)
 	{
-		PX_CORE_ASSERT(TopologyType != D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED, "can't draw with undefined topology");
-		m_PSODesc.PrimitiveTopologyType = TopologyType;
+		m_PSODesc.PrimitiveTopologyType = PiplinePrimitiveTopologyToDirectXPrimitiveTopology(TopologyType);
 	}
 
 	void GraphicsPSO::SetDepthTargetFormat(ImageFormat DSVFormat, uint32_t MsaaCount /*= 1*/, uint32_t MsaaQuality /*= 0*/)
@@ -118,7 +127,7 @@ namespace Pixel {
 
 			m_PSODesc.RTVFormats[i] = ImageFormatToDirectXImageFormat(RTVFormats[i]);
 		}
-
+		m_PSODesc.NumRenderTargets = 8;
 		//left render targets is null
 		for (uint32_t i = NumRTVs; i < m_PSODesc.NumRenderTargets; ++i)
 			m_PSODesc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
@@ -168,9 +177,9 @@ namespace Pixel {
 		PX_CORE_ASSERT(std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature() != nullptr, "root signature is nullptr!");
 	
 		m_PSODesc.InputLayout.pInputElementDescs = nullptr;
-		size_t HashCode = Utility::HashState(&m_PSODesc);
+		size_t HashCode = Utility::HashState((const uint32_t*)&m_PSODesc);
 		//hash the input layout elements
-		HashCode = Utility::HashState(m_InputLayouts.get(), m_PSODesc.InputLayout.NumElements, HashCode);
+		HashCode = Utility::HashState((const uint32_t*)m_InputLayouts.get(), m_PSODesc.InputLayout.NumElements, HashCode);
 		m_PSODesc.InputLayout.pInputElementDescs = m_InputLayouts.get();
 
 		ID3D12PipelineState** PSORef = nullptr;

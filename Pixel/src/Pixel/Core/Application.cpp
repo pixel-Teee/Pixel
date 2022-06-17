@@ -15,11 +15,13 @@
 #if defined(_DEBUG)
 #include <dxgi1_3.h>
 #include <dxgidebug.h>
+#include <vld.h>
 #endif
 
 #ifndef PX_OPENGL
 #include <wrl/client.h>
 #include "Platform/DirectX/d3dx12.h"
+#include "Platform/DirectX/DirectXRenderer.h"
 #endif
 
 namespace Pixel {
@@ -39,6 +41,8 @@ namespace Pixel {
 
 		m_ImGuiLayer = new ImGuiLayer(m_Window->GetDevice());
 		PushOverlay(m_ImGuiLayer);	
+
+		m_pRenderer = BaseRenderer::Create();
 	}
 	Application::~Application()
 	{
@@ -94,6 +98,11 @@ namespace Pixel {
 	void Application::Close()
 	{
 		m_Running = false;
+	}
+
+	Ref<BaseRenderer> Application::GetRenderer()
+	{
+		return m_pRenderer;
 	}
 
 	void Application::Run()

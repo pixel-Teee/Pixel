@@ -96,6 +96,7 @@ target_compile_definitions(Pixel
     PRIVATE PIXEL_3D
     PRIVATE __BT_DISABLE_SSE__
     PRIVATE B3_USE_CLEW
+    PRIVATE GLM_FORCE_LEFT_HANDED
 )
 
 set_source_files_properties(vendor/imguizmo/imGuizmo.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)

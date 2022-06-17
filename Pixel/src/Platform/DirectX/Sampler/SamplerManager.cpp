@@ -5,7 +5,6 @@
 #include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Descriptor/DirectXDescriptorAllocator.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
-#include "Pixel/Utils/Hash.h"
 
 namespace Pixel {
 
@@ -45,7 +44,7 @@ namespace Pixel {
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DirectXSamplerDesc::CreateDescriptor()
 	{
-		size_t hashValue = Utility::HashState(&m_SamplerDesc);
+		size_t hashValue = Utility::HashState((uint32_t*)&m_SamplerDesc);
 		auto iter = s_SamplerCache.find(hashValue);
 		if (iter != s_SamplerCache.end())
 		{

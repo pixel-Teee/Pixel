@@ -10,7 +10,13 @@
 
 namespace Pixel {
 
+	struct alignas(256) MeshConstant
+	{
+		glm::mat4 world;
+	};
+
 	class MaterialInstance;
+	class Context;
 	class StaticMesh
 	{
 	public:
@@ -27,7 +33,10 @@ namespace Pixel {
 		//TODO:temporary forward draw
 		void Draw();
 
-		Ref<VertexArray> GetVerterArray();
+		//TODO:Test
+		void Draw(Ref<Context> pContext, const glm::mat4& transform);
+
+		//Ref<VertexArray> GetVerterArray();
 		Ref<VertexBuffer> GetVertexBuffer();
 
 		unsigned char* GetIndexBuffer() { return m_Index; }
@@ -43,9 +52,11 @@ namespace Pixel {
 		unsigned char* m_AlternationDataBuffer = nullptr;
 		uint32_t m_AlternationDataBufferSize = 0;//total databuffer size
 		/*------Data------*/
-		Ref<VertexArray> VAO;
-		Ref<VertexBuffer> VBO;
-		Ref<IndexBuffer> IBO;
+
+		Ref<VertexBuffer> m_VertexBuffer;
+		Ref<IndexBuffer> m_IndexBuffer;
+
+		uint32_t PsoIndex;//pipeline state object index
 
 		int EntityID = -1;
 
@@ -53,6 +64,8 @@ namespace Pixel {
 		bool isFirst = false;
 
 		void SetupMesh(int entityID, bool bHavedSwitched);
+
+		MeshConstant m_MeshConstant;
 
 		friend class Model;
 	};

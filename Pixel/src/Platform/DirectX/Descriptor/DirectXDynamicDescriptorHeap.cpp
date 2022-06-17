@@ -8,6 +8,7 @@
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorGpuHandle.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootSignature.h"
 #include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/Context/DirectXContext.h"
 
 namespace Pixel {
 

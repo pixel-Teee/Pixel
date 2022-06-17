@@ -17,6 +17,7 @@ namespace Pixel {
 	class DescriptorHeap;
 	class ContextManager;
 	class GpuResource;
+	class PSO;
 
 	class Context : public std::enable_shared_from_this<Context>
 	{
@@ -100,6 +101,8 @@ namespace Pixel {
 		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) = 0;
 		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) = 0;
 		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) = 0;
+
+		virtual void SetPipelineState(const PSO& pso) = 0;
 
 		virtual void Draw(uint32_t VertexCount, uint32_t VertexStartOffset = 0) = 0;
 		virtual void DrawIndexed(uint32_t IndexCount, uint32_t StartIndexLocation = 0, int32_t BaseVertexLocation = 0) = 0;

@@ -94,6 +94,8 @@ namespace Pixel
 
 		Ref<DescriptorHandle> m_IconPlayHandle, m_IconStopHandle;
 
+		Ref<DescriptorHandle> m_FrameBufferHandle;
+
 		//----------test
 		Ref<Shader> m_testShader;
 		Model m_Model;

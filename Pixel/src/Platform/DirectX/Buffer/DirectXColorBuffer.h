@@ -13,7 +13,7 @@ namespace Pixel {
 	public:
 		friend class GraphicsContext;
 
-		DirectXColorBuffer(glm::vec4 ClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		DirectXColorBuffer(glm::vec4 ClearColor = glm::vec4(0.4f, 0.6f, 0.2f, 1.0f));
 
 		//create a color buffer from a swap chain buffer
 		//unordered access is restricted

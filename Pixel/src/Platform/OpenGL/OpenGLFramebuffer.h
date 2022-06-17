@@ -36,6 +36,9 @@ namespace Pixel {
 
 		uint32_t GetRenderId() override;
 
+
+		virtual Ref<DescriptorCpuHandle> GetColorAttachmentDescriptorCpuHandle(uint32_t index) override;
+
 	private:
 		uint32_t m_RendererID = 0;
 		

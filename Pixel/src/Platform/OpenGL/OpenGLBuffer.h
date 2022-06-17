@@ -30,6 +30,9 @@ namespace Pixel {
 
 		bool HaveBoneIndex(uint32_t Level) override;
 		bool HaveBoneWeight(uint32_t Level) override;
+
+		virtual Ref<VBV> GetVBV() override;
+
 		//------check vertex type info------
 	private:
 		bool CheckHaveSematics(Semantics semantics, uint32_t level);
@@ -53,6 +56,9 @@ namespace Pixel {
 		virtual void SetData(const void* data, uint32_t count) override;
 		
 		virtual uint32_t GetCount() const { return m_Count; }
+
+		virtual Ref<IBV> GetIBV() override;
+
 	private:
 		uint32_t m_RendererID;
 		uint32_t m_Count;
