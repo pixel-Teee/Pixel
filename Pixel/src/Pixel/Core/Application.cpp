@@ -15,7 +15,6 @@
 #if defined(_DEBUG)
 #include <dxgi1_3.h>
 #include <dxgidebug.h>
-#include <vld.h>
 #endif
 
 #ifndef PX_OPENGL
@@ -116,7 +115,7 @@ namespace Pixel {
 			if (!m_Minimized)
 			{
 				for (Layer* layer : m_LayerStack)
-					layer->OnUpdate(timestep);				
+					layer->OnUpdate(timestep);
 			}
 			
 			m_ImGuiLayer->Begin();

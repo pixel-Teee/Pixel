@@ -18,6 +18,7 @@ extern Pixel::Application* Pixel::CreateApplication();
 
 int main()
 {
+	//_CrtSetBreakAlloc(339);
 	Pixel::Log::Init();
 	//printf("Pixel Engine\n");
 
@@ -40,7 +41,7 @@ int main()
 		}
 	}
 #endif	
-
+	//_CrtDumpMemoryLeaks();
 }
 
 #endif

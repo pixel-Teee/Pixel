@@ -210,7 +210,7 @@ namespace Pixel {
 			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateGraphicsPipelineState(&m_PSODesc, IID_PPV_ARGS(m_pPSO.GetAddressOf())) >= 0,
 				"Create Pipeline State Object Error!");
 
-			s_GraphicsPSOHashMap[HashCode].Attach(m_pPSO.Get());
+			s_GraphicsPSOHashMap[HashCode] = m_pPSO;
 			m_pPSO->SetName(m_Name);
 		}
 		else

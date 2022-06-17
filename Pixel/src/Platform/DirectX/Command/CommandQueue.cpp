@@ -35,7 +35,7 @@ namespace Pixel {
 			if (AllocatorPair.first <= CompletedFenceValue)
 			{
 				pAllocator = AllocatorPair.second;
-
+				PX_CORE_ASSERT(pAllocator->Reset() >= 0, "Command Allocator's Reset Error!")
 				m_ReadyAlloactors.pop();
 			}
 		}

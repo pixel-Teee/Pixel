@@ -32,7 +32,7 @@ namespace Pixel {
 			"resize the swap chain error!"
 		);
 
-		m_CurrentBackBufferIndex = 0;
+		m_CurrentBackBufferIndex = 1;
 
 		//create the swap chain buffer, and create rtv references id3d12resource
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
@@ -124,7 +124,7 @@ namespace Pixel {
 
 	void DirectXSwapChain::Present()
 	{
-		m_SwapChain->Present(0, 0);
+		m_SwapChain->Present(1, 0);
 		m_CurrentBackBufferIndex = (m_CurrentBackBufferIndex + 1) % SwapChainBufferCount;
 	}
 

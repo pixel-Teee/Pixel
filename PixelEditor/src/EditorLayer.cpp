@@ -352,9 +352,9 @@ namespace Pixel
 			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION(m_GizmoType),
 			ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
 
-			glm::mat4 cubeMatrix = glm::mat4(1.0f);
+			//glm::mat4 cubeMatrix = glm::mat4(1.0f);
 
-			ImGuizmo::DrawCubes(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(cubeMatrix), 1);
+			//ImGuizmo::DrawCubes(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), glm::value_ptr(cubeMatrix), 1);
 			
 			if (ImGuizmo::IsUsing())
 			{

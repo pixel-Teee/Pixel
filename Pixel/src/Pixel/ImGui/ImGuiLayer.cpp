@@ -215,15 +215,15 @@ namespace Pixel {
 
 		EndContext->ClearColor(*m_BackBuffer[index].get(), color);
 
-	//	ImGui::Begin("DirectX12 Texture Test");
-	//	EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
+		//ImGui::Begin("DirectX12 Texture Test");
+		//EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
 		//ImGui::Image((ImTextureID)(m_pTexture->GetRendererID()), ImVec2(256, 256));
-	//	ImGui::End();
+		//ImGui::End();
 		EndContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_srvHeap);
 
 		ImGui::Render();
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), (ID3D12GraphicsCommandList*)(EndContext->GetNativeCommandList()));
-		//
+		
 		EndContext->TransitionResource(*m_BackBuffer[index], ResourceStates::Present, true);
 
 		////dx present
