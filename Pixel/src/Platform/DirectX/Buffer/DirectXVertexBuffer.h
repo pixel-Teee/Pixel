@@ -47,5 +47,8 @@ namespace Pixel {
 		BufferLayout m_Layout;
 		Ref<GpuResource> m_pResource;
 		Ref<VBV> m_pVBV;
+
+		uint32_t m_ElementCount;
+		uint32_t m_ElementSize;
 	};
 }

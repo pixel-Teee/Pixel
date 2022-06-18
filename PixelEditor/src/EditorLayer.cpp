@@ -11,6 +11,7 @@
 #include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Renderer/BaseRenderer.h"
 
 #include <chrono>
 
@@ -42,6 +43,8 @@ namespace Pixel
 		Device::Get()->CopyDescriptorsSimple(1, m_IconPlayHandle->GetCpuHandle(), m_IconPlay->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_IconStopHandle->GetCpuHandle(), m_IconStop->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		
+		m_UVBufferHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
 		m_CameraController.SetZoomLevel(5.5f);
 		/*------Create Geometry Framebuffer------*/
 
@@ -61,10 +64,11 @@ namespace Pixel
 		///*------Create Geometry Framebuffer------*/
 
 		///*------Create Framebuffer------*/	
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+		
 		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
 		///*------Create Framebuffer------*/
 
@@ -250,20 +254,20 @@ namespace Pixel
 		/*----------Render Content Browser----------*/
 
 		/*----------Render Stats----------*/
-		/*ImGui::Begin("Render Stats");
+		ImGui::Begin("Render Stats");
 
 		std::string name = "None";
 		if(m_HoveredEntity)
 			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 			ImGui::Text("Hovered Entity: %s", name.c_str());
 
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats");
-		ImGui::Text("Draw Call: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::End();*/
+		//auto stats = Renderer2D::GetStats();
+		//ImGui::Text("Renderer2D Stats");
+		//ImGui::Text("Draw Call: %d", stats.DrawCalls);
+		//ImGui::Text("Quads: %d", stats.QuadCount);
+		//ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+		//ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::End();
 		/*----------Render Stats----------*/
 
 		/*----------View Port----------*/
@@ -419,6 +423,15 @@ namespace Pixel
 		ImGui::End();*/
 		/*---------Deferred Shading Viewport---------*/
 
+		/*---------Debug Pannel---------*/
+		//ImGui::Begin("UvBuffer");
+		//Ref<DescriptorCpuHandle> UVBufferHandle = Application::Get().GetRenderer()->GetUVBufferHandle();
+		//Device::Get()->CopyDescriptorsSimple(1, m_UVBufferHandle->GetCpuHandle(), UVBufferHandle, DescriptorHeapType::CBV_UAV_SRV);
+		//Ref<DescriptorGpuHandle> pGpuHandle = m_UVBufferHandle->GetGpuHandle();
+		//ImGui::Image((ImTextureID)(pGpuHandle->GetGpuPtr()), ImVec2(256, 256));
+		//ImGui::End();
+		/*---------Debug Pannel---------*/
+
 		/*---------Play Button And Pause Button---------*/
 		UI_Toobar();
 		/*---------Play Button And Pause Button----------*/
@@ -476,16 +489,14 @@ namespace Pixel
 
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
-		//PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
+		PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
 
-		//m_GeoFramebuffer->Bind();
-		//if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
-		//{
-		//	int pixelData = m_GeoFramebuffer->ReadPixel(4, mouseX, mouseY);
-		//	//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
-		//	m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
-		//}
-		//m_GeoFramebuffer->UnBind();
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		{
+			int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
+			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
+			//m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+		}
 	}
 
 	void EditorLayer::OnEvent(Event& e)

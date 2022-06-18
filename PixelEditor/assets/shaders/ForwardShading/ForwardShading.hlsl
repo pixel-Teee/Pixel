@@ -32,6 +32,13 @@ struct VertexOut
 	float2 TexCoord : TEXCOORD;
 	float3 NormalW : NORMAL;
 	float4x4 Test : TEXCOORD2;
+	int Editor : EDITOR;
+};
+
+struct PixelOut
+{
+	float4 color1 : SV_Target;
+	int color2 : SV_Target1;
 };
 
 VertexOut VS(VertexIn vin)
@@ -51,6 +58,8 @@ VertexOut VS(VertexIn vin)
 	vout.Test = mul(gView, gProjection);
 
 	vout.TexCoord = vin.TexCoord;
+
+	vout.Editor = vin.Edtior;
 	return vout;
 }
 
@@ -69,7 +78,7 @@ Texture2D gDiffuseMap : register(t0);
 SamplerState gsamPointWrap : register(s0);
 //------material samplers------
 
-float4 PS(VertexOut pin) : SV_Target
+PixelOut PS(VertexOut pin)
 {
 	pin.NormalW = normalize(pin.NormalW);
 	
@@ -78,5 +87,11 @@ float4 PS(VertexOut pin) : SV_Target
 	float3 ambient = LightColor * max(dot(pin.NormalW, toLight), 0.0f);
 	//float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
-	return float4(ambient, 1.0f);
+	PixelOut pixelOut;
+
+	//return float4(ambient, 1.0f);
+	pixelOut.color1 = float4(ambient, 1.0f);
+	pixelOut.color2 = pin.Editor;
+
+	return pixelOut;
 }

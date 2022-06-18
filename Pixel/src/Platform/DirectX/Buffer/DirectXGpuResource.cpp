@@ -54,6 +54,11 @@ namespace Pixel {
 		return std::make_shared<DirectXDescriptorCpuHandle>();
 	}
 
+	void DirectXGpuResource::SetInitializeResourceState(ResourceStates currentState)
+	{
+		m_UsageState = ResourceStatesToDirectXResourceStates(currentState);
+	}
+
 	//void DirectXGpuResource::CreateFromSwapChain(const std::wstring& Name)
 	//{
 	//	throw std::logic_error("The method or operation is not implemented.");

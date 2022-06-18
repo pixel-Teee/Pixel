@@ -14,6 +14,7 @@ namespace Pixel {
 	public:
 		friend class DirectXContext;
 		friend class GraphicsContext;
+		friend class ComputeContext;
 		DirectXGpuBuffer();
 		virtual ~DirectXGpuBuffer();
 
@@ -36,9 +37,9 @@ namespace Pixel {
 		Ref<IBV> IndexBufferView(SIZE_T StartIndex = 0) const;
 		//vertex buffer view and index buffer view
 
-		size_t GetBufferSize() const { return m_BufferSize; }
-		uint32_t GetElementCount() const { return m_ElementCount; }
-		uint32_t GetElementSize() const { return m_ElementSize; }
+		size_t GetBufferSize() { return m_BufferSize; }
+		uint32_t GetElementCount() { return m_ElementCount; }
+		uint32_t GetElementSize() { return m_ElementSize; }
 
 		//virtual void SetGpuResource(Ref<GpuResource> pGpuBuffer) override;
 	protected:

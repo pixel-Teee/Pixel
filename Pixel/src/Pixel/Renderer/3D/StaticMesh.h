@@ -34,7 +34,7 @@ namespace Pixel {
 		void Draw();
 
 		//TODO:Test
-		void Draw(Ref<Context> pContext, const glm::mat4& transform);
+		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
 
 		//Ref<VertexArray> GetVerterArray();
 		Ref<VertexBuffer> GetVertexBuffer();

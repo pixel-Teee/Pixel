@@ -4,7 +4,7 @@
 #include "Platform/DirectX/PipelineStateObject/DirectXPipelineStateObject.h"
 #include "Pixel/Renderer/Buffer.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootSignature.h"
-#include "Pixel/Renderer/Device/Device.h"
+#include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Sampler/SamplerManager.h"
 #include "Platform/DirectX/State/DirectXBlenderState.h"
 #include "Platform/DirectX/State/DirectXRasterState.h"
@@ -14,9 +14,20 @@
 #include "Platform/DirectX/Context/GraphicsContext.h"
 #include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
 #include "Platform/DirectX/Buffer/DepthBuffer.h"
+#include "Platform/DirectX/Buffer/DirectXStructuredBuffer.h"
 #include "Pixel/Renderer/EditorCamera.h"
+#include "Pixel/Math/Math.h"
+#include "Platform/DirectX/Buffer/DirectXReadBackBuffer.h"
+#include "Pixel/Renderer/Context/ContextManager.h"
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 
 namespace Pixel {
+
+	struct UV
+	{
+		float x;
+		float y;
+	};
 
 	DirectXRenderer::DirectXRenderer()
 	{
@@ -58,7 +69,9 @@ namespace Pixel {
 		m_defaultPso->SetBlendState(pBlendState);
 		m_defaultPso->SetRasterizerState(pRasterState);
 		m_defaultPso->SetDepthState(pDepthState);
-		m_defaultPso->SetRenderTargetFormat(ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
+		m_defaultPso->SetRenderTargetFormats(2, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_defaultPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
 		
 		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardVs)->GetShaderBinary();
@@ -68,6 +81,24 @@ namespace Pixel {
 
 		m_defaultPso->SetRootSignature(m_rootSignature);
 		//------Create Default Pso------
+
+		//------Create Picker PSO------
+		m_PickerShader = Shader::Create("assets/shaders/ForwardShading/Picker.hlsl", "CSGetPixels", "cs_5_0");
+		auto [CsBinary, CsBinarySize] = std::static_pointer_cast<DirectXShader>(m_PickerShader)->GetShaderBinary();
+		m_PickerPSO = CreateRef<ComputePSO>(L"Picker PSO");
+		m_PickerPSO->SetComputeShader(CsBinary, CsBinarySize);
+		m_PickerRootSignature = RootSignature::Create(3, 1);
+		m_PickerRootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[0].InitAsDescriptorTable({ std::make_tuple(RangeType::SRV, 0, 1)}, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[1].InitiAsBufferSRV(1, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[2].InitAsBufferUAV(0, ShaderVisibility::ALL);
+		m_PickerRootSignature->Finalize(L"Picker RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_PickerPSO->SetRootSignature(m_PickerRootSignature);
+		m_PickerPSO->Finalize();
+
+		m_ComputeSrvHeap = DescriptorHeap::Create(L"Compute Srv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		m_TextureHandle = m_ComputeSrvHeap->Alloc(1);
+		//------Create Picker PSO------
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -170,10 +201,10 @@ namespace Pixel {
 	}
 
 	void DirectXRenderer::ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
-		std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer)
+		std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
 	{
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
-		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 1, "color buffer's size is not equal to 1!");
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 2, "color buffer's size is not equal to 2!");
 
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 		
@@ -192,20 +223,24 @@ namespace Pixel {
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(GlobalConstants), &m_globalConstants);
 
 		Ref<DescriptorCpuHandle> rtvHandle = pDirectxFrameBuffer->m_pColorBuffers[0]->GetRTV();
+		Ref<DescriptorCpuHandle> editorHandle = pDirectxFrameBuffer->m_pColorBuffers[1]->GetRTV();
 		std::vector<Ref<DescriptorCpuHandle>> rtvHandles;
 		rtvHandles.push_back(rtvHandle);
+		rtvHandles.push_back(editorHandle);
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 
-		pContext->SetRenderTargets(1, rtvHandles, dsvHandle);
+		pContext->SetRenderTargets(2, rtvHandles, dsvHandle);
 
 		//get the framebuffer and bind
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[1]), ResourceStates::RenderTarget);
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
 
 		//float color[4] = { 0.3f, 0.2f, 0.6f, 1.0f };
 		//clear
 		pContext->ClearColor(*(pDirectxFrameBuffer->m_pColorBuffers[0]));
+		pContext->ClearColor(*(pDirectxFrameBuffer->m_pColorBuffers[1]));
 		pContext->ClearDepth(*(pDirectxFrameBuffer->m_pDepthBuffer));
 
 		//set viewport and scissor
@@ -231,18 +266,117 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//set pipeline state object
-			meshs[i].mesh.Draw(trans[i].GetTransform(), pGraphicsContext);
+			meshs[i].mesh.Draw(trans[i].GetTransform(), pGraphicsContext, entityIds[i]);
 		}
 
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[0]), ResourceStates::Common);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[1]), ResourceStates::UnorderedAccess);
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
 		//pContext->Finish(true);
+
+		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
+		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
+
+		//------UV Buffer------
+		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
+		{
+			m_UVBuffer = CreateRef<StructuredBuffer>();
+			m_UVBuffer->SetInitializeResourceState(ResourceStates::Common);
+			UV* data = new UV[m_Width * m_Height];
+
+			for (uint32_t i = 0; i < m_Width; ++i)
+			{
+				for (uint32_t j = 0; j < m_Height; ++j)
+				{
+					data[i * m_Height + j].x = (float)i / m_Width;
+					data[i * m_Height + j].y = (float)j / m_Height;
+				}
+			}
+
+			std::static_pointer_cast<StructuredBuffer>(m_UVBuffer)->Create(L"UVBuffer", m_Width * m_Height, sizeof(UV), data);
+			std::static_pointer_cast<StructuredBuffer>(m_UVBuffer)->CreateDerivedViews();
+			delete[] data;
+
+			pContext->TransitionResource(*m_UVBuffer, ResourceStates::UnorderedAccess);
+			//------UV Buffer------
+		}
+
+		m_lastWidth = m_Width;
+		m_lastHeight = m_Height;
+	}
+
+	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)
+	{
+		//get the editor buffer
+		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 2, "frame color buffer's size error!");
+
+		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[1];
+
+		m_Width = pColorBuffer->GetWidth();
+		m_Height = pColorBuffer->GetHeight();
+
+		//creat the structed buffer
+		m_PickerBuffer = CreateRef<StructuredBuffer>();
+		std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
+
+		//copy descriptor
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->CopyDescriptorsSimple(1, m_TextureHandle->GetCpuHandle(), pColorBuffer->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+
+		pComputeContext->SetType(CommandListType::Graphics);
+
+		pComputeContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_ComputeSrvHeap);
+
+		pComputeContext->TransitionResource(*m_UVBuffer, ResourceStates::NonPixelShaderResource, true);
+		pComputeContext->TransitionResource(*m_PickerBuffer, ResourceStates::UnorderedAccess, true);
+		
+		//pComputeContext->SetRootSignature()
+		pComputeContext->SetPipelineState(*m_PickerPSO);
+		//pComputeContext->SetDynamicSRV(0, )
+		pComputeContext->SetRootSignature(*m_PickerRootSignature);
+		pComputeContext->SetDescriptorTable(0, m_TextureHandle->GetGpuHandle());
+		pComputeContext->SetBufferSRV(1, *m_UVBuffer);
+		pComputeContext->SetBufferUAV(2, *m_PickerBuffer);
+		
+		pComputeContext->Dispatch2D(m_Width * m_Height, 1, 256, 1);
+	//	pComputeContext->TransitionResource(*pColorBuffer, ResourceStates::Common, true);
+	//	pComputeContext->TransitionResource(*pUVBuffer, ResourceStates::Common, true);
+		//pComputeContext->TransitionResource(*m_PickerBuffer, ResourceStates::Common, true);
+		pComputeContext->SetType(CommandListType::Compute);
+		pComputeContext->Finish(true);
 	}
 
 	Ref<PSO> DirectXRenderer::GetPso(uint32_t psoIndex)
 	{
 		PX_CORE_ASSERT(psoIndex <= m_PsoArray.size() && psoIndex >= 0, "out of pipeline state object's range!");
 		return m_PsoArray[psoIndex - 1];
+	}
+
+	int32_t DirectXRenderer::GetPickerValue(uint32_t x, uint32_t y)
+	{
+		//creat the read back buffer, and copy the picker buffer to read back buffer
+		Ref<ReadBackBuffer> pReadBack = CreateRef<ReadBackBuffer>();
+		Ref<StructuredBuffer> pPickBuffer = std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer);
+		pReadBack->Create(L"ReadBackBuffer", std::static_pointer_cast<DirectXGpuBuffer>(pPickBuffer)->GetElementCount(), std::static_pointer_cast<DirectXGpuBuffer>(m_PickerBuffer)->GetElementSize());
+
+		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		pContext->TransitionResource(*pReadBack, ResourceStates::CopyDest, true);
+		pContext->TransitionResource(*pPickBuffer, ResourceStates::CopySource, true);
+		pContext->CopyBufferRegion(*pReadBack, 0, *pPickBuffer, 0, std::static_pointer_cast<DirectXGpuBuffer>(pPickBuffer)->GetBufferSize());
+		pContext->Finish(true);
+
+		int32_t* value = (int32_t*)(pReadBack->Map());
+
+		int32_t returnValue = value[m_Height * x + y];
+
+		pReadBack->UnMap();
+
+		return returnValue;
+	}
+
+	Ref<DescriptorCpuHandle> DirectXRenderer::GetUVBufferHandle()
+	{
+		return m_UVBuffer->GetSRV();
 	}
 
 }

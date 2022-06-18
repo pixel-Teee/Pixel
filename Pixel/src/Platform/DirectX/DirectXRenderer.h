@@ -10,9 +10,12 @@ namespace Pixel {
 	class RootSignature;
 	class Shader;
 	class Context;
+	class GpuResource;
 
 	class EditorCamera;
 	class Framebuffer;
+	class DescriptorHeap;
+	class DescriptorHandle;
 	class DirectXRenderer : public BaseRenderer
 	{
 	public:
@@ -22,10 +25,15 @@ namespace Pixel {
 		virtual uint32_t CreatePso(BufferLayout& layout) override;
 
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
-			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer) override;
+			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
+
+		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
 		virtual Ref<PSO> GetPso(uint32_t psoIndex) override;
 
+		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) override;
+
+		virtual Ref<DescriptorCpuHandle> GetUVBufferHandle() override;
 	private:
 		Ref<RootSignature> m_rootSignature;
 
@@ -36,6 +44,25 @@ namespace Pixel {
 		Ref<Shader> m_forwardVs;
 
 		GlobalConstants m_globalConstants;
+
+		//------Picker Information------
+		Ref<DescriptorHeap> m_ComputeSrvHeap;
+
+		Ref<GpuResource> m_PickerBuffer;
+		Ref<GpuResource> m_UVBuffer;
+		//Ref<GpuResource> m_UVDebugBuffer;
+		Ref<PSO> m_PickerPSO;
+		Ref<RootSignature> m_PickerRootSignature;
+		Ref<Shader> m_PickerShader;
+		Ref<DescriptorHandle> m_TextureHandle;
+		uint32_t m_Width;
+		uint32_t m_Height;
+
+		uint32_t m_lastWidth;
+		uint32_t m_lastHeight;
+		
+		Ref<DescriptorHandle> m_UVBufferHandle;
+		//------Picker Information------
 	};
 }
  

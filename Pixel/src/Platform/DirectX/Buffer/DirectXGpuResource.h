@@ -48,6 +48,9 @@ namespace Pixel {
 		virtual Ref<DescriptorCpuHandle> GetUAV() const override;
 		virtual Ref<DescriptorCpuHandle> GetSRV() const override;
 
+
+		virtual void SetInitializeResourceState(ResourceStates currentState) override;
+
 		//virtual void CreateFromSwapChain(const std::wstring& Name) override;
 	protected:
 

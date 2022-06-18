@@ -231,7 +231,7 @@ namespace Pixel {
 		if (m_Type == D3D12_COMMAND_LIST_TYPE_COMPUTE)
 		{
 			PX_CORE_ASSERT((OldState & VALID_COMPUTE_QUEUE_RESOURCE_STATES) == OldState, "resource state is not valid!");
-			PX_CORE_ASSERT((OldState & VALID_COMPUTE_QUEUE_RESOURCE_STATES) == NewState, "resource state is not valid!");
+			PX_CORE_ASSERT((NewState & VALID_COMPUTE_QUEUE_RESOURCE_STATES) == NewState, "resource state is not valid!");
 		}
 
 		if (OldState != NewState)
@@ -623,6 +623,26 @@ namespace Pixel {
 	{
 		//throw std::logic_error("The method or operation is not implemented.");
 		return DirectXCmdListTypeToCmdListType(m_Type);
+	}
+
+	void DirectXContext::Dispatch(size_t GroupCountX /*= 1*/, size_t GroupCountY /*= 1*/, size_t GroupCountZ /*= 1*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::Dispatch1D(size_t ThreadCountX, size_t GroupSizeX /*= 64*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::Dispatch2D(size_t ThreadCountX, size_t ThreadCountY, size_t GroupSizeX /*= 8*/, size_t GroupSizeY /*= 8*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void DirectXContext::SetType(CommandListType type)
+	{
+		m_Type = CmdListTypeToDirectXCmdListType(type);
 	}
 
 	void DirectXContext::Reset()

@@ -13,6 +13,8 @@ namespace Pixel {
 
 		virtual void SetResource(void* resource) = 0;
 
+		virtual void SetInitializeResourceState(ResourceStates currentState) = 0;
+
 		//------Pixel Buffer Interface------
 		//virtual void CreateFromSwapChain(Ref<GpuResource> pResource, const std::wstring& Name) = 0;
 		//------Pixel Buffer Interface------

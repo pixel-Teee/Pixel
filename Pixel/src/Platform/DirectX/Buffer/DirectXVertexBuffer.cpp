@@ -21,6 +21,9 @@ namespace Pixel {
 
 		m_pVBV = CreateRef<DirectXVBV>(std::static_pointer_cast<DirectXByteAddressBuffer>(m_pResource)->GetGpuVirtualAddress(),
 		0, ElementCount * ElementSize, ElementSize);
+
+		m_ElementCount = ElementCount;
+		m_ElementSize = ElementSize;
 	}
 
 	Ref<VBV> DirectXVertexBuffer::GetVBV()
@@ -40,7 +43,11 @@ namespace Pixel {
 
 	void DirectXVertexBuffer::SetData(const void* data, uint32_t size)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		m_pResource = CreateRef<DirectXByteAddressBuffer>();
+		std::static_pointer_cast<DirectXByteAddressBuffer>(m_pResource)->Create(L"VertexBuffer", m_ElementCount, m_ElementSize, data);
+
+		m_pVBV = CreateRef<DirectXVBV>(std::static_pointer_cast<DirectXByteAddressBuffer>(m_pResource)->GetGpuVirtualAddress(),
+			0, m_ElementCount * m_ElementSize, m_ElementSize);
 	}
 
 	const Pixel::BufferLayout& DirectXVertexBuffer::GetLayout() const

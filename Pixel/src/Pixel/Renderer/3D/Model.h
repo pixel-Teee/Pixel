@@ -24,7 +24,7 @@ namespace Pixel {
 		//TODO:forward temporary
 		void Draw();
 
-		void Draw(const glm::mat4& transform, Ref<Context> pContext);
+		void Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId);
 
 		std::vector<StaticMesh> GetMeshes() { return m_Meshes; }
 

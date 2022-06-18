@@ -96,6 +96,7 @@ namespace Pixel
 
 		Ref<DescriptorHandle> m_FrameBufferHandle;
 
+		Ref<DescriptorHandle> m_UVBufferHandle;
 		//----------test
 		Ref<Shader> m_testShader;
 		Model m_Model;

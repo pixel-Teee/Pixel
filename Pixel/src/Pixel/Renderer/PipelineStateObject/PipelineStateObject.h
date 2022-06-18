@@ -35,6 +35,8 @@ namespace Pixel {
 
 		virtual void SetPixelShader(const void* Binary, size_t Size) = 0;
 
+		virtual void SetComputeShader(const void* Binary, size_t Size) = 0;
+
 		static Ref<PSO> CreateGraphicsPso(const wchar_t* Name);
 	};
 }

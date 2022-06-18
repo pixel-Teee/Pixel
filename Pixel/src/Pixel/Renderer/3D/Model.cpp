@@ -27,10 +27,10 @@ namespace Pixel {
 			m_Meshes[i].Draw();
 	}
 
-	void Model::Draw(const glm::mat4& transform, Ref<Context> pContext)
+	void Model::Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
-			m_Meshes[i].Draw(pContext, transform);
+			m_Meshes[i].Draw(pContext, transform, entityId);
 	}
 
 	/*------------------------------------------------------

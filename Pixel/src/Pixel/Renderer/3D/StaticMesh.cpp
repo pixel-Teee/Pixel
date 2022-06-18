@@ -178,8 +178,13 @@ namespace Pixel {
 		
 	}
 
-	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform)
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId)
 	{
+		if (!isFirst)
+		{
+			isFirst = true;
+			SetupMesh(entityId, false);
+		}	
 		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
 
 		m_MeshConstant.world = glm::transpose(transform);

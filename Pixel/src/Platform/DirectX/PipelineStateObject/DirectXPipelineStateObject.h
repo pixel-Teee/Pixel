@@ -83,10 +83,38 @@ namespace Pixel {
 		//perform validation and compute a hash value for fast state block comparisons
 		virtual void Finalize() override;
 
+		//------Compute PSO's operation------
+		virtual void SetComputeShader(const void* Binary, size_t Size) override;
+		//------Compute PSO's operation------
 	private:
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC m_PSODesc;
 
 		Ref<D3D12_INPUT_ELEMENT_DESC> m_InputLayouts;
+	};
+
+	class ComputePSO : public DirectXPSO
+	{
+	public:
+		ComputePSO(const wchar_t* Name = L"Unnamed Compute PSO");
+
+		virtual void SetComputeShader(const void* Binary, size_t Size) override;
+
+		virtual void SetRootSignature(Ref<RootSignature> pRootSignature) override;
+		virtual void Finalize() override;
+
+		//------garbage------
+		virtual void SetBlendState(Ref<BlenderState> pBlendState) override;
+		virtual void SetRasterizerState(Ref<RasterState> pRasterState) override;
+		virtual void SetDepthState(Ref<DepthState> pDepthState) override;
+		virtual void SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType) override;
+		virtual void SetDepthTargetFormat(ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) override;
+		virtual void SetRenderTargetFormat(ImageFormat RTVFormat, ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) override;
+		virtual void SetRenderTargetFormats(uint32_t NumRTVs, const ImageFormat* RTVFormats, ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) override;
+		virtual void SetVertexShader(const void* Binary, size_t Size) override;
+		virtual void SetPixelShader(const void* Binary, size_t Size) override;
+		//------garbage------
+	private:
+		D3D12_COMPUTE_PIPELINE_STATE_DESC m_PSODesc;
 	};
 }

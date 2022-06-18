@@ -4,6 +4,7 @@
 #include "Platform/DirectX/TypeUtils.h"
 
 #include "GraphicsContext.h"
+#include "ComputeContext.h"
 
 namespace Pixel {
 
@@ -27,7 +28,10 @@ namespace Pixel {
 			//Ref<GraphicsContext> Test = std::make_shared<GraphicsContext>(CmdListType, shared_from_this());
 			//if(CmdListType == CommandListType::Graphics)
 				//ReturnContext = std::make_shared<GraphicsContext>(CmdListType, shared_from_this());
-			ReturnContext = std::make_shared<GraphicsContext>(CmdListType);
+			if (CmdListType == CommandListType::Graphics)
+				ReturnContext = std::make_shared<GraphicsContext>(CmdListType);
+			else
+				ReturnContext = std::make_shared<ComputeContext>(CmdListType);
 			sm_ContextPool[DirectXCmdListType].emplace_back(ReturnContext);
 			ReturnContext->Initialize();
 		}

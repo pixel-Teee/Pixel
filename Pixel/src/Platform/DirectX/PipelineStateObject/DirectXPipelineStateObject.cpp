@@ -221,6 +221,11 @@ namespace Pixel {
 		}
 	}
 
+	void GraphicsPSO::SetComputeShader(const void* Binary, size_t Size)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 	void GraphicsPSO::SetRootSignature(Ref<RootSignature> pRootSignature)
 	{
 		//throw std::logic_error("The method or operation is not implemented.");
@@ -228,4 +233,114 @@ namespace Pixel {
 	}
 
 	//------Graphics PSO------
+
+	ComputePSO::ComputePSO(const wchar_t* Name /*= L"Unnamed Compute PSO"*/)
+		:DirectXPSO(Name)
+	{
+		ZeroMemory(&m_PSODesc, sizeof(D3D12_COMPUTE_PIPELINE_STATE_DESC));
+		//m_PSODesc.NodeMask = UINT_MAX;
+	}
+
+	void ComputePSO::SetComputeShader(const void* Binary, size_t Size)
+	{
+		m_PSODesc.CS = {
+			reinterpret_cast<BYTE*>(const_cast<void*>(Binary)),
+			Size
+		};
+	}
+
+	void ComputePSO::SetRootSignature(Ref<RootSignature> pRootSignature)
+	{
+		m_pRootSignature = pRootSignature;
+	}
+
+	void ComputePSO::SetBlendState(Ref<BlenderState> pBlendState)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetRasterizerState(Ref<RasterState> pRasterState)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetDepthState(Ref<DepthState> pDepthState)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::Finalize()
+	{
+		m_PSODesc.pRootSignature = std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature();
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature() != nullptr, "root signature is nullptr!");
+
+		size_t HashCode = Utility::HashState((const uint32_t*)&m_PSODesc);
+
+		ID3D12PipelineState** PSORef = nullptr;
+
+		bool firstCompile = false;
+		{
+			std::mutex s_HashMapMutex;
+			std::lock_guard<std::mutex> CS(s_HashMapMutex);
+
+			auto iter = s_ComputePSOHashMap.find(HashCode);
+
+			if (iter == s_ComputePSOHashMap.end())
+			{
+				firstCompile = true;
+				PSORef = s_ComputePSOHashMap[HashCode].GetAddressOf();
+			}
+			else
+			{
+				PSORef = iter->second.GetAddressOf();
+			}
+		}
+
+		if (firstCompile)
+		{
+			
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateComputePipelineState(&m_PSODesc, IID_PPV_ARGS(m_pPSO.GetAddressOf())) >= 0,
+				"Create Pipeline State Object Error!");
+
+			s_GraphicsPSOHashMap[HashCode] = m_pPSO;
+			m_pPSO->SetName(m_Name);
+		}
+		else
+		{
+			while (*PSORef == nullptr)
+				std::this_thread::yield();
+			m_pPSO = *PSORef;
+		}
+	}
+
+	void ComputePSO::SetDepthTargetFormat(ImageFormat DSVFormat, uint32_t MsaaCount /*= 1*/, uint32_t MsaaQuality /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetRenderTargetFormat(ImageFormat RTVFormat, ImageFormat DSVFormat, uint32_t MsaaCount /*= 1*/, uint32_t MsaaQuality /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetRenderTargetFormats(uint32_t NumRTVs, const ImageFormat* RTVFormats, ImageFormat DSVFormat, uint32_t MsaaCount /*= 1*/, uint32_t MsaaQuality /*= 0*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetVertexShader(const void* Binary, size_t Size)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void ComputePSO::SetPixelShader(const void* Binary, size_t Size)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 }

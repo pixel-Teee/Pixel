@@ -102,7 +102,7 @@ namespace Pixel {
 
 	void DirectXRootParameter::InitAsBufferUAV(uint32_t Register, ShaderVisibility Visibility /*= ShaderVisibility::ALL*/, uint32_t Space /*= 0*/)
 	{
-		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
 		m_RootParam.ShaderVisibility = ShaderVisibilityToDirectXShaderVisibility(Visibility);
 		m_RootParam.Descriptor.ShaderRegister = Register;
 		m_RootParam.Descriptor.RegisterSpace = Space;

@@ -21,7 +21,13 @@ namespace Pixel {
 		virtual Ref<PSO> GetPso(uint32_t psoIndex) = 0;
 
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
-			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer) = 0;
+			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) = 0;
+
+		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer) = 0;
+
+		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) = 0;
+
+		virtual Ref<DescriptorCpuHandle> GetUVBufferHandle() = 0;
 
 		static Ref<BaseRenderer> Create();
 	};

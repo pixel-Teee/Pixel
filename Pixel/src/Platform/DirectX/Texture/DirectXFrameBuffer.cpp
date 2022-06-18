@@ -32,7 +32,7 @@ namespace Pixel {
 			case FramebufferTextureFormat::RGBA16F:
 				return ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT;
 			case FramebufferTextureFormat::RED_INTEGER:
-				return ImageFormat::PX_FORMAT_R32_UINT;
+				return ImageFormat::PX_FORMAT_R32_SINT;
 			case FramebufferTextureFormat::DEPTH24STENCIL8:
 				return ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT;
 			}
@@ -83,8 +83,10 @@ namespace Pixel {
 
 			for (size_t i = 0; i < m_pColorBuffers.size(); ++i)
 			{
-				//create color buffer
-				m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>();
+				if (m_ColorAttachmentSpecifications[i].TextureFormat == FramebufferTextureFormat::RED_INTEGER)
+					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>(glm::vec4(-1, -1, -1, -1));
+				else
+					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>();
 				//TODO:mipmaps
 				m_pColorBuffers[i]->Create(L"RenderTarget", m_Specification.Width, m_Specification.Height, 0, Utils::FrameBufferTextureFormatToImageFormat(m_ColorAttachmentSpecifications[i].TextureFormat),
 					nullptr);

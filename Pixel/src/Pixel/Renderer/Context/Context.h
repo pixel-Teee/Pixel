@@ -111,6 +111,16 @@ namespace Pixel {
 		virtual void DrawIndexedInstanced(uint32_t IndexCountPerInstance, uint32_t InstanceCount, uint32_t StatrIndexLocation,
 			int32_t BaseVertexLocation, uint32_t StartInstanceLocation) = 0;
 		//------Graphics Pso Operation------
+
+		//------Compute Operation------
+		virtual void Dispatch(size_t GroupCountX = 1, size_t GroupCountY = 1, size_t GroupCountZ = 1) = 0;
+
+		virtual void Dispatch1D(size_t ThreadCountX, size_t GroupSizeX = 64) = 0;
+
+		virtual void Dispatch2D(size_t ThreadCountX, size_t ThreadCountY, size_t GroupSizeX = 8, size_t GroupSizeY = 8) = 0;
+		//------Compute Operation------
+
+		virtual void SetType(CommandListType type) = 0;
 	};
 
 }

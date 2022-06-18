@@ -313,4 +313,24 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	void OpenGLContext::Dispatch(size_t GroupCountX /*= 1*/, size_t GroupCountY /*= 1*/, size_t GroupCountZ /*= 1*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::Dispatch1D(size_t ThreadCountX, size_t GroupSizeX /*= 64*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::Dispatch2D(size_t ThreadCountX, size_t ThreadCountY, size_t GroupSizeX /*= 8*/, size_t GroupSizeY /*= 8*/)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void OpenGLContext::SetType(CommandListType type)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 }

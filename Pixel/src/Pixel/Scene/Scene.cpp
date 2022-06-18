@@ -652,6 +652,7 @@ namespace Pixel
 
 		std::vector<TransformComponent> trans;
 		std::vector<StaticMeshComponent> meshs;
+		std::vector<int32_t> entityIds;
 		for (auto entity : group)
 		{
 			auto [transform, mesh] = group.get<TransformComponent, StaticMeshComponent>(entity);
@@ -659,6 +660,7 @@ namespace Pixel
 			//in terms of transform and mesh to draw
 			trans.push_back(transform);
 			meshs.push_back(mesh);
+			entityIds.push_back((int32_t)entity);
 		}
 
 		std::vector<LightComponent> lights;
@@ -674,8 +676,12 @@ namespace Pixel
 		}
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->ForwardRendering(pContext, camera, trans, meshs, lights, lightTrans, pFrameBuffer);
+		Application::Get().GetRenderer()->ForwardRendering(pContext, camera, trans, meshs, lights, lightTrans, pFrameBuffer, entityIds);
 		pContext->Finish(true);
+
+		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
+		Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pFrameBuffer);
+		//pComputeContext->Finish(true);
 	}
 
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
