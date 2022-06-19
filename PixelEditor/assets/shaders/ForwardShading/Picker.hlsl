@@ -1,14 +1,23 @@
-Texture2D<float4> TextureInput : register(t0);
+Texture2D<int> TextureInput : register(t0);
 
 StructuredBuffer<float2> UVBuffer : register(t1);
 
-RWStructuredBuffer<float4> RWColorBuffer : register(u0);
+RWStructuredBuffer<int> RWColorBuffer : register(u0);
 
 SamplerState Sampler : register(s0);
 
-[numthreads(256, 1, 1)]
+cbuffer Information : register(b0)
+{
+	int width;
+	int height;
+};
+
+[numthreads(32, 32, 1)]
 void CSGetPixels(uint3 threadId : SV_DispatchThreadID)
 {
-	float4 color = TextureInput.SampleLevel(Sampler, UVBuffer[threadId.x].xy, 0);
-	RWColorBuffer[threadId.x] = color;
+	//float2 UV = UVBuffer[threadId.x].xy;
+
+	int index = width * threadId.y + min(threadId.x, width);
+	int color = TextureInput[int2(min(threadId.x, width), min(threadId.y, height))];
+	RWColorBuffer[index] = color;
 }

@@ -87,17 +87,21 @@ namespace Pixel {
 		auto [CsBinary, CsBinarySize] = std::static_pointer_cast<DirectXShader>(m_PickerShader)->GetShaderBinary();
 		m_PickerPSO = CreateRef<ComputePSO>(L"Picker PSO");
 		m_PickerPSO->SetComputeShader(CsBinary, CsBinarySize);
-		m_PickerRootSignature = RootSignature::Create(3, 1);
+		m_PickerRootSignature = RootSignature::Create(4, 1);
 		m_PickerRootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::ALL);
 		(*m_PickerRootSignature)[0].InitAsDescriptorTable({ std::make_tuple(RangeType::SRV, 0, 1)}, ShaderVisibility::ALL);
 		(*m_PickerRootSignature)[1].InitiAsBufferSRV(1, ShaderVisibility::ALL);
 		(*m_PickerRootSignature)[2].InitAsBufferUAV(0, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[3].InitAsConstantBuffer(0, ShaderVisibility::ALL);
 		m_PickerRootSignature->Finalize(L"Picker RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 		m_PickerPSO->SetRootSignature(m_PickerRootSignature);
 		m_PickerPSO->Finalize();
 
 		m_ComputeSrvHeap = DescriptorHeap::Create(L"Compute Srv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		m_TextureHandle = m_ComputeSrvHeap->Alloc(1);
+
+		//m_ComputeCbvHeap = DescriptorHeap::Create(L"Compute Cbv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		//m_ImageWidthHandle = m_ComputeCbvHeap->Alloc(1);
 		//------Create Picker PSO------
 	}
 
@@ -299,6 +303,10 @@ namespace Pixel {
 
 			pContext->TransitionResource(*m_UVBuffer, ResourceStates::UnorderedAccess);
 			//------UV Buffer------
+
+			int widthAndHeight[2] = { m_Width, m_Height };
+			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
+			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
 		}
 
 		m_lastWidth = m_Width;
@@ -312,9 +320,6 @@ namespace Pixel {
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 2, "frame color buffer's size error!");
 
 		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[1];
-
-		m_Width = pColorBuffer->GetWidth();
-		m_Height = pColorBuffer->GetHeight();
 
 		//creat the structed buffer
 		m_PickerBuffer = CreateRef<StructuredBuffer>();
@@ -337,8 +342,9 @@ namespace Pixel {
 		pComputeContext->SetDescriptorTable(0, m_TextureHandle->GetGpuHandle());
 		pComputeContext->SetBufferSRV(1, *m_UVBuffer);
 		pComputeContext->SetBufferUAV(2, *m_PickerBuffer);
+		pComputeContext->SetConstantBuffer(3, std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->GetGpuVirtualAddress());
 		
-		pComputeContext->Dispatch2D(m_Width * m_Height, 1, 256, 1);
+		pComputeContext->Dispatch2D(m_Width, m_Height, 32, 32);
 	//	pComputeContext->TransitionResource(*pColorBuffer, ResourceStates::Common, true);
 	//	pComputeContext->TransitionResource(*pUVBuffer, ResourceStates::Common, true);
 		//pComputeContext->TransitionResource(*m_PickerBuffer, ResourceStates::Common, true);
@@ -362,12 +368,12 @@ namespace Pixel {
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		pContext->TransitionResource(*pReadBack, ResourceStates::CopyDest, true);
 		pContext->TransitionResource(*pPickBuffer, ResourceStates::CopySource, true);
-		pContext->CopyBufferRegion(*pReadBack, 0, *pPickBuffer, 0, std::static_pointer_cast<DirectXGpuBuffer>(pPickBuffer)->GetBufferSize());
+		pContext->CopyBufferRegion(*pReadBack, 0, *pPickBuffer, 0, std::static_pointer_cast<ReadBackBuffer>(pReadBack)->GetBufferSize());
 		pContext->Finish(true);
 
 		int32_t* value = (int32_t*)(pReadBack->Map());
 
-		int32_t returnValue = value[m_Height * x + y];
+		int32_t returnValue = value[m_Width * y + x];
 
 		pReadBack->UnMap();
 

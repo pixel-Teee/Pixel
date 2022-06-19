@@ -47,6 +47,7 @@ namespace Pixel {
 
 		//------Picker Information------
 		Ref<DescriptorHeap> m_ComputeSrvHeap;
+		Ref<DescriptorHeap> m_ComputeCbvHeap;
 
 		Ref<GpuResource> m_PickerBuffer;
 		Ref<GpuResource> m_UVBuffer;
@@ -62,6 +63,9 @@ namespace Pixel {
 		uint32_t m_lastHeight;
 		
 		Ref<DescriptorHandle> m_UVBufferHandle;
+
+		Ref<GpuResource> m_editorImageWidthHeightBuffer;
+		Ref<DescriptorHandle> m_ImageWidthHandle;
 		//------Picker Information------
 	};
 }

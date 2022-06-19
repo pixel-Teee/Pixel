@@ -57,11 +57,11 @@ namespace Pixel {
 			pDxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, true);
 		}
 
-		////PIX
-		//if (GetModuleHandle(L"WinPixGpuCapturer.dll") == 0)
-		//{
-		//	LoadLibrary(GetLatestWinPixGpuCapturePath().c_str());
-		//}
+		//PIX
+		if (GetModuleHandle(L"WinPixGpuCapturer.dll") == 0)
+		{
+			LoadLibrary(GetLatestWinPixGpuCapturePath().c_str());
+		}
 #endif
 		PX_CORE_ASSERT(CreateDXGIFactory1(IID_PPV_ARGS(m_pDxgiFactory.ReleaseAndGetAddressOf())) >= 0, "get dxgi factory error!");
 

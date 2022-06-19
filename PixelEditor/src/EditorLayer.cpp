@@ -485,17 +485,17 @@ namespace Pixel
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-		my = viewportSize.y - my;
+		//my = viewportSize.y - my;
 
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
-		PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
+		//PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
 
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
-			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
-			//m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			PIXEL_CORE_INFO("PixelData = {0}", pixelData);
+			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 	}
 
