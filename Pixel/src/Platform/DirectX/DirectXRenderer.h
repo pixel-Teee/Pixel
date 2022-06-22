@@ -32,8 +32,6 @@ namespace Pixel {
 		virtual Ref<PSO> GetPso(uint32_t psoIndex) override;
 
 		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) override;
-
-		virtual Ref<DescriptorCpuHandle> GetUVBufferHandle() override;
 	private:
 		Ref<RootSignature> m_rootSignature;
 
@@ -50,7 +48,6 @@ namespace Pixel {
 		Ref<DescriptorHeap> m_ComputeCbvHeap;
 
 		Ref<GpuResource> m_PickerBuffer;
-		Ref<GpuResource> m_UVBuffer;
 		//Ref<GpuResource> m_UVDebugBuffer;
 		Ref<PSO> m_PickerPSO;
 		Ref<RootSignature> m_PickerRootSignature;

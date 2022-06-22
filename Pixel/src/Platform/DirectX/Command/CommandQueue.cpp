@@ -92,7 +92,7 @@ namespace Pixel {
 		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_pFence.ReleaseAndGetAddressOf())) >= 0,
 		"Create Fence Error!");
 
-		m_pFence->SetName(L"CommandListManager::m_pFence");
+		m_pFence->SetName(L"CommandListManager::m_Fence");
 		//the highest 8 bit is type
 		m_pFence->Signal((uint64_t)m_Type << 56);
 

@@ -20,6 +20,7 @@ namespace Pixel {
 	public:
 		DirectXGpuResource();
 
+		//default state is common, so when create a resource, it's state need to be common state
 		DirectXGpuResource(ResourceStates CurrentState);
 
 		DirectXGpuResource(ID3D12Resource* pResource, D3D12_RESOURCE_STATES CurrentState);

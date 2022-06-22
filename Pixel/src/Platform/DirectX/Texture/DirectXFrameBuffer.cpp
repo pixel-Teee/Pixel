@@ -81,14 +81,17 @@ namespace Pixel {
 		{
 			m_pColorBuffers.resize(m_ColorAttachmentSpecifications.size());
 
+			uint32_t i = 0;
+			std::wstring ColorBufferName;
 			for (size_t i = 0; i < m_pColorBuffers.size(); ++i)
 			{
 				if (m_ColorAttachmentSpecifications[i].TextureFormat == FramebufferTextureFormat::RED_INTEGER)
 					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>(glm::vec4(-1, -1, -1, -1));
 				else
 					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>();
+				ColorBufferName = L"RenderTarget" + std::to_wstring(i);
 				//TODO:mipmaps
-				m_pColorBuffers[i]->Create(L"RenderTarget", m_Specification.Width, m_Specification.Height, 0, Utils::FrameBufferTextureFormatToImageFormat(m_ColorAttachmentSpecifications[i].TextureFormat),
+				m_pColorBuffers[i]->Create(ColorBufferName.c_str(), m_Specification.Width, m_Specification.Height, 0, Utils::FrameBufferTextureFormatToImageFormat(m_ColorAttachmentSpecifications[i].TextureFormat),
 					nullptr);
 			}
 		}
@@ -96,7 +99,7 @@ namespace Pixel {
 		if (m_DepthAttachmentSpecification.TextureFormat != FramebufferTextureFormat::None)
 		{
 			m_pDepthBuffer = CreateRef<DepthBuffer>();
-			m_pDepthBuffer->Create(L"RenderTarget's Depth", m_Specification.Width, m_Specification.Height, 1, Utils::FrameBufferTextureFormatToImageFormat(m_DepthAttachmentSpecification.TextureFormat), nullptr);
+			m_pDepthBuffer->Create(L"RenderTarget's Depth And Stencil", m_Specification.Width, m_Specification.Height, 1, Utils::FrameBufferTextureFormatToImageFormat(m_DepthAttachmentSpecification.TextureFormat), nullptr);
 		}
 	}
 

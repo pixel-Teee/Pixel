@@ -97,7 +97,7 @@ namespace Pixel {
 		m_PickerPSO->SetRootSignature(m_PickerRootSignature);
 		m_PickerPSO->Finalize();
 
-		m_ComputeSrvHeap = DescriptorHeap::Create(L"Compute Srv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		m_ComputeSrvHeap = DescriptorHeap::Create(L"Picker Srv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		m_TextureHandle = m_ComputeSrvHeap->Alloc(1);
 
 		//m_ComputeCbvHeap = DescriptorHeap::Create(L"Compute Cbv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
@@ -281,29 +281,8 @@ namespace Pixel {
 		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
 		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
 
-		//------UV Buffer------
 		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
 		{
-			m_UVBuffer = CreateRef<StructuredBuffer>();
-			m_UVBuffer->SetInitializeResourceState(ResourceStates::Common);
-			UV* data = new UV[m_Width * m_Height];
-
-			for (uint32_t i = 0; i < m_Width; ++i)
-			{
-				for (uint32_t j = 0; j < m_Height; ++j)
-				{
-					data[i * m_Height + j].x = (float)i / m_Width;
-					data[i * m_Height + j].y = (float)j / m_Height;
-				}
-			}
-
-			std::static_pointer_cast<StructuredBuffer>(m_UVBuffer)->Create(L"UVBuffer", m_Width * m_Height, sizeof(UV), data);
-			std::static_pointer_cast<StructuredBuffer>(m_UVBuffer)->CreateDerivedViews();
-			delete[] data;
-
-			pContext->TransitionResource(*m_UVBuffer, ResourceStates::UnorderedAccess);
-			//------UV Buffer------
-
 			int widthAndHeight[2] = { m_Width, m_Height };
 			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
 			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
@@ -332,7 +311,7 @@ namespace Pixel {
 
 		pComputeContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_ComputeSrvHeap);
 
-		pComputeContext->TransitionResource(*m_UVBuffer, ResourceStates::NonPixelShaderResource, true);
+		//pComputeContext->TransitionResource(*m_UVBuffer, ResourceStates::NonPixelShaderResource, true);
 		pComputeContext->TransitionResource(*m_PickerBuffer, ResourceStates::UnorderedAccess, true);
 		
 		//pComputeContext->SetRootSignature()
@@ -340,7 +319,7 @@ namespace Pixel {
 		//pComputeContext->SetDynamicSRV(0, )
 		pComputeContext->SetRootSignature(*m_PickerRootSignature);
 		pComputeContext->SetDescriptorTable(0, m_TextureHandle->GetGpuHandle());
-		pComputeContext->SetBufferSRV(1, *m_UVBuffer);
+		//pComputeContext->SetBufferSRV(1, *m_UVBuffer);
 		pComputeContext->SetBufferUAV(2, *m_PickerBuffer);
 		pComputeContext->SetConstantBuffer(3, std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->GetGpuVirtualAddress());
 		
@@ -378,11 +357,6 @@ namespace Pixel {
 		pReadBack->UnMap();
 
 		return returnValue;
-	}
-
-	Ref<DescriptorCpuHandle> DirectXRenderer::GetUVBufferHandle()
-	{
-		return m_UVBuffer->GetSRV();
 	}
 
 }

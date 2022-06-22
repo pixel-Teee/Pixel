@@ -97,7 +97,7 @@ namespace Pixel {
 		//m_imageSrvHeap = DescriptorHeap::Create(L"ImageSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		
 
-		std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetComPtrHeap()->SetName(L"Srv Descriptor Heap");
+		std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetComPtrHeap()->SetName(L"Imgui Descriptor Heap");
 
 		m_srvHeap->Alloc(1);
 		ImGui_ImplGlfw_InitForOther(window, true);

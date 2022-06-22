@@ -27,8 +27,6 @@ namespace Pixel {
 
 		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) = 0;
 
-		virtual Ref<DescriptorCpuHandle> GetUVBufferHandle() = 0;
-
 		static Ref<BaseRenderer> Create();
 	};
 }
