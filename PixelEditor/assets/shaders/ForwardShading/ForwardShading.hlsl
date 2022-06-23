@@ -22,7 +22,7 @@ struct VertexIn
 	float3 PosL : POSITION;
 	float2 TexCoord : TEXCOORD;
 	float3 NormalL : NORMAL;
-	int Edtior : EDITOR;
+	int Editor : EDITOR;
 };
 
 struct VertexOut
@@ -59,7 +59,7 @@ VertexOut VS(VertexIn vin)
 
 	vout.TexCoord = vin.TexCoord;
 
-	vout.Editor = vin.Edtior;
+	vout.Editor = vin.Editor;
 	return vout;
 }
 

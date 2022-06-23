@@ -24,8 +24,14 @@ namespace Pixel {
 
 		virtual uint32_t CreatePso(BufferLayout& layout) override;
 
+		uint32_t CreateDeferredPso(BufferLayout& layout);
+
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
 			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
+
+		void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*>& trans,
+		std::vector<StaticMeshComponent*>& meshs, std::vector<LightComponent*>& lights, std::vector<TransformComponent*>& lightTrans,
+		Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds);
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
@@ -64,6 +70,16 @@ namespace Pixel {
 		Ref<GpuResource> m_editorImageWidthHeightBuffer;
 		Ref<DescriptorHandle> m_ImageWidthHandle;
 		//------Picker Information------
+
+		//------Deferred Shading------
+		void CreateDefaultDeferredShadingPso();
+		Ref<RootSignature> m_pDeferredShadingRootSignature;
+		Ref<PSO> m_DefaultGeometryShadingPso;
+		Ref<PSO> m_DefaultLightShadingPso;
+
+		Ref<Shader> m_GeometryVertexShader;
+		Ref<Shader> m_GeometryPixelShader;
+		//------Deferred Shading------
 	};
 }
  

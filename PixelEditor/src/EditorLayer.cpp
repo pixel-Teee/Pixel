@@ -56,11 +56,11 @@ namespace Pixel
 		roughness	metallic	emissive	x
 		--------------------------------------*/
 		FramebufferSpecification fbSpec;
-		//fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
-		//FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
-		//fbSpec.Width = 1280;
-		//fbSpec.Height = 720;
-		//m_GeoFramebuffer = Framebuffer::Create(fbSpec);
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 1280;
+		fbSpec.Height = 720;
+		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
 		///*------Create Geometry Framebuffer------*/
 
 		///*------Create Framebuffer------*/	

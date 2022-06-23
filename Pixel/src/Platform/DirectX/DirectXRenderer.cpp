@@ -103,6 +103,10 @@ namespace Pixel {
 		//m_ComputeCbvHeap = DescriptorHeap::Create(L"Compute Cbv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		//m_ImageWidthHandle = m_ComputeCbvHeap->Alloc(1);
 		//------Create Picker PSO------
+
+		//------Create Deferred Shading PipelineState-------
+		CreateDefaultDeferredShadingPso();
+		//------Create Deferred Shading PipelineState-------
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -204,6 +208,43 @@ namespace Pixel {
 		return m_PsoArray.size();
 	}
 
+	uint32_t DirectXRenderer::CreateDeferredPso(BufferLayout& layout)
+	{
+		//may be release
+		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			ElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			ElementArray[i].SemanticIndex = 0;
+			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			ElementArray[i].InputSlot = 0;
+			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			ElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		//create forward renderer pos
+		//copy constructor
+		Ref<PSO> pPso = std::make_shared<GraphicsPSO>(*std::static_pointer_cast<GraphicsPSO>(m_DefaultGeometryShadingPso));
+		std::static_pointer_cast<GraphicsPSO>(pPso)->SetInputLayout(layout.GetElements().size(), ElementArray);
+		//initialize the pipeline state object
+		pPso->Finalize();
+		m_PsoArray.push_back(pPso);
+
+		//return pso index
+		return m_PsoArray.size();
+	}
+
 	void DirectXRenderer::ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
 		std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
 	{
@@ -292,6 +333,69 @@ namespace Pixel {
 		m_lastHeight = m_Height;
 	}
 
+	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
+	std::vector<TransformComponent*>& trans, std::vector<StaticMeshComponent*>& meshs,
+	std::vector<LightComponent*>& lights, std::vector<TransformComponent*>& lightTrans,
+	Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
+	{
+		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
+		//bind the deferred shading pipeline state
+		pGraphicsContext->SetPipelineState(*m_DefaultGeometryShadingPso);
+		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
+
+		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "color buffer's size is not equal to 5!");
+
+		//------get the cpu descriptor handle------
+		std::vector<Ref<DescriptorCpuHandle>> m_CpuHandles;
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		{
+			m_CpuHandles.push_back(pDirectxFrameBuffer->m_pColorBuffers[i]->GetRTV());
+		}
+		//------get the cpu descriptor handle------
+
+		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
+		pGraphicsContext->SetRenderTargets(5, m_CpuHandles, dsvHandle);
+
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		{
+			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::RenderTarget);
+		}
+		pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pDepthBuffer, ResourceStates::DepthWrite);
+
+		//set primitive topology
+		pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::LINELIST);
+
+		//set viewport and scissor
+		ViewPort vp;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = pDirectxFrameBuffer->GetSpecification().Width;
+		vp.Height = pDirectxFrameBuffer->GetSpecification().Height;
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+
+		PixelRect scissor;
+		scissor.Left = 0;
+		scissor.Right = pDirectxFrameBuffer->GetSpecification().Width;
+		scissor.Top = 0;
+		scissor.Bottom = pDirectxFrameBuffer->GetSpecification().Height;
+
+		pContext->SetViewportAndScissor(vp, scissor);
+
+		//bind resources
+
+
+
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
+		{
+			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::RenderTarget);
+		}
+		//editor frame buffer
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[4]), ResourceStates::UnorderedAccess);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
+	}
+
 	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)
 	{
 		//get the editor buffer
@@ -357,6 +461,57 @@ namespace Pixel {
 		pReadBack->UnMap();
 
 		return returnValue;
+	}
+
+	void DirectXRenderer::CreateDefaultDeferredShadingPso()
+	{
+		m_DefaultGeometryShadingPso = PSO::CreateGraphicsPso(L"DeferredShadingGeometryPso");
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+
+		//------Create RootSignature------
+		m_pDeferredShadingRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_pDeferredShadingRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		//------Create RootSignature------
+
+		//-----Create Blend State------
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		//-----Create Blend State------
+
+		//------Create Raster State------
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//------Create Raster State------
+
+		//------Create Depth State------
+		Ref<DepthState> pDepthState = DepthState::Create();
+		//------Create Depth State------
+
+		m_DefaultGeometryShadingPso->SetBlendState(pBlendState);
+		m_DefaultGeometryShadingPso->SetRasterizerState(pRasterState);
+		m_DefaultGeometryShadingPso->SetDepthState(pDepthState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, 
+		ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
+		m_DefaultGeometryShadingPso->SetRenderTargetFormats(5, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_DefaultGeometryShadingPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		m_GeometryVertexShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "VS", "vs_5_0");
+		m_GeometryPixelShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "PS", "ps_5_0");
+		
+		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_GeometryVertexShader)->GetShaderBinary();
+		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(m_GeometryPixelShader)->GetShaderBinary();
+		m_DefaultGeometryShadingPso->SetVertexShader(VsBinary, VsBinarySize);
+		m_DefaultGeometryShadingPso->SetPixelShader(PsBinary, PsBinarySize);
+		
+		m_DefaultGeometryShadingPso->SetRootSignature(m_pDeferredShadingRootSignature);
 	}
 
 }
