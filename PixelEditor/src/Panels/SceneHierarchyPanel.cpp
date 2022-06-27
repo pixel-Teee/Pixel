@@ -3,6 +3,11 @@
 #include "SceneHierarchyPanel.h"
 
 #include "Pixel/Scene/Components.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
+#include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
+#include "Pixel/Renderer/Device/Device.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -18,6 +23,12 @@ namespace Pixel
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
 		SetContext(context);
+	}
+
+	SceneHierarchyPanel::SceneHierarchyPanel()
+	{
+		//get the imgui srv heap
+		m_MaterialComponentHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(5);
 	}
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
@@ -480,10 +491,32 @@ namespace Pixel
 			}
 		);
 		
-		DrawComponent<MaterialComponent>("Material Component", entity, [](auto& component)
+		DrawComponent<MaterialComponent>("Material Component", entity, [this](auto& component)
 			{
+				//copy descriptor to imgui srv descriptor heap
+				//Ref<DescriptorHeap> descriptorHeap = Application::Get().GetImGuiLayer()->GetSrvHeap();
+
+				//get the texture descriptor handle, and copy to the srv heap
+				std::vector<Ref<DescriptorCpuHandle>> pHandles(5);
+				pHandles[0] = component.Albedo->GetHandle()->GetCpuHandle();
+				pHandles[1] = component.NormalMap->GetHandle()->GetCpuHandle();
+				pHandles[2] = component.Roughness->GetHandle()->GetCpuHandle();
+				pHandles[3] = component.Metallic->GetHandle()->GetCpuHandle();
+				pHandles[4] = component.Emissive->GetHandle()->GetCpuHandle();
+
+				std::vector<DescriptorHandle> pDestHandles(5);
+				uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+				pDestHandles[0] = (*this->m_MaterialComponentHandle) ;
+				pDestHandles[1] = (*this->m_MaterialComponentHandle) + DescriptorSize;
+				pDestHandles[2] = (*this->m_MaterialComponentHandle) + 2 * DescriptorSize;
+				pDestHandles[3] = (*this->m_MaterialComponentHandle) + 3 * DescriptorSize;
+				pDestHandles[4] = (*this->m_MaterialComponentHandle) + 4 * DescriptorSize;
+
+				for(uint32_t i = 0; i < 5; ++i)
+					Device::Get()->CopyDescriptorsSimple(1, pDestHandles[i].GetCpuHandle(), pHandles[i], DescriptorHeapType::CBV_UAV_SRV);			
+
 				ImGui::Text("Albedo");
-				ImGui::Image((ImTextureID)component.Albedo->GetRendererID(), ImVec2(128.0f, 128.0f));
+				ImGui::Image((ImTextureID)pDestHandles[0].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -498,7 +531,7 @@ namespace Pixel
 				}
 
 				ImGui::Text("NormalMap");
-				ImGui::Image((ImTextureID)component.NormalMap->GetRendererID(), ImVec2(128.0f, 128.0f));
+				ImGui::Image((ImTextureID)pDestHandles[1].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -513,7 +546,7 @@ namespace Pixel
 				}
 
 				ImGui::Text("Roughness");
-				ImGui::Image((ImTextureID)component.Roughness->GetRendererID(), ImVec2(128.0f, 128.0f));
+				ImGui::Image((ImTextureID)pDestHandles[2].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -528,7 +561,7 @@ namespace Pixel
 				}
 
 				ImGui::Text("Metallic");
-				ImGui::Image((ImTextureID)component.Metallic->GetRendererID(), ImVec2(128.0f, 128.0f));
+				ImGui::Image((ImTextureID)pDestHandles[3].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -543,7 +576,7 @@ namespace Pixel
 				}
 
 				ImGui::Text("Emissive");
-				ImGui::Image((ImTextureID)component.Emissive->GetRendererID(), ImVec2(128.0f, 128.0f));
+				ImGui::Image((ImTextureID)pDestHandles[4].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))

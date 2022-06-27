@@ -15,7 +15,7 @@ namespace Pixel {
 	};
 
 	class DescriptorCpuHandle;
-
+	class DescriptorHandle;
 	class Texture
 	{
 	public:
@@ -32,7 +32,9 @@ namespace Pixel {
 
 		virtual bool operator==(const Texture& other) const = 0;
 
-		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() const = 0;
+		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() = 0;
+
+		virtual Ref<DescriptorHandle> GetHandle() const = 0;
 
 		virtual std::string& GetPath() = 0;
 	};
@@ -44,9 +46,13 @@ namespace Pixel {
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height, TextureFormat textureFormat);
 		static Ref<Texture2D> Create(const std::string& path);
-		static Ref<Texture2D> Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat);
+		static Ref<Texture2D> Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat,
+		const void* InitialData);
 
 		virtual bool operator==(const Texture& other) const = 0;
+
+		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() = 0;
+		virtual Ref<DescriptorHandle> GetHandle() const = 0;
 	};
 
 	enum FaceTarget {

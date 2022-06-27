@@ -9,7 +9,7 @@ namespace Pixel
 	class SceneHierarchyPanel
 	{
 	public:
-		SceneHierarchyPanel() = default;
+		SceneHierarchyPanel();
 		SceneHierarchyPanel(const Ref<Scene>& scene);
 
 		void SetContext(const Ref<Scene>& scene);
@@ -24,5 +24,8 @@ namespace Pixel
 	private:
 		Ref<Scene> m_Context;
 		Entity m_SelectionContext;
+
+		//aim:for material texture component handle
+		Ref<DescriptorHandle> m_MaterialComponentHandle;
 	};
 }

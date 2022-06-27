@@ -84,6 +84,11 @@ namespace Pixel {
 		sm_DescriptorHeapPool.clear();
 	}
 
+	uint32_t DirectXDescriptorAllocator::GetDescriptorSize()
+	{
+		return m_DescriptorSize;
+	}
+
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXDescriptorAllocator::RequestNewHeap(D3D12_DESCRIPTOR_HEAP_TYPE Type)
 	{
 		std::lock_guard<std::mutex> LockGuard(sm_AllocationMutex);

@@ -29,18 +29,20 @@ namespace Pixel {
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 		case RendererAPI::API::OpenGL: return CreateRef<OpenGLTexture2D>(width, height, textureFormat);
+		//case RendererAPI::API::DirectX12: return CreateRef<DirectXTexture>(width, height, textureFormat);
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
 
-	Ref<Texture2D> Texture2D::Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat imageFormat)
+	Ref<Texture2D> Texture2D::Create(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat,
+	const void* InitialData)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::DirectX12: return CreateRef<DirectXTexture>(RowPitch, width, height, imageFormat);
+		case RendererAPI::API::DirectX12: return CreateRef<DirectXTexture>(RowPitch, width, height, textureFormat, InitialData);
 		}
 
 		PX_CORE_ASSERT(false, "Unknown RendererAPI!");

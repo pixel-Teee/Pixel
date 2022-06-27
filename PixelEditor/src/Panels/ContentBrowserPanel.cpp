@@ -23,7 +23,7 @@ namespace Pixel {
 		//copy the these thexture's descriptor to descriptor heap
 		m_DirectoryHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 		m_FileHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
-
+		
 		Device::Get()->CopyDescriptorsSimple(1, m_DirectoryHandle->GetCpuHandle(), m_Directory->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 	}

@@ -28,7 +28,9 @@ namespace Pixel {
 
 		virtual std::string& GetPath() override;
 
-		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() const override;
+		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() override;
+
+		virtual Ref<DescriptorHandle> GetHandle() const override;
 
 	private:
 		std::string m_path;

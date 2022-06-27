@@ -21,6 +21,7 @@ namespace Pixel {
 
 		virtual void DestroyDescriptor() override;
 
+		virtual uint32_t GetDescriptorSize() override;
 	protected:
 		//per heap has descriptor number
 		static const uint32_t sm_NumDescriptorPerHeap = 256;

@@ -22,6 +22,7 @@ namespace Pixel {
 
 		static Ref<DescriptorHandle> AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType Type, uint32_t Count);
 
+		virtual uint32_t GetDescriptorSize() = 0;
 		//static void DestroyDescriptorPools();
 
 		//static Ref<DescriptorAllocator> g_Descriptor[(uint64_t)DescriptorHeapType::DescriptorHeapTypeNums];

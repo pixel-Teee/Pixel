@@ -18,63 +18,70 @@
 
 namespace Pixel {
 
-	//---only use for english------
+	//---only use for ascill------
 	std::wstring StringToWString(const std::string& str)
 	{
 		std::wstring wstr(str.length(), L' ');
 		std::copy(str.begin(), str.end(), wstr.begin());
 		return wstr;
 	}
-	//---only use for english------
-	DirectXTexture::DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat)
+	//---only use for ascill------
+	DirectXTexture::DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat,
+	const void* InitialData)
 	{
-		//m_pGpuResource->m_UsageState = D3D12_RESOURCE_STATE_COPY_DEST;
+		//m_pGpuResource->Destroy();
+		if (m_pGpuResource != nullptr) m_pGpuResource->Destroy();
 
-		//m_Width = width;
-		//m_Height = height;
-		//
-		//D3D12_RESOURCE_DESC texDesc = {};
-		//texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		//texDesc.Width = width;
-		//texDesc.DepthOrArraySize = 1;
-		//texDesc.MipLevels = 1;
-		//texDesc.Format = ImageFormatToDirectXImageFormat(textureFormat);
-		//texDesc.SampleDesc.Count = 1;
-		//texDesc.SampleDesc.Quality = 0;
-		//texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		//texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		m_pGpuResource = CreateRef<DirectXGpuResource>(ResourceStates::CopyDest);
+		//m_pGpuResource->SetInitializeResourceState(ResourceStates::CopyDest);
 
-		//D3D12_HEAP_PROPERTIES HeapProps;
-		//HeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
-		//HeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		//HeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		//HeapProps.CreationNodeMask = 1;
-		//HeapProps.VisibleNodeMask = 1;
+		m_Width = (uint32_t)width;
+		m_Height = (uint32_t)height;
+		
+		//m_Depth = 1;
 
-		//PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->CreateCommittedResource(&HeapProps,
-		//	D3D12_HEAP_FLAG_NONE, &texDesc, m_pGpuResource->m_UsageState, nullptr, IID_PPV_ARGS(m_pGpuResource->m_pResource.ReleaseAndGetAddressOf())) >= 0, "create texture 2d error!");
+		D3D12_RESOURCE_DESC texDesc = {};
+		texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		texDesc.Width = m_Width;
+		texDesc.Height = m_Height;
+		texDesc.DepthOrArraySize = 1;
+		texDesc.MipLevels = 1;
+		texDesc.Format = ImageFormatToDirectXImageFormat(textureFormat);
+		texDesc.SampleDesc.Count = 1;
+		texDesc.SampleDesc.Quality = 0;
+		texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-		//m_pGpuResource->m_pResource->SetName(L"Texture");
+		D3D12_HEAP_PROPERTIES HeapProps;
+		HeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+		HeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		HeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		HeapProps.CreationNodeMask = 1;
+		HeapProps.VisibleNodeMask = 1;
 
-		////D3D12_SUBRESOURCE_DATA texResource;
-		//////texResource.pData = 
-		////texResource.pData = nullptr;
-		////texResource.RowPitch = RowPitch;
-		////texResource.SlicePitch = RowPitch * width;
+		Ref<DirectXGpuResource> pResource = std::static_pointer_cast<DirectXGpuResource>(m_pGpuResource);
 
-		////Ref<Context> pContext = pContextManager->AllocateContext(CommandListType::Graphics, DirectXDevice::Get());
-		////std::static_pointer_cast<GraphicsContext>(pContext)->InitializeTexture(*m_pGpuResource, 1, &texResource, pContextManager, DirectXDevice::Get());
+		PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateCommittedResource
+		(&HeapProps, D3D12_HEAP_FLAG_NONE, &texDesc, pResource->m_UsageState,
+		nullptr, IID_PPV_ARGS(pResource->m_pResource.ReleaseAndGetAddressOf())) >= 0,
+		"create texture resource error!");
+		
+		pResource->m_pResource->SetName(L"Texture");
 
-		//m_pHandle = DescriptorAllocator::AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType::CBV_UAV_SRV, 1);
+		D3D12_SUBRESOURCE_DATA texResource;
+		texResource.pData = InitialData;
+		texResource.RowPitch = RowPitch;//one row's byte size
+		texResource.SlicePitch = RowPitch * height;
 
-		//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		//srvDesc.Format = ImageFormatToDirectXImageFormat(textureFormat);
-		//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-		//srvDesc.TextureCube.MipLevels = 1;
-		//srvDesc.TextureCube.MostDetailedMip = 0;
-		//srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-		//std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateShaderResourceView(m_pGpuResource->m_pResource.Get(), &srvDesc, std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_pHandle->GetCpuHandle())->GetCpuHandle());
+		Ref<Context> pContext = Device::Get()->GetContextManager()->CreateGraphicsContext(L"Create Texture");
+		Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
+		pGraphicsContext->InitializeTexture(*pResource, 1, &texResource);
+
+		m_pHandle = DescriptorAllocator::AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType::CBV_UAV_SRV, 1);
+		Ref<DirectXDescriptorCpuHandle> pHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_pHandle->GetCpuHandle());
+
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateShaderResourceView(pResource->m_pResource.Get(), nullptr,
+		pHandle->GetCpuHandle());
 	}
 
 	DirectXTexture::DirectXTexture(const std::string& path):m_path(path)
@@ -109,14 +116,19 @@ namespace Pixel {
 	}
 
 	uint64_t DirectXTexture::GetRendererID() const 
-{
+	{
 		//return static_cast<uint32_t>(std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_pCpuDescriptorHandle)->GetCpuHandle().ptr);
 		return static_cast<uint64_t>(m_pHandle->GetGpuPtr());
 	}
 
-	Ref<DescriptorCpuHandle> DirectXTexture::GetCpuDescriptorHandle() const
+	Ref<DescriptorCpuHandle> DirectXTexture::GetCpuDescriptorHandle()
 	{
 		return m_pHandle->GetCpuHandle();
+	}
+
+	Ref<DescriptorHandle> DirectXTexture::GetHandle() const
+	{
+		return m_pHandle;
 	}
 
 	void DirectXTexture::SetData(void* data, uint32_t size)

@@ -181,23 +181,18 @@ namespace Pixel {
 		{
 			uint32_t whiteTextureData = 0xffffff;
 			uint32_t whiteTextureData2 = 0xff;
-			Albedo = Texture2D::Create(1, 1, TextureFormat::RGB);
-			Albedo->SetData(&whiteTextureData, 3);
-			NormalMap = Texture2D::Create(1, 1, TextureFormat::RGB);
-			NormalMap->SetData(&whiteTextureData, 3);
-			Roughness = Texture2D::Create(1, 1, TextureFormat::RED);
-			Roughness->SetData(&whiteTextureData2, 1);
-			Metallic = Texture2D::Create(1, 1, TextureFormat::RED);
-			Metallic->SetData(&whiteTextureData2, 1);
-			Emissive = Texture2D::Create(1, 1, TextureFormat::RED);
-			Emissive->SetData(&whiteTextureData2, 1);
+			Albedo = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
+			NormalMap = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
+			Roughness = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
+			Metallic = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
+			Emissive = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 		}
 		MaterialComponent(const MaterialComponent&) = default;
 
 		MaterialComponent(std::string& AlbedoPath, std::string& NormalMapPath,
 			std::string& RoughnessPath, std::string& MetallicPath, std::string& EmissivePath)
 		{
-			uint32_t whiteTextureData = 0xffffff;
+			uint32_t whiteTextureData = 0xffffffff;
 			uint32_t whiteTextureData2 = 0xff;
 			albedoPath = AlbedoPath;
 			normalMapPath = NormalMapPath;
@@ -208,36 +203,32 @@ namespace Pixel {
 				Albedo = Texture2D::Create(AlbedoPath);
 			else
 			{
-				Albedo = Texture2D::Create(1, 1, TextureFormat::RGB);
-				Albedo->SetData(&whiteTextureData, 3);
+				Albedo = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
 			}
 			if(NormalMapPath != "")
 				NormalMap = Texture2D::Create(NormalMapPath);
 			else
 			{
-				NormalMap = Texture2D::Create(1, 1, TextureFormat::RGB);
-				NormalMap->SetData(&whiteTextureData, 3);
+				NormalMap = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
 			}
 			if(RoughnessPath != "")
 				Roughness = Texture2D::Create(RoughnessPath);
 			else
 			{
-				Roughness = Texture2D::Create(1, 1, TextureFormat::RED);
+				Roughness = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 				Roughness->SetData(&whiteTextureData2, 1);
 			}
 			if(MetallicPath != "")
 				Metallic = Texture2D::Create(MetallicPath);
 			else
 			{
-				Metallic = Texture2D::Create(1, 1, TextureFormat::RED);
-				Metallic->SetData(&whiteTextureData2, 1);
+				Metallic = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			}
 			if(EmissivePath != "")
 				Emissive = Texture2D::Create(EmissivePath);
 			else
 			{
-				Emissive = Texture2D::Create(1, 1, TextureFormat::RED);
-				Emissive->SetData(&whiteTextureData2, 1);
+				Emissive = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			}
 		}
 	};

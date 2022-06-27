@@ -113,13 +113,19 @@ namespace Pixel {
 		return m_path;
 	}
 
-	Ref<DescriptorCpuHandle> OpenGLTexture2D::GetCpuDescriptorHandle() const
+	Ref<DescriptorCpuHandle> OpenGLTexture2D::GetCpuDescriptorHandle()
 	{
 		//throw std::logic_error("The method or operation is not implemented.");
 
 		Ref<DescriptorCpuHandle> handle = DescriptorCpuHandle::Create();
 
 		return handle;
+	}
+
+
+	Ref<DescriptorHandle> OpenGLTexture2D::GetHandle() const
+	{
+		return nullptr;
 	}
 
 }

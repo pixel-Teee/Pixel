@@ -12,7 +12,9 @@ namespace Pixel {
 	{
 	public:
 		friend class Context;
-		DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat);
+		//DirectXTexture(uint32_t width, uint32_t height, ImageFormat textureFormat);
+		DirectXTexture(uint32_t RowPitch, uint32_t width, uint32_t height, ImageFormat textureFormat, const void*
+		InitialData);
 		DirectXTexture(const std::string& path);
 
 		virtual bool operator ==(const Texture& other) const override
@@ -27,7 +29,8 @@ namespace Pixel {
 
 		virtual uint64_t GetRendererID() const override;
 
-		Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() const override;
+		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() override;
+		virtual Ref<DescriptorHandle> GetHandle() const override;
 
 		//need to refractor
 		virtual void SetData(void* data, uint32_t size) override;
