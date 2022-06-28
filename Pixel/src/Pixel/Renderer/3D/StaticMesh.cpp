@@ -8,6 +8,9 @@
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Renderer/Context/Context.h"
 #include "Pixel/Renderer/RendererType.h"
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
+#include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
+#include "Pixel/Renderer/Device/Device.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -24,6 +27,9 @@ namespace Pixel {
 		m_IndexSize = 0;
 		m_AlternationDataBuffer = nullptr;
 		m_AlternationDataBufferSize = 0;
+
+		//m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
+		//m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh::StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices)
@@ -101,6 +107,9 @@ namespace Pixel {
 		}
 
 		PsoIndex = others.PsoIndex;
+
+		//m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
+		//m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh::~StaticMesh()
@@ -190,6 +199,43 @@ namespace Pixel {
 		m_MeshConstant.world = glm::transpose(transform);
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+
+		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+	}
+
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, MaterialComponent* pMaterial)
+	{
+		if (!isFirst)
+		{
+			isFirst = true;
+			SetupMesh(entityId, false);
+		}
+		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
+
+		m_MeshConstant.world = glm::transpose(transform);
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+
+		//get descriptor size
+		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+
+		//std::vector<DescriptorHandle> handles;
+		//for (uint32_t i = 0; i < 5; ++i)
+		//{
+		//	DescriptorHandle secondHandle = (*m_pTextureFirstHandle) + i * DescriptorSize;
+		//	handles.push_back(secondHandle);
+		//}	
+
+		//Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->Albedo->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->NormalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->Roughness->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->Metallic->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->Emissive->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_pDescriptorHeap);
+		////bind texture
+		//pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

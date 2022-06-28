@@ -69,7 +69,7 @@ namespace Pixel
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 		
-		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_GeoFramebuffer->GetColorAttachmentDescriptorCpuHandle(2), DescriptorHeapType::CBV_UAV_SRV);
 		///*------Create Framebuffer------*/
 
 		m_EditorScene = CreateRef<Scene>();
@@ -450,8 +450,8 @@ namespace Pixel
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			//recopy to descriptor
-			Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
-			//m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_GeoFramebuffer->GetColorAttachmentDescriptorCpuHandle(2), DescriptorHeapType::CBV_UAV_SRV);
+			m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -470,7 +470,8 @@ namespace Pixel
 					m_EditorCamera.OnUpdate(ts);
 				}
 				//Update scene
-				m_ActiveScene->OnUpdateEditorForward(ts, m_EditorCamera, m_Framebuffer);
+				//m_ActiveScene->OnUpdateEditorForward(ts, m_EditorCamera, m_Framebuffer);
+				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer);
 				break;
 			}
 			case EditorLayer::SceneState::Play:
@@ -493,9 +494,9 @@ namespace Pixel
 
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
-			int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
-			PIXEL_CORE_INFO("PixelData = {0}", pixelData);
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			//int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
+			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
+			//m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 	}
 

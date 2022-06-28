@@ -24,14 +24,14 @@ namespace Pixel {
 
 		virtual uint32_t CreatePso(BufferLayout& layout) override;
 
-		uint32_t CreateDeferredPso(BufferLayout& layout);
+		virtual uint32_t CreateDeferredPso(BufferLayout& layout) override;
 
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
 			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
 
-		void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*>& trans,
-		std::vector<StaticMeshComponent*>& meshs, std::vector<LightComponent*>& lights, std::vector<TransformComponent*>& lightTrans,
-		Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds);
+		virtual void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
+		std::vector<StaticMeshComponent>& meshs, std::vector<MaterialComponent>& materials, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans,
+		Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 

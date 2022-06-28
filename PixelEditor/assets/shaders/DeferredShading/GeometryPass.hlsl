@@ -33,6 +33,7 @@ struct PixelOut
 	float4 gBufferNormal : SV_Target1;
 	float4 gBufferAlbedo : SV_Target2;
 	float4 gBufferRoughnessMetallicEmissive : SV_Target3;
+	int gEditor : SV_Target4;
 };
 
 VertexOut VS(VertexIn vin)
@@ -95,6 +96,7 @@ PixelOut PS(VertexOut pin)
 	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x;
 	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).y;
 	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).z;
+	pixelOut.gEditor = pin.Editor;
 
 	return pixelOut;
 }	

@@ -33,6 +33,13 @@ namespace Pixel {
 			m_Meshes[i].Draw(pContext, transform, entityId);
 	}
 
+	void Model::Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId, 
+	MaterialComponent* pMaterialCompoent)
+	{
+		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
+			m_Meshes[i].Draw(pContext, transform, entityId, pMaterialCompoent);
+	}
+
 	/*------------------------------------------------------
 	----------Load Modle and Populate Vertex Information----
 	------------------------------------------------------*/
@@ -199,8 +206,8 @@ namespace Pixel {
 		staticMesh.m_IndexBuffer = IndexBuffer::Create((uint32_t*)staticMesh.m_Index, IndexNums);
 
 		//create pso
-		staticMesh.PsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
-
+		//staticMesh.PsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
+		staticMesh.PsoIndex = Application::Get().GetRenderer()->CreateDeferredPso(layout);
 		//std::vector<Vertex> vertices;
 		//std::vector<uint32_t> indices;
 

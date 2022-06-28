@@ -17,6 +17,8 @@ namespace Pixel {
 
 	class MaterialInstance;
 	class Context;
+	class MaterialComponent;
+	class DescriptorHeap;
 	class StaticMesh
 	{
 	public:
@@ -35,6 +37,8 @@ namespace Pixel {
 
 		//TODO:Test
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
+
+		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, MaterialComponent* pMaterial);
 
 		//Ref<VertexArray> GetVerterArray();
 		Ref<VertexBuffer> GetVertexBuffer();
@@ -66,6 +70,10 @@ namespace Pixel {
 		void SetupMesh(int entityID, bool bHavedSwitched);
 
 		MeshConstant m_MeshConstant;
+
+		//texture descriptor heap
+		Ref<DescriptorHeap> m_pDescriptorHeap;
+		Ref<DescriptorHandle> m_pTextureFirstHandle;
 
 		friend class Model;
 	};

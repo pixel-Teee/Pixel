@@ -334,13 +334,12 @@ namespace Pixel {
 	}
 
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
-	std::vector<TransformComponent*>& trans, std::vector<StaticMeshComponent*>& meshs,
-	std::vector<LightComponent*>& lights, std::vector<TransformComponent*>& lightTrans,
+	std::vector<TransformComponent>& trans, std::vector<StaticMeshComponent>& meshs, std::vector<MaterialComponent>& materials,
+	std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans,
 	Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
-		//bind the deferred shading pipeline state
-		pGraphicsContext->SetPipelineState(*m_DefaultGeometryShadingPso);
+
 		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
@@ -363,8 +362,15 @@ namespace Pixel {
 		}
 		pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pDepthBuffer, ResourceStates::DepthWrite);
 
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		{
+			//clear color buffer
+			pContext->ClearColor(*(pDirectxFrameBuffer->m_pColorBuffers[i]));
+		}
+		pContext->ClearDepth(*(pDirectxFrameBuffer->m_pDepthBuffer));
+
 		//set primitive topology
-		pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::LINELIST);
+		pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
 
 		//set viewport and scissor
 		ViewPort vp;
@@ -384,25 +390,44 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		//bind resources
-
-
+		glm::mat4x4 gViewProjection = glm::transpose(camera.GetViewProjection());
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4x4), glm::value_ptr(gViewProjection));
+		
+		for (uint32_t i = 0; i < meshs.size(); ++i)
+		{
+			//draw every mesh
+			meshs[i].mesh.Draw(trans[i].GetTransform(), pContext, entityIds[i], &materials[i]);
+		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
 		{
-			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::RenderTarget);
+			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::Common);
 		}
 		//editor frame buffer
-		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[4]), ResourceStates::UnorderedAccess);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[4]), ResourceStates::Common);
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
+
+		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
+		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
+
+		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
+		{
+			int32_t widthAndHeight[2] = { m_Width, m_Height };
+			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
+			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
+		}
+
+		m_lastWidth = m_Width;
+		m_lastHeight = m_Height;
 	}
 
 	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)
 	{
 		//get the editor buffer
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
-		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 2, "frame color buffer's size error!");
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "frame color buffer's size error!");
 
-		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[1];
+		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[4];
 
 		//creat the structed buffer
 		m_PickerBuffer = CreateRef<StructuredBuffer>();
@@ -498,7 +523,7 @@ namespace Pixel {
 		m_DefaultGeometryShadingPso->SetRasterizerState(pRasterState);
 		m_DefaultGeometryShadingPso->SetDepthState(pDepthState);
 
-		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, 
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
 		ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
 		m_DefaultGeometryShadingPso->SetRenderTargetFormats(5, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_DefaultGeometryShadingPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
