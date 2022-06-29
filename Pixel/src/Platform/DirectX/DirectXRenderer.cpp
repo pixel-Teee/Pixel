@@ -334,8 +334,8 @@ namespace Pixel {
 	}
 
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
-	std::vector<TransformComponent>& trans, std::vector<StaticMeshComponent>& meshs, std::vector<MaterialComponent>& materials,
-	std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans,
+	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials,
+	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
 	Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
@@ -396,7 +396,7 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//draw every mesh
-			meshs[i].mesh.Draw(trans[i].GetTransform(), pContext, entityIds[i], &materials[i]);
+			meshs[i]->mesh.Draw(trans[i]->GetTransform(), pContext, entityIds[i], materials[i]);
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)

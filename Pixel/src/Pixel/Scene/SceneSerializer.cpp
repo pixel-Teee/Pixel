@@ -406,9 +406,9 @@ namespace Pixel {
 		);
 		out << YAML::EndSeq;
 
-		out << YAML::Key << "Environment" << YAML::BeginSeq;
-		SerializeEnvironment(out, m_Scene->m_skyBox->GetPaths());
-		out << YAML::EndSeq;
+		//out << YAML::Key << "Environment" << YAML::BeginSeq;
+		//SerializeEnvironment(out, m_Scene->m_skyBox->GetPaths());
+		//out << YAML::EndSeq;
 
 		out << YAML::EndMap;
 
@@ -573,46 +573,46 @@ namespace Pixel {
 		}
 
 		//environment
-		{
-			auto environments = data["Environment"];
-			if (environments)
-			{
-				for (auto environment : environments)
-				{
-					std::string environmentType = environment["EnvironmentType"].as<std::string>();
-					PX_CORE_ASSERT("environment type{0}", environmentType);
-					auto SkyBox = environment["SkyBox"];
-					if (SkyBox)
-					{
+		//{
+		//	auto environments = data["Environment"];
+		//	if (environments)
+		//	{
+		//		for (auto environment : environments)
+		//		{
+		//			std::string environmentType = environment["EnvironmentType"].as<std::string>();
+		//			PX_CORE_ASSERT("environment type{0}", environmentType);
+		//			auto SkyBox = environment["SkyBox"];
+		//			if (SkyBox)
+		//			{
 
-						//PIXEL_CORE_TRACE("Deserializing environment '{0}'", environment);
+		//				//PIXEL_CORE_TRACE("Deserializing environment '{0}'", environment);
 
-						static std::vector<std::string> faces = {
-							"Right",
-							"Left",
-							"Top",
-							"Bottom",
-							"Front",
-							"Back"
-						};
+		//				static std::vector<std::string> faces = {
+		//					"Right",
+		//					"Left",
+		//					"Top",
+		//					"Bottom",
+		//					"Front",
+		//					"Back"
+		//				};
 
-						std::vector<std::string> paths(6);
+		//				std::vector<std::string> paths(6);
 
-						for (uint32_t i = 0; i < 6; ++i)
-						{
-							paths[i] = SkyBox[faces[i]].as<std::string>();
-						}
-						
-						for (uint32_t i = 0; i < 6; ++i)
-						{
-							m_Scene->m_skyBox->SetFace((FaceTarget)i, paths[i]);
-						}
-						m_Scene->m_skyBox->GenerateCubeMap();
-						m_Scene->m_skyBox->SetDirty(true);
-					}
-				}
-			}	
-		}	
+		//				for (uint32_t i = 0; i < 6; ++i)
+		//				{
+		//					paths[i] = SkyBox[faces[i]].as<std::string>();
+		//				}
+		//				
+		//				for (uint32_t i = 0; i < 6; ++i)
+		//				{
+		//					m_Scene->m_skyBox->SetFace((FaceTarget)i, paths[i]);
+		//				}
+		//				m_Scene->m_skyBox->GenerateCubeMap();
+		//				m_Scene->m_skyBox->SetDirty(true);
+		//			}
+		//		}
+		//	}	
+		//}	
 		return true;
 	}
 

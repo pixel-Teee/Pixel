@@ -139,8 +139,9 @@ namespace Pixel {
 		texResource.SlicePitch = size;
 
 		//GraphicsContext::InitializeTexture()
-
 		Ref<Context> pContext = DirectXDevice::Get()->GetContextManager()->CreateGraphicsContext(L"Create Texture");
+
+		pContext->TransitionResource(*m_pGpuResource, ResourceStates::CopyDest);
 
 		std::static_pointer_cast<GraphicsContext>(pContext)->InitializeTexture(*m_pGpuResource, 1, &texResource);
 	}

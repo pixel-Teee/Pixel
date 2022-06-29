@@ -216,7 +216,6 @@ namespace Pixel {
 			else
 			{
 				Roughness = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
-				Roughness->SetData(&whiteTextureData2, 1);
 			}
 			if(MetallicPath != "")
 				Metallic = Texture2D::Create(MetallicPath);

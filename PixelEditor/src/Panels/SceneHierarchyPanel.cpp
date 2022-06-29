@@ -8,6 +8,7 @@
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 #include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Renderer/Context/ContextManager.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -117,6 +118,7 @@ namespace Pixel
 		if (entityDeleted)
 		{
 			m_Context->DestroyEntity(entity);
+
 			if (m_SelectionContext == entity)
 				m_SelectionContext = {};
 		}

@@ -28,8 +28,8 @@ namespace Pixel {
 		m_AlternationDataBuffer = nullptr;
 		m_AlternationDataBufferSize = 0;
 
-		//m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
-		//m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
+		m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
+		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh::StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices)
@@ -108,8 +108,83 @@ namespace Pixel {
 
 		PsoIndex = others.PsoIndex;
 
-		//m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
-		//m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
+		m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh Textures", DescriptorHeapType::CBV_UAV_SRV, 5);
+		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
+	}
+
+	StaticMesh& StaticMesh::operator=(const StaticMesh& rhs)
+	{
+		if (this == &rhs)
+			return *this;
+
+		//delete original data
+		for (uint32_t i = 0; i < (uint32_t)Semantics::MAX; ++i)
+		{
+			if (m_DataBuffer[i] != nullptr)
+			{
+				delete[] m_DataBuffer[i];
+			}
+			m_DataBuffer[i] = nullptr;
+		}
+
+		if (m_Index != nullptr)
+		{
+			delete[] m_Index;
+			m_Index = nullptr;
+		}
+		//delete[]Index;
+		if (m_AlternationDataBuffer != nullptr)
+		{
+			delete[] m_AlternationDataBuffer;
+			m_AlternationDataBuffer = nullptr;
+		}
+
+		//copy other's data
+		m_VertexBuffer = rhs.m_VertexBuffer;
+		m_IndexBuffer = rhs.m_IndexBuffer;
+
+		for (uint32_t i = 0; i < (uint32_t)Semantics::MAX; ++i)
+		{
+			if (rhs.m_DataBuffer[i] != nullptr)
+			{
+				m_DataBuffer[i] = new unsigned char[rhs.m_DataBufferSize[i]];
+				memcpy(m_DataBuffer[i], rhs.m_DataBuffer[i], rhs.m_DataBufferSize[i]);
+				m_DataBufferSize[i] = rhs.m_DataBufferSize[i];
+			}
+			else
+			{
+				m_DataBuffer[i] = nullptr;
+				m_DataBufferSize[i] = 0;
+			}
+		}
+
+		if (rhs.m_Index != nullptr)
+		{
+			m_Index = new unsigned char[rhs.m_IndexSize];
+			memcpy(m_Index, rhs.m_Index, rhs.m_IndexSize);
+			m_IndexSize = rhs.m_IndexSize;
+		}
+		else
+		{
+			m_Index = nullptr;
+			m_IndexSize = 0;
+		}
+
+		if (rhs.m_AlternationDataBuffer != nullptr)
+		{
+			m_AlternationDataBuffer = new unsigned char[rhs.m_AlternationDataBufferSize];
+			memcpy(m_AlternationDataBuffer, rhs.m_AlternationDataBuffer, rhs.m_AlternationDataBufferSize);
+			m_AlternationDataBufferSize = rhs.m_AlternationDataBufferSize;
+		}
+		else
+		{
+			m_AlternationDataBuffer = nullptr;
+			m_AlternationDataBufferSize = 0;
+		}
+
+		PsoIndex = rhs.PsoIndex;
+		m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
+		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh::~StaticMesh()
@@ -119,8 +194,8 @@ namespace Pixel {
 			if (m_DataBuffer[i] != nullptr)
 			{
 				delete[] m_DataBuffer[i];
-				m_DataBuffer[i] = nullptr;
 			}
+			m_DataBuffer[i] = nullptr;
 		}
 
 		if (m_Index != nullptr)
@@ -221,25 +296,29 @@ namespace Pixel {
 		//get descriptor size
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 
-		//std::vector<DescriptorHandle> handles;
-		//for (uint32_t i = 0; i < 5; ++i)
-		//{
-		//	DescriptorHandle secondHandle = (*m_pTextureFirstHandle) + i * DescriptorSize;
-		//	handles.push_back(secondHandle);
-		//}	
+		std::vector<DescriptorHandle> handles;
+		for (uint32_t i = 0; i < 5; ++i)
+		{
+			DescriptorHandle secondHandle = (*m_pTextureFirstHandle) + i * DescriptorSize;
+			handles.push_back(secondHandle);
+		}	
 
-		//Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->Albedo->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->NormalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->Roughness->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->Metallic->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->Emissive->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_pDescriptorHeap);
-		////bind texture
-		//pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
+		Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->Albedo->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->NormalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->Roughness->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->Metallic->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->Emissive->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_pDescriptorHeap);
+		//bind texture
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+
+		//unbind descriptor heap
+		Ref<DescriptorHeap> nullHeap = DescriptorHeap::Create();
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
 	}
 
 	//Ref<VertexArray> StaticMesh::GetVerterArray()

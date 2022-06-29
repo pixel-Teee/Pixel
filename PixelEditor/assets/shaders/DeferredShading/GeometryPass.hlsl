@@ -91,8 +91,9 @@ PixelOut PS(VertexOut pin)
 	//write out to gbuffer
 	PixelOut pixelOut = (PixelOut)(0.0f);
 	pixelOut.gBufferPosition.xyz = pin.PosW;
-	pixelOut.gBufferNormal.xyz = DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW);
-	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz * 2.0f - 1.0f;
+	pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;
+	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz;
+	pixelOut.gBufferAlbedo.w = 1.0f;
 	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x;
 	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).y;
 	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).z;

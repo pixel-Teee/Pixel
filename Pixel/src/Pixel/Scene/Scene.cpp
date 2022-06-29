@@ -688,31 +688,31 @@ namespace Pixel
 	{
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
-		std::vector<TransformComponent> trans;
-		std::vector<StaticMeshComponent> meshs;
-		std::vector<MaterialComponent> materials;
+		std::vector<TransformComponent*> trans;
+		std::vector<StaticMeshComponent*> meshs;
+		std::vector<MaterialComponent*> materials;
 		std::vector<int32_t> entityIds;
 		for (auto entity : group)
 		{
-			auto [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialComponent>(entity);
+			auto& [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialComponent>(entity);
 
 			//in terms of transform and mesh to draw
-			trans.push_back(transform);
-			meshs.push_back(mesh);
-			materials.push_back(material);
+			trans.push_back(&transform);
+			meshs.push_back(&mesh);
+			materials.push_back(&material);
 			entityIds.push_back((int32_t)entity);
 		}
 
-		std::vector<LightComponent> lights;
-		std::vector<TransformComponent> lightTrans;
+		std::vector<LightComponent*> lights;
+		std::vector<TransformComponent*> lightTrans;
 		auto lightGroup = m_Registry.group<LightComponent>(entt::get<TransformComponent>);
 		for (auto entity : lightGroup)
 		{
-			auto [trans, light] = lightGroup.get<TransformComponent, LightComponent>(entity);
+			auto& [trans, light] = lightGroup.get<TransformComponent, LightComponent>(entity);
 
 			//in terms of transform and mesh to draw
-			lightTrans.push_back(trans);
-			lights.push_back(light);
+			lightTrans.push_back(&trans);
+			lights.push_back(&light);
 		}
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);

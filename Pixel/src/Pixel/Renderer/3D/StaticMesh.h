@@ -24,6 +24,7 @@ namespace Pixel {
 	public:
 		StaticMesh();
 		StaticMesh(const StaticMesh& others);
+		StaticMesh& operator=(const StaticMesh& rhs);
 		~StaticMesh();
 
 		StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices);
