@@ -17,8 +17,8 @@ namespace Pixel {
 	ContentBrowserPanel::ContentBrowserPanel()
 	:m_CurrentDirectory(g_AssetPath)
 	{
-		m_Directory = Texture2D::Create(g_AssetPath.string() + "/icons/directory.dds");
-		m_File = Texture2D::Create(g_AssetPath.string() + "/icons/file.dds");
+		m_Directory = Texture2D::Create(g_AssetPath.string() + "/icons/directory.png");
+		m_File = Texture2D::Create(g_AssetPath.string() + "/icons/file.png");
 
 		//copy the these thexture's descriptor to descriptor heap
 		m_DirectoryHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);

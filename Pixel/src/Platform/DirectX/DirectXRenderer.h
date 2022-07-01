@@ -2,6 +2,8 @@
 
 #include "Pixel/ConstantBuffers.h"
 #include "Pixel/Renderer/BaseRenderer.h"
+#include "Pixel/Renderer/RendererType.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
 
 namespace Pixel {
 	class BufferLayout;
@@ -26,12 +28,14 @@ namespace Pixel {
 
 		virtual uint32_t CreateDeferredPso(BufferLayout& layout) override;
 
+		virtual uint32_t CreateDeferredLightPso(BufferLayout& layout) override;
+
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
 			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
 
 		virtual void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 		std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-		Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
+		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds) override;
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
@@ -75,11 +79,27 @@ namespace Pixel {
 		void CreateDefaultDeferredShadingPso();
 		Ref<RootSignature> m_pDeferredShadingRootSignature;
 		Ref<PSO> m_DefaultGeometryShadingPso;
-		Ref<PSO> m_DefaultLightShadingPso;
-
+		
 		Ref<Shader> m_GeometryVertexShader;
 		Ref<Shader> m_GeometryPixelShader;
 		//------Deferred Shading------
+
+		//------Deferred Shading Light Pass------
+		Ref<PSO> m_DefaultLightShadingPso;
+		Ref<RootSignature> m_pDeferredShadingLightRootSignature;
+		Ref<Shader> m_LightVertexShader;
+		Ref<Shader> m_LightPixelShader;
+		uint32_t m_DeferredShadingLightPsoIndex;
+
+		Ref<VertexBuffer> m_pVertexBuffer;
+		Ref<IndexBuffer> m_pIndexBuffer;
+
+		LightPass m_lightPass;
+
+		Ref<DescriptorHeap> m_DeferredShadingLightGbufferTextureHeap;
+		Ref<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandle;
+		std::vector<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandles;
+		//------Deferred Shading Light Pass------
 	};
 }
  

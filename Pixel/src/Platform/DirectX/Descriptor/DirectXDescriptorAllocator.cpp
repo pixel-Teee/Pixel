@@ -17,7 +17,7 @@ namespace Pixel {
 	DirectXDescriptorAllocator::DirectXDescriptorAllocator(DescriptorHeapType Type)
 	:m_Type(DescriptorHeapTypeToDirectXDescriptorHeapType(Type)), m_CurrentHeap(nullptr), m_DescriptorSize(0)
 	{
-		
+		m_DescriptorSize = std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->GetDescriptorHandleIncrementSize(m_Type);
 	}
 
 	Ref<DescriptorCpuHandle> DirectXDescriptorAllocator::Allocate(uint32_t Count)

@@ -32,8 +32,8 @@ namespace Pixel
 	void EditorLayer::OnAttach()
 	{
 		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.dds");
-		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.dds");
+		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
+		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
 
 		m_IconPlayHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 		m_IconStopHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
@@ -471,7 +471,7 @@ namespace Pixel
 				}
 				//Update scene
 				//m_ActiveScene->OnUpdateEditorForward(ts, m_EditorCamera, m_Framebuffer);
-				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer);
+				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
 				break;
 			}
 			case EditorLayer::SceneState::Play:

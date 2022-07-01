@@ -94,10 +94,109 @@ namespace Pixel {
 
 		//std::string ddsFilePath = path.substr(0, dotPlace - 1) + ".dds";
 
+		int width, height, channels = 0;
+
+		stbi_info(path.c_str(), &width, &height, &channels);
+
+		if (channels == 1)
+		{
+			stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 1);
+			m_Width = width;
+			m_Height = height;
+
+			//------Create ID3D12Resource------
+			D3D12_RESOURCE_DESC texDesc = {};
+			texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			texDesc.Width = m_Width;
+			texDesc.Height = m_Height;
+			texDesc.DepthOrArraySize = 1;
+			texDesc.MipLevels = 1;
+			texDesc.Format = ImageFormatToDirectXImageFormat(ImageFormat::PX_FORMAT_R8_UNORM);
+			texDesc.SampleDesc.Count = 1;
+			texDesc.SampleDesc.Quality = 0;
+			texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+			texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+			D3D12_HEAP_PROPERTIES HeapProps;
+			HeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+			HeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+			HeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+			HeapProps.CreationNodeMask = 1;
+			HeapProps.VisibleNodeMask = 1;
+
+			Ref<DirectXGpuResource> pResource = std::static_pointer_cast<DirectXGpuResource>(m_pGpuResource);
+
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateCommittedResource
+			(&HeapProps, D3D12_HEAP_FLAG_NONE, &texDesc, pResource->m_UsageState,
+				nullptr, IID_PPV_ARGS(pResource->m_pResource.ReleaseAndGetAddressOf())) >= 0,
+				"create texture resource error!");
+
+			pResource->m_pResource->SetName(L"Texture");
+			//------Create ID3D12Resource------
+
+			Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+
+			D3D12_SUBRESOURCE_DATA subData;
+			subData.pData = data;
+			subData.RowPitch = width;
+			subData.SlicePitch = width * height;
+
+			std::static_pointer_cast<GraphicsContext>(pContext)->InitializeTexture(*pResource, 1, &subData);
+
+			stbi_image_free(data);
+		}
+		else if (channels == 4 || channels == 3)
+		{
+			stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+			m_Width = width;
+			m_Height = height;
+
+			//------Create ID3D12Resource------
+			D3D12_RESOURCE_DESC texDesc = {};
+			texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			texDesc.Width = m_Width;
+			texDesc.Height = m_Height;
+			texDesc.DepthOrArraySize = 1;
+			texDesc.MipLevels = 1;
+			texDesc.Format = ImageFormatToDirectXImageFormat(ImageFormat::PX_FORMAT_R8G8B8A8_UNORM);
+			texDesc.SampleDesc.Count = 1;
+			texDesc.SampleDesc.Quality = 0;
+			texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+			texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+			D3D12_HEAP_PROPERTIES HeapProps;
+			HeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+			HeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+			HeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+			HeapProps.CreationNodeMask = 1;
+			HeapProps.VisibleNodeMask = 1;
+
+			Ref<DirectXGpuResource> pResource = std::static_pointer_cast<DirectXGpuResource>(m_pGpuResource);
+
+			PX_CORE_ASSERT(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateCommittedResource
+			(&HeapProps, D3D12_HEAP_FLAG_NONE, &texDesc, pResource->m_UsageState,
+				nullptr, IID_PPV_ARGS(pResource->m_pResource.ReleaseAndGetAddressOf())) >= 0,
+				"create texture resource error!");
+
+			pResource->m_pResource->SetName(L"Texture");
+			//------Create ID3D12Resource------
+
+			Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+
+			D3D12_SUBRESOURCE_DATA subData;
+			subData.pData = data;
+			subData.RowPitch = 4 * width;
+			subData.SlicePitch = 4 * width * height;
+
+			std::static_pointer_cast<GraphicsContext>(pContext)->InitializeTexture(*pResource, 1, &subData);
+
+			stbi_image_free(data);
+		}
+
 		//------need to refractor------
-		Ref<GpuResource> pResource = m_pGpuResource;
-		PX_CORE_ASSERT(DirectX::CreateDDSTextureForPixelEngine(*pResource, StringToWString(path).c_str()) >= 0,
-			"create texture 2d error!");
+		
+		//PX_CORE_ASSERT(DirectX::CreateDDSTextureForPixelEngine(*pResource, StringToWString(path).c_str()) >= 0,
+		//	"create texture 2d error!");
 
 		//------need to refractor------
 		//create handle

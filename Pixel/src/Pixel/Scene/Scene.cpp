@@ -684,7 +684,7 @@ namespace Pixel
 		//pComputeContext->Finish(true);
 	}
 
-	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pFrameBuffer)
+	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer)
 	{
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
@@ -716,7 +716,7 @@ namespace Pixel
 		}
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pFrameBuffer, entityIds);
+		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds);
 		pContext->Finish(true);
 
 		//Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);

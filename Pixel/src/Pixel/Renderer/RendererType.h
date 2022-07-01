@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace Pixel {
 
 	struct PixelRect {
@@ -224,5 +226,29 @@ namespace Pixel {
 		CommonCBV,
 		SkinMatrices,
 		NumRootBindings
+	};
+
+#define MAXLIGHTS 16
+
+	struct Light
+	{
+		glm::vec3 Position;//light position
+		float pad;
+		glm::vec3 Direction;
+		float pad2;
+		glm::vec3 color;
+		float Intensity;
+		float FallOffRadius;
+		float InnerAngle;
+		float OuterAngle;
+		float LengthLight;
+		float Radius;
+	};
+
+	struct alignas(256) LightPass
+	{
+		glm::vec3 CameraPosition;
+		float pad;
+		Light lights[MAXLIGHTS];
 	};
 }

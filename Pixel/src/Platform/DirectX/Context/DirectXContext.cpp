@@ -406,7 +406,7 @@ namespace Pixel {
 	{
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> PipelineState = static_cast<const GraphicsPSO&>(pso).GetPipelineStateObject();
 
-		if (PipelineState == m_CurrPipelineState)
+		if (PipelineState == m_CurrPipelineState || PipelineState == nullptr)
 			return;
 
 		m_pCommandList->SetPipelineState(PipelineState.Get());
