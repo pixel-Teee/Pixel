@@ -312,6 +312,15 @@ namespace Pixel {
 		//bind texture
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
 
+		m_MaterialConstant.Albedo = pMaterial->gAlbedo;
+		m_MaterialConstant.Emissive = pMaterial->gEmissive;
+		m_MaterialConstant.Metallic = pMaterial->gMetallic;
+		m_MaterialConstant.Roughness = pMaterial->gRoughness;
+		m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
+
+
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());

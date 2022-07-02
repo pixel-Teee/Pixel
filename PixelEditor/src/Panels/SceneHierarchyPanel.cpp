@@ -531,6 +531,8 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
+				ImGui::DragFloat3("Albedo Value:", glm::value_ptr(component.gAlbedo), 0.05f, 0.0f, 1.0f);
+				//ImGui::InputFloat3("Albedo Value:", glm::value_ptr(component.gAlbedo));
 
 				ImGui::Text("NormalMap");
 				ImGui::Image((ImTextureID)pDestHandles[1].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
@@ -546,6 +548,9 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
+				ImGui::Checkbox("HaveNormal", &component.HaveNormal);
+				//ImGui::DragFloat3("Normal Value:", glm::value_ptr(component.gNormal), 0.05f, 0.0f, 1.0f);
+				//ImGui::InputFloat3("Normal Value:", glm::value_ptr(component.gNormal));
 
 				ImGui::Text("Roughness");
 				ImGui::Image((ImTextureID)pDestHandles[2].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
@@ -561,6 +566,8 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
+				ImGui::DragFloat("Roughness Value:", &component.gRoughness, 0.05f, 0.0f, 1.0f);
+				//ImGui::InputFloat("Roughness Value:", &component.gRoughness);
 
 				ImGui::Text("Metallic");
 				ImGui::Image((ImTextureID)pDestHandles[3].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
@@ -576,6 +583,8 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
+				ImGui::DragFloat("Metallic Value:", &component.gMetallic, 0.05f, 0.0f, 1.0f);
+				//ImGui::InputFloat("Metallic Value:", &component.gMetallic);
 
 				ImGui::Text("Emissive");
 				ImGui::Image((ImTextureID)pDestHandles[4].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
@@ -591,6 +600,8 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
+				ImGui::DragFloat("Emissive Value:", &component.gEmissive, 0.05f, 0.0f, 1.0f);
+				//ImGui::InputFloat("Emissive Value:", &component.gEmissive);
 
 				//ImGui::DragFloat("Shininess", &component.shininess, 2.0f, 2.0f, 64.0f);
 			}
@@ -598,11 +609,35 @@ namespace Pixel
 		
 		DrawComponent<LightComponent>("Light Component", entity, [](auto& component) 
 			{
-				ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
-				//ImGui::DragFloat("Light diffuse", &component.diffuse, 10.0f, 1.0f, 1000.0f);
-				ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
-				ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
-				ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
+				const char* LightTypeString[] = { "PointLight", "DirectLight", "SpointLight" };
+				const char* currentLightTypeString = LightTypeString[(int)component.lightType];
+				if (ImGui::BeginCombo("Light Type", currentLightTypeString))
+				{
+					for (int i = 0; i < 3; ++i)
+					{
+						bool isSelected = currentLightTypeString == LightTypeString[i];
+						if (ImGui::Selectable(LightTypeString[i], isSelected))
+						{
+							currentLightTypeString = LightTypeString[i];
+							component.lightType = (LightType)i;
+						}
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+				if (component.lightType == LightType::PointLight)
+				{
+					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
+					//ImGui::DragFloat("Light diffuse", &component.diffuse, 10.0f, 1.0f, 1000.0f);
+					ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
+					ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
+					ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
+				}
+				else if (component.lightType == LightType::DirectLight)
+				{
+					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
+				}
 			}
 		);
 

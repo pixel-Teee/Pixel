@@ -7,6 +7,7 @@
 #include "Pixel/Renderer/Shader.h"
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/UniformBuffer.h"
+#include "Pixel/Renderer/RendererType.h"
 
 namespace Pixel {
 
@@ -75,6 +76,8 @@ namespace Pixel {
 		//texture descriptor heap
 		Ref<DescriptorHeap> m_pDescriptorHeap;
 		Ref<DescriptorHandle> m_pTextureFirstHandle;
+
+		MaterialConstant m_MaterialConstant;
 
 		friend class Model;
 	};

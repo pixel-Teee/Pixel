@@ -177,6 +177,14 @@ namespace Pixel {
 		std::string metallicPath;
 		std::string emissivePath;
 
+		//constant
+		glm::vec3 gAlbedo = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 gNormal = { 1.0f, 1.0f, 1.0f };
+		float gRoughness = 1.0f;
+		float gMetallic = 1.0f;
+		float gEmissive = 1.0f;
+		bool HaveNormal = false;
+
 		MaterialComponent()
 		{
 			uint32_t whiteTextureData = 0xffffff;
@@ -268,15 +276,25 @@ namespace Pixel {
 		}
 	};
 
+	enum class LightType
+	{
+		PointLight = 0,
+		DirectLight = 1,
+		SpotLight = 2
+	};
+
 	//TODO£ºtemporary there only have a point light
 	struct LightComponent
 	{
+		LightType lightType;
 		//LightColor
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
+		//------for point light's volume radius------
 		float constant = 1.0f;
 		float linear = 0.09f;
 		float quadratic = 0.032f;
+		//------for point light's volume radius------
 
 		LightComponent() = default;
 		LightComponent(const LightComponent&) = default;

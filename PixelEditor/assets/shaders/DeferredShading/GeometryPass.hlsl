@@ -10,6 +10,15 @@ cbuffer cbPass : register(b1)
 	float4x4 gViewProjection;
 };
 
+cbuffer CbMaterial : register(b2)
+{
+	float3 gAlbedo;
+	float gRoughness;
+	float gMetallic;
+	float gEmissive;
+	bool HaveNormal;//have normal
+};
+
 struct VertexIn
 {
 	float3 PosL : POSITION;
@@ -91,12 +100,17 @@ PixelOut PS(VertexOut pin)
 	//write out to gbuffer
 	PixelOut pixelOut = (PixelOut)(0.0f);
 	pixelOut.gBufferPosition.xyz = pin.PosW;
-	pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;
-	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz;
+
+	//if don't have normal map, then use the vertex's normal
+	if (HaveNormal)
+		pixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;
+	else
+		pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;
+	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz * gAlbedo;
 	pixelOut.gBufferAlbedo.w = 1.0f;
-	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x;
-	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).y;
-	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).z;
+	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;
+	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).y * gMetallic;
+	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).z * gEmissive;
 	pixelOut.gEditor = pin.Editor;
 
 	return pixelOut;

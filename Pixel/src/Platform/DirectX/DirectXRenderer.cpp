@@ -495,11 +495,39 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		m_lightPass.CameraPosition = camera.GetPosition();
+		
+		std::vector<LightComponent*> ReSortedPointLight;
+		std::vector<LightComponent*> ReSortedDirectLight;
+		std::vector<LightComponent*> ReSortedSpotLight;
+
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
+			//---restored point light---
+			if (lights[i]->lightType == LightType::PointLight)
+			{
+				ReSortedPointLight.push_back(lights[i]);
+			}
+			else if (lights[i]->lightType == LightType::DirectLight)
+			{
+				ReSortedDirectLight.push_back(lights[i]);
+			}
+			//---restored point light---
+		}
+
+		m_lightPass.PointLightNumber = ReSortedPointLight.size();
+		m_lightPass.DirectLightNumber = ReSortedDirectLight.size();
+
+		for (uint32_t i = 0; i < ReSortedPointLight.size(); ++i)
+		{
 			m_lightPass.lights[i].Position = (*lightTrans[i]).Translation;
-			m_lightPass.lights[i].color = (*lights[i]).color;
-			m_lightPass.lights[i].FallOffRadius = (*lights[i]).GetSphereLightVolumeRadius();
+			m_lightPass.lights[i].Color = (*lights[i]).color;
+			m_lightPass.lights[i].Radius = (*lights[i]).GetSphereLightVolumeRadius();
+		}
+
+		for (uint32_t i = 0; i < ReSortedDirectLight.size(); ++i)
+		{
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*lightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*lights[i]).color;
 		}
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);

@@ -232,23 +232,31 @@ namespace Pixel {
 
 	struct Light
 	{
-		glm::vec3 Position;//light position
+		glm::vec3 Position;//point light, to calculate attenuation
 		float pad;
-		glm::vec3 Direction;
+		glm::vec3 Direction;//direction light
 		float pad2;
-		glm::vec3 color;
-		float Intensity;
-		float FallOffRadius;
-		float InnerAngle;
-		float OuterAngle;
-		float LengthLight;
-		float Radius;
+		glm::vec3 Color;//point light/direction light
+		float Radius;//point light, volume radius
 	};
 
 	struct alignas(256) LightPass
 	{
 		glm::vec3 CameraPosition;
+		int PointLightNumber = 0;
+		int DirectLightNumber = 0;
+		int SpotLightNumber = 0;
 		float pad;
+		float pad2;
 		Light lights[MAXLIGHTS];
+	};
+
+	struct alignas(256) MaterialConstant
+	{
+		glm::vec3 Albedo = { 1.0f, 1.0f, 1.0f };
+		float Roughness = 1.0f;
+		float Metallic = 0.0f;
+		float Emissive = 0.0f;
+		bool HaveNormal = false;
 	};
 }
