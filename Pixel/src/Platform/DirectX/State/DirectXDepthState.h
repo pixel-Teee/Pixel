@@ -11,5 +11,8 @@ namespace Pixel {
 		virtual ~DirectXDepthState();
 
 		D3D12_DEPTH_STENCIL_DESC m_DepthStencilDesc;
+
+		virtual void SetDepthFunc(DepthFunc func) override;
+
 	};
 }

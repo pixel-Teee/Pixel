@@ -21,6 +21,10 @@
 #include "Pixel/Renderer/Context/ContextManager.h"
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
+#include "Platform/DirectX/Texture/DirectXCubeTexture.h"
+#include "Platform/DirectX/Texture/DirectXTexture.h"
+
+#include "stb_image.h"
 
 namespace Pixel {
 
@@ -122,16 +126,59 @@ namespace Pixel {
 		CreateDefaultDeferredShadingPso();
 		//------Create Deferred Shading PipelineState-------
 
-		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 4);
-		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(4);
+		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 5);
+		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(5);
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
-		m_DeferredShadingLightGbufferTextureHandles.resize(4);
+		m_DeferredShadingLightGbufferTextureHandles.resize(5);
 
-		for (uint32_t i = 0; i < 4; ++i)
+		for (uint32_t i = 0; i < 5; ++i)
 		{
 			DescriptorHandle secondHandle = (*m_DeferredShadingLightGbufferTextureHandle) + i * DescriptorSize;
 			m_DeferredShadingLightGbufferTextureHandles[i] = secondHandle;
 		}
+
+		CreateConvertHDRToCubePipeline();
+
+		m_EquirectangularMap = DescriptorHeap::Create(L"EquirectangularMap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		m_EquirectangularDescriptorHandle = m_EquirectangularMap->Alloc(1);
+
+		m_irradianceCubeTextureHeap = DescriptorHeap::Create(L"IrradianceCubeTextureMap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		m_irradianceCubeTextureHandle = m_irradianceCubeTextureHeap->Alloc(1);
+
+		std::array<float, 24> vertices = {
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, +1.0f, -1.0f,
+			+1.0f, +1.0f, -1.0f,
+			+1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f, +1.0f,
+			-1.0f, +1.0f, +1.0f,
+			+1.0f, +1.0f, +1.0f,
+			+1.0f, -1.0f, +1.0f
+		};
+
+		std::array<uint32_t, 36> indices = {
+			0, 2, 1,
+			0, 3, 2,
+
+			4, 5, 6,
+			4, 6, 7,
+
+			4, 1, 5,
+			4, 0, 1,
+
+			3, 6, 2,
+			3, 7, 6,
+
+			1, 6, 5,
+			1, 2, 6,
+
+			4, 3, 0,
+			4, 7, 3
+		};
+
+		//create cube vertex buffer and index buffer
+		m_CubeVertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() / 3, 3 * sizeof(float));
+		m_CubeIndexBuffer = IndexBuffer::Create(indices.data(), indices.size());
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -497,7 +544,9 @@ namespace Pixel {
 		m_lightPass.CameraPosition = camera.GetPosition();
 		
 		std::vector<LightComponent*> ReSortedPointLight;
+		std::vector<TransformComponent*> ReSortedPointLightTrans;
 		std::vector<LightComponent*> ReSortedDirectLight;
+		std::vector<TransformComponent*> ReSortedDirectLightTrans;
 		std::vector<LightComponent*> ReSortedSpotLight;
 
 		for (uint32_t i = 0; i < lights.size(); ++i)
@@ -506,10 +555,12 @@ namespace Pixel {
 			if (lights[i]->lightType == LightType::PointLight)
 			{
 				ReSortedPointLight.push_back(lights[i]);
+				ReSortedPointLightTrans.push_back(lightTrans[i]);
 			}
 			else if (lights[i]->lightType == LightType::DirectLight)
 			{
 				ReSortedDirectLight.push_back(lights[i]);
+				ReSortedDirectLightTrans.push_back(lightTrans[i]);
 			}
 			//---restored point light---
 		}
@@ -519,25 +570,27 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < ReSortedPointLight.size(); ++i)
 		{
-			m_lightPass.lights[i].Position = (*lightTrans[i]).Translation;
-			m_lightPass.lights[i].Color = (*lights[i]).color;
-			m_lightPass.lights[i].Radius = (*lights[i]).GetSphereLightVolumeRadius();
+			m_lightPass.lights[i].Position = (*ReSortedPointLightTrans[i]).Translation;
+			m_lightPass.lights[i].Color = (*ReSortedPointLight[i]).color;
+			m_lightPass.lights[i].Radius = (*ReSortedPointLight[i]).GetSphereLightVolumeRadius();
 		}
 
 		for (uint32_t i = 0; i < ReSortedDirectLight.size(); ++i)
 		{
-			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*lightTrans[i]).Rotation;
-			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*lights[i]).color;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*ReSortedDirectLight[i]).color;
 		}
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);
+
+		Ref<DirectXCubeTexture> m_pIrradianceCubeTexture = std::static_pointer_cast<DirectXCubeTexture>(m_irradianceCubeTexture);
 
 		//copy descriptor handle
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[0].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[0]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[1].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[1]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[2].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[2]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[3].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[3]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
-
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		//bind texture resources
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
@@ -546,13 +599,39 @@ namespace Pixel {
 		pContext->SetVertexBuffer(0, m_pVertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_pIndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_pIndexBuffer->GetCount());
+		//------second pass:light pass------
+
+		//------draw sky box------
+		pGraphicsContext->SetPipelineState(*m_SkyBoxPso);
+		pContext->SetViewportAndScissor(vp, scissor);
+		pContext->SetRenderTargets(1, m_lightFrameBufferCpuHandles, dsvHandle);
+		pContext->SetRootSignature(*m_SkyBoxRootSignature);
+
+		//Ref<DirectXCubeTexture> m_pIrradianceCubeTexture = std::static_pointer_cast<DirectXCubeTexture>(m_irradianceCubeTexture);
+
+		pContext->TransitionResource(*(m_pIrradianceCubeTexture->m_pCubeTextureResource), ResourceStates::GenericRead);
+
+		Device::Get()->CopyDescriptorsSimple(1, m_irradianceCubeTextureHandle->GetCpuHandle(), m_irradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_irradianceCubeTextureHeap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_irradianceCubeTextureHandle->GetGpuHandle());
+
+		glm::mat4 NoRotateView = glm::transpose(glm::mat4(glm::mat3(camera.GetViewMatrix())));
+		glm::mat4 Projection = glm::transpose(camera.GetProjection());
+
+		glm::mat4 NoRotateViewProjection = NoRotateView * Projection;
+	//	pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(glm::transpose(camera.GetViewProjection())));
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(NoRotateViewProjection));
+		pContext->SetVertexBuffer(0, m_CubeVertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
+		//------draw sky box------
 
 		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size() - 1; ++i)
 		{
 			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
 		}
 		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::Common);
-		//------second pass:light pass------
 
 		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
 		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
@@ -633,6 +712,137 @@ namespace Pixel {
 		pReadBack->UnMap();
 
 		return returnValue;
+	}
+
+	void DirectXRenderer::InitializeAndConvertHDRToCubeMap(std::string& HdrTexturePath)
+	{
+		//------Load Hdr Texture------
+		int width, height, Components;
+		float* data = stbi_loadf(HdrTexturePath.c_str(), &width, &height, &Components, 4);
+		m_HDRTexture = Texture2D::Create(16 * width, width, height, ImageFormat::PX_FORMAT_R32G32B32A32_FLOAT, data);
+		Ref<DirectXTexture> m_pHDRTexture = std::static_pointer_cast<DirectXTexture>(m_HDRTexture);
+
+		stbi_image_free(data);
+		//------Load Hdr Texture------
+
+		m_CubeMapTexture = CubeTexture::Create(512, 512, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM);
+		Ref<DirectXCubeTexture> m_pCubeMapTexture = std::static_pointer_cast<DirectXCubeTexture>(m_CubeMapTexture);
+		//------Covert HDR Texture To CubeTexture------
+		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		pContext->SetRootSignature(*m_EquirectangularToCubemapRootSignature);
+		pContext->SetPipelineState(*m_HDRConvertToCubePso);
+		pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);	
+
+		pContext->TransitionResource(*m_pHDRTexture->m_pGpuResource, ResourceStates::GenericRead);
+
+		//create depth
+		FramebufferSpecification fbSpec;
+		fbSpec.Attachments = { FramebufferTextureFormat::Depth };
+		fbSpec.Width = 512;
+		fbSpec.Height = 512;
+		m_EquirectangularToCubemapFrameBuffer = Framebuffer::Create(fbSpec);
+		Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(m_EquirectangularToCubemapFrameBuffer);
+
+		//set viewport and scrssior
+		ViewPort vp;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = pDirectXFrameBuffer->GetSpecification().Width;
+		vp.Height = pDirectXFrameBuffer->GetSpecification().Height;
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+
+		PixelRect scissor;
+		scissor.Left = 0;
+		scissor.Right = pDirectXFrameBuffer->GetSpecification().Width;
+		scissor.Top = 0;
+		scissor.Bottom = pDirectXFrameBuffer->GetSpecification().Height;
+
+		pContext->SetViewportAndScissor(vp, scissor);
+
+		//bind resource
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_EquirectangularMap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_EquirectangularDescriptorHandle->GetGpuHandle());
+		Device::Get()->CopyDescriptorsSimple(1, m_EquirectangularDescriptorHandle->GetCpuHandle(), m_HDRTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		glm::mat4 captureProjection = glm::perspectiveLH_ZO(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+
+		glm::mat4 captureViews[] = {
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, 1.0f,  0.0f)),//+x
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, 1.0f,  0.0f)),//-x
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  -1.0f)),//+y
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, 1.0f)),//-y
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, 1.0f,  0.0f)),//+z
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f))//-z
+		};
+
+		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::RenderTarget);
+		pContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
+
+		for (uint32_t i = 0; i < 6; ++i)
+		{
+			//clear depth
+			std::static_pointer_cast<GraphicsContext>(pContext)->ClearDepth(*(pDirectXFrameBuffer->m_pDepthBuffer));
+			
+			//bind render target
+			//render to cubemap
+			pContext->SetRenderTarget(m_pCubeMapTexture->GetRtvHandle(i)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
+
+			glm::mat4 ViewProjection = glm::transpose(captureProjection * captureViews[i]);
+			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(ViewProjection));
+
+			pContext->SetVertexBuffer(0, m_CubeVertexBuffer->GetVBV());
+			pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
+			pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());			
+		}	
+
+		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::Common);
+		pContext->TransitionResource(*pDirectXFrameBuffer->m_pDepthBuffer, ResourceStates::Common);
+
+		//------generate irradiance convolution cubemap------
+		m_irradianceCubeTexture = CubeTexture::Create(32, 32, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM);
+		Ref<DirectXCubeTexture> m_pIrradianceCubeTexture = std::static_pointer_cast<DirectXCubeTexture>(m_irradianceCubeTexture);
+		pContext->SetRootSignature(*m_convolutionRootSignature);
+		pContext->SetPipelineState(*m_convolutionPso);
+		pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+
+		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::GenericRead);
+		pContext->TransitionResource(*(m_pIrradianceCubeTexture->m_pCubeTextureResource), ResourceStates::RenderTarget);
+		pContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
+		pContext->SetViewportAndScissor(vp, scissor);
+
+		Device::Get()->CopyDescriptorsSimple(1, m_SkyBoxHeapTextureHandle->GetCpuHandle(), m_CubeMapTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_SkyBoxHeap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_SkyBoxHeapTextureHandle->GetGpuHandle());
+
+		for (uint32_t i = 0; i < 6; ++i)
+		{
+			//clear depth
+			std::static_pointer_cast<GraphicsContext>(pContext)->ClearDepth(*(pDirectXFrameBuffer->m_pDepthBuffer));
+
+			//bind render target
+			//render to cubemap
+			pContext->SetRenderTarget(m_pIrradianceCubeTexture->GetRtvHandle(i)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
+
+			glm::mat4 ViewProjection = glm::transpose(captureProjection * captureViews[i]);
+			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(ViewProjection));
+
+			pContext->SetVertexBuffer(0, m_CubeVertexBuffer->GetVBV());
+			pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
+			pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
+		}
+
+		//------generate irradiance convolution cubemap------
+		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::Common);
+		pContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
+
+		pContext->Finish(true);
+	}
+
+	Ref<DescriptorCpuHandle> DirectXRenderer::GetHDRDescriptorHandle()
+	{
+		return m_HDRTexture->GetCpuDescriptorHandle();
 	}
 
 	void DirectXRenderer::CreateDefaultDeferredShadingPso()
@@ -730,5 +940,214 @@ namespace Pixel {
 		//------create light pso------
 	}
 
+
+	void DirectXRenderer::CreateConvertHDRToCubePipeline()
+	{
+		m_EquirectangularToCubemapVs = Shader::Create("assets/shaders/IBL/EquirectangularToCubemap.hlsl", "VS", "vs_5_0");
+		m_EquirectangularToCubemapFs = Shader::Create("assets/shaders/IBL/EquirectangularToCubemap.hlsl", "PS", "ps_5_0");
+
+		auto [VSShaderBinary, VSBinarySize] = std::static_pointer_cast<DirectXShader>(m_EquirectangularToCubemapVs)->GetShaderBinary();
+		auto [PSShaderBinary, PSBinarySize] = std::static_pointer_cast<DirectXShader>(m_EquirectangularToCubemapFs)->GetShaderBinary();
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false} };
+
+		//------layout------
+		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			ElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			ElementArray[i].SemanticIndex = 0;
+			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			ElementArray[i].InputSlot = 0;
+			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			ElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+		//------layout------
+		m_HDRConvertToCubePso = PSO::CreateGraphicsPso(L"HDRConvertToCubePso");
+
+		m_HDRConvertToCubePso->SetVertexShader(VSShaderBinary, VSBinarySize);
+		m_HDRConvertToCubePso->SetPixelShader(PSShaderBinary, PSBinarySize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+
+		m_EquirectangularToCubemapRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_EquirectangularToCubemapRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_EquirectangularToCubemapRootSignature->Finalize(L"DeferredShadingLightRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_HDRConvertToCubePso->SetRootSignature(m_EquirectangularToCubemapRootSignature);
+
+		//-----Create Blend State------
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		//-----Create Blend State------
+
+		//------Create Raster State------
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//------Create Raster State------
+
+		//------Create Depth State------
+		Ref<DepthState> pDepthState = DepthState::Create();
+		//------Create Depth State------
+
+		m_HDRConvertToCubePso->SetBlendState(pBlendState);
+		m_HDRConvertToCubePso->SetRasterizerState(pRasterState);
+		m_HDRConvertToCubePso->SetDepthState(pDepthState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM};
+		m_HDRConvertToCubePso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_HDRConvertToCubePso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		std::static_pointer_cast<GraphicsPSO>(m_HDRConvertToCubePso)->SetInputLayout(layout.GetElements().size(), ElementArray);
+
+		//------initialize pso------
+		m_HDRConvertToCubePso->Finalize();
+		//------initialize pso------
+
+		//------create sky box pso------
+		m_SkyBoxVs = Shader::Create("assets/shaders/IBL/SkyBox.hlsl", "VS", "vs_5_0");
+		m_SkyBoxPs = Shader::Create("assets/shaders/IBL/SkyBox.hlsl", "PS", "ps_5_0");
+		auto [SkyBoxVSShaderBinary, SkyBoxVSBinarySize] = std::static_pointer_cast<DirectXShader>(m_SkyBoxVs)->GetShaderBinary();
+		auto [SkyBoxPSShaderBinary, SkyBoxPSBinarySize] = std::static_pointer_cast<DirectXShader>(m_SkyBoxPs)->GetShaderBinary();
+
+		m_SkyBoxRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_SkyBoxRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_SkyBoxRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_SkyBoxRootSignature->Finalize(L"SkyBoxRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_SkyBoxPso = PSO::CreateGraphicsPso(L"SkyBoxPso");
+
+		//------element array------
+		D3D12_INPUT_ELEMENT_DESC* SkyBoxElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			SkyBoxElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)SkyBoxElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			SkyBoxElementArray[i].SemanticIndex = 0;
+			SkyBoxElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			SkyBoxElementArray[i].InputSlot = 0;
+			SkyBoxElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			SkyBoxElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			SkyBoxElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+		//------element array------
+		m_SkyBoxPso->SetRootSignature(m_SkyBoxRootSignature);
+
+		m_SkyBoxPso->SetVertexShader(SkyBoxVSShaderBinary, SkyBoxVSBinarySize);
+		m_SkyBoxPso->SetPixelShader(SkyBoxPSShaderBinary, SkyBoxPSBinarySize);
+
+		pDepthState->SetDepthFunc(DepthFunc::LEQUAL);
+
+		m_SkyBoxPso->SetBlendState(pBlendState);
+		m_SkyBoxPso->SetRasterizerState(pRasterState);
+		m_SkyBoxPso->SetDepthState(pDepthState);
+
+		m_SkyBoxPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_SkyBoxPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		std::static_pointer_cast<GraphicsPSO>(m_SkyBoxPso)->SetInputLayout(layout.GetElements().size(), SkyBoxElementArray);
+
+		m_SkyBoxPso->Finalize();
+
+		//------create sky box texture descriptor heap------
+		m_SkyBoxHeap = DescriptorHeap::Create(L"SkyBoxDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		m_SkyBoxHeapTextureHandle = m_SkyBoxHeap->Alloc(1);
+		//------create sky box texture descriptor heap------
+		//------create sky box pso------
+
+		//------create convolution pso------
+		m_convolutionVs = Shader::Create("assets/shaders/IBL/Convolution.hlsl", "VS", "vs_5_0");
+		m_convolutionPs = Shader::Create("assets/shaders/IBL/Convolution.hlsl", "PS", "ps_5_0");
+
+		m_convolutionPso = PSO::CreateGraphicsPso(L"ConvolutionPso");
+		auto [ConVolutionVSShaderBinary, ConVolutionVSBinarySize] = std::static_pointer_cast<DirectXShader>(m_convolutionVs)->GetShaderBinary();
+		auto [ConVolutionPSShaderBinary, ConVolutionPSBinarySize] = std::static_pointer_cast<DirectXShader>(m_convolutionPs)->GetShaderBinary();
+
+		m_convolutionPso->SetVertexShader(ConVolutionVSShaderBinary, ConVolutionVSBinarySize);
+		m_convolutionPso->SetPixelShader(ConVolutionPSShaderBinary, ConVolutionPSBinarySize);
+
+		m_convolutionRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_convolutionRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_convolutionRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_convolutionRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_convolutionRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_convolutionRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_convolutionRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_convolutionRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_convolutionRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_convolutionRootSignature->Finalize(L"ConvolutionRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_convolutionPso->SetRootSignature(m_convolutionRootSignature);
+
+		pDepthState->SetDepthFunc(DepthFunc::LESS);
+
+		m_convolutionPso->SetBlendState(pBlendState);
+		m_convolutionPso->SetDepthState(pDepthState);
+		m_convolutionPso->SetRasterizerState(pRasterState);
+
+		m_convolutionPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_convolutionPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}, {ShaderDataType::Float3, "Normal", Semantics::NORMAL, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* ConvolutionElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			ConvolutionElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)ConvolutionElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			ConvolutionElementArray[i].SemanticIndex = 0;
+			ConvolutionElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			ConvolutionElementArray[i].InputSlot = 0;
+			ConvolutionElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			ConvolutionElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			ConvolutionElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		std::static_pointer_cast<GraphicsPSO>(m_convolutionPso)->SetInputLayout(layout.GetElements().size(), ConvolutionElementArray);
+
+		m_convolutionPso->Finalize();
+
+		//------create convolution pso------
+	}
 
 }

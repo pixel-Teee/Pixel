@@ -88,7 +88,7 @@ namespace Pixel {
 				if (m_ColorAttachmentSpecifications[i].TextureFormat == FramebufferTextureFormat::RED_INTEGER)
 					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>(glm::vec4(-1, -1, -1, -1));
 				else
-					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>();
+					m_pColorBuffers[i] = CreateRef<DirectXColorBuffer>(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 				ColorBufferName = L"RenderTarget" + std::to_wstring(i);
 				//TODO:mipmaps
 				m_pColorBuffers[i]->Create(ColorBufferName.c_str(), m_Specification.Width, m_Specification.Height, 0, Utils::FrameBufferTextureFormatToImageFormat(m_ColorAttachmentSpecifications[i].TextureFormat),

@@ -17,6 +17,7 @@ namespace Pixel {
 		friend class DirectXPixelBuffer;
 		friend class DepthBuffer;
 		friend class DirectXTexture;
+		friend class DirectXCubeTexture;
 	public:
 		DirectXGpuResource();
 

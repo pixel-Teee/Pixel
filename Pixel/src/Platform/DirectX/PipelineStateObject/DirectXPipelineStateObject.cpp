@@ -43,8 +43,11 @@ namespace Pixel {
 	:DirectXPSO(Name)
 	{
 		//m_pPSO = {};
-		ZeroMemory(&m_PSODesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+		ZeroMemory(&m_PSODesc, sizeof(m_PSODesc));
 		m_PSODesc.SampleMask = UINT_MAX;
+		m_PSODesc.NodeMask = 1;
+		m_PSODesc.SampleDesc.Count = 1;
+		m_PSODesc.InputLayout.NumElements = 0;
 		//m_Name = Name;
 	}
 

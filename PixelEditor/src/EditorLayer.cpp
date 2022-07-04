@@ -131,7 +131,6 @@ namespace Pixel
 		//ownership is belgon to Renderer3D
 		//m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
 		//m_EditorScene->SetSkyBox(Renderer3D::GetSkyBox());
-		//m_environmentPanel.SetSkyBox(Renderer3D::GetSkyBox());
 
 		//SceneSerializer serializer(m_ActiveScene);
 		//serializer.Serialize("assets/scenes/Example.pixel");
@@ -399,7 +398,7 @@ namespace Pixel
 		//	}
 		//}
 		//
-		//m_environmentPanel.OnImGuiRender();
+		m_environmentPanel.OnImGuiRender();
 		/*---------Environment Panel---------*/
 
 		/*---------Deferred Shading Viewport---------*/

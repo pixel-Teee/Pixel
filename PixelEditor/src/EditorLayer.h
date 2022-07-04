@@ -80,7 +80,7 @@ namespace Pixel
 		//Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
-		//EnvironmentPanel m_environmentPanel;
+		EnvironmentPanel m_environmentPanel;
 
 		enum class SceneState
 		{

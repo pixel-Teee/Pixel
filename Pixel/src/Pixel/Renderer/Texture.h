@@ -77,4 +77,13 @@ namespace Pixel {
 		virtual bool IsDirty() = 0;
 		static Ref<CubeMap> Create(std::vector<std::string>& paths);
 	};
+
+	class CubeTexture
+	{
+	public:
+		virtual ~CubeTexture() = default;
+		virtual Ref<DescriptorHandle> GetRtvHandle(uint32_t index) = 0;
+		virtual Ref<DescriptorHandle> GetSrvHandle() = 0;
+		static Ref<CubeTexture> Create(uint32_t width, uint32_t height, ImageFormat format);
+	};
 }

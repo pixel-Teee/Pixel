@@ -25,4 +25,18 @@ namespace Pixel {
 
 	}
 
+	void DirectXDepthState::SetDepthFunc(DepthFunc func)
+	{
+		switch (func)
+		{
+		case DepthFunc::LESS:
+			m_DepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+			break;
+		case DepthFunc::LEQUAL:
+			m_DepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+			break;
+		}
+		
+	}
+
 }

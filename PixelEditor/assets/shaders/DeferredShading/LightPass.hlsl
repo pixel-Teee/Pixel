@@ -36,6 +36,7 @@ Texture2D gBufferPosition : register(t0);
 Texture2D gBufferNormal : register(t1);
 Texture2D gBufferAlbedo : register(t2);
 Texture2D gBufferRoughnessMetallicEmissive : register(t3);
+TextureCube IrradianceMap : register(t4);
 //------gbuffer texture------
 
 //------gbuffer sampler------
@@ -61,19 +62,35 @@ cbuffer LightPass : register(b1)
 	Light lights[16];
 };
 
-float D_GGX(float NoH, float Roughness)
+float DistributionGGX(float NoH, float Roughness)
 {
-	float a = NoH * Roughness;
-	float k = Roughness / (1.0 - NoH * NoH + a * a);
-	return k * k * (1.0 / PI);
+	float a = Roughness * Roughness;
+	float a2 = a * a;
+	float NoH2 = NoH * NoH;
+
+	float num = a2;
+	float denom = (NoH2 * (a2 - 1.0) + 1.0);
+	denom = PI * denom * denom;
+
+	return num / denom;
 }
 
-float V_SmithGGXCorrelated(float NoV, float NoL, float Roughness)
+float GeometrySchlickGGX(float NdotV, float roughness)
 {
-	float a2 = Roughness * Roughness;
-	float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
-	float GGXL = NoL * sqrt(NoL * NoL * (1.0 - a2) + a2);
-	return 0.5 / (GGXV + GGXL);
+	float r = (roughness + 1.0);
+	float k = (r * r) / 8.0;
+
+	float num = NdotV;
+	float denom = NdotV * (1.0 - k) + k;
+
+	return num / denom;
+}
+float GeometrySmith(float NoV, float NoL, float Roughness)
+{
+	float ggx2 = GeometrySchlickGGX(NoV, Roughness);
+	float ggx1 = GeometrySchlickGGX(NoL, Roughness);
+
+	return ggx1 * ggx2;
 }
 
 float3 F_Shlick(float u, float3 f0, float f90) {
@@ -89,9 +106,9 @@ float3 AccumulatePointLight(float NoV, float NoL, float NoH, float LoH, Light li
 	float3 Lo = float3(0.0f, 0.0f, 0.0f);
 
 	//perceptually linear roughness to roughness
-	float D = D_GGX(NoH, Roughness);
+	float D = DistributionGGX(NoH, Roughness);
 	float3 F = F_Shlick(LoH, f0, 1.0);
-	float V = V_SmithGGXCorrelated(NoV, NoL, Roughness);
+	float V = GeometrySmith(NoV, NoL, Roughness);
 
 	//specular brdf
 	float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
@@ -106,8 +123,12 @@ PixelOut PS(VertexOut pin)
 {
 	PixelOut pixelOut = (PixelOut)(0.7f);
 	//get the gbuffer texture 's value
+	float3 NormalW = gBufferNormal.Sample(gsamPointWrap, pin.TexCoord).xyz;
+	bool NeedDiscard = (NormalW.x == 0.0f && NormalW.y == 0.0f && NormalW.z == 0.0f);
+	if (NeedDiscard)
+		discard;
+	NormalW = NormalW * 2.0f - 1.0f;
 	float3 PosW = gBufferPosition.Sample(gsamPointWrap, pin.TexCoord).xyz;
-	float3 NormalW = (gBufferNormal.Sample(gsamPointWrap, pin.TexCoord) * 2.0f - 1.0f).xyz;
 	float3 Albedo = pow(gBufferAlbedo.Sample(gsamPointWrap, pin.TexCoord).xyz, 2.2);
 	float Roughness = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).x;
 	float Metallic = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).y;
@@ -149,9 +170,9 @@ PixelOut PS(VertexOut pin)
 		float NoH = clamp(dot(N, H), 0.0, 1.0);
 		float LoH = clamp(dot(L, H), 0.0, 1.0);
 
-		float D = D_GGX(NoH, Roughness);
+		float D = DistributionGGX(NoH, Roughness);
 		float3 F = F_Shlick(LoH, f0, 1.0);
-		float V = V_SmithGGXCorrelated(NoV, NoL, Roughness);
+		float V = GeometrySmith(NoV, NoL, Roughness);
 
 		//specular brdf
 		float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
@@ -162,8 +183,22 @@ PixelOut PS(VertexOut pin)
 		Lo += (Fr + Fd) * lights[i].Color * NoL;
 	}
 
+	//------IBL------
+	float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
+	float3 kD = 1.0f - kS;
+	kD *= 1.0 - Metallic;
+	float3 Irradiance = IrradianceMap.Sample(gsamPointWrap, N).xyz;
+	float3 diffuse = Irradiance * Albedo;
+	float3 ambient = kD * diffuse;
+	//------IBL------
+
+	Lo += ambient;
+
 	Lo = Lo / (Lo + float3(1.0f, 1.0f, 1.0f));
-	Lo = pow(Lo, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+
+	float Gamma = 1.0f / 2.2f;
+
+	Lo = pow(Lo, float3(Gamma, Gamma, Gamma));
 
 	pixelOut.Color = float4(Lo, 1.0f);
 

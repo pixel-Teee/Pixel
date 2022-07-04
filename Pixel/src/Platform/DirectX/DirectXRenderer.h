@@ -42,7 +42,13 @@ namespace Pixel {
 		virtual Ref<PSO> GetPso(uint32_t psoIndex) override;
 
 		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) override;
+
+		virtual void InitializeAndConvertHDRToCubeMap(std::string& HdrTexturePath) override;
+
+		//return hdr texture's cpu descriptor handle
+		virtual Ref<DescriptorCpuHandle> GetHDRDescriptorHandle() override;
 	private:
+		
 		Ref<RootSignature> m_rootSignature;
 
 		std::vector<Ref<PSO>> m_PsoArray;
@@ -100,6 +106,37 @@ namespace Pixel {
 		Ref<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandle;
 		std::vector<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandles;
 		//------Deferred Shading Light Pass------
+
+		//------IBL------
+		Ref<Texture> m_HDRTexture;
+		Ref<PSO> m_HDRConvertToCubePso;
+		Ref<Shader> m_EquirectangularToCubemapVs;
+		Ref<Shader> m_EquirectangularToCubemapFs;
+		Ref<RootSignature> m_EquirectangularToCubemapRootSignature;
+		Ref<DescriptorHeap> m_EquirectangularMap;
+		Ref<DescriptorHandle> m_EquirectangularDescriptorHandle;
+		Ref<Framebuffer> m_EquirectangularToCubemapFrameBuffer;
+		Ref<CubeTexture> m_CubeMapTexture;
+
+		Ref<RootSignature> m_SkyBoxRootSignature;
+		Ref<PSO> m_SkyBoxPso;
+		Ref<Shader> m_SkyBoxVs;
+		Ref<Shader> m_SkyBoxPs;
+		Ref<DescriptorHeap> m_SkyBoxHeap;
+		Ref<DescriptorHandle> m_SkyBoxHeapTextureHandle;
+		void CreateConvertHDRToCubePipeline();
+
+		Ref<RootSignature> m_convolutionRootSignature;
+		Ref<PSO> m_convolutionPso;
+		Ref<Shader> m_convolutionVs;
+		Ref<Shader> m_convolutionPs;
+		Ref<CubeTexture> m_irradianceCubeTexture;//fu zhao du
+		Ref<DescriptorHeap> m_irradianceCubeTextureHeap;
+		Ref<DescriptorHandle> m_irradianceCubeTextureHandle;
+		//------IBL------
+
+		Ref<VertexBuffer> m_CubeVertexBuffer;
+		Ref<IndexBuffer> m_CubeIndexBuffer;
 	};
 }
  
