@@ -33,4 +33,10 @@ namespace Pixel {
 	CommandListType DirectXCmdListTypeToCmdListType(D3D12_COMMAND_LIST_TYPE CmdListType);
 
 	D3D12_ROOT_SIGNATURE_FLAGS RootSignatureFlagToDirectXRootSignatureFlag(RootSignatureFlag flag);
+
+	D3D12_TEXTURE_ADDRESS_MODE AddressModeToDirectXAddressMode(AddressMode addressMode);
+
+	D3D12_FILTER FilterToDirectXFilter(Filter filter);
+
+	uint32_t CalculateSubresource(uint32_t MipSlice, uint32_t ArraySlice, uint32_t MipLevels, uint32_t ArraySize, uint32_t PlaneSlice);
 }

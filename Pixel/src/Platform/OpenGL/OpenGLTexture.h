@@ -32,6 +32,8 @@ namespace Pixel {
 
 		virtual Ref<DescriptorHandle> GetHandle() const override;
 
+		virtual Ref<DescriptorHandle> GetRtvHandle() const override;
+
 	private:
 		std::string m_path;
 		uint32_t m_Width, m_Height;

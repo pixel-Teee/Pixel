@@ -36,6 +36,8 @@ namespace Pixel {
 
 		virtual Ref<DescriptorHandle> GetHandle() const = 0;
 
+		virtual Ref<DescriptorHandle> GetRtvHandle() const = 0;
+
 		virtual std::string& GetPath() = 0;
 	};
 
@@ -53,6 +55,7 @@ namespace Pixel {
 
 		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() = 0;
 		virtual Ref<DescriptorHandle> GetHandle() const = 0;
+		virtual Ref<DescriptorHandle> GetRtvHandle() const = 0;
 	};
 
 	enum FaceTarget {
@@ -82,8 +85,10 @@ namespace Pixel {
 	{
 	public:
 		virtual ~CubeTexture() = default;
-		virtual Ref<DescriptorHandle> GetRtvHandle(uint32_t index) = 0;
+		virtual Ref<DescriptorHandle> GetRtvHandle(uint32_t mipSlice, uint32_t arraySlice) = 0;
 		virtual Ref<DescriptorHandle> GetSrvHandle() = 0;
+		virtual Ref<DescriptorHandle> GetUavHandle(uint32_t mipSlice, uint32_t arraySlice) = 0;
 		static Ref<CubeTexture> Create(uint32_t width, uint32_t height, ImageFormat format);
+		static Ref<CubeTexture> Create(uint32_t width, uint32_t height, ImageFormat format, uint32_t MaxMipLevels);
 	};
 }

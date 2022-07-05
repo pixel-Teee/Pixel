@@ -74,4 +74,16 @@ namespace Pixel {
 		return nullptr;
 	}
 
+	Ref<CubeTexture> CubeTexture::Create(uint32_t width, uint32_t height, ImageFormat format, uint32_t MaxMipLevels)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None: PX_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+		case RendererAPI::API::DirectX12: return CreateRef<DirectXCubeTexture>(width, height, format, MaxMipLevels);
+		}
+
+		PX_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
 }

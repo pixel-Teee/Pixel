@@ -32,6 +32,8 @@ namespace Pixel {
 		virtual Ref<DescriptorCpuHandle> GetCpuDescriptorHandle() override;
 		virtual Ref<DescriptorHandle> GetHandle() const override;
 
+		virtual Ref<DescriptorHandle> GetRtvHandle() const override;
+
 		//need to refractor
 		virtual void SetData(void* data, uint32_t size) override;
 
@@ -45,5 +47,7 @@ namespace Pixel {
 		Ref<DirectXGpuResource> m_pGpuResource;
 
 		Ref<DescriptorHandle> m_pHandle;
+
+		Ref<DescriptorHandle> m_RtvHandle;
 	};
 }

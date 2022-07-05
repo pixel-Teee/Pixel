@@ -259,4 +259,15 @@ namespace Pixel {
 		float Emissive = 0.0f;
 		bool HaveNormal = false;
 	};
+
+	enum class AddressMode
+	{
+		CLAMP,
+		WRAP
+	};
+
+	enum class Filter
+	{
+		MIN_MAG_MIP_LINEAR
+	};
 }

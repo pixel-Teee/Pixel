@@ -37,6 +37,8 @@ Texture2D gBufferNormal : register(t1);
 Texture2D gBufferAlbedo : register(t2);
 Texture2D gBufferRoughnessMetallicEmissive : register(t3);
 TextureCube IrradianceMap : register(t4);
+TextureCube PrefilterMap : register(t5);
+Texture2D BrdfLut : register(t6);
 //------gbuffer texture------
 
 //------gbuffer sampler------
@@ -136,6 +138,7 @@ PixelOut PS(VertexOut pin)
 
 	float3 N = normalize(NormalW);
 	float3 V = normalize(CameraPos - PosW);
+	float3 R = reflect(-V, N);
 
 	float3 f0 = float3(0.04, 0.04, 0.04);//non-metal's base reflectance
 	f0 = lerp(f0, Albedo, Metallic);//metal's reflectance
@@ -182,14 +185,23 @@ PixelOut PS(VertexOut pin)
 
 		Lo += (Fr + Fd) * lights[i].Color * NoL;
 	}
-
+	//ambient lighting(we now use IBL as the ambient term)
+	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
+	
 	//------IBL------
 	float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
 	float3 kD = 1.0f - kS;
 	kD *= 1.0 - Metallic;
 	float3 Irradiance = IrradianceMap.Sample(gsamPointWrap, N).xyz;
 	float3 diffuse = Irradiance * Albedo;
-	float3 ambient = kD * diffuse;
+
+	float MAX_REFLECTION_LOD = 4.0f;
+	float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, Roughness * MAX_REFLECTION_LOD).xyz;
+	float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), Roughness));
+
+	float3 specular = prefilterColor * (F * brdf.x + brdf.y);
+
+	float3 ambient = kD * diffuse + specular;
 	//------IBL------
 
 	Lo += ambient;

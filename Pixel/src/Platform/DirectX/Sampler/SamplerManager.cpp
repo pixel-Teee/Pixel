@@ -5,6 +5,7 @@
 #include "Platform/DirectX/DirectXDevice.h"
 #include "Platform/DirectX/Descriptor/DirectXDescriptorAllocator.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
+#include "Platform/DirectX/TypeUtils.h"
 
 namespace Pixel {
 
@@ -27,11 +28,16 @@ namespace Pixel {
 		m_SamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 	}
 
-	void DirectXSamplerDesc::SetTextureAddressMode(D3D12_TEXTURE_ADDRESS_MODE AddressMode)
+	void DirectXSamplerDesc::SetTextureAddressMode(AddressMode addressMode)
 	{
-		m_SamplerDesc.AddressU = AddressMode;
-		m_SamplerDesc.AddressV = AddressMode;
-		m_SamplerDesc.AddressW = AddressMode;
+		m_SamplerDesc.AddressU = AddressModeToDirectXAddressMode(addressMode);
+		m_SamplerDesc.AddressV = AddressModeToDirectXAddressMode(addressMode);
+		m_SamplerDesc.AddressW = AddressModeToDirectXAddressMode(addressMode);
+	}
+
+	void DirectXSamplerDesc::SetFilter(Filter filter)
+	{
+		m_SamplerDesc.Filter = FilterToDirectXFilter(filter);
 	}
 
 	void DirectXSamplerDesc::SetBoarderColor(glm::vec4 BorderColor)

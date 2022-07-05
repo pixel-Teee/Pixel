@@ -128,4 +128,9 @@ namespace Pixel {
 		return nullptr;
 	}
 
+	Ref<Pixel::DescriptorHandle> OpenGLTexture2D::GetRtvHandle() const
+	{
+		return nullptr;
+	}
+
 }

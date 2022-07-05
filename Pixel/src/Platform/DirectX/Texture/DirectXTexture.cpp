@@ -50,7 +50,7 @@ namespace Pixel {
 		texDesc.SampleDesc.Count = 1;
 		texDesc.SampleDesc.Quality = 0;
 		texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 		D3D12_HEAP_PROPERTIES HeapProps;
 		HeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -68,20 +68,38 @@ namespace Pixel {
 		
 		pResource->m_pResource->SetName(L"Texture");
 
-		D3D12_SUBRESOURCE_DATA texResource;
-		texResource.pData = InitialData;
-		texResource.RowPitch = RowPitch;//one row's byte size
-		texResource.SlicePitch = RowPitch * height;
+		if (InitialData != nullptr)
+		{
+			D3D12_SUBRESOURCE_DATA texResource;
+			texResource.pData = InitialData;
+			texResource.RowPitch = RowPitch;//one row's byte size
+			texResource.SlicePitch = RowPitch * height;
 
-		Ref<Context> pContext = Device::Get()->GetContextManager()->CreateGraphicsContext(L"Create Texture");
-		Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
-		pGraphicsContext->InitializeTexture(*pResource, 1, &texResource);
+			Ref<Context> pContext = Device::Get()->GetContextManager()->CreateGraphicsContext(L"Create Texture");
+			Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
+			pGraphicsContext->InitializeTexture(*pResource, 1, &texResource);
+
+		}	
 
 		m_pHandle = DescriptorAllocator::AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType::CBV_UAV_SRV, 1);
 		Ref<DirectXDescriptorCpuHandle> pHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_pHandle->GetCpuHandle());
 
 		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateShaderResourceView(pResource->m_pResource.Get(), nullptr,
 		pHandle->GetCpuHandle());
+
+		//------create rtv handle------
+		m_RtvHandle = DescriptorAllocator::AllocateCpuAndGpuDescriptorHandle(DescriptorHeapType::RTV, 1);
+		Ref<DirectXDescriptorCpuHandle> rtvHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_RtvHandle->GetCpuHandle());
+
+		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		rtvDesc.Format = ImageFormatToDirectXImageFormat(textureFormat);
+		rtvDesc.Texture2D.MipSlice = 0;
+		rtvDesc.Texture2D.PlaneSlice = 0;
+
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateRenderTargetView(pResource->m_pResource.Get(), &rtvDesc,
+			rtvHandle->GetCpuHandle());
+		//------create rtv handle------
 	}
 
 	DirectXTexture::DirectXTexture(const std::string& path):m_path(path)
@@ -228,6 +246,11 @@ namespace Pixel {
 	Ref<DescriptorHandle> DirectXTexture::GetHandle() const
 	{
 		return m_pHandle;
+	}
+
+	Ref<DescriptorHandle> DirectXTexture::GetRtvHandle() const
+	{
+		return m_RtvHandle;
 	}
 
 	void DirectXTexture::SetData(void* data, uint32_t size)

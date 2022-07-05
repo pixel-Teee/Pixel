@@ -13,7 +13,9 @@ namespace Pixel {
 		//so not overriding them here means you can safely not define then in hlsl
 		DirectXSamplerDesc();
 
-		void SetTextureAddressMode(D3D12_TEXTURE_ADDRESS_MODE AddressMode);
+		virtual void SetTextureAddressMode(AddressMode addressMode) override;
+
+		virtual void SetFilter(Filter filter) override;
 
 		void SetBoarderColor(glm::vec4 BorderColor);
 

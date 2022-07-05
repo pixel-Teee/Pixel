@@ -34,6 +34,12 @@ namespace Pixel {
 		float y;
 	};
 
+	struct PrefilterMapPass
+	{
+		glm::mat4 Projection;
+		float Roughness;
+	};
+
 	DirectXRenderer::DirectXRenderer()
 	{
 		
@@ -126,12 +132,12 @@ namespace Pixel {
 		CreateDefaultDeferredShadingPso();
 		//------Create Deferred Shading PipelineState-------
 
-		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 5);
-		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(5);
+		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 7);
+		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(7);
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
-		m_DeferredShadingLightGbufferTextureHandles.resize(5);
+		m_DeferredShadingLightGbufferTextureHandles.resize(7);
 
-		for (uint32_t i = 0; i < 5; ++i)
+		for (uint32_t i = 0; i < 7; ++i)
 		{
 			DescriptorHandle secondHandle = (*m_DeferredShadingLightGbufferTextureHandle) + i * DescriptorSize;
 			m_DeferredShadingLightGbufferTextureHandles[i] = secondHandle;
@@ -179,6 +185,23 @@ namespace Pixel {
 		//create cube vertex buffer and index buffer
 		m_CubeVertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() / 3, 3 * sizeof(float));
 		m_CubeIndexBuffer = IndexBuffer::Create(indices.data(), indices.size());
+
+		std::array<float, 20> QuadVertices = {
+			-1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 1.0f
+		};
+
+		std::array<uint32_t, 6> QuadIndices = {
+			0, 2, 1, 1, 2, 3
+		};
+
+		m_QuadVertexBuffer = VertexBuffer::Create(QuadVertices.data(), QuadVertices.size() / 5, 5 * sizeof(float));
+		m_QuadIndexBuffer = IndexBuffer::Create(QuadIndices.data(), QuadIndices.size());
+
+		CreatePrefilterPipeline();
+		CreateLutPipeline();
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -591,6 +614,8 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[2].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[2]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[3].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[3]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		//bind texture resources
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
@@ -611,7 +636,7 @@ namespace Pixel {
 
 		pContext->TransitionResource(*(m_pIrradianceCubeTexture->m_pCubeTextureResource), ResourceStates::GenericRead);
 
-		Device::Get()->CopyDescriptorsSimple(1, m_irradianceCubeTextureHandle->GetCpuHandle(), m_irradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_irradianceCubeTextureHandle->GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_irradianceCubeTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_irradianceCubeTextureHandle->GetGpuHandle());
@@ -620,7 +645,7 @@ namespace Pixel {
 		glm::mat4 Projection = glm::transpose(camera.GetProjection());
 
 		glm::mat4 NoRotateViewProjection = NoRotateView * Projection;
-	//	pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(glm::transpose(camera.GetViewProjection())));
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(glm::transpose(camera.GetViewProjection())));
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(NoRotateViewProjection));
 		pContext->SetVertexBuffer(0, m_CubeVertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
@@ -632,6 +657,12 @@ namespace Pixel {
 			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
 		}
 		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::Common);
+
+		////------default hdr texture------
+		//std::string texturePath = "assets/textures/hdr/brown_photostudio_01_1k.hdr";
+		////------default hdr texture------
+
+		//InitializeAndConvertHDRToCubeMap(texturePath);
 
 		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
 		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
@@ -786,7 +817,7 @@ namespace Pixel {
 			
 			//bind render target
 			//render to cubemap
-			pContext->SetRenderTarget(m_pCubeMapTexture->GetRtvHandle(i)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
+			pContext->SetRenderTarget(m_pCubeMapTexture->GetRtvHandle(0, i)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
 
 			glm::mat4 ViewProjection = glm::transpose(captureProjection * captureViews[i]);
 			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(ViewProjection));
@@ -823,7 +854,7 @@ namespace Pixel {
 
 			//bind render target
 			//render to cubemap
-			pContext->SetRenderTarget(m_pIrradianceCubeTexture->GetRtvHandle(i)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
+			pContext->SetRenderTarget(m_pIrradianceCubeTexture->GetRtvHandle(0, i)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
 
 			glm::mat4 ViewProjection = glm::transpose(captureProjection * captureViews[i]);
 			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(ViewProjection));
@@ -836,6 +867,110 @@ namespace Pixel {
 		//------generate irradiance convolution cubemap------
 		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::Common);
 		pContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
+
+		//------generate prefilterMap cubemap------
+		m_prefilterMap = CubeTexture::Create(128, 128, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, 5);
+		
+		Ref<DirectXCubeTexture> m_pPrefilterMap = std::static_pointer_cast<DirectXCubeTexture>(m_prefilterMap);
+		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::GenericRead);
+		pContext->TransitionResource(*(m_pPrefilterMap->m_pCubeTextureResource), ResourceStates::RenderTarget);
+		pContext->SetPipelineState(*m_prefilterPso);
+		pContext->SetRootSignature(*m_prefilterRootSignature);
+		pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+		
+		uint32_t maxMipLevels = 5;
+		for (uint32_t mip = 0; mip < 5; ++mip)
+		{
+			uint32_t mipWidth = 128 * std::pow(0.5f, mip);
+			uint32_t mipHeight = 128 * std::pow(0.5, mip);
+
+			ViewPort vp;
+			vp.TopLeftX = 0.0f;
+			vp.TopLeftY = 0.0f;
+			vp.Width = mipWidth;
+			vp.Height = mipHeight;
+			vp.MaxDepth = 1.0f;
+			vp.MinDepth = 0.0f;
+
+			PixelRect scissor;
+			scissor.Left = 0;
+			scissor.Right = mipWidth;
+			scissor.Top = 0;
+			scissor.Bottom = mipHeight;
+
+			fbSpec.Width = mipWidth;
+			fbSpec.Height = mipHeight;
+			
+			m_prefilterFrameBuffer[mip] = Framebuffer::Create(fbSpec);
+			Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(m_prefilterFrameBuffer[mip]);
+
+			pContext->SetViewportAndScissor(vp, scissor);
+
+			float roughness = (float)mip / (float)(maxMipLevels - 1);
+			
+			//bind resource
+			PrefilterMapPass prefilterPass;
+			prefilterPass.Roughness = roughness;
+			pContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
+
+			for (uint32_t j = 0; j < 6; ++j)//array slice
+			{
+				pContext->ClearDepth(*(pDirectXFrameBuffer->m_pDepthBuffer));
+				pContext->SetRenderTarget(m_prefilterMap->GetRtvHandle(mip, j)->GetCpuHandle(), pDirectXFrameBuffer->m_pDepthBuffer->GetDSV());
+
+				glm::mat4 ViewProjection = glm::transpose(captureProjection * captureViews[j]);
+				prefilterPass.Projection = ViewProjection;
+
+				pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), &prefilterPass);
+
+				pContext->SetVertexBuffer(0, m_CubeVertexBuffer->GetVBV());
+				pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
+				pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
+			}
+		}
+
+		pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::Common);
+		pContext->TransitionResource(*(m_pPrefilterMap->m_pCubeTextureResource), ResourceStates::Common);
+		//------generate prefilterMap cubemap------
+
+		//------generate lut------
+		m_LutTexture = Texture2D::Create(4 * 512, 512, 512, ImageFormat::PX_FORMAT_R16G16_FLOAT, nullptr);
+		Ref<DirectXTexture> pLutTexture = std::static_pointer_cast<DirectXTexture>(m_LutTexture);
+		pContext->TransitionResource(*(pLutTexture->m_pGpuResource), ResourceStates::RenderTarget);
+		
+		pContext->SetPipelineState(*m_LutPso);
+		pContext->SetRootSignature(*m_LutRootSignature);
+		pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+		fbSpec.Width = 512;
+		fbSpec.Height = 512;
+
+		m_LutFrameBuffer = Framebuffer::Create(fbSpec);
+		Ref<DirectXFrameBuffer> pLutFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(m_LutFrameBuffer);
+		pContext->TransitionResource(*(pLutFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
+		//clear color
+		pContext->ClearDepth(*(pLutFrameBuffer->m_pDepthBuffer));
+
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = 512;
+		vp.Height = 512;
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+
+		scissor.Left = 0;
+		scissor.Right = 512;
+		scissor.Top = 0;
+		scissor.Bottom = 512;
+
+		pContext->SetViewportAndScissor(vp, scissor);
+		pContext->SetRenderTarget(m_LutTexture->GetRtvHandle()->GetCpuHandle(), pLutFrameBuffer->m_pDepthBuffer->GetDSV());
+
+		pContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
+
+		pContext->TransitionResource(*(pLutTexture->m_pGpuResource), ResourceStates::GenericRead);
+		//------generate lut------
 
 		pContext->Finish(true);
 	}
@@ -1148,6 +1283,142 @@ namespace Pixel {
 		m_convolutionPso->Finalize();
 
 		//------create convolution pso------
+	}
+
+	void DirectXRenderer::CreatePrefilterPipeline()
+	{
+		m_prefilterVs = Shader::Create("assets/shaders/IBL/PrefilterMap.hlsl", "VS", "vs_5_0");
+		m_prefilterPs = Shader::Create("assets/shaders/IBL/PrefilterMap.hlsl", "PS", "ps_5_0");
+
+		m_prefilterPso = PSO::CreateGraphicsPso(L"PrefilterPso");
+		auto [PrefilterMapVSShaderBinary, PrefilterMapVSBinarySize] = std::static_pointer_cast<DirectXShader>(m_prefilterVs)->GetShaderBinary();
+		auto [PrefilterMapPSShaderBinary, PrefilterMapPSBinarySize] = std::static_pointer_cast<DirectXShader>(m_prefilterPs)->GetShaderBinary();
+
+		m_prefilterPso->SetVertexShader(PrefilterMapVSShaderBinary, PrefilterMapVSBinarySize);
+		m_prefilterPso->SetPixelShader(PrefilterMapPSShaderBinary, PrefilterMapPSBinarySize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+
+		m_prefilterRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_prefilterRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_prefilterRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_prefilterRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_prefilterRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_prefilterRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_prefilterRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_prefilterRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_prefilterRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_prefilterRootSignature->Finalize(L"PrefilterRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_prefilterPso->SetRootSignature(m_convolutionRootSignature);
+
+		pDepthState->SetDepthFunc(DepthFunc::LESS);
+
+		m_prefilterPso->SetBlendState(pBlendState);
+		m_prefilterPso->SetDepthState(pDepthState);
+		m_prefilterPso->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM };
+		m_prefilterPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_prefilterPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* PrefilterElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			PrefilterElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)PrefilterElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			PrefilterElementArray[i].SemanticIndex = 0;
+			PrefilterElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			PrefilterElementArray[i].InputSlot = 0;
+			PrefilterElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			PrefilterElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			PrefilterElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		std::static_pointer_cast<GraphicsPSO>(m_prefilterPso)->SetInputLayout(layout.GetElements().size(), PrefilterElementArray);
+
+		m_prefilterPso->Finalize();
+	}
+
+	void DirectXRenderer::CreateLutPipeline()
+	{
+		m_LutVs = Shader::Create("assets/shaders/IBL/Lut.hlsl", "VS", "vs_5_0");
+		m_LutPs = Shader::Create("assets/shaders/IBL/Lut.hlsl", "PS", "ps_5_0");
+
+		m_LutPso = PSO::CreateGraphicsPso(L"LutPso");
+		auto [LutVSShaderBinary, LutVSBinarySize] = std::static_pointer_cast<DirectXShader>(m_LutVs)->GetShaderBinary();
+		auto [LutPSShaderBinary, LutPSBinarySize] = std::static_pointer_cast<DirectXShader>(m_LutPs)->GetShaderBinary();
+
+		m_LutPso->SetVertexShader(LutVSShaderBinary, LutVSBinarySize);
+		m_LutPso->SetPixelShader(LutPSShaderBinary, LutPSBinarySize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+
+		m_LutRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_LutRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_LutRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_LutRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_LutRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_LutRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_LutRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_LutRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_LutRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_LutRootSignature->Finalize(L"LutRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_LutPso->SetRootSignature(m_LutRootSignature);
+
+		m_LutPso->SetBlendState(pBlendState);
+		m_LutPso->SetDepthState(pDepthState);
+		m_LutPso->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16_FLOAT };
+		m_LutPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_LutPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}, {ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* LutElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			LutElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)LutElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			LutElementArray[i].SemanticIndex = 0;
+			LutElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			LutElementArray[i].InputSlot = 0;
+			LutElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			LutElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			LutElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		std::static_pointer_cast<GraphicsPSO>(m_LutPso)->SetInputLayout(layout.GetElements().size(), LutElementArray);
+
+		m_LutPso->Finalize();
 	}
 
 }

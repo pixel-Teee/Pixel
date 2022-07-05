@@ -125,7 +125,8 @@ namespace Pixel {
 		Ref<DescriptorHeap> m_SkyBoxHeap;
 		Ref<DescriptorHandle> m_SkyBoxHeapTextureHandle;
 		void CreateConvertHDRToCubePipeline();
-
+		void CreatePrefilterPipeline();
+		void CreateLutPipeline();
 		Ref<RootSignature> m_convolutionRootSignature;
 		Ref<PSO> m_convolutionPso;
 		Ref<Shader> m_convolutionVs;
@@ -133,7 +134,24 @@ namespace Pixel {
 		Ref<CubeTexture> m_irradianceCubeTexture;//fu zhao du
 		Ref<DescriptorHeap> m_irradianceCubeTextureHeap;
 		Ref<DescriptorHandle> m_irradianceCubeTextureHandle;
+
+		Ref<CubeTexture> m_prefilterMap;
+		Ref<PSO> m_prefilterPso;
+		Ref<Shader> m_prefilterVs;
+		Ref<Shader> m_prefilterPs;
+		Ref<RootSignature> m_prefilterRootSignature;
+		Ref<Framebuffer> m_prefilterFrameBuffer[5];
+
+		Ref<Texture2D> m_LutTexture;
+		Ref<PSO> m_LutPso;
+		Ref<Shader> m_LutVs;
+		Ref<Shader> m_LutPs;
+		Ref<RootSignature> m_LutRootSignature;
+		Ref<Framebuffer> m_LutFrameBuffer;
 		//------IBL------
+
+		Ref<VertexBuffer> m_QuadVertexBuffer;
+		Ref<IndexBuffer> m_QuadIndexBuffer;
 
 		Ref<VertexBuffer> m_CubeVertexBuffer;
 		Ref<IndexBuffer> m_CubeIndexBuffer;
