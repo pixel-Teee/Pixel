@@ -42,5 +42,7 @@ namespace Pixel {
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_SwapChainBuffer[SwapChainBufferCount];
 
 		int32_t m_CurrentBackBufferIndex = 0;
+
+		bool m_firstPresent = true;
 	};
 }

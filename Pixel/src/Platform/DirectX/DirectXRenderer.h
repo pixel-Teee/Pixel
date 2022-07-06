@@ -47,6 +47,12 @@ namespace Pixel {
 
 		//return hdr texture's cpu descriptor handle
 		virtual Ref<DescriptorCpuHandle> GetHDRDescriptorHandle() override;
+
+		virtual void DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds) override;
+
+		virtual void RenderImageToBackBuffer(Ref<GpuResource> pDestResource, Ref<GpuResource> pSrcResource, Ref<Context> pContext) override;
+
+		void CreateRenderImageToBackBufferPipeline();
 	private:
 		
 		Ref<RootSignature> m_rootSignature;
@@ -155,6 +161,16 @@ namespace Pixel {
 
 		Ref<VertexBuffer> m_CubeVertexBuffer;
 		Ref<IndexBuffer> m_CubeIndexBuffer;
+
+
+		//------render image to back buffer------
+		Ref<PSO> m_ImageToBackBufferPso;
+		Ref<RootSignature> m_ImageToBackBufferRootSignature;
+		Ref<Shader> m_ImageToBackBufferVs;
+		Ref<Shader> m_ImageToBackBufferPs;
+		Ref<DescriptorHeap> m_ImageDescriptorHeap;
+		Ref<DescriptorHandle> m_ImageDescriptorHandle;
+		//------render image to back buffer------
 	};
 }
  

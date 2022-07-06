@@ -296,10 +296,18 @@ namespace Pixel {
 			out << YAML::BeginMap;
 
 			auto& lightComponent = entity.GetComponent<LightComponent>();
+
+			uint32_t lightType = (uint32_t)lightComponent.lightType;
+
+			out << YAML::Key << "LightType" << YAML::Value << lightType;
+			
 			out << YAML::Key << "Color" << YAML::Value << lightComponent.color;
-			out << YAML::Key << "Constant" << YAML::Value << lightComponent.constant;
-			out << YAML::Key << "Linear" << YAML::Value << lightComponent.linear;
-			out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.quadratic;
+			if (lightComponent.lightType == LightType::PointLight)
+			{
+				out << YAML::Key << "Constant" << YAML::Value << lightComponent.constant;
+				out << YAML::Key << "Linear" << YAML::Value << lightComponent.linear;
+				out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.quadratic;
+			}
 
 			out << YAML::EndMap;
 		}
@@ -315,6 +323,12 @@ namespace Pixel {
 			out << YAML::Key << "roughnessPath" << YAML::Value << materialComponent.roughnessPath;
 			out << YAML::Key << "emissivePath" << YAML::Value << materialComponent.emissivePath;
 			out << YAML::Key << "metallicPath" << YAML::Value << materialComponent.metallicPath;
+			out << YAML::Key << "gAlbedo" << YAML::Value << materialComponent.gAlbedo;
+			out << YAML::Key << "gNormal" << YAML::Value << materialComponent.gNormal;
+			out << YAML::Key << "gRoughness" << YAML::Value << materialComponent.gRoughness;
+			out << YAML::Key << "gMetallic" << YAML::Value << materialComponent.gMetallic;
+			out << YAML::Key << "gEmissive" << YAML::Value << materialComponent.gEmissive;
+			out << YAML::Key << "HaveNormal" << YAML::Value << materialComponent.HaveNormal;
 			out << YAML::EndMap;
 		}
 
@@ -519,10 +533,19 @@ namespace Pixel {
 			if (lightComponent)
 			{
 				auto& light = deserializedEntity.AddComponent<LightComponent>();
+
+				uint32_t lightType = lightComponent["LightType"].as<int32_t>();
+				if (lightType == 0) light.lightType = LightType::PointLight;
+				else if (lightType == 1) light.lightType == LightType::DirectLight;
+				else light.lightType = LightType::SpotLight;
+
 				light.color = lightComponent["Color"].as<glm::vec3>();
-				light.constant = lightComponent["Constant"].as<float>();
-				light.linear = lightComponent["Linear"].as<float>();
-				light.quadratic = lightComponent["Quadratic"].as<float>();
+				if (lightType == 0)
+				{
+					light.constant = lightComponent["Constant"].as<float>();
+					light.linear = lightComponent["Linear"].as<float>();
+					light.quadratic = lightComponent["Quadratic"].as<float>();
+				}			
 			}
 
 			auto materialComponent = entity["MaterialComponent"];
@@ -533,7 +556,14 @@ namespace Pixel {
 				std::string metallicPath = materialComponent["metallicPath"].as<std::string>();
 				std::string normalMapPath = materialComponent["normalMapPath"].as<std::string>();
 				std::string emissivePath = materialComponent["emissivePath"].as<std::string>();
-				auto& material = deserializedEntity.AddComponent<MaterialComponent>(albedoPath, normalMapPath, roughnessPath, metallicPath, emissivePath);
+				glm::vec3 albedo = materialComponent["gAlbedo"].as<glm::vec3>();
+				glm::vec3 normal = materialComponent["gNormal"].as<glm::vec3>();
+				float roughness = materialComponent["gRoughness"].as<float>();
+				float metallic = materialComponent["gMetallic"].as<float>();
+				float emissive = materialComponent["gEmissive"].as<float>();
+				bool HaveNormal = materialComponent["HaveNormal"].as<bool>();
+				auto& material = deserializedEntity.AddComponent<MaterialComponent>(albedoPath, normalMapPath, roughnessPath, metallicPath, emissivePath,
+					albedo, normal, roughness, metallic, emissive, HaveNormal);
 			}
 
 			auto materialTreeComponent = entity["MaterialTreeComponent"];

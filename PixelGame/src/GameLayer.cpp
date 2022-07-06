@@ -1,6 +1,12 @@
 #include "GameLayer.h"
 #include "Pixel/Scene/SceneSerializer.h"
 
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Renderer/Context/ContextManager.h"
+#include "Pixel/Renderer/Context/Context.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/BaseRenderer.h"
+
 namespace Pixel {
 	extern const std::filesystem::path g_AssetPath;
 
@@ -10,7 +16,7 @@ namespace Pixel {
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
 		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
-		fbSpec.Height = 970;
+		fbSpec.Height = 720;
 		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
 
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
@@ -18,10 +24,16 @@ namespace Pixel {
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
-		//m_GameScene = CreateRef<Scene>();
+		m_GameScene = CreateRef<Scene>();
+
+		//------default hdr texture------
+		std::string texturePath = "assets/textures/hdr/brown_photostudio_01_1k.hdr";
+		//------default hdr texture------
+
+		Application::Get().GetRenderer()->InitializeAndConvertHDRToCubeMap(texturePath);
 
 		OpenScene();
-		m_GameScene->OnRuntimeStart();
+		//m_GameScene->OnRuntimeStart();
 		//m_ViewPortSize = { 1280, 970 };
 	}
 
@@ -43,11 +55,19 @@ namespace Pixel {
 			m_GameScene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
 		}
 		
-		m_GameScene->OnUpdateRuntime(ts, m_GeoFramebuffer, m_Framebuffer);
+		m_GameScene->OnUpdateRuntimeDeferred(ts, m_GeoFramebuffer, m_Framebuffer);
 
-		BindReadFramebuffer(m_Framebuffer->GetRenderId());
-		BindWriteFramebuffer(0);
-		BlitFramebuffer(m_ViewPortSize.x, m_ViewPortSize.y);
+		//copy the framebuffer resource to 
+		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+
+
+		////	Ref<GpuResource> BackBuffer = Device::Get()->GetCurrentBackBuffer();
+
+		Ref<GpuResource> BackBuffer = Application::Get().GetImGuiLayer()->GetBackBuffer();
+
+		Application::Get().GetRenderer()->RenderImageToBackBuffer(BackBuffer, m_Framebuffer->GetColorGpuResource(0), pContext);
+
+		pContext->Finish(true);
 	}
 
 	void GameLayer::OnEvent(Event& event)
@@ -62,8 +82,8 @@ namespace Pixel {
 		newScene->SetViewPortSize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
 		SceneSerializer serializer(newScene);
 		//TODO:need to fix
-		newScene->SetSkyBox(Renderer3D::GetSkyBox());
-		if (serializer.Deserialize("assets//scenes//Test4.pixel"))
+		//newScene->SetSkyBox(Renderer3D::GetSkyBox());
+		if (serializer.Deserialize("assets//scenes//Test.pixel"))
 		{
 			m_GameScene = newScene;
 

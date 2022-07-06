@@ -39,4 +39,9 @@ namespace Pixel {
 		
 	}
 
+	void DirectXDepthState::DepthTest(bool enable)
+	{
+		m_DepthStencilDesc.DepthEnable = enable;
+	}
+
 }

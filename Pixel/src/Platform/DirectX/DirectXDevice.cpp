@@ -18,6 +18,8 @@
 #include "Platform/DirectX/Descriptor/DirectXDescriptorAllocator.h"
 #include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 #include "Platform/DirectX/TypeUtils.h"
+#include "Platform/DirectX/Buffer/DirectXGpuResource.h"
+#include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
 
 namespace Pixel {
 
@@ -203,6 +205,11 @@ namespace Pixel {
 		return m_DepthStencilFormat;
 	}
 
+	void DirectXDevice::ReCreateSwapChain()
+	{
+		m_pSwapChain->OnResize(shared_from_this());
+	}
+
 	Ref<DirectXSwapChain> DirectXDevice::GetSwapChain()
 	{
 		return m_pSwapChain;
@@ -218,6 +225,15 @@ namespace Pixel {
 		Ref<DirectXDescriptorCpuHandle> pDestHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(DestHandle);
 		Ref<DirectXDescriptorCpuHandle> pSrcHandle = std::static_pointer_cast<DirectXDescriptorCpuHandle>(SrcHandle);
 		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CopyDescriptorsSimple(NumDescriptors, pDestHandle->GetCpuHandle(), pSrcHandle->GetCpuHandle(), DescriptorHeapTypeToDirectXDescriptorHeapType(Type));
+	}
+
+	Ref<GpuResource> DirectXDevice::GetCurrentBackBuffer()
+	{
+		Microsoft::WRL::ComPtr<ID3D12Resource> pDirectXResource = m_pSwapChain->GetCurrentBackBufferSource();
+		Ref<GpuResource> pResource = GpuResource::CreateColorBuffer();
+		std::static_pointer_cast<DirectXColorBuffer>(pResource)->CreateFromSwapChain(pDirectXResource, L"BackBuffer");
+		//pResource->SetResource(pDirectXResource.Get());
+		return pResource;
 	}
 
 	//------Get Buffer Format------

@@ -257,7 +257,7 @@ namespace Pixel {
 		float Roughness = 1.0f;
 		float Metallic = 0.0f;
 		float Emissive = 0.0f;
-		bool HaveNormal = false;
+		uint32_t HaveNormal = false;
 	};
 
 	enum class AddressMode

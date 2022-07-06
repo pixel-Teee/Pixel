@@ -12,6 +12,8 @@ namespace Pixel {
 
 		virtual void SetDepthFunc(DepthFunc func) = 0;
 
+		virtual void DepthTest(bool enable) = 0;
+
 		static Ref<DepthState> Create();
 	};
 }

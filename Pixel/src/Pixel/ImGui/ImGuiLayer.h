@@ -28,11 +28,15 @@ namespace Pixel {
 		virtual void OnDetach() override;
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e);
+
 		void Begin();
 		void End();
 
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 		void SetDarkThemeColors();
+		void ResetSwapChain();
+		void ReCreateSwapChain();
+		Ref<GpuResource> GetBackBuffer();
 
 		Ref<DescriptorHeap> GetSrvHeap();
 	private:

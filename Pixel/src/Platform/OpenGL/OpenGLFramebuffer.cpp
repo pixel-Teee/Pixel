@@ -254,6 +254,11 @@ namespace Pixel {
 		return nullptr;
 	}
 
+	Ref<GpuResource> OpenGLFramebuffer::GetColorGpuResource(uint32_t index)
+	{
+		return nullptr;
+	}
+
 	void BindReadFramebuffer(uint32_t renderId)
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderId);

@@ -211,7 +211,7 @@ namespace Pixel {
 		////output merge stage
 		EndContext->SetRenderTargets(1, handles);
 		//
-		float color[4] = { 0.2f, 0.3f, 0.7f, 1.0f };
+		float color[4] = { 0.6f, 0.3f, 0.7f, 1.0f };
 
 		EndContext->ClearColor(*m_BackBuffer[index].get(), color);
 
@@ -271,6 +271,28 @@ namespace Pixel {
 		colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+	}
+
+	void ImGuiLayer::ResetSwapChain()
+	{
+		std::static_pointer_cast<DirectXGpuResource>(m_BackBuffer[0])->Destroy();
+		std::static_pointer_cast<DirectXGpuResource>(m_BackBuffer[1])->Destroy();
+	}
+
+	void ImGuiLayer::ReCreateSwapChain()
+	{
+		m_BackBuffer[0] = GpuResource::CreateColorBuffer();
+		m_BackBuffer[1] = GpuResource::CreateColorBuffer();
+
+		std::static_pointer_cast<DirectXColorBuffer>(m_BackBuffer[0])->CreateFromSwapChain(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetBackBufferSource(0), L"BackBuffer[0]");
+		std::static_pointer_cast<DirectXColorBuffer>(m_BackBuffer[1])->CreateFromSwapChain(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetBackBufferSource(1), L"BackBuffer[1]");
+	}
+
+	Ref<GpuResource> ImGuiLayer::GetBackBuffer()
+	{
+		uint32_t index = std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetCurrentBackBufferIndex();
+		PIXEL_CORE_INFO("{0}", index);
+		return m_BackBuffer[index];
 	}
 
 	Ref<DescriptorHeap> ImGuiLayer::GetSrvHeap()

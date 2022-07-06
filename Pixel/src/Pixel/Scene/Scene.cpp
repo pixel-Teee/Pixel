@@ -723,6 +723,66 @@ namespace Pixel
 		//Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pFrameBuffer);
 	}
 
+	void Scene::OnUpdateRuntimeDeferred(Timestep& ts, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer)
+	{
+		Camera* mainCamera = nullptr;
+		TransformComponent* cameraTransform;
+		{
+			//Renderer 3D
+			auto view = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+
+				if (camera.Primary)
+				{
+					mainCamera = &camera.camera;
+					cameraTransform = &transform;
+					break;
+				}
+			}
+		}
+
+		if (mainCamera)
+		{
+			auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
+
+			std::vector<TransformComponent*> trans;
+			std::vector<StaticMeshComponent*> meshs;
+			std::vector<MaterialComponent*> materials;
+			std::vector<int32_t> entityIds;
+			for (auto entity : group)
+			{
+				auto& [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialComponent>(entity);
+
+				//in terms of transform and mesh to draw
+				trans.push_back(&transform);
+				meshs.push_back(&mesh);
+				materials.push_back(&material);
+				entityIds.push_back((int32_t)entity);
+			}
+
+			std::vector<LightComponent*> lights;
+			std::vector<TransformComponent*> lightTrans;
+			auto lightGroup = m_Registry.group<LightComponent>(entt::get<TransformComponent>);
+			for (auto entity : lightGroup)
+			{
+				auto& [trans, light] = lightGroup.get<TransformComponent, LightComponent>(entity);
+
+				//in terms of transform and mesh to draw
+				lightTrans.push_back(&trans);
+				lights.push_back(&light);
+			}
+
+			//find camera
+
+
+			Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+			Application::Get().GetRenderer()->DeferredRendering(pContext, mainCamera, cameraTransform, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds);
+			pContext->Finish(true);
+		}		
+	}
+
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer)
 	{
 		//Renderer3D::BeginScene(camera, m_GeoPassFramebuffer);

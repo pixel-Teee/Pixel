@@ -198,7 +198,8 @@ namespace Pixel {
 		MaterialComponent(const MaterialComponent&) = default;
 
 		MaterialComponent(std::string& AlbedoPath, std::string& NormalMapPath,
-			std::string& RoughnessPath, std::string& MetallicPath, std::string& EmissivePath)
+			std::string& RoughnessPath, std::string& MetallicPath, std::string& EmissivePath,
+			glm::vec3 albedo, glm::vec3 normal, float roughness, float metallic, float emissive, bool haveNormal)
 		{
 			uint32_t whiteTextureData = 0xffffffff;
 			uint32_t whiteTextureData2 = 0xff;
@@ -207,6 +208,14 @@ namespace Pixel {
 			roughnessPath = RoughnessPath;
 			metallicPath = MetallicPath;
 			emissivePath = EmissivePath;
+
+			gAlbedo = albedo;
+			gNormal = normal;
+			gRoughness = roughness;
+			gMetallic = metallic;
+			gEmissive = emissive;
+			HaveNormal = haveNormal;
+			
 			if(AlbedoPath != "")
 				Albedo = Texture2D::Create(AlbedoPath);
 			else

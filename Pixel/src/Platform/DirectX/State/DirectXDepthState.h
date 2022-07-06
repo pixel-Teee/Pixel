@@ -14,5 +14,7 @@ namespace Pixel {
 
 		virtual void SetDepthFunc(DepthFunc func) override;
 
+		virtual void DepthTest(bool enable) override;
+
 	};
 }

@@ -54,6 +54,7 @@ namespace Pixel {
 	void BlitDepthFramebuffer(uint32_t srcWidth, uint32_t srcHeight);
 
 	class DescriptorCpuHandle;
+	class GpuResource;
 	class Framebuffer
 	{
 	public:
@@ -79,6 +80,8 @@ namespace Pixel {
 		virtual void SetColorAttachmentDraw(uint32_t index) = 0;
 
 		virtual Ref<DescriptorCpuHandle> GetColorAttachmentDescriptorCpuHandle(uint32_t index) = 0;
+
+		virtual Ref<GpuResource> GetColorGpuResource(uint32_t index) = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
 	};

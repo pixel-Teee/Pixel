@@ -125,6 +125,7 @@ namespace Pixel {
 	void DirectXSwapChain::Present()
 	{
 		m_SwapChain->Present(1, 0);
+		
 		m_CurrentBackBufferIndex = (m_CurrentBackBufferIndex + 1) % SwapChainBufferCount;
 	}
 

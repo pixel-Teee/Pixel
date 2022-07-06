@@ -21,6 +21,7 @@
 #include <wrl/client.h>
 #include "Platform/DirectX/d3dx12.h"
 #include "Platform/DirectX/DirectXRenderer.h"
+#include "Pixel/Renderer/Device/Device.h"
 #endif
 
 namespace Pixel {
@@ -62,7 +63,13 @@ namespace Pixel {
 			return false;
 		}
 		m_Minimized = false;
-		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		m_ImGuiLayer->ResetSwapChain();
+		//Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		Device::Get()->SetClientSize(e.GetWidth(), e.GetHeight());
+		//recreate swap chain
+		Device::Get()->ReCreateSwapChain();
+
+		m_ImGuiLayer->ReCreateSwapChain();
 
 		return false;
 	}

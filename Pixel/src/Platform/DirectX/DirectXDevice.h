@@ -16,6 +16,7 @@ namespace Pixel {
 	class ContextManager;
 	class CommandListManager;
 	class DescriptorAllocator;
+	class GpuResource;
 
 	class DirectXDevice : public Device
 	{
@@ -35,7 +36,7 @@ namespace Pixel {
 		virtual Ref<ContextManager> GetContextManager() override;
 
 		//------set and get client size------
-		void SetClientSize(uint32_t width, uint32_t height);
+		virtual void SetClientSize(uint32_t width, uint32_t height) override;
 		std::pair<uint32_t, uint32_t> GetClientSize();
 		//------set and get client size------
 
@@ -56,11 +57,15 @@ namespace Pixel {
 		DXGI_FORMAT GetDepthBufferFormat();
 		//------Get Buffer Format------
 
+		virtual void ReCreateSwapChain() override;
 		Ref<DirectXSwapChain> GetSwapChain();
 
 		Ref<DescriptorAllocator> GetDescriptorAllocator(uint32_t index);
 
 		virtual void CopyDescriptorsSimple(uint32_t NumDescriptors, Ref<DescriptorCpuHandle> DestHandle, Ref<DescriptorCpuHandle> SrcHandle, DescriptorHeapType Type) override;
+
+		virtual Ref<GpuResource> GetCurrentBackBuffer() override;
+
 	private:
 		//------output hard device------
 		void LogAdapters();

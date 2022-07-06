@@ -191,5 +191,11 @@ namespace Pixel {
 		return std::static_pointer_cast<DirectXColorBuffer>(m_pColorBuffers[index])->GetSRV();
 	}
 
+	Ref<GpuResource> DirectXFrameBuffer::GetColorGpuResource(uint32_t index)
+	{
+		PX_CORE_ASSERT(index < m_pColorBuffers.size(), "out of the color buffer range!");
+		return m_pColorBuffers[index];
+	}
+
 }
 
