@@ -299,6 +299,8 @@ namespace Pixel {
 		//LightColor
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
+		bool GenerateShadowMap = false;//temporarily for direct light
+
 		//------for point light's volume radius------
 		float constant = 1.0f;
 		float linear = 0.09f;

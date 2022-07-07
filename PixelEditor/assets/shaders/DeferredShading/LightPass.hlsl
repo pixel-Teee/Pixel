@@ -39,10 +39,12 @@ Texture2D gBufferRoughnessMetallicEmissive : register(t3);
 TextureCube IrradianceMap : register(t4);
 TextureCube PrefilterMap : register(t5);
 Texture2D BrdfLut : register(t6);
+Texture2D ShadowMap : register(t7);
 //------gbuffer texture------
 
 //------gbuffer sampler------
 SamplerState gsamPointWrap : register(s0);//static sampler
+SamplerState gShadowMapBorder : register(s1);
 //------gbuffer sampler------
 
 struct Light
@@ -51,6 +53,7 @@ struct Light
 	float3 Direction;
 	float3 Color;
 	float Radius;
+	uint GenerateShadow;//could cast shadow
 };
 
 #define PI 3.1415926535
@@ -61,6 +64,9 @@ cbuffer LightPass : register(b1)
 	int PointLightNumber;
 	int DirectLightNumber;
 	int SpotLightNumber;
+	float pad;
+	float pad2;
+	float4x4 LightSpaceMatrix;
 	Light lights[16];
 };
 
@@ -121,9 +127,22 @@ float3 AccumulatePointLight(float NoV, float NoL, float NoH, float LoH, Light li
 	return (Fr + Fd) * light.Color * NoL;
 }
 
+float ShadowCalculation(float4 fragPosLightSpace)
+{
+	float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	//projCoords = projCoords * 0.5f + 0.5f;
+	projCoords.xy = projCoords.xy * 0.5f + 0.5f;
+	projCoords.y = 1.0f - projCoords.y;
+	float closestDepth = ShadowMap.Sample(gShadowMapBorder, projCoords.xy).x;
+	float currentDepth = projCoords.z;
+	float bias = 0.005f;
+	float Shadow = currentDepth - bias > closestDepth ? 1.0f : 0.0f;
+	return Shadow;
+}
+
 PixelOut PS(VertexOut pin)
 {
-	PixelOut pixelOut = (PixelOut)(0.7f);
+	PixelOut pixelOut = (PixelOut)(0.0f);
 	//get the gbuffer texture 's value
 	float3 NormalW = gBufferNormal.Sample(gsamPointWrap, pin.TexCoord).xyz;
 	bool NeedDiscard = (NormalW.x == 0.0f && NormalW.y == 0.0f && NormalW.z == 0.0f);
@@ -135,6 +154,11 @@ PixelOut PS(VertexOut pin)
 	float Roughness = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).x;
 	float Metallic = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).y;
 	float Emissive = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).z;
+
+	//------shadow map------
+	float4 FragPosLightSpace = mul(float4(PosW, 1.0f), LightSpaceMatrix);
+	float Shadow = ShadowCalculation(FragPosLightSpace);
+	//------shadow map------
 
 	float3 N = normalize(NormalW);
 	float3 V = normalize(CameraPos - PosW);
@@ -205,6 +229,10 @@ PixelOut PS(VertexOut pin)
 	//------IBL------
 
 	Lo += ambient;
+
+	//------shadow map------
+	Lo *= (1 - Shadow);//test?
+	//------shadow map------
 
 	Lo = Lo / (Lo + float3(1.0f, 1.0f, 1.0f));
 

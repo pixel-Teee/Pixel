@@ -330,6 +330,23 @@ namespace Pixel {
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
 	}
 
+	void StaticMesh::DrawShadowMap(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId)
+	{
+		if (!isFirst)
+		{
+			isFirst = true;
+			SetupMesh(entityId, false);
+		}
+
+		m_MeshConstant.world = glm::transpose(transform);
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+
+		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+	}
+
 	//Ref<VertexArray> StaticMesh::GetVerterArray()
 	//{
 	//	return VAO;

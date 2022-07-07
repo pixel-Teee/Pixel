@@ -17,8 +17,6 @@ namespace Pixel {
 
 		virtual void SetFilter(Filter filter) override;
 
-		void SetBoarderColor(glm::vec4 BorderColor);
-
 		//allocate new descriptor as needed
 		//return handle to existing descriptor when possible
 		D3D12_CPU_DESCRIPTOR_HANDLE CreateDescriptor();
@@ -26,5 +24,8 @@ namespace Pixel {
 		D3D12_SAMPLER_DESC m_SamplerDesc;
 
 		//static Ref<SamplerDesc> Create();
+
+		virtual void SetBorderColor(glm::vec4 BoarderColor) override;
+
 	};
 }

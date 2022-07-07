@@ -25,6 +25,7 @@ namespace Pixel {
 		void Draw();
 
 		void Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId);
+		void DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId);
 		void Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId, MaterialComponent* pMaterialCompoent);
 
 		std::vector<StaticMesh> GetMeshes() { return m_Meshes; }

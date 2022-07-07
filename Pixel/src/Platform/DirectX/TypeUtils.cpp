@@ -471,6 +471,8 @@ namespace Pixel {
 		case AddressMode::WRAP:
 			return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			break;
+		case AddressMode::BORDER:
+			return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 		}
 	}
 

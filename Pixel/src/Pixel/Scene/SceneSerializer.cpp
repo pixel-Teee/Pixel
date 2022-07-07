@@ -308,6 +308,10 @@ namespace Pixel {
 				out << YAML::Key << "Linear" << YAML::Value << lightComponent.linear;
 				out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.quadratic;
 			}
+			else if (lightComponent.lightType == LightType::DirectLight)
+			{
+				out << YAML::Key << "GenerateShadowMap" << YAML::Value << lightComponent.GenerateShadowMap;
+			}
 
 			out << YAML::EndMap;
 		}
@@ -536,7 +540,7 @@ namespace Pixel {
 
 				uint32_t lightType = lightComponent["LightType"].as<int32_t>();
 				if (lightType == 0) light.lightType = LightType::PointLight;
-				else if (lightType == 1) light.lightType == LightType::DirectLight;
+				else if (lightType == 1) light.lightType = LightType::DirectLight;
 				else light.lightType = LightType::SpotLight;
 
 				light.color = lightComponent["Color"].as<glm::vec3>();
@@ -545,7 +549,11 @@ namespace Pixel {
 					light.constant = lightComponent["Constant"].as<float>();
 					light.linear = lightComponent["Linear"].as<float>();
 					light.quadratic = lightComponent["Quadratic"].as<float>();
-				}			
+				}		
+				else if (lightType == 1)
+				{
+					light.GenerateShadowMap = lightComponent["GenerateShadowMap"].as<bool>();
+				}
 			}
 
 			auto materialComponent = entity["MaterialComponent"];

@@ -1,30 +1,33 @@
 Scene: Untitled
 Entities:
-  - Entity: 16312184753008301474
+  - Entity: 8534297921756704914
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0, -5.31004715]
+      Translation: [0, 0, -0.313876033]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 0
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 6687847255550329588
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.25
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 3641331486970308766
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0, -0.0123082399]
+      Translation: [0, -3.5331459, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Scale: [5.88916111, 1, 4.70824671]
     StaticMeshComponent:
       Path: assets\models\Box.fbx
     MaterialComponent:
@@ -33,35 +36,19 @@ Entities:
       roughnessPath: ""
       emissivePath: ""
       metallicPath: ""
-      gAlbedo: [0.649999976, 0.600000024, 1]
+      gAlbedo: [1, 1, 1]
       gNormal: [1, 1, 1]
-      gRoughness: 0.400000006
+      gRoughness: 1
       gMetallic: 1
       gEmissive: 1
       HaveNormal: true
-  - Entity: 11603731081976734240
+  - Entity: 18230534363186635804
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-0.665372729, -0.81196034, 5.39028072]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Translation: [0, 0.100514673, -9.29995537]
+      Rotation: [0.146741882, 0, 0]
+      Scale: [1, 0.999958396, 0.999947309]
     LightComponent:
-      LightType: 0
+      LightType: 1
       Color: [1, 1, 1]
-      Constant: 1
-      Linear: 0.0900000036
-      Quadratic: 0.0320000015
-  - Entity: 2033707971328693149
-    TagComponent:
-      Tag: Empty Entity(0)
-    TransformComponent:
-      Translation: [0.351062715, 0.509203017, 5.39028072]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    LightComponent:
-      LightType: 0
-      Color: [1, 1, 1]
-      Constant: 1
-      Linear: 0.0900000036
-      Quadratic: 0.0320000015

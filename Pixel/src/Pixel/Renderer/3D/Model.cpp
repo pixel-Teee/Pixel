@@ -40,6 +40,12 @@ namespace Pixel {
 			m_Meshes[i].Draw(pContext, transform, entityId, pMaterialCompoent);
 	}
 
+	void Model::DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId)
+	{
+		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
+			m_Meshes[i].DrawShadowMap(pContext, transform, entityId);
+	}
+
 	/*------------------------------------------------------
 	----------Load Modle and Populate Vertex Information----
 	------------------------------------------------------*/

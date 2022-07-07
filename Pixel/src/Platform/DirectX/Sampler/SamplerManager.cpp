@@ -40,14 +40,6 @@ namespace Pixel {
 		m_SamplerDesc.Filter = FilterToDirectXFilter(filter);
 	}
 
-	void DirectXSamplerDesc::SetBoarderColor(glm::vec4 BorderColor)
-	{
-		m_SamplerDesc.BorderColor[0] = BorderColor.r;
-		m_SamplerDesc.BorderColor[1] = BorderColor.g;
-		m_SamplerDesc.BorderColor[2] = BorderColor.b;
-		m_SamplerDesc.BorderColor[3] = BorderColor.a;
-	}
-
 	D3D12_CPU_DESCRIPTOR_HANDLE DirectXSamplerDesc::CreateDescriptor()
 	{
 		size_t hashValue = Utility::HashState((uint32_t*)&m_SamplerDesc);
@@ -63,5 +55,13 @@ namespace Pixel {
 	}
 
 
+
+	void DirectXSamplerDesc::SetBorderColor(glm::vec4 BoarderColor)
+	{
+		m_SamplerDesc.BorderColor[0] = BoarderColor.x;
+		m_SamplerDesc.BorderColor[1] = BoarderColor.y;
+		m_SamplerDesc.BorderColor[2] = BoarderColor.z;
+		m_SamplerDesc.BorderColor[3] = BoarderColor.w;
+	}
 
 } 

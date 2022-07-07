@@ -637,6 +637,7 @@ namespace Pixel
 				else if (component.lightType == LightType::DirectLight)
 				{
 					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
+					ImGui::Checkbox("GenerateShadowMap", &component.GenerateShadowMap);
 				}
 			}
 		);

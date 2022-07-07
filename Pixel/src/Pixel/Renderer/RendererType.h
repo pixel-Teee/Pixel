@@ -238,6 +238,7 @@ namespace Pixel {
 		float pad2;
 		glm::vec3 Color;//point light/direction light
 		float Radius;//point light, volume radius
+		uint32_t GenerateShadow = 0;//cast shadow
 	};
 
 	struct alignas(256) LightPass
@@ -248,6 +249,7 @@ namespace Pixel {
 		int SpotLightNumber = 0;
 		float pad;
 		float pad2;
+		glm::mat4 LightSpaceMatrix;
 		Light lights[MAXLIGHTS];
 	};
 
@@ -263,7 +265,8 @@ namespace Pixel {
 	enum class AddressMode
 	{
 		CLAMP,
-		WRAP
+		WRAP,
+		BORDER
 	};
 
 	enum class Filter

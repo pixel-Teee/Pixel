@@ -37,11 +37,13 @@ namespace Pixel
 
 		m_IconPlayHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 		m_IconStopHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+		m_ShadowMapHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 
 		m_FrameBufferHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 
 		Device::Get()->CopyDescriptorsSimple(1, m_IconPlayHandle->GetCpuHandle(), m_IconPlay->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_IconStopHandle->GetCpuHandle(), m_IconStop->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_ShadowMapHandle->GetCpuHandle(), Application::Get().GetRenderer()->GetShadowMapSrvHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		
 		m_UVBufferHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 
@@ -402,6 +404,12 @@ namespace Pixel
 		/*---------Environment Panel---------*/
 
 		/*---------Deferred Shading Viewport---------*/
+
+		ImGui::Begin("Debug");
+		ImVec2 DebugViewPortSize = ImVec2(m_ViewportSize.x / 4.0f, m_ViewportSize.y / 4.0f);
+		ImGui::Text("ShadowMap");
+		ImGui::Image((ImTextureID)(m_ShadowMapHandle->GetGpuHandle()->GetGpuPtr()), DebugViewPortSize);
+		ImGui::End();
 		
 	/*	ImGui::Begin("Deferred Shading Viewport");
 

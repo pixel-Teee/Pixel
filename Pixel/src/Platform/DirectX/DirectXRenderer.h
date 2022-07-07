@@ -18,6 +18,7 @@ namespace Pixel {
 	class Framebuffer;
 	class DescriptorHeap;
 	class DescriptorHandle;
+	class ShadowBuffer;
 	class DirectXRenderer : public BaseRenderer
 	{
 	public:
@@ -52,7 +53,7 @@ namespace Pixel {
 
 		virtual void RenderImageToBackBuffer(Ref<GpuResource> pDestResource, Ref<GpuResource> pSrcResource, Ref<Context> pContext) override;
 
-		void CreateRenderImageToBackBufferPipeline();
+		virtual Ref<DescriptorCpuHandle> GetShadowMapSrvHandle() override;
 	private:
 		
 		Ref<RootSignature> m_rootSignature;
@@ -162,7 +163,6 @@ namespace Pixel {
 		Ref<VertexBuffer> m_CubeVertexBuffer;
 		Ref<IndexBuffer> m_CubeIndexBuffer;
 
-
 		//------render image to back buffer------
 		Ref<PSO> m_ImageToBackBufferPso;
 		Ref<RootSignature> m_ImageToBackBufferRootSignature;
@@ -170,7 +170,17 @@ namespace Pixel {
 		Ref<Shader> m_ImageToBackBufferPs;
 		Ref<DescriptorHeap> m_ImageDescriptorHeap;
 		Ref<DescriptorHandle> m_ImageDescriptorHandle;
+		void CreateRenderImageToBackBufferPipeline();
 		//------render image to back buffer------
+
+		//------render shadow map------
+		Ref<PSO> m_RenderShadowMapPso;
+		Ref<RootSignature> m_RenderShadowMapRootSignature;
+		Ref<Shader> m_RenderShadowMapVs;
+		Ref<Shader> m_RenderShadowMapPs;
+		Ref<ShadowBuffer> m_ShadowMap;
+		void CreateRenderShadowMapPipeline();
+		//------render shadow map------
 	};
 }
  

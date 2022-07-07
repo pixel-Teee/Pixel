@@ -94,6 +94,9 @@ namespace Pixel
 
 		Ref<DescriptorHandle> m_IconPlayHandle, m_IconStopHandle;
 
+		//debug
+		Ref<DescriptorHandle> m_ShadowMapHandle;
+
 		Ref<DescriptorHandle> m_FrameBufferHandle;
 
 		Ref<DescriptorHandle> m_UVBufferHandle;

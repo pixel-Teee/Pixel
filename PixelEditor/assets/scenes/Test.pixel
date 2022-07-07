@@ -1,12 +1,65 @@
 Scene: Untitled
 Entities:
-  - Entity: 16312184753008301474
+  - Entity: 5643804548652488927
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0, -5.31004715]
+      Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.550000012
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 17492161255626896809
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 6.87712955, -7.03079939]
+      Rotation: [0.448305994, 0, 0]
+      Scale: [1, 0.99994719, 0.99994719]
+    LightComponent:
+      LightType: 1
+      Color: [1, 1, 1]
+      GenerateShadowMap: true
+  - Entity: 8919142017348422396
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, -3.08585691, 0]
+      Rotation: [0, 0, 0]
+      Scale: [5.55215502, 1, 7.20162821]
+    StaticMeshComponent:
+      Path: assets\models\Box.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: false
+  - Entity: 13504033856264872947
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [-0.541674614, 1.47161531, -9.47204113]
+      Rotation: [0.28841269, 0, 0]
+      Scale: [1.00000083, 0.999998927, 0.999998927]
     CameraComponent:
       Camera:
         ProjectionType: 0
@@ -18,50 +71,3 @@ Entities:
         OrthographicFar: 1
       Primary: true
       FixedAspectRatio: false
-  - Entity: 6687847255550329588
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [0, 0, -0.0123082399]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Box.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [0.649999976, 0.600000024, 1]
-      gNormal: [1, 1, 1]
-      gRoughness: 0.400000006
-      gMetallic: 1
-      gEmissive: 1
-      HaveNormal: true
-  - Entity: 11603731081976734240
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [-0.665372729, -0.81196034, 5.39028072]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    LightComponent:
-      LightType: 0
-      Color: [1, 1, 1]
-      Constant: 1
-      Linear: 0.0900000036
-      Quadratic: 0.0320000015
-  - Entity: 2033707971328693149
-    TagComponent:
-      Tag: Empty Entity(0)
-    TransformComponent:
-      Translation: [0.351062715, 0.509203017, 5.39028072]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    LightComponent:
-      LightType: 0
-      Color: [1, 1, 1]
-      Constant: 1
-      Linear: 0.0900000036
-      Quadratic: 0.0320000015

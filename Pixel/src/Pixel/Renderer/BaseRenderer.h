@@ -46,6 +46,8 @@ namespace Pixel {
 
 		virtual Ref<DescriptorCpuHandle> GetHDRDescriptorHandle() = 0;
 
+		virtual Ref<DescriptorCpuHandle> GetShadowMapSrvHandle() = 0;
+
 		static Ref<BaseRenderer> Create();
 	};
 }

@@ -211,9 +211,11 @@ namespace Pixel {
 		////output merge stage
 		EndContext->SetRenderTargets(1, handles);
 		//
-		float color[4] = { 0.6f, 0.3f, 0.7f, 1.0f };
+		//float color[4] = { 0.6f, 0.3f, 0.7f, 1.0f };
 
-		EndContext->ClearColor(*m_BackBuffer[index].get(), color);
+		//EndContext->ClearColor(*m_BackBuffer[index].get(), color);
+
+		EndContext->FlushResourceBarriers();
 
 		//ImGui::Begin("DirectX12 Texture Test");
 		//EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
@@ -291,7 +293,7 @@ namespace Pixel {
 	Ref<GpuResource> ImGuiLayer::GetBackBuffer()
 	{
 		uint32_t index = std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetCurrentBackBufferIndex();
-		PIXEL_CORE_INFO("{0}", index);
+		//PIXEL_CORE_INFO("{0}", index);
 		return m_BackBuffer[index];
 	}
 

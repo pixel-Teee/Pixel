@@ -23,6 +23,7 @@
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Platform/DirectX/Texture/DirectXCubeTexture.h"
 #include "Platform/DirectX/Texture/DirectXTexture.h"
+#include "Platform/DirectX/Buffer/ShadowBuffer.h"
 
 #include "stb_image.h"
 
@@ -132,12 +133,12 @@ namespace Pixel {
 		CreateDefaultDeferredShadingPso();
 		//------Create Deferred Shading PipelineState-------
 
-		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 7);
-		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(7);
+		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 8);
+		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(8);
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
-		m_DeferredShadingLightGbufferTextureHandles.resize(7);
+		m_DeferredShadingLightGbufferTextureHandles.resize(8);
 
-		for (uint32_t i = 0; i < 7; ++i)
+		for (uint32_t i = 0; i < 8; ++i)
 		{
 			DescriptorHandle secondHandle = (*m_DeferredShadingLightGbufferTextureHandle) + i * DescriptorSize;
 			m_DeferredShadingLightGbufferTextureHandles[i] = secondHandle;
@@ -206,6 +207,12 @@ namespace Pixel {
 
 		m_ImageDescriptorHeap = DescriptorHeap::Create(L"ImageDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		m_ImageDescriptorHandle = m_ImageDescriptorHeap->Alloc(1);
+
+		//------create shadow map and pipeline state object------
+		CreateRenderShadowMapPipeline();
+		m_ShadowMap = CreateRef<ShadowBuffer>();
+		m_ShadowMap->Create(L"ShadowMap", 1024, 1024);
+		//------create shadow map and pipeline state object------
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -479,6 +486,47 @@ namespace Pixel {
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "color buffer's size is not equal to 5!");
 
+		//------shadow map------
+		LightComponent* mainDirectLight = nullptr;//find the direct light to generate shadow map
+		TransformComponent* mainDirectLightComponent = nullptr;
+		for (uint32_t i = 0; i < lights.size(); ++i)
+		{
+			if (lights[i]->GenerateShadowMap)
+			{
+				mainDirectLight = lights[i];
+				mainDirectLightComponent = lightTrans[i];
+				break;
+			}
+		}
+
+		glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
+
+		if (mainDirectLight != nullptr)
+		{
+			pContext->SetPipelineState(*m_RenderShadowMapPso);
+			pContext->SetRootSignature(*m_RenderShadowMapRootSignature);
+			pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+			m_ShadowMap->BeginRendering(*pContext);
+
+			float nearPlane = 0.01f;
+			float farPlane = 500.0f;
+
+			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane));
+			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetTransform()));
+			lightSpaceMatrix = lightView * lightProjection;
+
+			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+
+			for (uint32_t i = 0; i < meshs.size(); ++i)
+			{
+				//draw every mesh
+				meshs[i]->mesh.DrawShadowMap(trans[i]->GetTransform(), pContext, entityIds[i]);
+			}
+
+			m_ShadowMap->EndRendering(*pContext);
+		}
+		//------shadow map------
+
 		//------get the cpu descriptor handle------
 		std::vector<Ref<DescriptorCpuHandle>> m_CpuHandles;
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
@@ -552,13 +600,13 @@ namespace Pixel {
 		pGraphicsContext->SetRenderTargets(1, m_lightFrameBufferCpuHandles, dsvHandle);
 
 		//clear buffer
-		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size() - 1; ++i)
+		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
 		{
 			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::RenderTarget);
 		}
 		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::DepthWrite);
 
-		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size() - 1; ++i)
+		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
 		{
 			//clear color buffer
 			pContext->ClearColor(*(pLightFrame->m_pColorBuffers[i]));
@@ -606,6 +654,15 @@ namespace Pixel {
 		{
 			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).Rotation;
 			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*ReSortedDirectLight[i]).color;
+			if (ReSortedDirectLight[i] == mainDirectLight)
+			{
+				m_lightPass.lights[i + m_lightPass.PointLightNumber].GenerateShadow = 1;
+			}
+		}
+
+		if (mainDirectLight != nullptr)
+		{
+			m_lightPass.LightSpaceMatrix = lightSpaceMatrix;
 		}
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);
@@ -620,6 +677,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		//bind texture resources
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
@@ -692,6 +750,47 @@ namespace Pixel {
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "color buffer's size is not equal to 5!");
 
+		//------shadow map------
+		LightComponent* mainDirectLight = nullptr;//find the direct light to generate shadow map
+		TransformComponent* mainDirectLightComponent = nullptr;
+		for (uint32_t i = 0; i < lights.size(); ++i)
+		{
+			if (lights[i]->GenerateShadowMap)
+			{
+				mainDirectLight = lights[i];
+				mainDirectLightComponent = lightTrans[i];
+				break;
+			}
+		}
+
+		glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
+
+		if (mainDirectLight != nullptr)
+		{
+			pContext->SetPipelineState(*m_RenderShadowMapPso);
+			pContext->SetRootSignature(*m_RenderShadowMapRootSignature);
+			pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+			m_ShadowMap->BeginRendering(*pContext);
+
+			float nearPlane = 0.01f;
+			float farPlane = 500.0f;
+
+			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane));
+			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetTransform()));
+			lightSpaceMatrix = lightView * lightProjection;
+
+			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+
+			for (uint32_t i = 0; i < meshs.size(); ++i)
+			{
+				//draw every mesh
+				meshs[i]->mesh.DrawShadowMap(trans[i]->GetTransform(), pContext, entityIds[i]);
+			}
+
+			m_ShadowMap->EndRendering(*pContext);
+		}
+		//------shadow map------
+
 		//------get the cpu descriptor handle------
 		std::vector<Ref<DescriptorCpuHandle>> m_CpuHandles;
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
@@ -738,6 +837,8 @@ namespace Pixel {
 
 		//bind resources
 		glm::mat4x4 gViewProjection = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform())) * glm::transpose(pCamera->GetProjection());
+		//glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform()));
+		//glm::mat4x4 Projection = glm::transpose(pCamera->GetProjection());
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4x4), glm::value_ptr(gViewProjection));
 
 		for (uint32_t i = 0; i < meshs.size(); ++i)
@@ -746,7 +847,7 @@ namespace Pixel {
 			meshs[i]->mesh.Draw(trans[i]->GetTransform(), pContext, entityIds[i], materials[i]);
 		}
 
-		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
 		{
 			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::Common);
 		}
@@ -771,7 +872,7 @@ namespace Pixel {
 		}
 		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::DepthWrite);
 
-		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size() - 1; ++i)
+		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
 		{
 			//clear color buffer
 			pContext->ClearColor(*(pLightFrame->m_pColorBuffers[i]));
@@ -819,6 +920,15 @@ namespace Pixel {
 		{
 			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).Rotation;
 			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*ReSortedDirectLight[i]).color;
+			if (ReSortedDirectLight[i] == mainDirectLight)
+			{
+				m_lightPass.lights[i + m_lightPass.PointLightNumber].GenerateShadow = 1;
+			}
+		}
+
+		if (mainDirectLight != nullptr)
+		{
+			m_lightPass.LightSpaceMatrix = lightSpaceMatrix;
 		}
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);
@@ -833,6 +943,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		//bind texture resources
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
@@ -858,7 +969,7 @@ namespace Pixel {
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_irradianceCubeTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_irradianceCubeTextureHandle->GetGpuHandle());
 
-		glm::mat4 NoRotateView = glm::transpose(glm::mat4(glm::mat3(glm::inverse(pCameraTransformComponent->GetTransform()))));
+		glm::mat4 NoRotateView = glm::transpose(glm::mat4(glm::mat3(pCameraTransformComponent->GetTransform())));
 		glm::mat4 Projection = glm::transpose(pCamera->GetProjection());
 
 		glm::mat4 NoRotateViewProjection = NoRotateView * Projection;
@@ -869,7 +980,7 @@ namespace Pixel {
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
 
-		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size() - 1; ++i)
+		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
 		{
 			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
 		}
@@ -937,8 +1048,13 @@ namespace Pixel {
 		pContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
 
-		pContext->TransitionResource(*pDestResource, ResourceStates::Common);
-		pContext->TransitionResource(*pSrcResource, ResourceStates::Common);
+		//pContext->TransitionResource(*pDestResource, ResourceStates::Common);
+		//pContext->TransitionResource(*pSrcResource, ResourceStates::Common);
+	}
+
+	Ref<DescriptorCpuHandle> DirectXRenderer::GetShadowMapSrvHandle()
+	{
+		return m_ShadowMap->GetDepthSRV();
 	}
 
 	void DirectXRenderer::CreateRenderImageToBackBufferPipeline()
@@ -1007,6 +1123,75 @@ namespace Pixel {
 		std::static_pointer_cast<GraphicsPSO>(m_ImageToBackBufferPso)->SetInputLayout(layout.GetElements().size(), ImageToBackBufferElementArray);
 
 		m_ImageToBackBufferPso->Finalize();
+	}
+
+	void DirectXRenderer::CreateRenderShadowMapPipeline()
+	{
+		m_RenderShadowMapVs = Shader::Create("assets/shaders/ShadowMap.hlsl", "VS", "vs_5_0");
+		m_RenderShadowMapPs = Shader::Create("assets/shaders/ShadowMap.hlsl", "PS", "ps_5_0");
+
+		m_RenderShadowMapPso = PSO::CreateGraphicsPso(L"RenderShadowMapPso");
+		auto [RenderShadowMapVsShaderBinary, RenderShadowMapVsShaderSize] = std::static_pointer_cast<DirectXShader>(m_RenderShadowMapVs)->GetShaderBinary();
+		auto [RenderShadowMapPsShaderBinary, RenderShadowMapPsShaderSize] = std::static_pointer_cast<DirectXShader>(m_RenderShadowMapPs)->GetShaderBinary();
+
+		m_RenderShadowMapPso->SetVertexShader(RenderShadowMapVsShaderBinary, RenderShadowMapVsShaderSize);
+		m_RenderShadowMapPso->SetPixelShader(RenderShadowMapPsShaderBinary, RenderShadowMapPsShaderSize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+
+		//samplerDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		samplerDesc->SetTextureAddressMode(AddressMode::BORDER);
+
+		m_RenderShadowMapRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_RenderShadowMapRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_RenderShadowMapRootSignature->Finalize(L"RenderShadowMapRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_RenderShadowMapPso->SetRootSignature(m_RenderShadowMapRootSignature);
+
+		m_RenderShadowMapPso->SetBlendState(pBlendState);
+		m_RenderShadowMapPso->SetDepthState(pDepthState);
+		m_RenderShadowMapPso->SetRasterizerState(pRasterState);
+
+		m_RenderShadowMapPso->SetDepthTargetFormat(ImageFormat::PX_FORMAT_D16_UNORM);
+		m_RenderShadowMapPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* RenderShadowMapElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			RenderShadowMapElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)RenderShadowMapElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			RenderShadowMapElementArray[i].SemanticIndex = 0;
+			RenderShadowMapElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			RenderShadowMapElementArray[i].InputSlot = 0;
+			RenderShadowMapElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			RenderShadowMapElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			RenderShadowMapElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		std::static_pointer_cast<GraphicsPSO>(m_RenderShadowMapPso)->SetInputLayout(layout.GetElements().size(), RenderShadowMapElementArray);
+
+		m_RenderShadowMapPso->Finalize();
 	}
 
 	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)
@@ -1365,13 +1550,18 @@ namespace Pixel {
 		//------create light pso------
 		m_DefaultLightShadingPso = PSO::CreateGraphicsPso(L"DeferredShadingLightPso");
 
+		Ref<SamplerDesc> ShadowMapDesc = SamplerDesc::Create();
+		ShadowMapDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ShadowMapDesc->SetTextureAddressMode(AddressMode::BORDER);
+
 		//-------create root signature------
-		m_pDeferredShadingLightRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_pDeferredShadingLightRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 2);
 		m_pDeferredShadingLightRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		m_pDeferredShadingLightRootSignature->InitStaticSampler(1, ShadowMapDesc, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
-		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 2, 10, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
@@ -1398,8 +1588,6 @@ namespace Pixel {
 
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
 			{ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false}};
-
-		m_DefaultGeometryShadingPso->SetRootSignature(m_pDeferredShadingLightRootSignature);
 
 		m_DeferredShadingLightPsoIndex = CreateDeferredLightPso(layout);
 
