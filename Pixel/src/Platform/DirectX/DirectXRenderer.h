@@ -54,6 +54,8 @@ namespace Pixel {
 		virtual void RenderImageToBackBuffer(Ref<GpuResource> pDestResource, Ref<GpuResource> pSrcResource, Ref<Context> pContext) override;
 
 		virtual Ref<DescriptorCpuHandle> GetShadowMapSrvHandle() override;
+
+		virtual void DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer) override;//editor only, draw frustum
 	private:
 		
 		Ref<RootSignature> m_rootSignature;
@@ -181,6 +183,14 @@ namespace Pixel {
 		Ref<ShadowBuffer> m_ShadowMap;
 		void CreateRenderShadowMapPipeline();
 		//------render shadow map------
+
+		//------render camera frustum------
+		Ref<PSO> m_CameraFrustumPso;
+		Ref<RootSignature> m_CameraFrustumRootSignature;
+		Ref<Shader> m_CameraFrustumVs;
+		Ref<Shader> m_CameraFrustumPs;
+		void CreateCameraFrustumPipeline();
+		//------render camera frustum------
 	};
 }
  

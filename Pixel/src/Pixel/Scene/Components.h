@@ -80,6 +80,10 @@ namespace Pixel {
 		//when OnResize, whether is SetViewport
 		bool FixedAspectRatio = false;
 
+		//draw frustum
+		//editor only
+		bool DisplayFurstum = false;
+
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 		//CameraComponent(const glm::mat4& projection);

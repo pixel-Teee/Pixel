@@ -168,7 +168,7 @@ namespace Pixel {
 		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) override;
 
 
-		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) override;
+		virtual void SetDynamicIB(size_t IndexCount, const uint16_t* IBData) override;
 
 
 		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) override;

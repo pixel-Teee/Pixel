@@ -213,6 +213,8 @@ namespace Pixel {
 		m_ShadowMap = CreateRef<ShadowBuffer>();
 		m_ShadowMap->Create(L"ShadowMap", 1024, 1024);
 		//------create shadow map and pipeline state object------
+
+		CreateCameraFrustumPipeline();
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -714,11 +716,11 @@ namespace Pixel {
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
 
-		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
-		{
-			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
-		}
-		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::Common);
+		//for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
+		//{
+		//	pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
+		//}
+		//pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::Common);
 
 		////------default hdr texture------
 		//std::string texturePath = "assets/textures/hdr/brown_photostudio_01_1k.hdr";
@@ -980,11 +982,11 @@ namespace Pixel {
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
 
-		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
-		{
-			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
-		}
-		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::Common);
+		//for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
+		//{
+		//	pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
+		//}
+		//pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::Common);
 
 		////------default hdr texture------
 		//std::string texturePath = "assets/textures/hdr/brown_photostudio_01_1k.hdr";
@@ -1055,6 +1057,123 @@ namespace Pixel {
 	Ref<DescriptorCpuHandle> DirectXRenderer::GetShadowMapSrvHandle()
 	{
 		return m_ShadowMap->GetDepthSRV();
+	}
+
+	void DirectXRenderer::DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer)
+	{
+		if (pCamera != nullptr && pCameraTransformComponent != nullptr)
+		{
+			glm::vec4 vec4Vertices[8] = {
+				//near plane
+				{-1.0f, 1.0f, 0.0f, 1.0f},
+				{1.0f, 1.0f, 0.0f, 1.0f},
+				{-1.0f, -1.0f, 0.0f, 1.0f},
+				{1.0f, -1.0f, 0.0f, 1.0f},
+
+				//far plane
+				{-1.0f, 1.0f, 1.0f, 1.0f},
+				{1.0f, 1.0f, 1.0f, 1.0f},
+				{-1.0f, -1.0f, 1.0f, 1.0f},
+				{1.0f, -1.0f, 1.0f, 1.0f}
+			};
+
+			glm::vec4 worldFrustum[8];
+			for (uint32_t i = 0; i < 8; ++i)
+			{
+				glm::vec4 newVertices = vec4Vertices[i] * glm::transpose(glm::inverse(pCamera->GetProjection())) * glm::transpose(pCameraTransformComponent->GetTransform());
+				worldFrustum[i].x = newVertices.x / newVertices.w;
+				worldFrustum[i].y = newVertices.y / newVertices.w;
+				worldFrustum[i].z = newVertices.z / newVertices.w;
+			}
+			float newVertices[24];
+			for (uint32_t i = 0; i < 8; ++i)
+			{
+				newVertices[i * 3] = worldFrustum[i].x;
+				newVertices[i * 3 + 1] = worldFrustum[i].y;
+				newVertices[i * 3 + 2] = worldFrustum[i].z;
+			}
+
+			uint16_t indices[48] = {
+				1, 0,
+				1, 3,
+				3, 2,
+				0, 2,//near plane
+
+				1, 5,
+				5, 7,
+				7, 3,
+				3, 1,//right plane
+
+				0, 4,
+				4, 6,
+				6, 2,
+				2, 0,//left plane
+
+				0, 1,
+				1, 5,
+				5, 4,
+				4, 0,//top plane
+
+				2, 3,
+				3, 7,
+				7, 6,
+				6, 2,//down plane,
+
+				6, 7,
+				7, 3,
+				3, 2,
+				2, 6//far plane
+			};
+
+			pGraphicsContext->SetPipelineState(*m_CameraFrustumPso);
+			pGraphicsContext->SetRootSignature(*m_CameraFrustumRootSignature);
+			pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::LINELIST);
+
+			Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+
+			std::vector<Ref<DescriptorCpuHandle>> rtvHandles;
+			rtvHandles.push_back(pDirectXFrameBuffer->m_pColorBuffers[0]->GetRTV());
+
+			pGraphicsContext->SetRenderTargets(1, rtvHandles);
+
+			//transition resource
+			pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+			//pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
+			//set viewport and scissor
+			ViewPort vp;
+			vp.TopLeftX = 0.0f;
+			vp.TopLeftY = 0.0f;
+			vp.Width = pFrameBuffer->GetSpecification().Width;
+			vp.Height = pFrameBuffer->GetSpecification().Height;
+			vp.MaxDepth = 1.0f;
+			vp.MinDepth = 0.0f;
+
+			PixelRect scissor;
+			scissor.Left = 0;
+			scissor.Right = pFrameBuffer->GetSpecification().Width;
+			scissor.Top = 0;
+			scissor.Bottom = pFrameBuffer->GetSpecification().Height;
+
+			pGraphicsContext->SetViewportAndScissor(vp, scissor);
+
+			glm::mat4 viewProjection = glm::transpose(editorCamera.GetViewProjection());
+			//bind resource
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(viewProjection));
+
+			//------test-------
+			/*float line[24] = { 0.0f, 0.0f, 0.0f, 0.5, 0.5f, 1.0f, 0.5f, 0.5f, 1.0f, 3.0f, 3.4f, 2.5f,
+			0.0f, 0.0f, 0.0f, 0.5, 0.5f, 1.0f, 0.5f, 0.5f, 1.0f, 3.0f, 3.4f, 2.5f };
+			uint16_t lineIndex[8] = { 0, 1, 2, 3, 4, 5, 6, 7};*/
+			//------test-------
+
+
+			pGraphicsContext->SetDynamicVB(0, 8, sizeof(float) * 3, newVertices);
+			pGraphicsContext->SetDynamicIB(48, indices);
+			pGraphicsContext->DrawIndexed(48);
+
+			//test
+			//pGraphicsContext->DrawIndexed(48);
+		}		
 	}
 
 	void DirectXRenderer::CreateRenderImageToBackBufferPipeline()
@@ -1192,6 +1311,77 @@ namespace Pixel {
 		std::static_pointer_cast<GraphicsPSO>(m_RenderShadowMapPso)->SetInputLayout(layout.GetElements().size(), RenderShadowMapElementArray);
 
 		m_RenderShadowMapPso->Finalize();
+	}
+
+	void DirectXRenderer::CreateCameraFrustumPipeline()
+	{
+		m_CameraFrustumVs = Shader::Create("assets/shaders/CameraFrustum.hlsl", "VS", "vs_5_0");
+		m_CameraFrustumPs = Shader::Create("assets/shaders/CameraFrustum.hlsl", "PS", "ps_5_0");
+
+		m_CameraFrustumPso = PSO::CreateGraphicsPso(L"CameraFrustumPso");
+		auto [CameraFrustumVsShaderBinary, CameraFrustumVsShaderSize] = std::static_pointer_cast<DirectXShader>(m_CameraFrustumVs)->GetShaderBinary();
+		auto [CameraFrustumPsShaderBinary, CameraFrustumPsShaderSize] = std::static_pointer_cast<DirectXShader>(m_CameraFrustumPs)->GetShaderBinary();
+
+		m_CameraFrustumPso->SetVertexShader(CameraFrustumVsShaderBinary, CameraFrustumVsShaderSize);
+		m_CameraFrustumPso->SetPixelShader(CameraFrustumPsShaderBinary, CameraFrustumPsShaderSize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+		pDepthState->DepthTest(false);
+
+		//samplerDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		//samplerDesc->SetTextureAddressMode(AddressMode::BORDER);
+
+		m_CameraFrustumRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_CameraFrustumRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_CameraFrustumRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_CameraFrustumRootSignature->Finalize(L"CameraFrustumRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_CameraFrustumPso->SetRootSignature(m_CameraFrustumRootSignature);
+
+		m_CameraFrustumPso->SetBlendState(pBlendState);
+		m_CameraFrustumPso->SetDepthState(pDepthState);
+		m_CameraFrustumPso->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM };
+		m_CameraFrustumPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
+		m_CameraFrustumPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::LINE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false} };
+
+		D3D12_INPUT_ELEMENT_DESC* CameraFrustumElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			CameraFrustumElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)CameraFrustumElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			CameraFrustumElementArray[i].SemanticIndex = 0;
+			CameraFrustumElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			CameraFrustumElementArray[i].InputSlot = 0;
+			CameraFrustumElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			CameraFrustumElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			CameraFrustumElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		std::static_pointer_cast<GraphicsPSO>(m_CameraFrustumPso)->SetInputLayout(layout.GetElements().size(), CameraFrustumElementArray);
+
+		m_CameraFrustumPso->Finalize();
 	}
 
 	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)

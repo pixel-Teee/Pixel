@@ -1,10 +1,10 @@
 Scene: Untitled
 Entities:
-  - Entity: 8534297921756704914
+  - Entity: 5643804548652488927
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0, -0.313876033]
+      Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     StaticMeshComponent:
@@ -17,17 +17,28 @@ Entities:
       metallicPath: ""
       gAlbedo: [1, 1, 1]
       gNormal: [1, 1, 1]
-      gRoughness: 0.25
+      gRoughness: 0.550000012
       gMetallic: 1
       gEmissive: 1
       HaveNormal: true
-  - Entity: 3641331486970308766
+  - Entity: 17492161255626896809
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, -3.5331459, 0]
+      Translation: [0, 6.87712955, -7.03079939]
+      Rotation: [0.448305994, 0, 0]
+      Scale: [1, 0.99994719, 0.99994719]
+    LightComponent:
+      LightType: 1
+      Color: [1, 1, 1]
+      GenerateShadowMap: true
+  - Entity: 8919142017348422396
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, -3.08585691, 0]
       Rotation: [0, 0, 0]
-      Scale: [5.88916111, 1, 4.70824671]
+      Scale: [5.55215502, 1, 7.20162821]
     StaticMeshComponent:
       Path: assets\models\Box.fbx
     MaterialComponent:
@@ -41,14 +52,22 @@ Entities:
       gRoughness: 1
       gMetallic: 1
       gEmissive: 1
-      HaveNormal: true
-  - Entity: 18230534363186635804
+      HaveNormal: false
+  - Entity: 13504033856264872947
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0.100514673, -9.29995537]
-      Rotation: [0.146741882, 0, 0]
-      Scale: [1, 0.999958396, 0.999947309]
-    LightComponent:
-      LightType: 1
-      Color: [1, 1, 1]
+      Translation: [-0.541674614, 1.47161531, -9.47204113]
+      Rotation: [0.28841269, 0, 0]
+      Scale: [1.00000083, 0.999998927, 0.999998927]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false

@@ -99,7 +99,7 @@ namespace Pixel {
 		virtual void SetVertexBuffer(uint32_t Slot, const Ref<VBV> VBView) = 0;
 		virtual void SetVertexBuffers(uint32_t StartSlot, uint32_t Count, const std::vector<Ref<VBV>> VBViews) = 0;
 		virtual void SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VBData) = 0;
-		virtual void SetDynamicIB(size_t IndexCount, const uint64_t* IBData) = 0;
+		virtual void SetDynamicIB(size_t IndexCount, const uint16_t* IBData) = 0;
 		virtual void SetDynamicSRV(uint32_t RootIndex, size_t BufferSize, const void* BufferData) = 0;
 
 		virtual void SetPipelineState(const PSO& pso) = 0;

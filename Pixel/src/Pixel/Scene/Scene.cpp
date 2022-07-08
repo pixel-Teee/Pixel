@@ -715,8 +715,34 @@ namespace Pixel
 			lights.push_back(&light);
 		}
 
+		//------draw frustum------
+		Camera* mainCamera = nullptr;
+		TransformComponent* cameraTransform;
+		bool DisplayFrustum = false;
+		{
+			//Renderer 3D
+			auto view = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+
+				if (camera.Primary)
+				{
+					mainCamera = &camera.camera;
+					cameraTransform = &transform;
+					DisplayFrustum = camera.DisplayFurstum;
+					break;
+				}
+			}
+		}
+		//------draw frustum------
+
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds);
+		if (mainCamera != nullptr && cameraTransform != nullptr && DisplayFrustum)
+		{
+			Application::Get().GetRenderer()->DrawFrustum(pContext, camera, mainCamera, cameraTransform, pLightFrameBuffer);
+		}
 		pContext->Finish(true);
 
 		//Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);

@@ -392,6 +392,8 @@ namespace Pixel
 
 					ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
 				}
+
+				ImGui::Checkbox("DisplayFrustum", &component.DisplayFurstum);
 			});
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)

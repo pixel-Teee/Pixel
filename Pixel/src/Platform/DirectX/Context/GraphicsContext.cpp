@@ -339,7 +339,7 @@ namespace Pixel {
 
 	void GraphicsContext::SetDynamicVB(uint32_t Slot, size_t NumVertices, size_t VertexStride, const void* VertexData)
 	{
-		PX_CORE_ASSERT(VertexData != nullptr && Math::IsAligned(VertexData, 16), "vertex data is nullptr or vertex data is not aligned!");
+		//PX_CORE_ASSERT(VertexData != nullptr && Math::IsAligned(VertexData, 16), "vertex data is nullptr or vertex data is not aligned!");
 
 		//temp allocate
 		size_t BufferSize = Math::AlignUp(NumVertices * VertexStride, 16);
@@ -355,14 +355,14 @@ namespace Pixel {
 		m_pCommandList->IASetVertexBuffers(Slot, 1, &VBView);
 	}
 
-	void GraphicsContext::SetDynamicIB(size_t IndexCount, const uint64_t* IndexData)
+	void GraphicsContext::SetDynamicIB(size_t IndexCount, const uint16_t* IBData)
 	{
-		PX_CORE_ASSERT(IndexData != nullptr && Math::IsAligned(IndexData, 16), "IndexData is nullptr or IndexData is not aligned 16!");
+		//PX_CORE_ASSERT(IBData != nullptr && Math::IsAligned(IBData, 16), "IndexData is nullptr or IndexData is not aligned 16!");
 
 		size_t BufferSize = Math::AlignUp(IndexCount * sizeof(uint16_t), 16);
 		DynAlloc ib = m_CpuLinearAllocator.Allocate(BufferSize, 256);
 
-		memcpy(ib.DataPtr, IndexData, BufferSize);
+		memcpy(ib.DataPtr, IBData, BufferSize);
 
 		D3D12_INDEX_BUFFER_VIEW IBView;
 		IBView.BufferLocation = ib.GpuAddress;

@@ -278,7 +278,7 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void OpenGLContext::SetDynamicIB(size_t IndexCount, const uint64_t* IBData)
+	void OpenGLContext::SetDynamicIB(size_t IndexCount, const uint16_t* IBData)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}

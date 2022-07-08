@@ -38,6 +38,8 @@ namespace Pixel {
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer) = 0;
 
+		virtual void DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer) = 0;
+
 		virtual void RenderImageToBackBuffer(Ref<GpuResource> pDestResource, Ref<GpuResource> pSrcResource, Ref<Context> pContext) = 0;
 
 		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) = 0;
