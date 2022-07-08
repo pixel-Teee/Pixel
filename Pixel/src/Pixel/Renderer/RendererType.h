@@ -239,6 +239,7 @@ namespace Pixel {
 		glm::vec3 Color;//point light/direction light
 		float Radius;//point light, volume radius
 		uint32_t GenerateShadow = 0;//cast shadow
+		glm::vec3 pad3;
 	};
 
 	struct alignas(256) LightPass
