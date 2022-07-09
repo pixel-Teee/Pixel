@@ -25,6 +25,8 @@ namespace Pixel {
 		DirectXRenderer();
 		virtual ~DirectXRenderer();
 
+		virtual void Initialize() override;
+
 		virtual uint32_t CreatePso(BufferLayout& layout) override;
 
 		virtual uint32_t CreateDeferredPso(BufferLayout& layout) override;
@@ -36,7 +38,7 @@ namespace Pixel {
 
 		virtual void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 		std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds) override;
+		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity) override;
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
@@ -191,6 +193,11 @@ namespace Pixel {
 		Ref<Shader> m_CameraFrustumPs;
 		void CreateCameraFrustumPipeline();
 		//------render camera frustum------
+
+		//------camera texture------
+		Ref<Model> pCameraModel;
+		Ref<MaterialComponent> pCameraMaterialComponent;
+		//------camera texture------
 	};
 }
  

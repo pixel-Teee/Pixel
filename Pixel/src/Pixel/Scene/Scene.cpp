@@ -716,9 +716,11 @@ namespace Pixel
 		}
 
 		//------draw frustum------
-		Camera* mainCamera = nullptr;
-		TransformComponent* cameraTransform;
-		bool DisplayFrustum = false;
+		std::vector<Camera*> cameras;
+		std::vector<TransformComponent*> cameraTransformComponents;
+		std::vector<int32_t> cameraEntitys;
+		std::vector<bool> displayCameras;
+		int32_t cameraEntityId = -1;
 		{
 			//Renderer 3D
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
@@ -726,23 +728,25 @@ namespace Pixel
 			{
 				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
 
-				if (camera.Primary)
-				{
-					mainCamera = &camera.camera;
-					cameraTransform = &transform;
-					DisplayFrustum = camera.DisplayFurstum;
-					break;
-				}
+				cameras.push_back(&camera.camera);
+				cameraTransformComponents.push_back(&transform);
+				cameraEntitys.push_back((int32_t)entity);
+				displayCameras.push_back(camera.DisplayFurstum);
 			}
 		}
 		//------draw frustum------
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds);
-		if (mainCamera != nullptr && cameraTransform != nullptr && DisplayFrustum)
+		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys);
+		
+		for (uint32_t i = 0; i < cameras.size(); ++i)
 		{
-			Application::Get().GetRenderer()->DrawFrustum(pContext, camera, mainCamera, cameraTransform, pLightFrameBuffer);
+			if (displayCameras[i])
+			{
+				Application::Get().GetRenderer()->DrawFrustum(pContext, camera, cameras[i], cameraTransformComponents[i], pLightFrameBuffer);
+			}
 		}
+
 		pContext->Finish(true);
 
 		//Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);

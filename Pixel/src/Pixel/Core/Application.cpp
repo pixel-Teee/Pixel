@@ -43,6 +43,7 @@ namespace Pixel {
 		PushOverlay(m_ImGuiLayer);	
 
 		m_pRenderer = BaseRenderer::Create();
+		m_pRenderer->Initialize();
 	}
 	Application::~Application()
 	{

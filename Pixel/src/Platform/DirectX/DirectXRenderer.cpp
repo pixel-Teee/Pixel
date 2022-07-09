@@ -226,6 +226,21 @@ namespace Pixel {
 		DirectXRootSignature::DestroyAll();
 	}
 
+	void DirectXRenderer::Initialize()
+	{
+		pCameraModel = CreateRef<Model>("Resources/Icons/Camera.fbx");
+
+		std::string albedoPath = "Resources/Icons/Camera_Albedo.png";
+		std::string normalPath = "Resources/Icons/Camera_normal.png";
+		std::string roughnessPath = "Resources/Icons/Camera_roughness.png";
+		std::string metallicPath = "Resources/Icons/Camera_metallic.png";
+		std::string emissivePath = "Resources/Icons/Camera_emissive.png";
+
+		pCameraMaterialComponent = CreateRef<MaterialComponent>(albedoPath,
+			normalPath, roughnessPath, metallicPath,
+			emissivePath, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f, 1.0f, false);
+	}
+
 	//sematics to dx sematics
 	std::string SemanticsToDirectXSemantics(Semantics sematics)
 	{
@@ -479,7 +494,7 @@ namespace Pixel {
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
 	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials,
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds)
+	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
@@ -581,6 +596,13 @@ namespace Pixel {
 		{
 			//draw every mesh
 			meshs[i]->mesh.Draw(trans[i]->GetTransform(), pContext, entityIds[i], materials[i]);
+		}
+
+		//draw runtime camera's model
+
+		for (uint32_t i = 0; i < cameraTransformant.size(); ++i)
+		{
+			pCameraModel->Draw(cameraTransformant[i]->GetTransform(), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get());
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
