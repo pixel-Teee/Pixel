@@ -290,6 +290,7 @@ namespace Pixel {
 		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
 
 		m_MeshConstant.world = glm::transpose(transform);
+		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
 

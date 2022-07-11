@@ -81,6 +81,11 @@ namespace Pixel {
 		m_pCommandList->SetComputeRoot32BitConstants(RootIndex, NumConstants, pConstants, 0);
 	}
 
+	void ComputeContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset)
+	{
+		m_pCommandList->SetComputeRoot32BitConstants(RootIndex, NumConstants, pConstants, offset);
+	}
+
 	void ComputeContext::SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val)
 	{
 		m_pCommandList->SetComputeRoot32BitConstant(RootIndex, Val, Offset);

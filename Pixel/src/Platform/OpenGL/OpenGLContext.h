@@ -200,6 +200,9 @@ namespace Pixel {
 
 		virtual void SetType(CommandListType type) override;
 
+
+		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset) override;
+
 	private:
 		GLFWwindow* m_WindowHandle;
 	};

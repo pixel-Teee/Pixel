@@ -54,6 +54,8 @@ namespace Pixel
 
 		Ref<Framebuffer> m_Framebuffer;
 
+		Ref<Framebuffer> m_FinalFrameBuffer;
+
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
 		std::filesystem::path m_CurrentScenePath;

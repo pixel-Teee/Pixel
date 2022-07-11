@@ -57,22 +57,30 @@ namespace Pixel
 		albedo.r	albedo.g	albedo.b	x
 		roughness	metallic	emissive	x
 		--------------------------------------*/
+
+		//last is bloom texture
 		FramebufferSpecification fbSpec;
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
-		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
 		///*------Create Geometry Framebuffer------*/
 
 		///*------Create Framebuffer------*/	
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth};
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
-		
-		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+			
 		///*------Create Framebuffer------*/
+
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+		fbSpec.Width = 1280;
+		fbSpec.Height = 720;
+		m_FinalFrameBuffer = Framebuffer::Create(fbSpec);
+
+		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_FinalFrameBuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
 
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
@@ -457,8 +465,9 @@ namespace Pixel
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_FinalFrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			//recopy to descriptor
-			Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_Framebuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+			Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_FinalFrameBuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -478,7 +487,7 @@ namespace Pixel
 				}
 				//Update scene
 				//m_ActiveScene->OnUpdateEditorForward(ts, m_EditorCamera, m_Framebuffer);
-				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
+				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer, m_FinalFrameBuffer);
 				break;
 			}
 			case EditorLayer::SceneState::Play:

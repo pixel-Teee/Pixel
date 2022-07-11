@@ -684,7 +684,7 @@ namespace Pixel
 		//pComputeContext->Finish(true);
 	}
 
-	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer)
+	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer)
 	{
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
@@ -738,7 +738,7 @@ namespace Pixel
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys);
-		
+
 		for (uint32_t i = 0; i < cameras.size(); ++i)
 		{
 			if (displayCameras[i])
@@ -746,8 +746,17 @@ namespace Pixel
 				Application::Get().GetRenderer()->DrawFrustum(pContext, camera, cameras[i], cameraTransformComponents[i], pLightFrameBuffer);
 			}
 		}
-
 		pContext->Finish(true);
+
+		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
+		Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
+		pComputeContext->Finish(true);
+
+		Ref<Context> pFinalColorContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		Application::Get().GetRenderer()->RenderingFinalColorBuffer(pFinalColorContext, pLightFrameBuffer, pFinalFrameBuffer);
+		pFinalColorContext->Finish(true);
+		//Application::Get().GetRenderer()->RenderingFinalColorBuffer(pContext, pLightFrameBuffer, pFinalFrameBuffer);
+	//	pContext->Finish(true);
 
 		//Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
 		//Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pFrameBuffer);

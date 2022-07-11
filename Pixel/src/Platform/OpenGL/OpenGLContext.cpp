@@ -208,6 +208,11 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	void OpenGLContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 	void OpenGLContext::SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val)
 	{
 		throw std::logic_error("The method or operation is not implemented.");

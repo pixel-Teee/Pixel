@@ -84,6 +84,7 @@ namespace Pixel {
 		virtual void SetPrimitiveTopology(PrimitiveTopology Topology) = 0;
 
 		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants) = 0;
+		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset) = 0;
 		virtual void SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val) = 0;
 		virtual void SetConstants(uint32_t RootIndex, uint32_t x) = 0;
 		virtual void SetConstants(uint32_t RootIndex, uint32_t x, uint32_t y) = 0;

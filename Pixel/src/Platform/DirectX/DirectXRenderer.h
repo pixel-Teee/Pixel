@@ -58,6 +58,10 @@ namespace Pixel {
 		virtual Ref<DescriptorCpuHandle> GetShadowMapSrvHandle() override;
 
 		virtual void DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer) override;//editor only, draw frustum
+
+		virtual void RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer) override;
+
+		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) override;
 	private:
 		
 		Ref<RootSignature> m_rootSignature;
@@ -198,6 +202,35 @@ namespace Pixel {
 		Ref<Model> pCameraModel;
 		Ref<MaterialComponent> pCameraMaterialComponent;
 		//------camera texture------
+
+		//------bloom------
+		Ref<Shader> m_HorzBlurShader;
+		Ref<Shader> m_VertBlurShader;
+		Ref<PSO> m_HorzBlurPso;
+		Ref<PSO> m_VertBlurPso;
+		Ref<RootSignature> m_BlurRootSignature;
+		Ref<RootSignature> m_Blur2RootSignature;
+		Ref<GpuResource> m_BlurTexture;
+		Ref<GpuResource> m_BlurTexture2;
+		Ref<DescriptorHeap> m_BlurTextureUavSrvHeap;
+		Ref<DescriptorHandle> m_BlurTextureUavHandle;//horz
+		Ref<DescriptorHandle> m_BlurTexture2SrvHandle;
+
+		Ref<DescriptorHandle> m_BlurTexture2UavHandle;//vert
+		Ref<DescriptorHandle> m_BlurTextureSrvHandle;
+		void CreateBlurPipeline();
+		//------bloom------
+
+		//------additive blending------
+		Ref<DescriptorHeap> m_AdditiveBlendingDescriptorHeap;
+		Ref<DescriptorHandle> m_AdditiveBlendingDescriptorHandle;
+		Ref<DescriptorHandle> m_AdditiveBlendingDescriptorHandle2;
+		Ref<Shader> m_AdditiveBlendingVs;
+		Ref<Shader> m_AdditiveBlendingPs;
+		Ref<PSO> m_AdditiveBlendingPso;
+		Ref<RootSignature> m_AdditiveRootSignature;
+		void CreateAdditiveBlendingPipeline();
+		//------additive blending------
 	};
 }
  

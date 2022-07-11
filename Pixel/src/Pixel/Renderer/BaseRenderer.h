@@ -52,6 +52,10 @@ namespace Pixel {
 
 		virtual Ref<DescriptorCpuHandle> GetShadowMapSrvHandle() = 0;
 
+		virtual void RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer) = 0;
+
+		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) = 0;
+
 		static Ref<BaseRenderer> Create();
 	};
 }

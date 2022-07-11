@@ -38,6 +38,7 @@ namespace Pixel {
 		virtual void SetBlendFactor(glm::vec4 BlendFactor) override;
 		virtual void SetPrimitiveTopology(PrimitiveTopology Topology) override;
 
+		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset) override;
 		virtual void SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants) override;
 		virtual void SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val) override;
 		virtual void SetConstants(uint32_t RootIndex, uint32_t x)  override;

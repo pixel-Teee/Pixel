@@ -41,6 +41,34 @@ namespace Pixel {
 		float Roughness;
 	};
 
+	std::vector<float> CalcGaussWeights(float sigma)
+	{
+		float twoSigma2 = 2.0f * sigma * sigma;
+
+		int blurRadius = (int)ceil(2.0f * sigma);
+
+		std::vector<float> weights;
+		weights.resize(2 * blurRadius + 1);
+
+		float weightSum = 0.0f;
+
+		for (int i = -blurRadius; i <= blurRadius; ++i)
+		{
+			float x = (float)i;
+
+			weights[i + blurRadius] = expf(-x * x / twoSigma2);
+
+			weightSum += weights[i + blurRadius];
+		}
+
+		for (int32_t i = 0; i < weights.size(); ++i)
+		{
+			weights[i] /= weightSum;
+		}
+
+		return weights;
+	}
+
 	DirectXRenderer::DirectXRenderer()
 	{
 		
@@ -215,6 +243,11 @@ namespace Pixel {
 		//------create shadow map and pipeline state object------
 
 		CreateCameraFrustumPipeline();
+		CreateAdditiveBlendingPipeline();
+
+		m_AdditiveBlendingDescriptorHeap = DescriptorHeap::Create(L"AdditiveBlendingDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 2);
+		m_AdditiveBlendingDescriptorHandle = m_AdditiveBlendingDescriptorHeap->Alloc(1);
+		m_AdditiveBlendingDescriptorHandle2 = m_AdditiveBlendingDescriptorHeap->Alloc(1);
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -239,6 +272,14 @@ namespace Pixel {
 		pCameraMaterialComponent = CreateRef<MaterialComponent>(albedoPath,
 			normalPath, roughnessPath, metallicPath,
 			emissivePath, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f, 1.0f, false);
+
+		m_BlurTextureUavSrvHeap = DescriptorHeap::Create(L"BlurTexture", DescriptorHeapType::CBV_UAV_SRV, 4);
+		m_BlurTextureSrvHandle = m_BlurTextureUavSrvHeap->Alloc(1);
+		m_BlurTextureUavHandle = m_BlurTextureUavSrvHeap->Alloc(1);
+		m_BlurTexture2SrvHandle = m_BlurTextureUavSrvHeap->Alloc(1);
+		m_BlurTexture2UavHandle = m_BlurTextureUavSrvHeap->Alloc(1);
+
+		CreateBlurPipeline();
 	}
 
 	//sematics to dx sematics
@@ -620,8 +661,9 @@ namespace Pixel {
 		std::vector<Ref<DescriptorCpuHandle>> m_lightFrameBufferCpuHandles;
 		Ref<DirectXFrameBuffer> pLightFrame = std::static_pointer_cast<DirectXFrameBuffer>(pLightFrameBuffer);
 		m_lightFrameBufferCpuHandles.push_back(pLightFrame->m_pColorBuffers[0]->GetRTV());
+		m_lightFrameBufferCpuHandles.push_back(pLightFrame->m_pColorBuffers[1]->GetRTV());
 		dsvHandle = pLightFrame->m_pDepthBuffer->GetDSV();
-		pGraphicsContext->SetRenderTargets(1, m_lightFrameBufferCpuHandles, dsvHandle);
+		pGraphicsContext->SetRenderTargets(2, m_lightFrameBufferCpuHandles, dsvHandle);
 
 		//clear buffer
 		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
@@ -758,7 +800,16 @@ namespace Pixel {
 			int32_t widthAndHeight[2] = { m_Width, m_Height };
 			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
 			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
+
+			m_BlurTexture = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture)->Create(L"BlurTexture", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
 		}
+
+		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
+		pContext->CopyBuffer(*pBlurTexture, *(pLightFrame->m_pColorBuffers[1]));
 
 		m_lastWidth = m_Width;
 		m_lastHeight = m_Height;
@@ -1024,6 +1075,17 @@ namespace Pixel {
 			int32_t widthAndHeight[2] = { m_Width, m_Height };
 			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
 			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
+
+			m_BlurTexture = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture)->Create(L"BlurTexture", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
+
+			//copy 
+			pContext->CopyBuffer(*(pBlurTexture), *(pLightFrame->m_pColorBuffers[1]));
+
+			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
 		}
 
 		m_lastWidth = m_Width;
@@ -1406,6 +1468,202 @@ namespace Pixel {
 		m_CameraFrustumPso->Finalize();
 	}
 
+	void DirectXRenderer::CreateBlurPipeline()
+	{
+		m_HorzBlurShader = Shader::Create("assets/shaders/Blur.hlsl", "horzBlurCS", "cs_5_0");
+		auto [CsBinary, CsBinarySize] = std::static_pointer_cast<DirectXShader>(m_HorzBlurShader)->GetShaderBinary();
+
+		Ref<SamplerDesc> sampler = SamplerDesc::Create();
+
+		m_HorzBlurPso = CreateRef<ComputePSO>(L"Horz Blur PSO");
+		m_HorzBlurPso->SetComputeShader(CsBinary, CsBinarySize);
+		m_BlurRootSignature = RootSignature::Create(3, 1);
+		m_BlurRootSignature->InitStaticSampler(0, sampler, ShaderVisibility::ALL);
+		(*m_BlurRootSignature)[0].InitAsConstants(0, 12, ShaderVisibility::ALL);
+		(*m_BlurRootSignature)[1].InitAsDescriptorTable({ std::make_tuple(RangeType::SRV, 0, 1) }, ShaderVisibility::ALL);
+		(*m_BlurRootSignature)[2].InitAsDescriptorTable({ std::make_tuple(RangeType::UAV, 0, 1) }, ShaderVisibility::ALL);
+		m_BlurRootSignature->Finalize(L"Blur RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_HorzBlurPso->SetRootSignature(m_BlurRootSignature);
+		m_HorzBlurPso->Finalize();
+
+		m_VertBlurShader = Shader::Create("assets/shaders/VertBlur.hlsl", "VertBlurCS", "cs_5_0");
+		auto [VertCsBinary, VertCsBinarySize] = std::static_pointer_cast<DirectXShader>(m_VertBlurShader)->GetShaderBinary();
+
+		m_VertBlurPso = CreateRef<ComputePSO>(L"Vert Blur PSO");
+		m_VertBlurPso->SetComputeShader(VertCsBinary, VertCsBinarySize);
+		m_Blur2RootSignature = RootSignature::Create(3, 2);
+		m_Blur2RootSignature->InitStaticSampler(0, sampler, ShaderVisibility::ALL);
+		m_Blur2RootSignature->InitStaticSampler(1, sampler, ShaderVisibility::ALL);//hash collider
+		(*m_Blur2RootSignature)[0].InitAsConstants(0, 12, ShaderVisibility::ALL);
+		(*m_Blur2RootSignature)[1].InitAsDescriptorTable({ std::make_tuple(RangeType::SRV, 0, 1) }, ShaderVisibility::ALL);
+		(*m_Blur2RootSignature)[2].InitAsDescriptorTable({ std::make_tuple(RangeType::UAV, 0, 1) }, ShaderVisibility::ALL);
+		m_Blur2RootSignature->Finalize(L"Blur RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_VertBlurPso->SetRootSignature(m_Blur2RootSignature);
+		m_VertBlurPso->Finalize();
+	}
+
+	void DirectXRenderer::CreateAdditiveBlendingPipeline()
+	{
+		m_AdditiveBlendingVs = Shader::Create("assets/shaders/AdditiveBlending.hlsl", "VS", "vs_5_0");
+		m_AdditiveBlendingPs = Shader::Create("assets/shaders/AdditiveBlending.hlsl", "PS", "ps_5_0");
+
+		m_AdditiveBlendingPso = PSO::CreateGraphicsPso(L"AdditiveBlendingPso");
+		auto [AdditiveBlendingVsShaderBinary, AdditiveBlendingVsShaderSize] = std::static_pointer_cast<DirectXShader>(m_AdditiveBlendingVs)->GetShaderBinary();
+		auto [AdditiveBlendingPsShaderBinary, AdditiveBlendingPsShaderSize] = std::static_pointer_cast<DirectXShader>(m_AdditiveBlendingPs)->GetShaderBinary();
+
+		m_AdditiveBlendingPso->SetVertexShader(AdditiveBlendingVsShaderBinary, AdditiveBlendingVsShaderSize);
+		m_AdditiveBlendingPso->SetPixelShader(AdditiveBlendingPsShaderBinary, AdditiveBlendingPsShaderSize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+		pDepthState->DepthTest(false);
+
+		m_AdditiveRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_AdditiveRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_AdditiveRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_AdditiveRootSignature->Finalize(L"AdditiveBlendingRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_AdditiveBlendingPso->SetRootSignature(m_AdditiveRootSignature);
+
+		m_AdditiveBlendingPso->SetBlendState(pBlendState);
+		m_AdditiveBlendingPso->SetDepthState(pDepthState);
+		m_AdditiveBlendingPso->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM };
+		m_AdditiveBlendingPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
+		m_AdditiveBlendingPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}, {ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false} };
+
+		D3D12_INPUT_ELEMENT_DESC* AdditiveBlendingElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			AdditiveBlendingElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)AdditiveBlendingElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			AdditiveBlendingElementArray[i].SemanticIndex = 0;
+			AdditiveBlendingElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			AdditiveBlendingElementArray[i].InputSlot = 0;
+			AdditiveBlendingElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			AdditiveBlendingElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			AdditiveBlendingElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		std::static_pointer_cast<GraphicsPSO>(m_AdditiveBlendingPso)->SetInputLayout(layout.GetElements().size(), AdditiveBlendingElementArray);
+
+		m_AdditiveBlendingPso->Finalize();
+	}
+
+	void DirectXRenderer::RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer)
+	{
+		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
+		Ref<DirectXColorBuffer> pBlurTexture2 = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2);
+		//copy descriptor
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->CopyDescriptorsSimple(1, m_BlurTextureSrvHandle->GetCpuHandle(), pBlurTexture->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->CopyDescriptorsSimple(1, m_BlurTexture2UavHandle->GetCpuHandle(), pBlurTexture2->GetUAV(), DescriptorHeapType::CBV_UAV_SRV);
+
+		pComputeContext->SetType(CommandListType::Graphics);
+
+		pComputeContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_BlurTextureUavSrvHeap);
+
+		//pComputeContext->TransitionResource(*m_BlurTexture, ResourceStates::GenericRead, true);
+		pComputeContext->TransitionResource(*m_BlurTexture2, ResourceStates::UnorderedAccess, true);
+
+		pComputeContext->SetPipelineState(*m_HorzBlurPso);
+
+		pComputeContext->SetRootSignature(*m_BlurRootSignature);
+
+		auto weights = CalcGaussWeights(2.5f);
+		int32_t blurRadius = (int32_t)weights.size() / 2;
+
+		pComputeContext->SetConstantArray(0, 1, &blurRadius, 0);
+		pComputeContext->SetConstantArray(0, weights.size(), weights.data(), 1);
+		pComputeContext->SetDescriptorTable(1, m_BlurTextureSrvHandle->GetGpuHandle());
+		pComputeContext->SetDescriptorTable(2, m_BlurTexture2UavHandle->GetGpuHandle());
+
+		pComputeContext->Dispatch2D(m_Width, m_Height, 256, 1);
+
+		//------vertical blur------
+		pComputeContext->SetPipelineState(*m_VertBlurPso);
+		pComputeContext->SetRootSignature(*m_Blur2RootSignature);
+		pComputeContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_BlurTextureUavSrvHeap);
+		
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->CopyDescriptorsSimple(1, m_BlurTexture2SrvHandle->GetCpuHandle(), pBlurTexture2->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		std::static_pointer_cast<DirectXDevice>(Device::Get())->CopyDescriptorsSimple(1, m_BlurTextureUavHandle->GetCpuHandle(), pBlurTexture->GetUAV(), DescriptorHeapType::CBV_UAV_SRV);
+
+		pComputeContext->TransitionResource(*m_BlurTexture, ResourceStates::UnorderedAccess, true);
+
+		//bind resource
+		pComputeContext->SetConstantArray(0, 1, &blurRadius, 0);
+		pComputeContext->SetConstantArray(0, weights.size(), weights.data(), 1);
+		pComputeContext->SetDescriptorTable(1, m_BlurTexture2SrvHandle->GetGpuHandle());
+		pComputeContext->SetDescriptorTable(2, m_BlurTextureUavHandle->GetGpuHandle());
+		pComputeContext->Dispatch2D(m_Width, m_Height, 1, 256);
+
+		pComputeContext->SetType(CommandListType::Compute);
+		//------vertical blur------
+	}
+
+	void DirectXRenderer::RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer)
+	{
+		Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
+		pGraphicsContext->SetPipelineState(*m_AdditiveBlendingPso);
+		pGraphicsContext->SetRootSignature(*m_AdditiveRootSignature);
+
+		Ref<DirectXFrameBuffer> SceneFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pSceneFrameBuffer);
+		Ref<DirectXColorBuffer> pBloomTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
+		Ref<DirectXColorBuffer> pSceneTexture = std::static_pointer_cast<DirectXColorBuffer>(SceneFrameBuffer->m_pColorBuffers[0]);
+		Ref<DirectXFrameBuffer> FinalColorBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFinalColorBuffer);
+
+		pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+		pContext->SetRenderTarget(FinalColorBuffer->m_pColorBuffers[0]->GetRTV());
+		Device::Get()->CopyDescriptorsSimple(1, m_AdditiveBlendingDescriptorHandle->GetCpuHandle(), pSceneTexture->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_AdditiveBlendingDescriptorHandle2->GetCpuHandle(), pBloomTexture->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_AdditiveBlendingDescriptorHeap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_AdditiveBlendingDescriptorHandle->GetGpuHandle());
+
+		pContext->TransitionResource(*pSceneTexture, ResourceStates::GenericRead);
+		pContext->TransitionResource(*pBloomTexture, ResourceStates::GenericRead);
+		pContext->TransitionResource(*(FinalColorBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+		//---set viewport and scissor---
+		ViewPort vp;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = SceneFrameBuffer->GetSpecification().Width;
+		vp.Height = SceneFrameBuffer->GetSpecification().Height;
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+
+		PixelRect scissor;
+		scissor.Left = 0;
+		scissor.Right = SceneFrameBuffer->GetSpecification().Width;
+		scissor.Top = 0;
+		scissor.Bottom = SceneFrameBuffer->GetSpecification().Height;
+
+		pContext->SetViewportAndScissor(vp, scissor);
+		//---set viewport and scissor---
+
+		pContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
+	}
+
 	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)
 	{
 		//get the editor buffer
@@ -1784,8 +2042,8 @@ namespace Pixel {
 		m_DefaultLightShadingPso->SetRasterizerState(pRasterState);
 		m_DefaultLightShadingPso->SetDepthState(pDepthState);
 
-		imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
-		m_DefaultLightShadingPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT };
+		m_DefaultLightShadingPso->SetRenderTargetFormats(2, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_DefaultLightShadingPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
 
 		m_LightVertexShader = Shader::Create("assets/shaders/DeferredShading/LightPass.hlsl", "VS", "vs_5_0");
@@ -1939,7 +2197,8 @@ namespace Pixel {
 		m_SkyBoxPso->SetRasterizerState(pRasterState);
 		m_SkyBoxPso->SetDepthState(pDepthState);
 
-		m_SkyBoxPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		std::vector<ImageFormat> SkyBoxImageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT };
+		m_SkyBoxPso->SetRenderTargetFormats(1, SkyBoxImageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_SkyBoxPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
 
 		std::static_pointer_cast<GraphicsPSO>(m_SkyBoxPso)->SetInputLayout(layout.GetElements().size(), SkyBoxElementArray);

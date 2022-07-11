@@ -2,6 +2,7 @@
 cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;//world matrix
+	float4x4 ginvWorld;//inverse world matrix
 };
 //------mesh constants------
 
@@ -53,7 +54,7 @@ VertexOut VS(VertexIn vin)
 	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
 	vout.PosW = posW.xyz;
 
-	vout.NormalW = mul(vin.NormalL, (float3x3)gWorld);
+	vout.NormalW = mul(vin.NormalL, (float3x3)transpose(ginvWorld));
 
 	//homogeneous clipping
 	//vout.PosH = mul(posW, gView);

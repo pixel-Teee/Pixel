@@ -17,6 +17,7 @@ struct VertexOut
 struct PixelOut
 {
 	float4 Color : SV_Target;
+	float4 BrightColor : SV_Target1;//bloom
 };
 
 VertexOut VS(VertexIn vin)
@@ -231,14 +232,19 @@ PixelOut PS(VertexOut pin)
 	Lo += ambient;
 
 	//------shadow map------
-	Lo *= (1 - Shadow);//test?
+	//Lo *= (1 - Shadow);
 	//------shadow map------
 
-	Lo = Lo / (Lo + float3(1.0f, 1.0f, 1.0f));
+	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
+
+	if (brightness > 1.0f)
+		pixelOut.BrightColor = float4(Lo, 1.0f);
+
+	/*Lo = Lo / (Lo + float3(1.0f, 1.0f, 1.0f));
 
 	float Gamma = 1.0f / 2.2f;
 
-	Lo = pow(Lo, float3(Gamma, Gamma, Gamma));
+	Lo = pow(Lo, float3(Gamma, Gamma, Gamma));*/
 
 	pixelOut.Color = float4(Lo, 1.0f);
 

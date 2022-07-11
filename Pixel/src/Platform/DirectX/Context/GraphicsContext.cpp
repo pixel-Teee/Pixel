@@ -235,6 +235,11 @@ namespace Pixel {
 		m_pCommandList->SetGraphicsRoot32BitConstants(RootIndex, NumConstants, pConstants, 0);
 	}
 
+	void GraphicsContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset)
+	{
+		m_pCommandList->SetGraphicsRoot32BitConstants(RootIndex, NumConstants, pConstants, offset);
+	}
+
 	void GraphicsContext::SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val)
 	{
 		m_pCommandList->SetGraphicsRoot32BitConstant(RootIndex, Val, Offset);

@@ -519,6 +519,11 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	void DirectXContext::SetConstantArray(uint32_t RootIndex, uint32_t NumConstants, const void* pConstants, uint32_t offset)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 	void DirectXContext::SetConstant(uint32_t RootIndex, uint32_t Offset, uint32_t Val)
 	{
 		throw std::logic_error("The method or operation is not implemented.");

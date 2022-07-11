@@ -14,6 +14,7 @@ namespace Pixel {
 	struct alignas(256) MeshConstant
 	{
 		glm::mat4 world;
+		glm::mat4 invWorld;
 	};
 
 	class MaterialInstance;
