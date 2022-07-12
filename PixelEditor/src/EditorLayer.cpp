@@ -493,7 +493,7 @@ namespace Pixel
 			case EditorLayer::SceneState::Play:
 			{
 				//m_ActiveScene->OnUpdateRuntime(ts, m_GeoFramebuffer, m_Framebuffer);
-				m_ActiveScene->OnUpdateRuntimeDeferred(ts, m_GeoFramebuffer, m_Framebuffer);
+				m_ActiveScene->OnUpdateRuntimeDeferred(ts, m_GeoFramebuffer, m_Framebuffer, m_FinalFrameBuffer);
 				break;
 			}
 		}

@@ -186,7 +186,7 @@ namespace Pixel {
 		glm::vec3 gNormal = { 1.0f, 1.0f, 1.0f };
 		float gRoughness = 1.0f;
 		float gMetallic = 1.0f;
-		float gEmissive = 1.0f;
+		float gEmissive = 0.2f;
 		bool HaveNormal = false;
 
 		MaterialComponent()

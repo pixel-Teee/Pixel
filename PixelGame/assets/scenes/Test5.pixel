@@ -1,0 +1,485 @@
+Scene: Untitled
+Entities:
+  - Entity: 463105971142022389
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [5.2494545, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 14962928631002933047
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 6.87712955, -7.03079939]
+      Rotation: [0.448305994, 0, 0]
+      Scale: [1, 0.99994719, 0.99994719]
+    LightComponent:
+      LightType: 1
+      Color: [0.13720727, 0.455598474, 0.455598474]
+      GenerateShadowMap: true
+  - Entity: 10714247267606455998
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, -3.08585691, 0]
+      Rotation: [0, 0, 0]
+      Scale: [5.55215502, 1, 7.20162821]
+    StaticMeshComponent:
+      Path: assets\models\Box.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: false
+  - Entity: 2034711290042486574
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [-0.541674614, 4.71175337, -14.847477]
+      Rotation: [0.0860965699, 0, 0]
+      Scale: [1.00000083, 0.999999404, 0.999999404]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 25
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 12671554438193896712
+    TagComponent:
+      Tag: Empty Entity(0)
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.600000024
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 7832604732482569874
+    TagComponent:
+      Tag: Empty Entity(0)
+    TransformComponent:
+      Translation: [-2.43196654, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.400000006
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 11850462842015871829
+    TagComponent:
+      Tag: Empty Entity(0)
+    TransformComponent:
+      Translation: [5.06304693, 7.23716927, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.800000012
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 3183613044226673836
+    TagComponent:
+      Tag: Empty Entity(0)
+    TransformComponent:
+      Translation: [2.5285213, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.800000012
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 10214334300496516889
+    TagComponent:
+      Tag: Empty Entity(1)
+    TransformComponent:
+      Translation: [-5.02384281, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.100000001
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 11702727939070181025
+    TagComponent:
+      Tag: Empty Entity(2)
+    TransformComponent:
+      Translation: [-5.02384281, 2.47893572, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.100000001
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 7137338995540878384
+    TagComponent:
+      Tag: Empty Entity(3)
+    TransformComponent:
+      Translation: [-2.38161135, 2.47893572, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0.200000003, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.200000003
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 11530902083480932605
+    TagComponent:
+      Tag: Empty Entity(4)
+    TransformComponent:
+      Translation: [0.11504972, 2.47893572, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0.200000003, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.400000006
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 7701719772884916249
+    TagComponent:
+      Tag: Empty Entity(5)
+    TransformComponent:
+      Translation: [2.68131137, 2.47893572, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0.200000003, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.600000024
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 14166219496068307411
+    TagComponent:
+      Tag: Empty Entity(6)
+    TransformComponent:
+      Translation: [5.15017223, 2.50495243, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0.200000003, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.800000012
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 6900320035751965199
+    TagComponent:
+      Tag: Empty Entity(7)
+    TransformComponent:
+      Translation: [5.15017223, 4.89021015, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.800000012
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 9745553400198965023
+    TagComponent:
+      Tag: Empty Entity(8)
+    TransformComponent:
+      Translation: [2.758255, 4.89021015, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.600000024
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 18118774185869433958
+    TagComponent:
+      Tag: Empty Entity(9)
+    TransformComponent:
+      Translation: [0.156512976, 4.89021015, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.400000006
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 7136633898083401566
+    TagComponent:
+      Tag: Empty Entity(10)
+    TransformComponent:
+      Translation: [-2.26409245, 4.89021015, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.200000003
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 16260896213952181981
+    TagComponent:
+      Tag: Empty Entity(11)
+    TransformComponent:
+      Translation: [-4.96298981, 4.89021015, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.100000001
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 17050690675370588546
+    TagComponent:
+      Tag: Empty Entity(12)
+    TransformComponent:
+      Translation: [-4.96298981, 7.23716927, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.100000001
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 9559282957569420962
+    TagComponent:
+      Tag: Empty Entity(13)
+    TransformComponent:
+      Translation: [-2.25814104, 7.23716927, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.200000003
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 7556724609700429232
+    TagComponent:
+      Tag: Empty Entity(14)
+    TransformComponent:
+      Translation: [0.218141437, 7.23716927, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.400000006
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 9896710392233742966
+    TagComponent:
+      Tag: Empty Entity(15)
+    TransformComponent:
+      Translation: [2.8381319, 7.23716927, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.600000024
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 7943098102815480785
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [1.20864058, -9.22248205e-07, -4.76093102]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    LightComponent:
+      LightType: 0
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015

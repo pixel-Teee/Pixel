@@ -21,6 +21,7 @@ namespace Pixel {
 	private:
 		Ref<Framebuffer> m_GeoFramebuffer;
 		Ref<Framebuffer> m_Framebuffer;
+		Ref<Framebuffer> m_FinalFrameBuffer;
 
 		glm::vec2 m_ViewPortSize{1280, 720};
 

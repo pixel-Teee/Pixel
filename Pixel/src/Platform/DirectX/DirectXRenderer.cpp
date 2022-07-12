@@ -911,9 +911,9 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		//bind resources
-		glm::mat4x4 gViewProjection = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform())) * glm::transpose(pCamera->GetProjection());
-		//glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform()));
-		//glm::mat4x4 Projection = glm::transpose(pCamera->GetProjection());
+		glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform()));
+		glm::mat4x4 Projection = glm::transpose(pCamera->GetProjection());
+		glm::mat4x4 gViewProjection = View * Projection;
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4x4), glm::value_ptr(gViewProjection));
 
 		for (uint32_t i = 0; i < meshs.size(); ++i)
@@ -937,8 +937,9 @@ namespace Pixel {
 		std::vector<Ref<DescriptorCpuHandle>> m_lightFrameBufferCpuHandles;
 		Ref<DirectXFrameBuffer> pLightFrame = std::static_pointer_cast<DirectXFrameBuffer>(pLightFrameBuffer);
 		m_lightFrameBufferCpuHandles.push_back(pLightFrame->m_pColorBuffers[0]->GetRTV());
+		m_lightFrameBufferCpuHandles.push_back(pLightFrame->m_pColorBuffers[1]->GetRTV());
 		dsvHandle = pLightFrame->m_pDepthBuffer->GetDSV();
-		pGraphicsContext->SetRenderTargets(1, m_lightFrameBufferCpuHandles, dsvHandle);
+		pGraphicsContext->SetRenderTargets(2, m_lightFrameBufferCpuHandles, dsvHandle);
 
 		//clear buffer
 		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
@@ -1044,8 +1045,8 @@ namespace Pixel {
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_irradianceCubeTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_irradianceCubeTextureHandle->GetGpuHandle());
 
-		glm::mat4 NoRotateView = glm::transpose(glm::mat4(glm::mat3(pCameraTransformComponent->GetTransform())));
-		glm::mat4 Projection = glm::transpose(pCamera->GetProjection());
+		glm::mat4 NoRotateView = glm::transpose(glm::mat4(glm::mat3(View)));
+		Projection = glm::transpose(pCamera->GetProjection());
 
 		glm::mat4 NoRotateViewProjection = NoRotateView * Projection;
 		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(glm::transpose(camera.GetViewProjection())));
@@ -1079,14 +1080,12 @@ namespace Pixel {
 			m_BlurTexture = CreateRef<DirectXColorBuffer>();
 			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture)->Create(L"BlurTexture", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
 
-			Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
-
-			//copy 
-			pContext->CopyBuffer(*(pBlurTexture), *(pLightFrame->m_pColorBuffers[1]));
-
 			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
 			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
 		}
+
+		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
+		pContext->CopyBuffer(*pBlurTexture, *(pLightFrame->m_pColorBuffers[1]));
 
 		m_lastWidth = m_Width;
 		m_lastHeight = m_Height;
@@ -1435,7 +1434,7 @@ namespace Pixel {
 		m_CameraFrustumPso->SetDepthState(pDepthState);
 		m_CameraFrustumPso->SetRasterizerState(pRasterState);
 
-		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM };
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT };
 		m_CameraFrustumPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
 		m_CameraFrustumPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::LINE);
 

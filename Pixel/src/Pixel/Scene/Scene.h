@@ -39,7 +39,7 @@ namespace Pixel
 
 		void OnUpdateEditorForward(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pFrameBuffer);
 		void OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer);
-		void OnUpdateRuntimeDeferred(Timestep& ts, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer);
+		void OnUpdateRuntimeDeferred(Timestep& ts, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer);
 		//TODO:need to refractor
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
 		void OnUpdateRuntime(Timestep& ts, Ref<Framebuffer>& m_GeoPassFramebuffer, Ref<Framebuffer>& m_LightPassFramebuffer);
