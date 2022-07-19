@@ -497,6 +497,37 @@ namespace Pixel
 		
 		DrawComponent<MaterialComponent>("Material Component", entity, [this](auto& component)
 			{
+
+				if(component.nextFrameNeedLoadTexture[0])
+				{
+					component.nextFrameNeedLoadTexture[0] = false;
+					component.Albedo = Texture2D::Create(component.albedoPath);
+				}
+
+				if (component.nextFrameNeedLoadTexture[1])
+				{
+					component.nextFrameNeedLoadTexture[1] = false;
+					component.Albedo = Texture2D::Create(component.normalMapPath);
+				}
+
+				if (component.nextFrameNeedLoadTexture[2])
+				{
+					component.nextFrameNeedLoadTexture[2] = false;
+					component.Albedo = Texture2D::Create(component.roughnessPath);
+				}
+
+				if (component.nextFrameNeedLoadTexture[3])
+				{
+					component.nextFrameNeedLoadTexture[3] = false;
+					component.Albedo = Texture2D::Create(component.metallicPath);
+				}
+
+				if (component.nextFrameNeedLoadTexture[4])
+				{
+					component.nextFrameNeedLoadTexture[4] = false;
+					component.Albedo = Texture2D::Create(component.emissivePath);
+				}
+
 				//copy descriptor to imgui srv descriptor heap
 				//Ref<DescriptorHeap> descriptorHeap = Application::Get().GetImGuiLayer()->GetSrvHeap();
 
@@ -520,14 +551,15 @@ namespace Pixel
 					Device::Get()->CopyDescriptorsSimple(1, pDestHandles[i].GetCpuHandle(), pHandles[i], DescriptorHeapType::CBV_UAV_SRV);			
 
 				ImGui::Text("Albedo");
-				ImGui::Image((ImTextureID)pDestHandles[0].GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
+				ImGui::Image((ImTextureID)(pDestHandles[0].GetGpuHandle()->GetGpuPtr()), ImVec2(128.0f, 128.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						component.Albedo = Texture2D::Create(texturePath.string());
+						//component.Albedo = Texture2D::Create(texturePath.string());
+						component.nextFrameNeedLoadTexture[0] = true;
 						component.albedoPath = texturePath.string();
 					}
 
@@ -544,7 +576,8 @@ namespace Pixel
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						component.NormalMap = Texture2D::Create(texturePath.string());
+						//component.NormalMap = Texture2D::Create(texturePath.string());
+						component.nextFrameNeedLoadTexture[1] = true;
 						component.normalMapPath = texturePath.string();
 					}
 
@@ -562,7 +595,8 @@ namespace Pixel
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						component.Roughness = Texture2D::Create(texturePath.string());
+						//component.Roughness = Texture2D::Create(texturePath.string());
+						component.nextFrameNeedLoadTexture[2] = true;
 						component.roughnessPath = texturePath.string();
 					}
 
@@ -579,7 +613,8 @@ namespace Pixel
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						component.Metallic = Texture2D::Create(texturePath.string());
+						//component.Metallic = Texture2D::Create(texturePath.string());
+						component.nextFrameNeedLoadTexture[3] = true;
 						component.metallicPath = texturePath.string();
 					}
 
@@ -596,7 +631,8 @@ namespace Pixel
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						component.Emissive = Texture2D::Create(texturePath.string());
+						//component.Emissive = Texture2D::Create(texturePath.string());
+						component.nextFrameNeedLoadTexture[4] = true;
 						component.emissivePath = texturePath.string();
 					}
 

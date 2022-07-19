@@ -189,6 +189,8 @@ namespace Pixel {
 		float gEmissive = 0.2f;
 		bool HaveNormal = false;
 
+		bool nextFrameNeedLoadTexture[5];
+
 		MaterialComponent()
 		{
 			uint32_t whiteTextureData = 0xffffff;
@@ -198,6 +200,9 @@ namespace Pixel {
 			Roughness = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			Metallic = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			Emissive = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
+
+			for (uint32_t i = 0; i < 5; ++i)
+				nextFrameNeedLoadTexture[i] = false;
 		}
 		MaterialComponent(const MaterialComponent&) = default;
 
@@ -250,6 +255,9 @@ namespace Pixel {
 			{
 				Emissive = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			}
+
+			for (uint32_t i = 0; i < 5; ++i)
+				nextFrameNeedLoadTexture[i] = false;
 		}
 	};
 

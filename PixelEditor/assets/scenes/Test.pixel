@@ -10,7 +10,7 @@ Entities:
     StaticMeshComponent:
       Path: assets\models\Sphere.obj
     MaterialComponent:
-      albedoPath: ""
+      albedoPath: assets\textures\Material_Albedo.png
       normalMapPath: ""
       roughnessPath: ""
       emissivePath: ""
