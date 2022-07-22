@@ -35,13 +35,16 @@ namespace Pixel {
 		float y;
 	};
 
+	//------use for prefilter map------
 	struct PrefilterMapPass
 	{
 		glm::mat4 Projection;
 		float Roughness;
 	};
+	//------use for prefilter map------
 
-	std::vector<float> CalcGaussWeights(float sigma)
+	//------use for calculate gauss weights------
+	static std::vector<float> CalcGaussWeights(float sigma)
 	{
 		float twoSigma2 = 2.0f * sigma * sigma;
 
@@ -61,94 +64,107 @@ namespace Pixel {
 			weightSum += weights[i + blurRadius];
 		}
 
-		for (int32_t i = 0; i < weights.size(); ++i)
+		for (size_t i = 0; i < weights.size(); ++i)
 		{
 			weights[i] /= weightSum;
 		}
 
 		return weights;
 	}
+	//------use for calculate gauss weights------
+
+	static DXGI_FORMAT ShaderDataTypeToDXGIFormat(ShaderDataType dataType)
+	{
+		switch (dataType)
+		{
+		case ShaderDataType::Float:
+			return DXGI_FORMAT_R32_FLOAT;
+		case ShaderDataType::Float2:
+			return DXGI_FORMAT_R32G32_FLOAT;
+		case ShaderDataType::Float3:
+			return DXGI_FORMAT_R32G32B32_FLOAT;
+		case ShaderDataType::Float4:
+			return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case ShaderDataType::Int:
+			return DXGI_FORMAT_R32_SINT;
+		case ShaderDataType::Int2:
+			return DXGI_FORMAT_R32G32_SINT;
+		case ShaderDataType::Int3:
+			return DXGI_FORMAT_R32G32B32_SINT;
+		case ShaderDataType::Int4:
+			return DXGI_FORMAT_R32G32B32A32_SINT;
+		case ShaderDataType::Bool:
+			return DXGI_FORMAT_R8_UINT;
+		}
+	}
+
+	//sematics to dx sematics
+	static std::string SemanticsToDirectXSemantics(Semantics sematics)
+	{
+		switch (sematics)
+		{
+		case Semantics::POSITION:
+			return "POSITION";
+		case Semantics::TEXCOORD:
+			return "TEXCOORD";
+		case Semantics::NORMAL:
+			return "NORMAL";
+		case Semantics::TANGENT:
+			return "TANGENT";
+		case Semantics::BINORMAL:
+			return "BINORMAL";
+		case Semantics::COLOR:
+			return "COLOR";
+		case Semantics::BLENDWEIGHT:
+			return "BLENDWEIGHT";
+		case Semantics::BLENDINDICES:
+			return "BLENDINDICES";
+		case Semantics::Editor:
+			return "EDITOR";
+		case Semantics::FLOAT:
+			return "FLOAT";
+		}
+	}
+
+	static D3D12_INPUT_ELEMENT_DESC* FromBufferLayoutToCreateDirectXVertexLayout(BufferLayout& layout)
+	{
+		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			ElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			ElementArray[i].SemanticIndex = 0;
+			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			ElementArray[i].InputSlot = 0;
+			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			ElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		return ElementArray;//life time managed by others
+	}
 
 	DirectXRenderer::DirectXRenderer()
-	{
-		
-		//------Create Default Pso------
-		m_defaultPso = PSO::CreateGraphicsPso(L"ForwardRendererPso");
+	{		
+		CreateDefaultForwardRendererPso();//for every model, model will create a forward pso, in terms of forward pso's vertex layout
 
-		Ref<SamplerDesc> defaultSampler = SamplerDesc::Create();;
-		//------Create Root Signature------
-		m_rootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
-		m_rootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::Pixel);
-		(*m_rootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
-		(*m_rootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
-		(*m_rootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
-		(*m_rootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
-		(*m_rootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
-		(*m_rootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
-		(*m_rootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
-		m_rootSignature->Finalize(L"RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
-		//------Create Root Signature------
+		CreatePickerPso();//picker renderer
 
-		//------Create Shader--------	
-		m_forwardVs = Shader::Create("assets/shaders/ForwardShading/ForwardShading.hlsl", "VS", "vs_5_0");
-		m_forwardPs = Shader::Create("assets/shaders/ForwardShading/ForwardShading.hlsl", "PS", "ps_5_0");
-		//------Create Shader--------
-
-		//-----Create Blend State------
-		Ref<BlenderState> pBlendState = BlenderState::Create();
-		//-----Create Blend State------
-
-		//------Create Raster State------
-		Ref<RasterState> pRasterState = RasterState::Create();
-		//------Create Raster State------
-
-		//------Create Depth State------
-		Ref<DepthState> pDepthState = DepthState::Create();
-		//------Create Depth State------
-
-		m_defaultPso->SetBlendState(pBlendState);
-		m_defaultPso->SetRasterizerState(pRasterState);
-		m_defaultPso->SetDepthState(pDepthState);
-
-		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
-		m_defaultPso->SetRenderTargetFormats(2, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
-		m_defaultPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
-		
-		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardVs)->GetShaderBinary();
-		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardPs)->GetShaderBinary();
-		m_defaultPso->SetVertexShader(VsBinary, VsBinarySize);
-		m_defaultPso->SetPixelShader(PsBinary, PsBinarySize);
-
-		m_defaultPso->SetRootSignature(m_rootSignature);
-		//------Create Default Pso------
-
-		//------Create Picker PSO------
-		m_PickerShader = Shader::Create("assets/shaders/ForwardShading/Picker.hlsl", "CSGetPixels", "cs_5_0");
-		auto [CsBinary, CsBinarySize] = std::static_pointer_cast<DirectXShader>(m_PickerShader)->GetShaderBinary();
-		m_PickerPSO = CreateRef<ComputePSO>(L"Picker PSO");
-		m_PickerPSO->SetComputeShader(CsBinary, CsBinarySize);
-		m_PickerRootSignature = RootSignature::Create(4, 1);
-		m_PickerRootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::ALL);
-		(*m_PickerRootSignature)[0].InitAsDescriptorTable({ std::make_tuple(RangeType::SRV, 0, 1)}, ShaderVisibility::ALL);
-		(*m_PickerRootSignature)[1].InitiAsBufferSRV(1, ShaderVisibility::ALL);
-		(*m_PickerRootSignature)[2].InitAsBufferUAV(0, ShaderVisibility::ALL);
-		(*m_PickerRootSignature)[3].InitAsConstantBuffer(0, ShaderVisibility::ALL);
-		m_PickerRootSignature->Finalize(L"Picker RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
-		m_PickerPSO->SetRootSignature(m_PickerRootSignature);
-		m_PickerPSO->Finalize();
-
-		m_ComputeSrvHeap = DescriptorHeap::Create(L"Picker Srv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
-		m_TextureHandle = m_ComputeSrvHeap->Alloc(1);
-
-		//m_ComputeCbvHeap = DescriptorHeap::Create(L"Compute Cbv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
-		//m_ImageWidthHandle = m_ComputeCbvHeap->Alloc(1);
-		//------Create Picker PSO------
-
+		//------create for quad vertex buffer and quad index buffer------
 		static float Quad[20] = {
-		-1,  1, 0, 0, 0,//<position, texcoord>
-		 1,  1, 0, 1, 0,
-		-1, -1, 0, 0, 1,
-		 1, -1, 0, 1, 1
+			-1,  1, 0, 0, 0,//<position, texcoord>
+			 1,  1, 0, 1, 0,
+			-1, -1, 0, 0, 1,
+			 1, -1, 0, 1, 1
 		};
 
 		static uint32_t QuadIndex[6] = {0, 1, 2, 1, 3, 2};
@@ -156,11 +172,13 @@ namespace Pixel {
 		//create vertex buffer
 		m_pVertexBuffer = VertexBuffer::Create(Quad, 4, 5 * sizeof(float));
 		m_pIndexBuffer = IndexBuffer::Create(QuadIndex, 6);
+		//------create for quad vertex buffer and quad index buffer------
 
-		//------Create Deferred Shading PipelineState-------
+		//------Create Deferred Shading Geometry and Light PipelineState-------
 		CreateDefaultDeferredShadingPso();
-		//------Create Deferred Shading PipelineState-------
+		//------Create Deferred Shading Geometry and Light PipelineState-------
 
+		//------Create Deferred Shading Geometry Gbuffer Texture Handle-------
 		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 8);
 		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(8);
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
@@ -171,6 +189,7 @@ namespace Pixel {
 			DescriptorHandle secondHandle = (*m_DeferredShadingLightGbufferTextureHandle) + i * DescriptorSize;
 			m_DeferredShadingLightGbufferTextureHandles[i] = secondHandle;
 		}
+		//-------Create Deferred Shading Geometry GBuffer Texture Handle------
 
 		CreateConvertHDRToCubePipeline();
 
@@ -280,59 +299,6 @@ namespace Pixel {
 		m_BlurTexture2UavHandle = m_BlurTextureUavSrvHeap->Alloc(1);
 
 		CreateBlurPipeline();
-	}
-
-	//sematics to dx sematics
-	std::string SemanticsToDirectXSemantics(Semantics sematics)
-	{
-		switch (sematics)
-		{
-		case Semantics::POSITION:
-			return "POSITION";
-		case Semantics::TEXCOORD:
-			return "TEXCOORD";
-		case Semantics::NORMAL:
-			return "NORMAL";
-		case Semantics::TANGENT:
-			return "TANGENT";
-		case Semantics::BINORMAL:
-			return "BINORMAL";
-		case Semantics::COLOR:
-			return "COLOR";
-		case Semantics::BLENDWEIGHT:
-			return "BLENDWEIGHT";
-		case Semantics::BLENDINDICES:
-			return "BLENDINDICES";
-		case Semantics::Editor:
-			return "EDITOR";
-		case Semantics::FLOAT:
-			return "FLOAT";
-		}
-	}
-
-	DXGI_FORMAT ShaderDataTypeToDXGIFormat(ShaderDataType dataType)
-	{
-		switch (dataType)
-		{
-		case ShaderDataType::Float:
-			return DXGI_FORMAT_R32_FLOAT;
-		case ShaderDataType::Float2:
-			return DXGI_FORMAT_R32G32_FLOAT;
-		case ShaderDataType::Float3:
-			return DXGI_FORMAT_R32G32B32_FLOAT;
-		case ShaderDataType::Float4:
-			return DXGI_FORMAT_R32G32B32A32_FLOAT;
-		case ShaderDataType::Int:
-			return DXGI_FORMAT_R32_SINT;
-		case ShaderDataType::Int2:
-			return DXGI_FORMAT_R32G32_SINT;
-		case ShaderDataType::Int3:
-			return DXGI_FORMAT_R32G32B32_SINT;
-		case ShaderDataType::Int4:
-			return DXGI_FORMAT_R32G32B32A32_SINT;
-		case ShaderDataType::Bool:
-			return DXGI_FORMAT_R8_UINT;
-		}
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -1663,6 +1629,83 @@ namespace Pixel {
 		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
 	}
 
+	void DirectXRenderer::CreateDefaultForwardRendererPso()
+	{
+		//------Create Default Forward Renderer Pso------
+		m_defaultPso = PSO::CreateGraphicsPso(L"ForwardRendererPso");
+
+		Ref<SamplerDesc> defaultSampler = SamplerDesc::Create();;
+		//------Create Root Signature------
+		m_rootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_rootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::Pixel);
+		(*m_rootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_rootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_rootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_rootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_rootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_rootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_rootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_rootSignature->Finalize(L"RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		//------Create Root Signature------
+
+		//------Create Shader--------	
+		m_forwardVs = Shader::Create("assets/shaders/ForwardShading/ForwardShading.hlsl", "VS", "vs_5_0");
+		m_forwardPs = Shader::Create("assets/shaders/ForwardShading/ForwardShading.hlsl", "PS", "ps_5_0");
+		//------Create Shader--------
+
+		//-----Create Blend State------
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		//-----Create Blend State------
+
+		//------Create Raster State------
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//------Create Raster State------
+
+		//------Create Depth State------
+		Ref<DepthState> pDepthState = DepthState::Create();
+		//------Create Depth State------
+
+		m_defaultPso->SetBlendState(pBlendState);
+		m_defaultPso->SetRasterizerState(pRasterState);
+		m_defaultPso->SetDepthState(pDepthState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
+		m_defaultPso->SetRenderTargetFormats(2, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_defaultPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardVs)->GetShaderBinary();
+		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardPs)->GetShaderBinary();
+		m_defaultPso->SetVertexShader(VsBinary, VsBinarySize);
+		m_defaultPso->SetPixelShader(PsBinary, PsBinarySize);
+
+		m_defaultPso->SetRootSignature(m_rootSignature);
+		//------Create Default Forward Renderer Pso------
+	}
+
+	void DirectXRenderer::CreatePickerPso()
+	{
+		Ref<SamplerDesc> defaultSampler = SamplerDesc::Create();
+
+		//------Create Picker PSO------
+		m_PickerShader = Shader::Create("assets/shaders/ForwardShading/Picker.hlsl", "CSGetPixels", "cs_5_0");
+		auto [CsBinary, CsBinarySize] = std::static_pointer_cast<DirectXShader>(m_PickerShader)->GetShaderBinary();
+		m_PickerPSO = CreateRef<ComputePSO>(L"Picker PSO");
+		m_PickerPSO->SetComputeShader(CsBinary, CsBinarySize);
+		m_PickerRootSignature = RootSignature::Create(4, 1);
+		m_PickerRootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[0].InitAsDescriptorTable({ std::make_tuple(RangeType::SRV, 0, 1) }, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[1].InitiAsBufferSRV(1, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[2].InitAsBufferUAV(0, ShaderVisibility::ALL);
+		(*m_PickerRootSignature)[3].InitAsConstantBuffer(0, ShaderVisibility::ALL);
+		m_PickerRootSignature->Finalize(L"Picker RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_PickerPSO->SetRootSignature(m_PickerRootSignature);
+		m_PickerPSO->Finalize();
+
+		m_ComputeSrvHeap = DescriptorHeap::Create(L"Picker Srv Heap", DescriptorHeapType::CBV_UAV_SRV, 1);
+		m_TextureHandle = m_ComputeSrvHeap->Alloc(1);
+		//------Create Picker PSO------
+	}
+
 	void DirectXRenderer::RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer)
 	{
 		//get the editor buffer
@@ -1737,12 +1780,14 @@ namespace Pixel {
 		float* data = stbi_loadf(HdrTexturePath.c_str(), &width, &height, &Components, 4);
 		m_HDRTexture = Texture2D::Create(16 * width, width, height, ImageFormat::PX_FORMAT_R32G32B32A32_FLOAT, data);
 		Ref<DirectXTexture> m_pHDRTexture = std::static_pointer_cast<DirectXTexture>(m_HDRTexture);
-
 		stbi_image_free(data);
 		//------Load Hdr Texture------
 
+		//------Create CubeMap Texture------
 		m_CubeMapTexture = CubeTexture::Create(512, 512, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM);
 		Ref<DirectXCubeTexture> m_pCubeMapTexture = std::static_pointer_cast<DirectXCubeTexture>(m_CubeMapTexture);
+		//------Create CubeMap Texture------
+		
 		//------Covert HDR Texture To CubeTexture------
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		pContext->SetRootSignature(*m_EquirectangularToCubemapRootSignature);
@@ -1967,6 +2012,7 @@ namespace Pixel {
 
 	void DirectXRenderer::CreateDefaultDeferredShadingPso()
 	{
+		//------Create Deferred Geometry Rendere------
 		m_DefaultGeometryShadingPso = PSO::CreateGraphicsPso(L"DeferredShadingGeometryPso");
 
 		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
@@ -1981,7 +2027,7 @@ namespace Pixel {
 		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
-		m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 		//------Create RootSignature------
 
 		//-----Create Blend State------
@@ -2014,9 +2060,9 @@ namespace Pixel {
 		m_DefaultGeometryShadingPso->SetPixelShader(PsBinary, PsBinarySize);
 
 		m_DefaultGeometryShadingPso->SetRootSignature(m_pDeferredShadingRootSignature);
+		//------Create Deferred Geometry Renderer------
 
-
-		//------create light pso------
+		//------Create Deferred Light Renderer------
 		m_DefaultLightShadingPso = PSO::CreateGraphicsPso(L"DeferredShadingLightPso");
 
 		Ref<SamplerDesc> ShadowMapDesc = SamplerDesc::Create();
@@ -2056,13 +2102,11 @@ namespace Pixel {
 		m_DefaultLightShadingPso->SetRootSignature(m_pDeferredShadingLightRootSignature);
 
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
-			{ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false}};
+		{ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false}};//for plane
 
 		m_DeferredShadingLightPsoIndex = CreateDeferredLightPso(layout);
-
-		//------create light pso------
+		//------Create Deferred Light Renderer------
 	}
-
 
 	void DirectXRenderer::CreateConvertHDRToCubePipeline()
 	{
@@ -2075,30 +2119,10 @@ namespace Pixel {
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false} };
 
 		//------layout------
-		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		uint32_t i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			ElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			ElementArray[i].SemanticIndex = 0;
-			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			ElementArray[i].InputSlot = 0;
-			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			ElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
+		D3D12_INPUT_ELEMENT_DESC* ElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
 		//------layout------
-		m_HDRConvertToCubePso = PSO::CreateGraphicsPso(L"HDRConvertToCubePso");
 
+		m_HDRConvertToCubePso = PSO::CreateGraphicsPso(L"HDRConvertToCubePso");
 		m_HDRConvertToCubePso->SetVertexShader(VSShaderBinary, VSBinarySize);
 		m_HDRConvertToCubePso->SetPixelShader(PSShaderBinary, PSBinarySize);
 
@@ -2114,7 +2138,6 @@ namespace Pixel {
 		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_EquirectangularToCubemapRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
 		m_EquirectangularToCubemapRootSignature->Finalize(L"DeferredShadingLightRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
-
 		m_HDRConvertToCubePso->SetRootSignature(m_EquirectangularToCubemapRootSignature);
 
 		//-----Create Blend State------
@@ -2163,28 +2186,9 @@ namespace Pixel {
 		m_SkyBoxPso = PSO::CreateGraphicsPso(L"SkyBoxPso");
 
 		//------element array------
-		D3D12_INPUT_ELEMENT_DESC* SkyBoxElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			SkyBoxElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)SkyBoxElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			SkyBoxElementArray[i].SemanticIndex = 0;
-			SkyBoxElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			SkyBoxElementArray[i].InputSlot = 0;
-			SkyBoxElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			SkyBoxElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			SkyBoxElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
+		D3D12_INPUT_ELEMENT_DESC* SkyBoxElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
 		//------element array------
+
 		m_SkyBoxPso->SetRootSignature(m_SkyBoxRootSignature);
 
 		m_SkyBoxPso->SetVertexShader(SkyBoxVSShaderBinary, SkyBoxVSBinarySize);
@@ -2245,27 +2249,7 @@ namespace Pixel {
 
 		layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}, {ShaderDataType::Float3, "Normal", Semantics::NORMAL, false}};
 
-		D3D12_INPUT_ELEMENT_DESC* ConvolutionElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			ConvolutionElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)ConvolutionElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			ConvolutionElementArray[i].SemanticIndex = 0;
-			ConvolutionElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			ConvolutionElementArray[i].InputSlot = 0;
-			ConvolutionElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			ConvolutionElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			ConvolutionElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
+		D3D12_INPUT_ELEMENT_DESC* ConvolutionElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
 
 		std::static_pointer_cast<GraphicsPSO>(m_convolutionPso)->SetInputLayout(layout.GetElements().size(), ConvolutionElementArray);
 

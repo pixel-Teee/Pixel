@@ -19,6 +19,7 @@ namespace Pixel {
 	class DescriptorHeap;
 	class DescriptorHandle;
 	class ShadowBuffer;
+
 	class DirectXRenderer : public BaseRenderer
 	{
 	public:
@@ -27,11 +28,11 @@ namespace Pixel {
 
 		virtual void Initialize() override;
 
-		virtual uint32_t CreatePso(BufferLayout& layout) override;
+		virtual uint32_t CreatePso(BufferLayout& layout) override;//use for model's forward renderer
 
-		virtual uint32_t CreateDeferredPso(BufferLayout& layout) override;
+		virtual uint32_t CreateDeferredPso(BufferLayout& layout) override;//use for model's deferred geometry renderer
 
-		virtual uint32_t CreateDeferredLightPso(BufferLayout& layout) override;
+		virtual uint32_t CreateDeferredLightPso(BufferLayout& layout) override;//use for model's deferred lighting renderer, but just only one plane use this function
 
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
 			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) override;
@@ -63,147 +64,163 @@ namespace Pixel {
 
 		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) override;
 	private:
+
+		void CreateDefaultForwardRendererPso();//use for model's forward renderer
+
+		void CreatePickerPso();
+
+		void CreateDefaultDeferredShadingPso();//create deferred geometry shading renderer and deferred light shading renderer
 		
-		Ref<RootSignature> m_rootSignature;
-
-		std::vector<Ref<PSO>> m_PsoArray;
-
+		//------Foward Renderer------
 		Ref<PSO> m_defaultPso;
+		Ref<RootSignature> m_rootSignature;
 		Ref<Shader> m_forwardPs;
 		Ref<Shader> m_forwardVs;
 
+		std::vector<Ref<PSO>> m_PsoArray;//for every models's pso
 		GlobalConstants m_globalConstants;
+		//------Foward Renderer------
 
 		//------Picker Information------
-		Ref<DescriptorHeap> m_ComputeSrvHeap;
-		Ref<DescriptorHeap> m_ComputeCbvHeap;
-
-		Ref<GpuResource> m_PickerBuffer;
-		//Ref<GpuResource> m_UVDebugBuffer;
 		Ref<PSO> m_PickerPSO;
 		Ref<RootSignature> m_PickerRootSignature;
 		Ref<Shader> m_PickerShader;
+		Ref<GpuResource> m_PickerBuffer;
+		Ref<DescriptorHandle> m_UVBufferHandle;
+		Ref<GpuResource> m_editorImageWidthHeightBuffer;
+
+		Ref<DescriptorHeap> m_ComputeSrvHeap;
+		Ref<DescriptorHeap> m_ComputeCbvHeap;
 		Ref<DescriptorHandle> m_TextureHandle;
+		Ref<DescriptorHandle> m_ImageWidthHandle;
+
 		uint32_t m_Width;
 		uint32_t m_Height;
 
 		uint32_t m_lastWidth;
 		uint32_t m_lastHeight;
-		
-		Ref<DescriptorHandle> m_UVBufferHandle;
-
-		Ref<GpuResource> m_editorImageWidthHeightBuffer;
-		Ref<DescriptorHandle> m_ImageWidthHandle;
 		//------Picker Information------
 
-		//------Deferred Shading------
-		void CreateDefaultDeferredShadingPso();
-		Ref<RootSignature> m_pDeferredShadingRootSignature;
+		//------Deferred Geometry Shading------
 		Ref<PSO> m_DefaultGeometryShadingPso;
-		
+		Ref<RootSignature> m_pDeferredShadingRootSignature;
 		Ref<Shader> m_GeometryVertexShader;
 		Ref<Shader> m_GeometryPixelShader;
-		//------Deferred Shading------
+		//------Deferred Geometry Shading------
 
 		//------Deferred Shading Light Pass------
 		Ref<PSO> m_DefaultLightShadingPso;
 		Ref<RootSignature> m_pDeferredShadingLightRootSignature;
 		Ref<Shader> m_LightVertexShader;
 		Ref<Shader> m_LightPixelShader;
-		uint32_t m_DeferredShadingLightPsoIndex;
 
 		Ref<VertexBuffer> m_pVertexBuffer;
-		Ref<IndexBuffer> m_pIndexBuffer;
+		Ref<IndexBuffer> m_pIndexBuffer;//for plane
 
 		LightPass m_lightPass;
 
-		Ref<DescriptorHeap> m_DeferredShadingLightGbufferTextureHeap;
-		Ref<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandle;
-		std::vector<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandles;
+		Ref<DescriptorHeap> m_DeferredShadingLightGbufferTextureHeap;//gbuffer texture handle and others texture handle
+		Ref<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandle;//first handle, to bind descriptor table
+		std::vector<DescriptorHandle> m_DeferredShadingLightGbufferTextureHandles;//other handles
+
+		uint32_t m_DeferredShadingLightPsoIndex;
 		//------Deferred Shading Light Pass------
 
 		//------IBL------
-		Ref<Texture> m_HDRTexture;
+		void CreateConvertHDRToCubePipeline();
+		void CreatePrefilterPipeline();
+		void CreateLutPipeline();
+		//------Equirectangular To CubeMap------
 		Ref<PSO> m_HDRConvertToCubePso;
+		Ref<RootSignature> m_EquirectangularToCubemapRootSignature;
 		Ref<Shader> m_EquirectangularToCubemapVs;
 		Ref<Shader> m_EquirectangularToCubemapFs;
-		Ref<RootSignature> m_EquirectangularToCubemapRootSignature;
+
+		Ref<Texture> m_HDRTexture;
 		Ref<DescriptorHeap> m_EquirectangularMap;
 		Ref<DescriptorHandle> m_EquirectangularDescriptorHandle;
-		Ref<Framebuffer> m_EquirectangularToCubemapFrameBuffer;
-		Ref<CubeTexture> m_CubeMapTexture;
 
-		Ref<RootSignature> m_SkyBoxRootSignature;
+		Ref<CubeTexture> m_CubeMapTexture;//from equirectangular to cubemap texture
+
+		Ref<Framebuffer> m_EquirectangularToCubemapFrameBuffer;
+		//------Equirectangular To CubeMap------
+
+		//------SkyBox------
 		Ref<PSO> m_SkyBoxPso;
+		Ref<RootSignature> m_SkyBoxRootSignature;
 		Ref<Shader> m_SkyBoxVs;
 		Ref<Shader> m_SkyBoxPs;
 		Ref<DescriptorHeap> m_SkyBoxHeap;
 		Ref<DescriptorHandle> m_SkyBoxHeapTextureHandle;
-		void CreateConvertHDRToCubePipeline();
-		void CreatePrefilterPipeline();
-		void CreateLutPipeline();
+		//------SkyBox------
+
+		//------irradiance cubemap texture------
 		Ref<RootSignature> m_convolutionRootSignature;
 		Ref<PSO> m_convolutionPso;
 		Ref<Shader> m_convolutionVs;
 		Ref<Shader> m_convolutionPs;
-		Ref<CubeTexture> m_irradianceCubeTexture;//fu zhao du
+		Ref<CubeTexture> m_irradianceCubeTexture;//irradiance(fu zhao du)
 		Ref<DescriptorHeap> m_irradianceCubeTextureHeap;
 		Ref<DescriptorHandle> m_irradianceCubeTextureHandle;
+		//------irradiance cubemap texture-------
 
-		Ref<CubeTexture> m_prefilterMap;
+		//------prefilter cubemap texture------
 		Ref<PSO> m_prefilterPso;
+		Ref<RootSignature> m_prefilterRootSignature;
 		Ref<Shader> m_prefilterVs;
 		Ref<Shader> m_prefilterPs;
-		Ref<RootSignature> m_prefilterRootSignature;
-		Ref<Framebuffer> m_prefilterFrameBuffer[5];
+		Ref<CubeTexture> m_prefilterMap;
+		Ref<Framebuffer> m_prefilterFrameBuffer[5];//5 mipmaps
+		//------prefilter cubemap texture------
 
-		Ref<Texture2D> m_LutTexture;
+		//------lut texture------
 		Ref<PSO> m_LutPso;
+		Ref<RootSignature> m_LutRootSignature;
+		Ref<Texture2D> m_LutTexture;
 		Ref<Shader> m_LutVs;
 		Ref<Shader> m_LutPs;
-		Ref<RootSignature> m_LutRootSignature;
 		Ref<Framebuffer> m_LutFrameBuffer;
+		//------lut texture------
 		//------IBL------
 
+		//------quad and cube vertex buffer and index buffer------
 		Ref<VertexBuffer> m_QuadVertexBuffer;
 		Ref<IndexBuffer> m_QuadIndexBuffer;
-
 		Ref<VertexBuffer> m_CubeVertexBuffer;
 		Ref<IndexBuffer> m_CubeIndexBuffer;
+		//------quad and cube vertex buffer and index buffer------
 
 		//------render image to back buffer------
+		void CreateRenderImageToBackBufferPipeline();
 		Ref<PSO> m_ImageToBackBufferPso;
 		Ref<RootSignature> m_ImageToBackBufferRootSignature;
 		Ref<Shader> m_ImageToBackBufferVs;
 		Ref<Shader> m_ImageToBackBufferPs;
 		Ref<DescriptorHeap> m_ImageDescriptorHeap;
 		Ref<DescriptorHandle> m_ImageDescriptorHandle;
-		void CreateRenderImageToBackBufferPipeline();
 		//------render image to back buffer------
 
-		//------render shadow map------
+		//------shadow map------
+		void CreateRenderShadowMapPipeline();
 		Ref<PSO> m_RenderShadowMapPso;
 		Ref<RootSignature> m_RenderShadowMapRootSignature;
 		Ref<Shader> m_RenderShadowMapVs;
 		Ref<Shader> m_RenderShadowMapPs;
 		Ref<ShadowBuffer> m_ShadowMap;
-		void CreateRenderShadowMapPipeline();
-		//------render shadow map------
+		//------shadow map------
 
 		//------render camera frustum------
+		void CreateCameraFrustumPipeline();
 		Ref<PSO> m_CameraFrustumPso;
 		Ref<RootSignature> m_CameraFrustumRootSignature;
 		Ref<Shader> m_CameraFrustumVs;
 		Ref<Shader> m_CameraFrustumPs;
-		void CreateCameraFrustumPipeline();
-		//------render camera frustum------
-
-		//------camera texture------
 		Ref<Model> pCameraModel;
 		Ref<MaterialComponent> pCameraMaterialComponent;
-		//------camera texture------
+		//------render camera frustum------
 
 		//------bloom------
+		void CreateBlurPipeline();
 		Ref<Shader> m_HorzBlurShader;
 		Ref<Shader> m_VertBlurShader;
 		Ref<PSO> m_HorzBlurPso;
@@ -218,18 +235,17 @@ namespace Pixel {
 
 		Ref<DescriptorHandle> m_BlurTexture2UavHandle;//vert
 		Ref<DescriptorHandle> m_BlurTextureSrvHandle;
-		void CreateBlurPipeline();
 		//------bloom------
 
 		//------additive blending------
+		void CreateAdditiveBlendingPipeline();
+		Ref<PSO> m_AdditiveBlendingPso;
+		Ref<RootSignature> m_AdditiveRootSignature;
+		Ref<Shader> m_AdditiveBlendingVs;
+		Ref<Shader> m_AdditiveBlendingPs;
 		Ref<DescriptorHeap> m_AdditiveBlendingDescriptorHeap;
 		Ref<DescriptorHandle> m_AdditiveBlendingDescriptorHandle;
 		Ref<DescriptorHandle> m_AdditiveBlendingDescriptorHandle2;
-		Ref<Shader> m_AdditiveBlendingVs;
-		Ref<Shader> m_AdditiveBlendingPs;
-		Ref<PSO> m_AdditiveBlendingPso;
-		Ref<RootSignature> m_AdditiveRootSignature;
-		void CreateAdditiveBlendingPipeline();
 		//------additive blending------
 	};
 }
