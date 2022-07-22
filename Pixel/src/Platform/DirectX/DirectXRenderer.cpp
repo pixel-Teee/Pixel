@@ -297,6 +297,7 @@ namespace Pixel {
 		//clear pipeline state object hash map
 		DirectXPSO::DestroyAll();
 
+		//clear root signature
 		DirectXRootSignature::DestroyAll();
 	}
 
@@ -420,7 +421,6 @@ namespace Pixel {
 			++i;
 		}
 
-		//create forward renderer pos
 		//copy constructor
 		Ref<PSO> pPso = std::make_shared<GraphicsPSO>(*(std::static_pointer_cast<GraphicsPSO>(m_DefaultGeometryShadingPso)));
 		std::static_pointer_cast<GraphicsPSO>(pPso)->SetInputLayout(layout.GetElements().size(), ElementArray);
