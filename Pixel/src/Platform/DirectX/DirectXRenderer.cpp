@@ -1,29 +1,51 @@
 #include "pxpch.h"
 
 #include "DirectXRenderer.h"
-#include "Platform/DirectX/PipelineStateObject/DirectXPipelineStateObject.h"
-#include "Pixel/Renderer/Buffer.h"
-#include "Platform/DirectX/PipelineStateObject/DirectXRootSignature.h"
 #include "Platform/DirectX/DirectXDevice.h"
+
+//------pso related------
+#include "Platform/DirectX/PipelineStateObject/DirectXPipelineStateObject.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXRootSignature.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXShader.h"
+//------pso related------
+
+//------buffer related------
+#include "Pixel/Renderer/Buffer.h"
+
+#include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
+
+#include "Platform/DirectX/Buffer/DirectXStructuredBuffer.h"
+#include "Platform/DirectX/Buffer/DirectXReadBackBuffer.h"
+
+#include "Platform/DirectX/Buffer/DepthBuffer.h"
+#include "Platform/DirectX/Buffer/ShadowBuffer.h"
+
+#include "Platform/DirectX/Texture/DirectXTexture.h"
+#include "Platform/DirectX/Texture/DirectXCubeTexture.h"
+#include "Platform/DirectX/Texture/DirectXFrameBuffer.h"
+//------buffer related------
+
+//------state releated------
 #include "Platform/DirectX/Sampler/SamplerManager.h"
 #include "Platform/DirectX/State/DirectXBlenderState.h"
 #include "Platform/DirectX/State/DirectXRasterState.h"
 #include "Platform/DirectX/State/DirectXDepthState.h"
-#include "Platform/DirectX/Texture/DirectXFrameBuffer.h"
-#include "Platform/DirectX/PipelineStateObject/DirectXShader.h"
+//------state releated------
+
+//-----context------
 #include "Platform/DirectX/Context/GraphicsContext.h"
-#include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
-#include "Platform/DirectX/Buffer/DepthBuffer.h"
-#include "Platform/DirectX/Buffer/DirectXStructuredBuffer.h"
+#include "Pixel/Renderer/Context/ContextManager.h"
+//-----context------
+
+//-----others------
 #include "Pixel/Renderer/EditorCamera.h"
 #include "Pixel/Math/Math.h"
-#include "Platform/DirectX/Buffer/DirectXReadBackBuffer.h"
-#include "Pixel/Renderer/Context/ContextManager.h"
+//-----others------
+
+//------descriptor related------
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
-#include "Platform/DirectX/Texture/DirectXCubeTexture.h"
-#include "Platform/DirectX/Texture/DirectXTexture.h"
-#include "Platform/DirectX/Buffer/ShadowBuffer.h"
+//------descriptor related------
 
 #include "stb_image.h"
 
