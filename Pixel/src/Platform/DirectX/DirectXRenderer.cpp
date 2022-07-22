@@ -211,12 +211,14 @@ namespace Pixel {
 			DescriptorHandle secondHandle = (*m_DeferredShadingLightGbufferTextureHandle) + i * DescriptorSize;
 			m_DeferredShadingLightGbufferTextureHandles[i] = secondHandle;
 		}
-		//-------Create Deferred Shading Geometry GBuffer Texture Handle------
+		//------Create Deferred Shading Geometry GBuffer Texture Handle------
 
+		//------Create HDR To CubeMap Pipeline------
 		CreateConvertHDRToCubePipeline();
 
 		m_EquirectangularMap = DescriptorHeap::Create(L"EquirectangularMap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		m_EquirectangularDescriptorHandle = m_EquirectangularMap->Alloc(1);
+		//------Create HDR To CubeMap Pipeline------
 
 		m_irradianceCubeTextureHeap = DescriptorHeap::Create(L"IrradianceCubeTextureMap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		m_irradianceCubeTextureHandle = m_irradianceCubeTextureHeap->Alloc(1);
@@ -256,6 +258,7 @@ namespace Pixel {
 		m_CubeVertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() / 3, 3 * sizeof(float));
 		m_CubeIndexBuffer = IndexBuffer::Create(indices.data(), indices.size());
 
+		//------create quad vertex buffer and quad index buffer------
 		std::array<float, 20> QuadVertices = {
 			-1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
 			-1.0f, -1.0f, 0.0f, 0.0f, 1.0f,
@@ -269,13 +272,16 @@ namespace Pixel {
 
 		m_QuadVertexBuffer = VertexBuffer::Create(QuadVertices.data(), QuadVertices.size() / 5, 5 * sizeof(float));
 		m_QuadIndexBuffer = IndexBuffer::Create(QuadIndices.data(), QuadIndices.size());
+		//------create quad vertex buffer and quad index buffer------
 
 		CreatePrefilterPipeline();
 		CreateLutPipeline();
-		CreateRenderImageToBackBufferPipeline();
 
+		//------render image to back buffer pipeline------
+		CreateRenderImageToBackBufferPipeline();
 		m_ImageDescriptorHeap = DescriptorHeap::Create(L"ImageDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		m_ImageDescriptorHandle = m_ImageDescriptorHeap->Alloc(1);
+		//------render image to back buffer pipeline------
 
 		//------create shadow map and pipeline state object------
 		CreateRenderShadowMapPipeline();
@@ -284,11 +290,13 @@ namespace Pixel {
 		//------create shadow map and pipeline state object------
 
 		CreateCameraFrustumPipeline();
-		CreateAdditiveBlendingPipeline();
 
+		//------create additive blending pipeline------
+		CreateAdditiveBlendingPipeline();
 		m_AdditiveBlendingDescriptorHeap = DescriptorHeap::Create(L"AdditiveBlendingDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 2);
 		m_AdditiveBlendingDescriptorHandle = m_AdditiveBlendingDescriptorHeap->Alloc(1);
 		m_AdditiveBlendingDescriptorHandle2 = m_AdditiveBlendingDescriptorHeap->Alloc(1);
+		//------create additive blending pipeline------
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -303,6 +311,7 @@ namespace Pixel {
 
 	void DirectXRenderer::Initialize()
 	{
+		//------create camera model, for editor debug------
 		pCameraModel = CreateRef<Model>("Resources/Icons/Camera.fbx");
 
 		std::string albedoPath = "Resources/Icons/Camera_Albedo.png";
@@ -311,10 +320,12 @@ namespace Pixel {
 		std::string metallicPath = "Resources/Icons/Camera_metallic.png";
 		std::string emissivePath = "Resources/Icons/Camera_emissive.png";
 
-		pCameraMaterialComponent = CreateRef<MaterialComponent>(albedoPath,
-			normalPath, roughnessPath, metallicPath,
-			emissivePath, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f, 1.0f, false);
+		pCameraMaterialComponent = CreateRef<MaterialComponent>(
+		albedoPath, normalPath, roughnessPath, metallicPath,
+		emissivePath, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f, 1.0f, false);
+		//------create camera model, for editor debug------
 
+		//------create blur texture handle------
 		m_BlurTextureUavSrvHeap = DescriptorHeap::Create(L"BlurTexture", DescriptorHeapType::CBV_UAV_SRV, 4);
 		m_BlurTextureSrvHandle = m_BlurTextureUavSrvHeap->Alloc(1);
 		m_BlurTextureUavHandle = m_BlurTextureUavSrvHeap->Alloc(1);
@@ -322,6 +333,7 @@ namespace Pixel {
 		m_BlurTexture2UavHandle = m_BlurTextureUavSrvHeap->Alloc(1);
 
 		CreateBlurPipeline();
+		//------create blur texture handle------
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -1428,27 +1440,7 @@ namespace Pixel {
 
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false} };
 
-		D3D12_INPUT_ELEMENT_DESC* CameraFrustumElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		uint32_t i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			CameraFrustumElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)CameraFrustumElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			CameraFrustumElementArray[i].SemanticIndex = 0;
-			CameraFrustumElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			CameraFrustumElementArray[i].InputSlot = 0;
-			CameraFrustumElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			CameraFrustumElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			CameraFrustumElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
+		D3D12_INPUT_ELEMENT_DESC* CameraFrustumElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
 
 		std::static_pointer_cast<GraphicsPSO>(m_CameraFrustumPso)->SetInputLayout(layout.GetElements().size(), CameraFrustumElementArray);
 
@@ -1878,9 +1870,6 @@ namespace Pixel {
 			pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
 			pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());			
 		}	
-
-		//pContext->TransitionResource(*(m_pCubeMapTexture->m_pCubeTextureResource), ResourceStates::Common);
-		//pContext->TransitionResource(*pDirectXFrameBuffer->m_pDepthBuffer, ResourceStates::Common);
 
 		//------generate irradiance convolution cubemap------
 		m_irradianceCubeTexture = CubeTexture::Create(32, 32, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM);
@@ -2322,27 +2311,7 @@ namespace Pixel {
 
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}};
 
-		D3D12_INPUT_ELEMENT_DESC* PrefilterElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		uint32_t i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			PrefilterElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)PrefilterElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			PrefilterElementArray[i].SemanticIndex = 0;
-			PrefilterElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			PrefilterElementArray[i].InputSlot = 0;
-			PrefilterElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			PrefilterElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			PrefilterElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
+		D3D12_INPUT_ELEMENT_DESC* PrefilterElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
 
 		std::static_pointer_cast<GraphicsPSO>(m_prefilterPso)->SetInputLayout(layout.GetElements().size(), PrefilterElementArray);
 
@@ -2389,27 +2358,7 @@ namespace Pixel {
 
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}, {ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false}};
 
-		D3D12_INPUT_ELEMENT_DESC* LutElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		uint32_t i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			LutElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)LutElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			LutElementArray[i].SemanticIndex = 0;
-			LutElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			LutElementArray[i].InputSlot = 0;
-			LutElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			LutElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			LutElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
+		D3D12_INPUT_ELEMENT_DESC* LutElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
 
 		std::static_pointer_cast<GraphicsPSO>(m_LutPso)->SetInputLayout(layout.GetElements().size(), LutElementArray);
 

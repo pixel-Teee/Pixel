@@ -50,7 +50,9 @@ namespace Pixel {
 
 		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) override;
 
+		//------called from the editor or the runtime when start------
 		virtual void InitializeAndConvertHDRToCubeMap(std::string& HdrTexturePath) override;
+		//------called from the editor or the runtime when start------
 
 		//return hdr texture's cpu descriptor handle
 		virtual Ref<DescriptorCpuHandle> GetHDRDescriptorHandle() override;
