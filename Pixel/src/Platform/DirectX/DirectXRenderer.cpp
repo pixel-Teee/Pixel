@@ -58,7 +58,7 @@ namespace Pixel {
 	};
 
 	//------use for prefilter map------
-	struct PrefilterMapPass
+	struct alignas(256) PrefilterMapPass
 	{
 		glm::mat4 Projection;
 		float Roughness;
@@ -1962,7 +1962,7 @@ namespace Pixel {
 				glm::mat4 ViewProjection = glm::transpose(captureProjection * captureViews[j]);
 				prefilterPass.Projection = ViewProjection;
 
-				pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), &prefilterPass);
+				pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(PrefilterMapPass), &prefilterPass);
 
 				pContext->SetVertexBuffer(0, m_CubeVertexBuffer->GetVBV());
 				pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
