@@ -1,4 +1,6 @@
 pushd ..\
-call vendor\premake\premake5.exe vs2019
+mkdir build
+cd build
+cmake .. -G"Visual Studio 16 2019"
 popd
 PAUSE
