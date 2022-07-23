@@ -507,25 +507,25 @@ namespace Pixel
 				if (component.nextFrameNeedLoadTexture[1])
 				{
 					component.nextFrameNeedLoadTexture[1] = false;
-					component.Albedo = Texture2D::Create(component.normalMapPath);
+					component.NormalMap = Texture2D::Create(component.normalMapPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[2])
 				{
 					component.nextFrameNeedLoadTexture[2] = false;
-					component.Albedo = Texture2D::Create(component.roughnessPath);
+					component.Roughness = Texture2D::Create(component.roughnessPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[3])
 				{
 					component.nextFrameNeedLoadTexture[3] = false;
-					component.Albedo = Texture2D::Create(component.metallicPath);
+					component.Metallic = Texture2D::Create(component.metallicPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[4])
 				{
 					component.nextFrameNeedLoadTexture[4] = false;
-					component.Albedo = Texture2D::Create(component.emissivePath);
+					component.Emissive = Texture2D::Create(component.emissivePath);
 				}
 
 				//copy descriptor to imgui srv descriptor heap
