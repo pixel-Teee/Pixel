@@ -34,6 +34,7 @@ namespace Pixel {
 
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 		void SetDarkThemeColors();
+		void SetPurpleThemeColors();
 		void ResetSwapChain();
 		void ReCreateSwapChain();
 		Ref<GpuResource> GetBackBuffer();
