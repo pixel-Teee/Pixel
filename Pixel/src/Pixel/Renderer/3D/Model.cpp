@@ -122,10 +122,10 @@ namespace Pixel {
 			bufferSize += mesh->mNumVertices * 24;
 		}
 		//------Editor------
-		staticMesh.m_DataBuffer[(uint64_t)Semantics::Editor] = new unsigned char[mesh->mNumVertices * 4];
-		staticMesh.m_DataBufferSize[(uint64_t)Semantics::Editor] = mesh->mNumVertices * 4;
-		elements.push_back({ ShaderDataType::Int, "a_EntityID", Semantics::Editor });
-		bufferSize += mesh->mNumVertices * 4;
+		//staticMesh.m_DataBuffer[(uint64_t)Semantics::Editor] = new unsigned char[mesh->mNumVertices * 4];
+		//staticMesh.m_DataBufferSize[(uint64_t)Semantics::Editor] = mesh->mNumVertices * 4;
+		//elements.push_back({ ShaderDataType::Int, "a_EntityID", Semantics::Editor });
+		//bufferSize += mesh->mNumVertices * 4;
 		//------Editor------
 		//------Allocator Memory------
 
@@ -166,7 +166,7 @@ namespace Pixel {
 			}
 
 			//---Editor---
-			memcpy(&staticMesh.m_DataBuffer[(uint64_t)Semantics::Editor][i * 4], &id, 4);
+			//memcpy(&staticMesh.m_DataBuffer[(uint64_t)Semantics::Editor][i * 4], &id, 4);
 			//---Editor---
 		}
 		BufferLayout layout{elements};

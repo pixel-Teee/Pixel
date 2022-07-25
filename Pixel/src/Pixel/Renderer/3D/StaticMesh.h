@@ -15,6 +15,7 @@ namespace Pixel {
 	{
 		glm::mat4 world;
 		glm::mat4 invWorld;
+		int editor;
 	};
 
 	class MaterialInstance;

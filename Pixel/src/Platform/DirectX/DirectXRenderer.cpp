@@ -1756,7 +1756,7 @@ namespace Pixel {
 	//	pComputeContext->TransitionResource(*pUVBuffer, ResourceStates::Common, true);
 		//pComputeContext->TransitionResource(*m_PickerBuffer, ResourceStates::Common, true);
 		pComputeContext->SetType(CommandListType::Compute);
-		pComputeContext->Finish(true);
+		//pComputeContext->Finish(true);
 	}
 
 	Ref<PSO> DirectXRenderer::GetPso(uint32_t psoIndex)

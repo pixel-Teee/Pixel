@@ -1,38 +1,24 @@
 Scene: Untitled
 Entities:
-  - Entity: 5643804548652488927
+  - Entity: 5808971463189267659
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere.obj
-    MaterialComponent:
-      albedoPath: assets\textures\Material_Albedo.png
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [1, 1, 1]
-      gNormal: [1, 1, 1]
-      gRoughness: 0.550000012
-      gMetallic: 1
-      gEmissive: 1
-      HaveNormal: true
-  - Entity: 17492161255626896809
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [0, 6.87712955, -7.03079939]
-      Rotation: [0.448305994, 0, 0]
-      Scale: [1, 0.99994719, 0.99994719]
-    LightComponent:
-      LightType: 1
-      Color: [1, 1, 1]
-      GenerateShadowMap: true
-  - Entity: 8919142017348422396
+      Translation: [-0.541674614, 1.47161531, -9.47204113]
+      Rotation: [0.28841269, 0, 0]
+      Scale: [1.00000083, 0.999998927, 0.999998927]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 6335700467801840805
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
@@ -53,21 +39,35 @@ Entities:
       gMetallic: 1
       gEmissive: 1
       HaveNormal: false
-  - Entity: 13504033856264872947
+  - Entity: 7780156973900407177
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-0.541674614, 1.47161531, -9.47204113]
-      Rotation: [0.28841269, 0, 0]
-      Scale: [1.00000083, 0.999998927, 0.999998927]
-    CameraComponent:
-      Camera:
-        ProjectionType: 0
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRatio: false
+      Translation: [0, 6.87712955, -7.03079939]
+      Rotation: [0.448305994, 0, 0]
+      Scale: [1, 0.99994719, 0.99994719]
+    LightComponent:
+      LightType: 1
+      Color: [1, 1, 1]
+      GenerateShadowMap: true
+  - Entity: 4130009959580136809
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere.obj
+    MaterialComponent:
+      albedoPath: assets\textures\Material_Albedo.png
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.550000012
+      gMetallic: 1
+      gEmissive: 1
+      HaveNormal: true

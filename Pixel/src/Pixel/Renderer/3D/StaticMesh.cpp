@@ -264,11 +264,11 @@ namespace Pixel {
 
 	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId)
 	{
-		if (!isFirst)
-		{
-			isFirst = true;
-			SetupMesh(entityId, false);
-		}	
+		//if (!isFirst)
+		//{
+		//	isFirst = true;
+		//	SetupMesh(entityId, false);
+		//}	
 		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
 
 		m_MeshConstant.world = glm::transpose(transform);
@@ -282,15 +282,16 @@ namespace Pixel {
 
 	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, MaterialComponent* pMaterial)
 	{
-		if (!isFirst)
-		{
-			isFirst = true;
-			SetupMesh(entityId, false);
-		}
+		//if (!isFirst)
+		//{
+		//	isFirst = true;
+		//	SetupMesh(entityId, false);
+		//}
 		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
 
 		m_MeshConstant.world = glm::transpose(transform);
 		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
+		m_MeshConstant.editor = entityId;
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
 
@@ -333,11 +334,11 @@ namespace Pixel {
 
 	void StaticMesh::DrawShadowMap(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId)
 	{
-		if (!isFirst)
-		{
-			isFirst = true;
-			SetupMesh(entityId, false);
-		}
+		//if (!isFirst)
+		//{
+		//	isFirst = true;
+		//	SetupMesh(entityId, false);
+		//}
 
 		m_MeshConstant.world = glm::transpose(transform);
 
@@ -361,48 +362,48 @@ namespace Pixel {
 	//setup mesh after load model
 	void StaticMesh::SetupMesh(int entityID, bool bHavedSwitched)
 	{
-		if (EntityID == -1 || bHavedSwitched)
-		{
-			bHavedSwitched = false;
-			EntityID = entityID;
+		//if (EntityID == -1 || bHavedSwitched)
+		//{
+		//	bHavedSwitched = false;
+		//	EntityID = entityID;
 
-			uint32_t numVertices = m_DataBufferSize[(uint64_t)Semantics::POSITION] / 12;
+		//	uint32_t numVertices = m_DataBufferSize[(uint64_t)Semantics::POSITION] / 12;
 
-			uint32_t offset = 0;
-			uint32_t size = 0;
-			for (auto element : m_VertexBuffer->GetLayout())
-			{
-				if (element.m_sematics == Semantics::Editor)
-				{
-					offset = element.Offset;
-					size = element.Size;
-					break;
-				}
-			}
+		//	uint32_t offset = 0;
+		//	uint32_t size = 0;
+		//	for (auto element : m_VertexBuffer->GetLayout())
+		//	{
+		//		if (element.m_sematics == Semantics::Editor)
+		//		{
+		//			offset = element.Offset;
+		//			size = element.Size;
+		//			break;
+		//		}
+		//	}
 
-			for (uint32_t i = 0; i < numVertices; ++i)
-			{
-				//one int for byte
-				memcpy(&m_DataBuffer[(uint64_t)Semantics::Editor][i * size], &EntityID, 4);
-			}
+		//	for (uint32_t i = 0; i < numVertices; ++i)
+		//	{
+		//		//one int for byte
+		//		memcpy(&m_DataBuffer[(uint64_t)Semantics::Editor][i * size], &EntityID, 4);
+		//	}
 
-			//unsigned char* dataBuffer = new unsigned char[bufferSize];
-			BufferLayout layout = m_VertexBuffer->GetLayout();
-			const std::vector<BufferElement>& elements = layout.GetElements();
-			for (uint32_t i = 0; i < numVertices; ++i)
-			{
-				for (uint32_t j = 0; j < elements.size(); ++j)
-				{
-					memcpy(&m_AlternationDataBuffer[i * layout.GetStride() + elements[j].Offset],
-					&m_DataBuffer[(uint64_t)elements[j].m_sematics][i * elements[j].Size], elements[j].Size);
-				}
-			}
-			//delete []dataBuffer;
+		//	//unsigned char* dataBuffer = new unsigned char[bufferSize];
+		//	BufferLayout layout = m_VertexBuffer->GetLayout();
+		//	const std::vector<BufferElement>& elements = layout.GetElements();
+		//	for (uint32_t i = 0; i < numVertices; ++i)
+		//	{
+		//		for (uint32_t j = 0; j < elements.size(); ++j)
+		//		{
+		//			memcpy(&m_AlternationDataBuffer[i * layout.GetStride() + elements[j].Offset],
+		//			&m_DataBuffer[(uint64_t)elements[j].m_sematics][i * elements[j].Size], elements[j].Size);
+		//		}
+		//	}
+		//	//delete []dataBuffer;
 
-			m_VertexBuffer->SetData(m_AlternationDataBuffer, m_AlternationDataBufferSize);
+		//	m_VertexBuffer->SetData(m_AlternationDataBuffer, m_AlternationDataBufferSize);
 
-			m_IndexBuffer->SetData(m_Index, m_IndexSize / 4);
-		}	
+		//	m_IndexBuffer->SetData(m_Index, m_IndexSize / 4);
+		//}	
 	}
 
 }
