@@ -251,6 +251,10 @@ namespace Pixel {
 		float pad;
 		float pad2;
 		glm::mat4 LightSpaceMatrix;
+		int receiveAmbientLight;
+		float pad3;
+		float pad4;
+		float pad5;
 		Light lights[MAXLIGHTS];
 	};
 

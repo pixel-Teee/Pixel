@@ -68,6 +68,10 @@ cbuffer LightPass : register(b1)
 	float pad;
 	float pad2;
 	float4x4 LightSpaceMatrix;
+	int receiveAmbientLight;
+	float pad3;
+	float pad4;
+	float pad5;
 	Light lights[16];
 };
 
@@ -214,22 +218,25 @@ PixelOut PS(VertexOut pin)
 	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 	
 	//------IBL------
-	float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
-	float3 kD = 1.0f - kS;
-	kD *= 1.0 - Metallic;
-	float3 Irradiance = IrradianceMap.Sample(gsamPointWrap, N).xyz;
-	float3 diffuse = Irradiance * Albedo;
+	if (receiveAmbientLight)
+	{
+		float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
+		float3 kD = 1.0f - kS;
+		kD *= 1.0 - Metallic;
+		float3 Irradiance = IrradianceMap.Sample(gsamPointWrap, N).xyz;
+		float3 diffuse = Irradiance * Albedo;
 
-	float MAX_REFLECTION_LOD = 4.0f;
-	float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, Roughness * MAX_REFLECTION_LOD).xyz;
-	float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), Roughness));
+		float MAX_REFLECTION_LOD = 4.0f;
+		float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, Roughness * MAX_REFLECTION_LOD).xyz;
+		float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), Roughness));
 
-	float3 specular = prefilterColor * (F * brdf.x + brdf.y);
+		float3 specular = prefilterColor * (F * brdf.x + brdf.y);
 
-	float3 ambient = kD * diffuse + specular;
+		float3 ambient = kD * diffuse + specular;
+
+		Lo += ambient;
+	}
 	//------IBL------
-
-	Lo += ambient;
 
 	//------shadow map------
 	//Lo *= (1 - Shadow);

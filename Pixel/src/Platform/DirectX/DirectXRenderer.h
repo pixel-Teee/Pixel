@@ -68,6 +68,8 @@ namespace Pixel {
 		virtual void RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer) override;
 
 		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) override;
+
+		virtual void RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer) override;
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -252,6 +254,16 @@ namespace Pixel {
 		Ref<DescriptorHandle> m_AdditiveBlendingDescriptorHandle;
 		Ref<DescriptorHandle> m_AdditiveBlendingDescriptorHandle2;
 		//------additive blending------
+
+		//------debug point light wireframe------
+		void CreatePointLightVolumePipeline();
+		Ref<PSO> m_PointLightVolumePso;
+		Ref<RootSignature> m_PointLightVolumeRootSignature;
+		Ref<Shader> m_PointLightVolumeVs;
+		Ref<Shader> m_PointLightVolumePs;
+		Ref<VertexBuffer> m_PointLightVolumeVertex;
+		Ref<IndexBuffer> m_PointLightVolumeIndex;
+		//------debug point light wireframe------
 	};
 }
  

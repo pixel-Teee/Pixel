@@ -3,6 +3,7 @@ cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;//world matrix
 	float4x4 ginvWorld;//inverse world matrix
+	int gEditor;
 };
 //------mesh constants------
 
@@ -25,7 +26,7 @@ struct VertexIn
 	float3 PosL : POSITION;
 	float2 TexCoord : TEXCOORD;
 	float3 NormalL : NORMAL;
-	int Editor : EDITOR;
+	//int Editor : EDITOR;
 };
 
 struct VertexOut
@@ -62,7 +63,7 @@ VertexOut VS(VertexIn vin)
 
 	vout.TexCoord = vin.TexCoord;
 
-	vout.Editor = vin.Editor;
+	vout.Editor = gEditor;
 	return vout;
 }
 

@@ -746,6 +746,14 @@ namespace Pixel
 				Application::Get().GetRenderer()->DrawFrustum(pContext, camera, cameras[i], cameraTransformComponents[i], pLightFrameBuffer);
 			}
 		}
+
+		for (uint32_t i = 0; i < lights.size(); ++i)
+		{
+			if (lights[i]->DisplayLightVolume && lights[i]->lightType == LightType::PointLight)
+			{
+				Application::Get().GetRenderer()->RenderPointLightVolume(pContext, camera, lights[i], lightTrans[i], pLightFrameBuffer);
+			}
+		}
 		pContext->Finish(true);
 
 		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);

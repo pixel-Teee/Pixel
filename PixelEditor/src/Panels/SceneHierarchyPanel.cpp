@@ -671,6 +671,7 @@ namespace Pixel
 					ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
 					ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
 					ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
+					ImGui::Checkbox("DisplayPointLightVolume", &component.DisplayLightVolume);
 				}
 				else if (component.lightType == LightType::DirectLight)
 				{

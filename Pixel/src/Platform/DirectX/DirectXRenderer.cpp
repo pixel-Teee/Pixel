@@ -334,6 +334,46 @@ namespace Pixel {
 
 		CreateBlurPipeline();
 		//------create blur texture handle------
+
+		//------create point volume pso------
+		CreatePointLightVolumePipeline();
+		//------create point volume pso------
+
+		//------create point light volume vertex and index------
+		std::vector<glm::vec3> pointLightVolumeVertex;
+		for (uint32_t i = 0; i < 64; ++i)
+		{
+			float theta = static_cast<float>(i) / 64 * 360.0f;
+			float x = glm::cos(glm::radians(theta));
+			float y = glm::sin(glm::radians(theta));
+			float z = 0.0f;
+			pointLightVolumeVertex.push_back(glm::vec3(x, y, z));
+		}
+		for (uint32_t i = 0; i < 64; ++i)
+		{
+			float theta = static_cast<float>(i) / 64 * 360.0f;
+			float x = 0.0f;
+			float y = glm::sin(glm::radians(theta));
+			float z = glm::cos(glm::radians(theta));
+			pointLightVolumeVertex.push_back(glm::vec3(x, y, z));
+		}
+		m_PointLightVolumeVertex = VertexBuffer::Create(glm::value_ptr(*pointLightVolumeVertex.data()), pointLightVolumeVertex.size(), sizeof(glm::vec3));
+		
+		std::vector<uint32_t> pointLightVolumeIndex;
+		for (uint32_t i = 0; i < 64; ++i)
+		{
+			pointLightVolumeIndex.push_back(i);
+			pointLightVolumeIndex.push_back(i + 1);
+		}
+		pointLightVolumeIndex.back() = 0;
+		for (uint32_t i = 64; i < 128; ++i)
+		{
+			pointLightVolumeIndex.push_back(i);
+			pointLightVolumeIndex.push_back(i + 1);
+		}
+		pointLightVolumeIndex.back() = 64;
+		m_PointLightVolumeIndex = IndexBuffer::Create(pointLightVolumeIndex.data(), pointLightVolumeIndex.size());
+		//------create point light volume vertex and index------
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -683,6 +723,7 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		m_lightPass.CameraPosition = camera.GetPosition();
+		m_lightPass.receiveAmbientLight = false;//test
 		
 		std::vector<LightComponent*> ReSortedPointLight;
 		std::vector<TransformComponent*> ReSortedPointLightTrans;
@@ -962,6 +1003,7 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		m_lightPass.CameraPosition = pCameraTransformComponent->Translation;
+		m_lightPass.receiveAmbientLight = false;
 
 		std::vector<LightComponent*> ReSortedPointLight;
 		std::vector<TransformComponent*> ReSortedPointLightTrans;
@@ -1555,6 +1597,54 @@ namespace Pixel {
 		m_AdditiveBlendingPso->Finalize();
 	}
 
+	void DirectXRenderer::CreatePointLightVolumePipeline()
+	{
+		m_PointLightVolumeVs = Shader::Create("assets/shaders/debug/DrawPointLightVolume.hlsl", "VS", "vs_5_0");
+		m_PointLightVolumePs = Shader::Create("assets/shaders/debug/DrawPointLightVolume.hlsl", "PS", "ps_5_0");
+
+		m_PointLightVolumePso = PSO::CreateGraphicsPso(L"PointLightVolumePso");
+		auto [PointLightVolumeVsShaderBinary, PointLightVolumeVsShaderSize] = std::static_pointer_cast<DirectXShader>(m_PointLightVolumeVs)->GetShaderBinary();
+		auto [PointLightVolumePsShaderBinary, PointLightVolumePsShaderSize] = std::static_pointer_cast<DirectXShader>(m_PointLightVolumePs)->GetShaderBinary();
+
+		m_PointLightVolumePso->SetVertexShader(PointLightVolumeVsShaderBinary, PointLightVolumeVsShaderSize);
+		m_PointLightVolumePso->SetPixelShader(PointLightVolumePsShaderBinary, PointLightVolumePsShaderSize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+		pDepthState->DepthTest(false);
+
+		m_PointLightVolumeRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_PointLightVolumeRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_PointLightVolumeRootSignature->Finalize(L"AdditiveBlendingRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_PointLightVolumePso->SetRootSignature(m_PointLightVolumeRootSignature);
+		
+		m_PointLightVolumePso->SetBlendState(pBlendState);
+		m_PointLightVolumePso->SetDepthState(pDepthState);
+		m_PointLightVolumePso->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT };
+		m_PointLightVolumePso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
+		m_PointLightVolumePso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::LINE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* PointLightVolumeElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
+
+		std::static_pointer_cast<GraphicsPSO>(m_PointLightVolumePso)->SetInputLayout(layout.GetElements().size(), PointLightVolumeElementArray);
+
+		m_PointLightVolumePso->Finalize();
+	}
+
 	void DirectXRenderer::RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer)
 	{
 		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
@@ -1647,6 +1737,44 @@ namespace Pixel {
 		pContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
+	}
+
+	void DirectXRenderer::RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer)
+	{
+		if (lights != nullptr && lightTrans != nullptr)
+		{
+			pGraphicsContext->SetPipelineState(*m_PointLightVolumePso);
+			pGraphicsContext->SetRootSignature(*m_PointLightVolumeRootSignature);
+			pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::LINELIST);
+
+			Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pLightFrameBuffer);
+			pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+			pGraphicsContext->SetRenderTarget(pDirectXFrameBuffer->m_pColorBuffers[0]->GetRTV());
+
+			glm::mat4 viewProjection = glm::transpose(editorCamera.GetViewProjection());
+			//bind resource
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(glm::mat4), glm::value_ptr(glm::transpose(lights->GetTransformComponent(*lightTrans))));
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(viewProjection));
+			
+			ViewPort vp;
+			vp.TopLeftX = 0.0f;
+			vp.TopLeftY = 0.0f;
+			vp.Width = pLightFrameBuffer->GetSpecification().Width;
+			vp.Height = pLightFrameBuffer->GetSpecification().Height;
+			vp.MaxDepth = 1.0f;
+			vp.MinDepth = 0.0f;
+
+			PixelRect scissor;
+			scissor.Left = 0;
+			scissor.Right = pLightFrameBuffer->GetSpecification().Width;
+			scissor.Top = 0;
+			scissor.Bottom = pLightFrameBuffer->GetSpecification().Height;
+
+			pGraphicsContext->SetViewportAndScissor(vp, scissor);
+			pGraphicsContext->SetVertexBuffer(0, m_PointLightVolumeVertex->GetVBV());
+			pGraphicsContext->SetIndexBuffer(m_PointLightVolumeIndex->GetIBV());
+			pGraphicsContext->DrawIndexed(m_PointLightVolumeIndex->GetCount());
+		}
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()
