@@ -107,7 +107,7 @@ float GeometrySmith(float NoV, float NoL, float Roughness)
 }
 
 float3 F_Shlick(float u, float3 f0, float f90) {
-	return f0 + (float3(f90, f90, f90) - f0) * pow(1.0 - u, 5.0);
+	return f0 + (float3(f90, f90, f90) - f0) * pow(clamp(1.0 - u, 0.0f, 1.0f), 5.0);
 }
 
 float Fd_Lambert() {
@@ -182,10 +182,10 @@ PixelOut PS(VertexOut pin)
 		{
 			//calculate lights
 			float3 H = normalize(V + L);
-			float NoV = abs(dot(N, V)) + 1e-5;
-			float NoL = clamp(dot(N, L), 0.0, 1.0);
-			float NoH = clamp(dot(N, H), 0.0, 1.0);
-			float LoH = clamp(dot(L, H), 0.0, 1.0);
+			float NoV = max(dot(N, V), 0.0f);
+			float NoL = max(dot(N, L), 0.0f);
+			float NoH = max(dot(N, H), 0.0f);
+			float LoH = max(dot(L, H), 0.0f);
 
 			Lo += AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, f0, Albedo);
 		}
@@ -197,10 +197,10 @@ PixelOut PS(VertexOut pin)
 		float3 L = normalize(-lights[i].Direction);
 
 		float3 H = normalize(V + L);
-		float NoV = abs(dot(N, V)) + 1e-5;
-		float NoL = clamp(dot(N, L), 0.0, 1.0);
-		float NoH = clamp(dot(N, H), 0.0, 1.0);
-		float LoH = clamp(dot(L, H), 0.0, 1.0);
+		float NoV = max(dot(N, V), 0.0f);
+		float NoL = max(dot(N, L), 0.0f);
+		float NoH = max(dot(N, H), 0.0f);
+		float LoH = max(dot(L, H), 0.0f);
 
 		float D = DistributionGGX(NoH, Roughness);
 		float3 F = F_Shlick(LoH, f0, 1.0);
