@@ -512,9 +512,9 @@ namespace Pixel
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y
 		&& m_SceneState == SceneState::Edit)
 		{
-			//int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
-			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
-			//m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
+			PIXEL_CORE_INFO("PixelData = {0}", pixelData);
+			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 	}
 

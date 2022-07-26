@@ -806,6 +806,9 @@ namespace Pixel {
 
 			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
 			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_PickerBuffer = CreateRef<StructuredBuffer>();
+			std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
 		}
 
 		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
@@ -1082,6 +1085,9 @@ namespace Pixel {
 
 			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
 			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_PickerBuffer = CreateRef<StructuredBuffer>();
+			std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
 		}
 
 		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
@@ -1729,8 +1735,8 @@ namespace Pixel {
 		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[4];
 
 		//creat the structed buffer
-		m_PickerBuffer = CreateRef<StructuredBuffer>();
-		std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
+		//m_PickerBuffer = CreateRef<StructuredBuffer>();
+		//std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
 
 		//copy descriptor
 		std::static_pointer_cast<DirectXDevice>(Device::Get())->CopyDescriptorsSimple(1, m_TextureHandle->GetCpuHandle(), pColorBuffer->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);

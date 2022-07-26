@@ -750,8 +750,11 @@ namespace Pixel
 
 		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
 		Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
-		//Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pGeoFrameBuffer);
 		pComputeContext->Finish(true);
+
+		Ref<Context> pPickerComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
+		Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pGeoFrameBuffer);
+		pPickerComputeContext->Finish(true);
 
 		Ref<Context> pFinalColorContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		Application::Get().GetRenderer()->RenderingFinalColorBuffer(pFinalColorContext, pLightFrameBuffer, pFinalFrameBuffer);
