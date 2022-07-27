@@ -218,8 +218,8 @@ PixelOut PS(VertexOut pin)
 	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 	
 	//------IBL------
-	if (receiveAmbientLight)
-	{
+	//if (receiveAmbientLight)
+	//{
 		float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
 		float3 kD = 1.0f - kS;
 		kD *= 1.0 - Metallic;
@@ -235,7 +235,7 @@ PixelOut PS(VertexOut pin)
 		float3 ambient = kD * diffuse + specular;
 
 		Lo += ambient;
-	}
+	//}
 	//------IBL------
 
 	//------shadow map------

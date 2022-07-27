@@ -12,13 +12,9 @@ Pixel Game Engine
 
 `git submodule update --init --recursive`
 
-`mkdir build`
+`cd scripts`
 
-`cd build`
-
-`cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Debug` 
-or
-`cmake .. -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release`
+`click Win-GenProjects.bat`
 
 Select the PixelEditor as the StartupProject
 
@@ -26,4 +22,12 @@ Select the PixelEditor as the StartupProject
 
 ![ReadMe1](./ReadMe1.png)
 
-![Image](./Image.png)
+# Features
+
+- Image-Based Lighting
+- Deferred Rendering
+- Bloom
+- PBR
+- Editor and Game Runtime
+- ShadowMap
+- ...
