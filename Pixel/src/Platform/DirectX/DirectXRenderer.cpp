@@ -1691,7 +1691,7 @@ namespace Pixel {
 		pDepthState->DepthTest(true);
 		pBlendState->SetRenderTargetBlendState(2, true);
 		pBlendState->SetIndependentBlendEnable(true);
-		pRasterState->SetCullMode(CullMode::None);
+		pRasterState->SetCullMode(CullMode::Front);
 
 		m_OutlineRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 2);
 		m_OutlineRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);

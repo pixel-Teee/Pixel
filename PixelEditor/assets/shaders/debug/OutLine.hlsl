@@ -73,7 +73,7 @@ PixelOut PS(VertexOut pin)
 
 	pixelOut.gBufferAlbedo.xyz = float3(1.0f, 1.0f, 0.0f);
 
-	float3 viewDir = camPos - pin.PosW;
+	float3 viewDir = normalize(camPos - pin.PosW);
 	int FrontOrBackFace = sign(dot(viewDir, normalize(pin.NormalW.xyz)));//check back of front face
 
 	pixelOut.gBufferAlbedo.w = FrontOrBackFace * -1.0f;
