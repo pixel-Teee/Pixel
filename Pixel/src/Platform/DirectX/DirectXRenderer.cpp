@@ -65,6 +65,14 @@ namespace Pixel {
 	};
 	//------use for prefilter map------
 
+	//------use for outline pass------
+	struct alignas(256) OutLinePass
+	{
+		glm::mat4 ViewProjection;
+		glm::vec3 camPos;
+	};
+	//------use for outline pass------
+
 	//------use for calculate gauss weights------
 	static std::vector<float> CalcGaussWeights(float sigma)
 	{
@@ -374,6 +382,8 @@ namespace Pixel {
 		pointLightVolumeIndex.back() = 64;
 		m_PointLightVolumeIndex = IndexBuffer::Create(pointLightVolumeIndex.data(), pointLightVolumeIndex.size());
 		//------create point light volume vertex and index------
+
+		CreateOutlinePipeline();
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -575,7 +585,7 @@ namespace Pixel {
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
 	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials,
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity)
+	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
@@ -685,6 +695,22 @@ namespace Pixel {
 		{
 			pCameraModel->Draw(cameraTransformant[i]->GetTransform(), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get());
 		}
+
+		//------draw outline mesh------
+		if (OutLineMesh != nullptr)
+		{
+			pGraphicsContext->SetPipelineState(*m_OutlinePso);
+			pGraphicsContext->SetRootSignature(*m_OutlineRootSignature);
+			//------outline pass------
+			OutLinePass outLinePass;
+			glm::mat4x4 gViewProjection = glm::transpose(camera.GetViewProjection());
+			outLinePass.ViewProjection = gViewProjection;
+			outLinePass.camPos = camera.GetPosition();
+			//------outline pass------
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(OutLinePass), &outLinePass);
+			OutLineMesh->mesh.DrawOutLine(OutLineMeshTransform->GetTransform(), pGraphicsContext);
+		}
+		//------draw outline mesh------
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
 		{
@@ -1624,7 +1650,7 @@ namespace Pixel {
 		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
 		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_PointLightVolumeRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
-		m_PointLightVolumeRootSignature->Finalize(L"AdditiveBlendingRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_PointLightVolumeRootSignature->Finalize(L"PointLightVolumeRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 
 		m_PointLightVolumePso->SetRootSignature(m_PointLightVolumeRootSignature);
 		
@@ -1643,6 +1669,62 @@ namespace Pixel {
 		std::static_pointer_cast<GraphicsPSO>(m_PointLightVolumePso)->SetInputLayout(layout.GetElements().size(), PointLightVolumeElementArray);
 
 		m_PointLightVolumePso->Finalize();
+	}
+
+	void DirectXRenderer::CreateOutlinePipeline()
+	{
+		m_OutlineVs = Shader::Create("assets/shaders/debug/OutLine.hlsl", "VS", "vs_5_0");
+		m_OutlinePs = Shader::Create("assets/shaders/debug/OutLine.hlsl", "PS", "ps_5_0");
+
+		m_OutlinePso = PSO::CreateGraphicsPso(L"OutlinePso");
+		auto [OutLineVsShaderBinary, OutLineVsShaderSize] = std::static_pointer_cast<DirectXShader>(m_OutlineVs)->GetShaderBinary();
+		auto [OutLinePsShaderBinary, OutLinePsShaderSize] = std::static_pointer_cast<DirectXShader>(m_OutlinePs)->GetShaderBinary();
+
+		m_OutlinePso->SetVertexShader(OutLineVsShaderBinary, OutLineVsShaderSize);
+		m_OutlinePso->SetPixelShader(OutLinePsShaderBinary, OutLinePsShaderSize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//pDepthState->DepthTest(false);
+		pDepthState->DepthTest(true);
+		pBlendState->SetRenderTargetBlendState(2, true);
+		pBlendState->SetIndependentBlendEnable(true);
+		pRasterState->SetCullMode(CullMode::None);
+
+		m_OutlineRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 2);
+		m_OutlineRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		m_OutlineRootSignature->InitStaticSampler(1, samplerDesc, ShaderVisibility::Pixel);//to solve the hash conflict
+		(*m_OutlineRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_OutlineRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_OutlineRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_OutlineRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_OutlineRootSignature->Finalize(L"OutLineRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_OutlinePso->SetRootSignature(m_OutlineRootSignature);
+
+		m_OutlinePso->SetBlendState(pBlendState);
+		m_OutlinePso->SetDepthState(pDepthState);
+		m_OutlinePso->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
+		ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
+		m_OutlinePso->SetRenderTargetFormats(5, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_OutlinePso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
+			{ShaderDataType::Float2, "Texcoord", Semantics::TEXCOORD, false},
+			{ShaderDataType::Float3, "Normal", Semantics::NORMAL, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* OutLineElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
+
+		std::static_pointer_cast<GraphicsPSO>(m_OutlinePso)->SetInputLayout(layout.GetElements().size(), OutLineElementArray);
+
+		m_OutlinePso->Finalize();
 	}
 
 	void DirectXRenderer::RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer)

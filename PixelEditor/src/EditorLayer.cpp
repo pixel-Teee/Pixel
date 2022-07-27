@@ -487,7 +487,7 @@ namespace Pixel
 				}
 				//Update scene
 				//m_ActiveScene->OnUpdateEditorForward(ts, m_EditorCamera, m_Framebuffer);
-				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer, m_FinalFrameBuffer);
+				m_ActiveScene->OnUpdateEditorDeferred(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer, m_FinalFrameBuffer, m_SceneHierarchyPanel.GetSelectedEntity());
 				break;
 			}
 			case EditorLayer::SceneState::Play:

@@ -45,6 +45,7 @@ namespace Pixel {
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, MaterialComponent* pMaterial);
 
 		void DrawShadowMap(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
+		void DrawOutLine(Ref<Context> pContext, const glm::mat4& transform);
 
 		//Ref<VertexArray> GetVerterArray();
 		Ref<VertexBuffer> GetVertexBuffer();

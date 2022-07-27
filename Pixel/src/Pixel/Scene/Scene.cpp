@@ -684,7 +684,7 @@ namespace Pixel
 		//pComputeContext->Finish(true);
 	}
 
-	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer)
+	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Entity& SelectedEntity)
 	{
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
@@ -735,9 +735,14 @@ namespace Pixel
 			}
 		}
 		//------draw frustum------
+		std::tuple<TransformComponent*, StaticMeshComponent*> OutLineEntity;
+		std::get<0>(OutLineEntity) = nullptr;
+		std::get<1>(OutLineEntity) = nullptr;
+		if(SelectedEntity)
+			OutLineEntity = m_Registry.try_get<TransformComponent, StaticMeshComponent>(SelectedEntity);
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys);
+		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys, std::get<1>(OutLineEntity), std::get<0>(OutLineEntity));
 
 		for (uint32_t i = 0; i < cameras.size(); ++i)
 		{

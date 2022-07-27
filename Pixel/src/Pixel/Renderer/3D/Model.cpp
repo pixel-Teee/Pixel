@@ -40,6 +40,12 @@ namespace Pixel {
 			m_Meshes[i].Draw(pContext, transform, entityId, pMaterialCompoent);
 	}
 
+	void Model::DrawOutLine(const glm::mat4& transform, Ref<Context> pContext)
+	{
+		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
+			m_Meshes[i].DrawOutLine(pContext, transform);
+	}
+
 	void Model::DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)

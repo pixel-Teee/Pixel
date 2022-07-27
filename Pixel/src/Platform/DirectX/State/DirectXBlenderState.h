@@ -15,6 +15,9 @@ namespace Pixel {
 
 		virtual void SetBlendState(BlenderStateType type) override;
 
+		virtual void SetRenderTargetBlendState(uint32_t index, bool enableBlend) override;
+		virtual void SetIndependentBlendEnable(bool enable) override;
+
 		//independent blend enable?
 		//void SetIndependentBlendEnable(bool enable);
 	

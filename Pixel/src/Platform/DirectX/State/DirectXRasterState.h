@@ -8,6 +8,7 @@ namespace Pixel {
 	{
 	public:
 		DirectXRasterState();
+		virtual void SetCullMode(CullMode cullMode) override;
 		virtual ~DirectXRasterState();
 
 		D3D12_RASTERIZER_DESC m_RasterizerDefault;

@@ -42,7 +42,7 @@ namespace Pixel {
 
 		virtual void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 		std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity) override;
+		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform) override;
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
@@ -70,6 +70,8 @@ namespace Pixel {
 		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) override;
 
 		virtual void RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer) override;
+
+		//virtual void RenderOutLine(Ref<Context> pGraphicsContext, const EditorCamera& camera, TransformComponent* )
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -264,6 +266,17 @@ namespace Pixel {
 		Ref<VertexBuffer> m_PointLightVolumeVertex;
 		Ref<IndexBuffer> m_PointLightVolumeIndex;
 		//------debug point light wireframe------
+
+		//------outline------
+		void CreateOutlinePipeline();
+		Ref<PSO> m_OutlinePso;
+		Ref<RootSignature> m_OutlineRootSignature;
+		Ref<Shader> m_OutlineVs;
+		Ref<Shader> m_OutlinePs;
+		Ref<VertexBuffer> m_OutlineVertex;
+		Ref<IndexBuffer> m_OutlineIndex;
+		//OutLinePass m_OutLinePass;
+		//------outline------
 	};
 }
  

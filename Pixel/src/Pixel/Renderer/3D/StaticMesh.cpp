@@ -349,6 +349,21 @@ namespace Pixel {
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
 	}
 
+	void StaticMesh::DrawOutLine(Ref<Context> pContext, const glm::mat4& transform)
+	{
+		//pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
+
+		m_MeshConstant.world = glm::transpose(transform);
+		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
+		m_MeshConstant.editor = -1;
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+
+		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+	}
+
 	//Ref<VertexArray> StaticMesh::GetVerterArray()
 	//{
 	//	return VAO;

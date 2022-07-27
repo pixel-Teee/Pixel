@@ -20,6 +20,22 @@ namespace Pixel {
 		m_RasterizerDefault.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 	}
 
+	void DirectXRasterState::SetCullMode(CullMode cullMode)
+	{
+		switch (cullMode)
+		{
+		case CullMode::None:
+			m_RasterizerDefault.CullMode = D3D12_CULL_MODE_NONE;
+			break;
+		case CullMode::Back:
+			m_RasterizerDefault.CullMode = D3D12_CULL_MODE_BACK;
+			break;
+		case CullMode::Front:
+			m_RasterizerDefault.CullMode = D3D12_CULL_MODE_FRONT;
+			break;
+		}
+	}
+
 	DirectXRasterState::~DirectXRasterState()
 	{
 

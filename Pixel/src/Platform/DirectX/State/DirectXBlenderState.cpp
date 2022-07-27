@@ -21,6 +21,15 @@ namespace Pixel {
 		m_DefaultBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 		//------Blend Describe------
 
+		m_DefaultBlendDesc.RenderTarget[2].BlendEnable = false;
+		m_DefaultBlendDesc.RenderTarget[2].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		m_DefaultBlendDesc.RenderTarget[2].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		m_DefaultBlendDesc.RenderTarget[2].BlendOp = D3D12_BLEND_OP_ADD;
+		m_DefaultBlendDesc.RenderTarget[2].SrcBlendAlpha = D3D12_BLEND_ONE;
+		m_DefaultBlendDesc.RenderTarget[2].DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
+		m_DefaultBlendDesc.RenderTarget[2].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		m_DefaultBlendDesc.RenderTarget[2].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
 		m_BlendDisable = m_DefaultBlendDesc;
 
 		m_CurrentBlend = m_BlendDisable;
@@ -43,9 +52,14 @@ namespace Pixel {
 		}
 	}
 
-	//void DirectXBlendState::SetIndependentBlendEnable(bool enable)
-	//{
-	//	m_BlendDesc.IndependentBlendEnable = enable;
-	//}
+	void DirectXBlenderState::SetRenderTargetBlendState(uint32_t index, bool enableBlend)
+	{
+		m_CurrentBlend.RenderTarget[index].BlendEnable = enableBlend;
+	}
+
+	void DirectXBlenderState::SetIndependentBlendEnable(bool enable)
+	{
+		m_CurrentBlend.IndependentBlendEnable = enable;
+	}
 
 }
