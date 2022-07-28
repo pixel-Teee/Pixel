@@ -216,6 +216,10 @@ PixelOut PS(VertexOut pin)
 	}
 	//ambient lighting(we now use IBL as the ambient term)
 	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
+
+	//------shadow map------
+	Lo *= (1 - Shadow);
+	//------shadow map------
 	
 	//------IBL------
 	//if (receiveAmbientLight)
@@ -237,10 +241,6 @@ PixelOut PS(VertexOut pin)
 		Lo += ambient;
 	//}
 	//------IBL------
-
-	//------shadow map------
-	//Lo *= (1 - Shadow);
-	//------shadow map------
 
 	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
 
