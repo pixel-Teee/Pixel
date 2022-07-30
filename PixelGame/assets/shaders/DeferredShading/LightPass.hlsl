@@ -35,12 +35,13 @@ VertexOut VS(VertexIn vin)
 //------gbuffer texture------
 Texture2D gBufferPosition : register(t0);
 Texture2D gBufferNormal : register(t1);
-Texture2D gBufferAlbedo : register(t2);
-Texture2D gBufferRoughnessMetallicEmissive : register(t3);
-TextureCube IrradianceMap : register(t4);
-TextureCube PrefilterMap : register(t5);
-Texture2D BrdfLut : register(t6);
-Texture2D ShadowMap : register(t7);
+Texture2D gVelocity : register(t2);//don't need to bind
+Texture2D gBufferAlbedo : register(t3);
+Texture2D gBufferRoughnessMetallicEmissive : register(t4);
+TextureCube IrradianceMap : register(t5);
+TextureCube PrefilterMap : register(t6);
+Texture2D BrdfLut : register(t7);
+Texture2D ShadowMap : register(t8);
 //------gbuffer texture------
 
 //------gbuffer sampler------
@@ -107,7 +108,7 @@ float GeometrySmith(float NoV, float NoL, float Roughness)
 }
 
 float3 F_Shlick(float u, float3 f0, float f90) {
-	return f0 + (float3(f90, f90, f90) - f0) * pow(1.0 - u, 5.0);
+	return f0 + (float3(f90, f90, f90) - f0) * pow(clamp(1.0 - u, 0.0f, 1.0f), 5.0);
 }
 
 float Fd_Lambert() {
@@ -182,10 +183,10 @@ PixelOut PS(VertexOut pin)
 		{
 			//calculate lights
 			float3 H = normalize(V + L);
-			float NoV = abs(dot(N, V)) + 1e-5;
-			float NoL = clamp(dot(N, L), 0.0, 1.0);
-			float NoH = clamp(dot(N, H), 0.0, 1.0);
-			float LoH = clamp(dot(L, H), 0.0, 1.0);
+			float NoV = max(dot(N, V), 0.0f);
+			float NoL = max(dot(N, L), 0.0f);
+			float NoH = max(dot(N, H), 0.0f);
+			float LoH = max(dot(L, H), 0.0f);
 
 			Lo += AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, f0, Albedo);
 		}
@@ -197,10 +198,10 @@ PixelOut PS(VertexOut pin)
 		float3 L = normalize(-lights[i].Direction);
 
 		float3 H = normalize(V + L);
-		float NoV = abs(dot(N, V)) + 1e-5;
-		float NoL = clamp(dot(N, L), 0.0, 1.0);
-		float NoH = clamp(dot(N, H), 0.0, 1.0);
-		float LoH = clamp(dot(L, H), 0.0, 1.0);
+		float NoV = max(dot(N, V), 0.0f);
+		float NoL = max(dot(N, L), 0.0f);
+		float NoH = max(dot(N, H), 0.0f);
+		float LoH = max(dot(L, H), 0.0f);
 
 		float D = DistributionGGX(NoH, Roughness);
 		float3 F = F_Shlick(LoH, f0, 1.0);
@@ -216,10 +217,14 @@ PixelOut PS(VertexOut pin)
 	}
 	//ambient lighting(we now use IBL as the ambient term)
 	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
+
+	//------shadow map------
+	Lo *= (1 - Shadow);
+	//------shadow map------
 	
 	//------IBL------
-	if (receiveAmbientLight)
-	{
+	//if (receiveAmbientLight)
+	//{
 		float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
 		float3 kD = 1.0f - kS;
 		kD *= 1.0 - Metallic;
@@ -235,12 +240,8 @@ PixelOut PS(VertexOut pin)
 		float3 ambient = kD * diffuse + specular;
 
 		Lo += ambient;
-	}
+	//}
 	//------IBL------
-
-	//------shadow map------
-	//Lo *= (1 - Shadow);
-	//------shadow map------
 
 	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
 
@@ -254,6 +255,9 @@ PixelOut PS(VertexOut pin)
 	Lo = pow(Lo, float3(Gamma, Gamma, Gamma));*/
 
 	pixelOut.Color = float4(Lo, 1.0f);
+
+	if (NormalW.x == -1.0f && NormalW.y == -1.0f && NormalW.z == -1.0f)
+		pixelOut.Color = float4(Albedo.x, Albedo.y, Albedo.z, 1.0f);
 
 	return pixelOut;
 }

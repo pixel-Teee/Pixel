@@ -219,7 +219,7 @@ PixelOut PS(VertexOut pin)
 	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 
 	//------shadow map------
-	Lo *= (1 - Shadow);
+	//Lo *= (1 - Shadow);//will cause point light not effect
 	//------shadow map------
 	
 	//------IBL------
