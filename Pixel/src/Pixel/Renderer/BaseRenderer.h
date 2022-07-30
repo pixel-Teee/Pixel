@@ -58,6 +58,8 @@ namespace Pixel {
 
 		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) = 0;
 
+		virtual void SetExposure(float exposure) = 0;
+
 		static Ref<BaseRenderer> Create();
 	};
 }

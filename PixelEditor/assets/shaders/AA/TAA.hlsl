@@ -40,6 +40,86 @@ Texture2D currentDepth : register(t3);
 
 SamplerState gsamPointWrap : register(s0);
 
+float3 RGB2YCoCgR(float3 rgbColor)
+{
+	float3 YCoCgRColor;
+
+	YCoCgRColor.y = rgbColor.r - rgbColor.b;
+	float temp = rgbColor.b + YCoCgRColor.y / 2.0f;
+	YCoCgRColor.z = rgbColor.g - temp;
+	YCoCgRColor.x = temp + YCoCgRColor.z / 2.0f;
+
+	return YCoCgRColor;
+}
+
+float3 YCoCgR2RGB(float3 YCoCgRColor)
+{
+	float3 rgbColor;
+
+	float temp = YCoCgRColor.x - YCoCgRColor.z / 2.0f;
+	rgbColor.g = YCoCgRColor.z + temp;
+	rgbColor.b = temp - YCoCgRColor.y / 2.0f;
+	rgbColor.r = rgbColor.b + YCoCgRColor.y;
+
+	return rgbColor;
+}
+
+float Luminance(float3 color)
+{
+	return 0.25 * color.r + 0.5 * color.g + 0.25 * color.b;
+}
+
+float3 ToneMap(float3 color)
+{
+	return color / (1 + Luminance(color));
+}
+
+float3 UnToneMap(float3 color)
+{
+	return color / (1 - Luminance(color));
+}
+
+float3 clipAABB(float3 nowColor, float3 preColor, float2 UV)
+{
+	float3 aabbMin = nowColor, aabbMax = nowColor;
+	float2 deltaRes = float2(1.0f / gWidth, 1.0f / gHeight);
+	float3 m1 = float3(0.0f, 0.0f, 0.0f), m2 = float3(0.0f, 0.0f, 0.0f);
+
+	for (int i = -1; i <= 1; ++i)
+	{
+		for (int j = -1; j <= 1; ++j)
+		{
+			float2 newUV = UV + deltaRes * float2(i, j);
+			float3 C = RGB2YCoCgR(ToneMap(currentScene.Sample(gsamPointWrap, newUV).xyz));
+			m1 += C;
+			m2 += C * C;
+		}
+	}
+
+	//Variance clip
+	int N = 9;
+	float VarianceClipGamma = 1.0f;
+	float3 mu = m1 / N;
+	float3 sigma = sqrt(abs(m2 / N - mu * mu));
+
+	aabbMin = mu - VarianceClipGamma * sigma;
+	aabbMax = mu + VarianceClipGamma * sigma;
+
+	// clip to center
+	float3 p_clip = 0.5 * (aabbMax + aabbMin);
+	float3 e_clip = 0.5 * (aabbMax - aabbMin);
+
+	float3 v_clip = preColor - p_clip;
+	float3 v_unit = v_clip.xyz / e_clip;
+	float3 a_unit = abs(v_unit);
+	float ma_unit = max(a_unit.x, max(a_unit.y, a_unit.z));
+
+	if (ma_unit > 1.0)
+		return p_clip + v_clip / ma_unit;
+	else
+		return preColor;
+}
+
 float2 getClosestOffset(float2 UV)
 {
 	float2 deltaRes = float2(1.0f / gWidth, 1.0f / gHeight);
@@ -71,26 +151,28 @@ PixelOut PS(VertexOut pin)
 
 	float3 nowColor = currentScene.Sample(gsamPointWrap, pin.TexCoord).xyz;
 
-	//HDR Color To LDR
-	float3 mappedNowColor = nowColor / (nowColor + float3(1.0f, 1.0f, 1.0f));
-
 	//find closest velocity
 	float2 velocity = velocityTexture.Sample(gsamPointWrap, getClosestOffset(pin.TexCoord)).xy;
 	float2 offsetUV = clamp(pin.TexCoord - velocity, 0.0f, 1.0f);
 	float3 preColor = previousScene.Sample(gsamPointWrap, offsetUV).xyz;
 
-	float3 mappedPreColor = preColor / (preColor + float3(1.0f, 1.0f, 1.0f));
+	//HDR TO LDR
+	float3 mappedNowColor = RGB2YCoCgR(ToneMap(nowColor));
+	float3 mappedPreColor = RGB2YCoCgR(ToneMap(preColor));
+
+	mappedPreColor = clipAABB(mappedNowColor, mappedPreColor, pin.TexCoord);
+
+	//LDR TO HDR
+	mappedNowColor = UnToneMap(YCoCgR2RGB(mappedNowColor));
+	mappedPreColor = UnToneMap(YCoCgR2RGB(mappedPreColor));
 
 	//blend
-	float c = 0.05f;
+	float c = 0.10f;
 
 	float3 resultColor = c * mappedNowColor + (1 - c) * mappedPreColor;
 
-	//LDR TO HDR Color
-	//inverse tone mapping
-	
 	//taa
-	pixelOut.Color = float4(resultColor / max((float3(1.0f, 1.0f, 1.0f) - resultColor), 0.001f), 1.0f);
+	pixelOut.Color = float4(resultColor.xyz, 1.0f);
 
 	return pixelOut;
 }

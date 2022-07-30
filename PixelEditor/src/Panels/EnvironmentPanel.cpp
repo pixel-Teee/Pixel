@@ -24,6 +24,8 @@ namespace Pixel {
 		Application::Get().GetRenderer()->InitializeAndConvertHDRToCubeMap(texturePath);
 
 		Device::Get()->CopyDescriptorsSimple(1, m_HDRTextureHandle->GetCpuHandle(), Application::Get().GetRenderer()->GetHDRDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		Application::Get().GetRenderer()->SetExposure(m_Exposure);
 	}
 	
 	EnvironmentPanel::~EnvironmentPanel()
@@ -50,7 +52,8 @@ namespace Pixel {
 				}
 				ImGui::EndDragDropTarget();
 			}
-			
+			ImGui::DragFloat("Exposure", &m_Exposure, 1.0f, 0.1f, 64.0f);
+			Application::Get().GetRenderer()->SetExposure(m_Exposure);
 			//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(51.0f / 255.0f, 197.0f / 255.0f, 178.0f / 255.0f));
 			//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(51.0f / 255.0f, 197.0f / 255.0f, 111.0f / 255.0f));
 			//ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(51.0f / 255.0f, 197.0f / 255.0f, 198.0f / 255.0f));

@@ -50,7 +50,7 @@ PixelOut PS(VertexOut pin)
 	hdrColor += bloomColor;
 
 	//tone mapping
-	float3 result = float3(1.0f, 1.0f, 1.0f) - exp(-hdrColor * 1.0f);
+	float3 result = float3(1.0f, 1.0f, 1.0f) - exp(-hdrColor * exposure);
 
 	//gamma correct
 	result = pow(result, float3(invGamma, invGamma, invGamma));

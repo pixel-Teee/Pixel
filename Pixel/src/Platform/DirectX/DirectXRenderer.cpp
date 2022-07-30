@@ -1974,7 +1974,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_AdditiveBlendingDescriptorHandle2->GetCpuHandle(), pBloomTexture->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_AdditiveBlendingDescriptorHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_AdditiveBlendingDescriptorHandle->GetGpuHandle());
-
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(float), &m_exposure);
 		pContext->TransitionResource(*pSceneTexture, ResourceStates::GenericRead);
 		pContext->TransitionResource(*pBloomTexture, ResourceStates::GenericRead);
 		pContext->TransitionResource(*(FinalColorBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
@@ -2037,6 +2037,11 @@ namespace Pixel {
 			pGraphicsContext->SetIndexBuffer(m_PointLightVolumeIndex->GetIBV());
 			pGraphicsContext->DrawIndexed(m_PointLightVolumeIndex->GetCount());
 		}
+	}
+
+	void DirectXRenderer::SetExposure(float exposure)
+	{
+		m_exposure = exposure;
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()

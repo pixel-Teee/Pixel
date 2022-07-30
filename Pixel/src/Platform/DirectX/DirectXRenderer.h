@@ -72,6 +72,7 @@ namespace Pixel {
 		virtual void RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer) override;
 
 		//virtual void RenderOutLine(Ref<Context> pGraphicsContext, const EditorCamera& camera, TransformComponent* )
+		virtual void SetExposure(float exposure) override;
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -294,6 +295,8 @@ namespace Pixel {
 		Ref<GpuResource> m_PreviousScene;//previous scene texture
 		Ref<GpuResource> m_CurrentScene;//current scene texture
 		//------TAA------
+
+		float m_exposure;
 	};
 }
  
