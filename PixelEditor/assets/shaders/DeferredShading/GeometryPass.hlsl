@@ -125,7 +125,7 @@ float3 DecodeNormalMap(float2 uv, float3 worldPos, float3 normal)
 	float3 Q1 = ddx(worldPos);
 	float3 Q2 = ddy(worldPos);
 	float2 st1 = ddx(uv);
-	float2 st2 = ddx(uv);
+	float2 st2 = ddy(uv);
 
 	float3 N = normalize(normal);
 	float3 T = normalize(Q1 * st2.y - Q2 * st1.y);
@@ -147,7 +147,7 @@ PixelOut PS(VertexOut pin)
 		pixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;//[-1, 1]->[0, 1]
 	else
 		pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;//[-1, 1]->[0, 1]
-	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz * gAlbedo;
+	pixelOut.gBufferAlbedo.xyz = pow(gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz, float3(2.2f, 2.2f, 2.2f)) * gAlbedo;
 	pixelOut.gBufferAlbedo.w = 1.0f;
 	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;
 	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).x * gMetallic;
@@ -158,7 +158,7 @@ PixelOut PS(VertexOut pin)
 	float2 newPos = ((pin.nowScreenPosition.xy / pin.nowScreenPosition.w) * 0.5f + 0.5f);
 	float2 prePos = ((pin.preScreenPosition.xy / pin.preScreenPosition.w) * 0.5f + 0.5f);
 	pixelOut.gVelocity.xy = newPos - prePos;
-	pixelOut.gVelocity.z = 1.0f;
+	pixelOut.gVelocity.z = 0.0f;
 	//------velocity------
 
 	return pixelOut;
