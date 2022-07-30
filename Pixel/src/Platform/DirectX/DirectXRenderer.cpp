@@ -1081,22 +1081,20 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		//bind resources
-		CbufferGeometryPass cbufferGeometryPass;
 		glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform()));
 		glm::mat4x4 Projection = glm::transpose(pCamera->GetProjection());
 		glm::mat4x4 gViewProjection = View * Projection;
-		cbufferGeometryPass.ViewProjection = gViewProjection;
+		m_CbufferGeometryPass.ViewProjection = gViewProjection;
 		if (m_IsFirst)
 		{
 			m_IsFirst = false;
-			//m_PreviousScene = Framebuffer::Create(pLightFrameBuffer->GetSpecification());//use for TAA
-			cbufferGeometryPass.previousViewProjection = gViewProjection;
+			m_CbufferGeometryPass.previousViewProjection = gViewProjection;
 		}
-		cbufferGeometryPass.frameCount = m_FrameCount;
-		cbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
-		cbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
+		m_CbufferGeometryPass.frameCount = m_FrameCount;//for taa
+		m_CbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
+		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
 		++m_FrameCount;
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &cbufferGeometryPass);
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
 
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
@@ -1141,7 +1139,7 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		m_lightPass.CameraPosition = pCameraTransformComponent->Translation;
-		m_lightPass.receiveAmbientLight = false;
+		m_lightPass.receiveAmbientLight = false;//test
 
 		std::vector<LightComponent*> ReSortedPointLight;
 		std::vector<TransformComponent*> ReSortedPointLightTrans;
@@ -1262,7 +1260,7 @@ namespace Pixel {
 		taaPass.frameCount = m_FrameCount;
 		taaPass.Width = pDirectxFrameBuffer->GetSpecification().Width;
 		taaPass.Height = pDirectxFrameBuffer->GetSpecification().Height;
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(TAAPass), &taaPass);
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(TAAPass), &taaPass);//maybe cause damage face
 		pContext->SetRenderTarget(pLightFrame->m_pColorBuffers[0]->GetRTV());
 		pContext->TransitionResource(*(pLightFrame->m_pColorBuffers[0]), ResourceStates::RenderTarget);
 		pContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
