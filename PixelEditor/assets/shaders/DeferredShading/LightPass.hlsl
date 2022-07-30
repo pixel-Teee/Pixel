@@ -35,12 +35,13 @@ VertexOut VS(VertexIn vin)
 //------gbuffer texture------
 Texture2D gBufferPosition : register(t0);
 Texture2D gBufferNormal : register(t1);
-Texture2D gBufferAlbedo : register(t2);
-Texture2D gBufferRoughnessMetallicEmissive : register(t3);
-TextureCube IrradianceMap : register(t4);
-TextureCube PrefilterMap : register(t5);
-Texture2D BrdfLut : register(t6);
-Texture2D ShadowMap : register(t7);
+Texture2D gVelocity : register(t2);//don't need to bind
+Texture2D gBufferAlbedo : register(t3);
+Texture2D gBufferRoughnessMetallicEmissive : register(t4);
+TextureCube IrradianceMap : register(t5);
+TextureCube PrefilterMap : register(t6);
+Texture2D BrdfLut : register(t7);
+Texture2D ShadowMap : register(t8);
 //------gbuffer texture------
 
 //------gbuffer sampler------
@@ -254,6 +255,9 @@ PixelOut PS(VertexOut pin)
 	Lo = pow(Lo, float3(Gamma, Gamma, Gamma));*/
 
 	pixelOut.Color = float4(Lo, 1.0f);
+
+	if (NormalW.x == -1.0f && NormalW.y == -1.0f && NormalW.z == -1.0f)
+		pixelOut.Color = float4(Albedo.x, Albedo.y, Albedo.z, 1.0f);
 
 	return pixelOut;
 }

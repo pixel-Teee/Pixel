@@ -6,6 +6,10 @@ namespace Pixel {
 
 	DirectXBlenderState::DirectXBlenderState()
 	{
+		/*
+			need to refractor this
+		*/
+
 		//m_DefaultBlendDesc = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		ZeroMemory(&m_DefaultBlendDesc, sizeof(D3D12_BLEND_DESC));
 		//------Blend Describe------
@@ -21,6 +25,8 @@ namespace Pixel {
 		m_DefaultBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 		//------Blend Describe------
 
+		m_DefaultBlendDesc.RenderTarget[1].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
 		m_DefaultBlendDesc.RenderTarget[2].BlendEnable = false;
 		m_DefaultBlendDesc.RenderTarget[2].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		m_DefaultBlendDesc.RenderTarget[2].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
@@ -29,6 +35,8 @@ namespace Pixel {
 		m_DefaultBlendDesc.RenderTarget[2].DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
 		m_DefaultBlendDesc.RenderTarget[2].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 		m_DefaultBlendDesc.RenderTarget[2].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+		m_DefaultBlendDesc.RenderTarget[3].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 		m_BlendDisable = m_DefaultBlendDesc;
 

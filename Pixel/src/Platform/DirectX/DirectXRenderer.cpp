@@ -73,6 +73,13 @@ namespace Pixel {
 	};
 	//------use for outline pass------
 
+	struct alignas(256) TAAPass
+	{
+		float Width;
+		float Height;
+		uint32_t frameCount;
+	};
+
 	//------use for calculate gauss weights------
 	static std::vector<float> CalcGaussWeights(float sigma)
 	{
@@ -209,12 +216,12 @@ namespace Pixel {
 		//------Create Deferred Shading Geometry and Light PipelineState-------
 
 		//------Create Deferred Shading Geometry Gbuffer Texture Handle-------
-		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 8);
-		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(8);
+		m_DeferredShadingLightGbufferTextureHeap = DescriptorHeap::Create(L"DeferredShadingLightHeap", DescriptorHeapType::CBV_UAV_SRV, 9);
+		m_DeferredShadingLightGbufferTextureHandle = m_DeferredShadingLightGbufferTextureHeap->Alloc(9);
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
-		m_DeferredShadingLightGbufferTextureHandles.resize(8);
+		m_DeferredShadingLightGbufferTextureHandles.resize(9);
 
-		for (uint32_t i = 0; i < 8; ++i)
+		for (uint32_t i = 0; i < 9; ++i)
 		{
 			DescriptorHandle secondHandle = (*m_DeferredShadingLightGbufferTextureHandle) + i * DescriptorSize;
 			m_DeferredShadingLightGbufferTextureHandles[i] = secondHandle;
@@ -384,6 +391,19 @@ namespace Pixel {
 		//------create point light volume vertex and index------
 
 		CreateOutlinePipeline();
+
+		//------TAA------
+		CreateTAAPipeline();
+		m_TAATextureDescriptorHeap = DescriptorHeap::Create(L"TAATextureDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 4);
+		m_TAAFirstTextureDescriptorHandle = m_TAATextureDescriptorHeap->Alloc(4);
+		m_TAAFirstTextureDescriptorHandles.resize(4);
+		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+		for (uint32_t i = 0; i < 4; ++i)
+		{
+			m_TAAFirstTextureDescriptorHandles[i] = (*m_TAAFirstTextureDescriptorHandle) + i * DescriptorSize;
+		}
+		m_FrameCount = 0;
+		//------TAA------
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -587,12 +607,38 @@ namespace Pixel {
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
 	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform)
 	{
+		m_Width = pFrameBuffer->GetSpecification().Width;
+		m_Height = pFrameBuffer->GetSpecification().Height;
+		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
+		{
+			int32_t widthAndHeight[2] = { m_Width, m_Height };
+			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
+			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
+
+			m_BlurTexture = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture)->Create(L"BlurTexture", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_PickerBuffer = CreateRef<StructuredBuffer>();
+			std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
+
+			//------use for TAA------
+			m_PreviousScene = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_PreviousScene)->Create(L"PreviousScene", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_CurrentScene = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_CurrentScene)->Create(L"CurrentScene", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+			//------use for TAA------
+		}
+
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
 		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
-		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "color buffer's size is not equal to 5!");
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "color buffer's size is not equal to 6!");
 
 		//------shadow map------
 		LightComponent* mainDirectLight = nullptr;//find the direct light to generate shadow map
@@ -644,7 +690,7 @@ namespace Pixel {
 		//------get the cpu descriptor handle------
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
-		pGraphicsContext->SetRenderTargets(5, m_CpuHandles, dsvHandle);
+		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
 		{
@@ -681,7 +727,17 @@ namespace Pixel {
 
 		//bind resources
 		glm::mat4x4 gViewProjection = glm::transpose(camera.GetViewProjection());
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4x4), glm::value_ptr(gViewProjection));
+		m_CbufferGeometryPass.ViewProjection = gViewProjection;
+		if (m_IsFirst)
+		{
+			m_IsFirst = false;
+			m_CbufferGeometryPass.previousViewProjection = gViewProjection;
+		}
+		m_CbufferGeometryPass.frameCount = m_FrameCount;//for taa
+		m_CbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
+		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
+		++m_FrameCount;
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
 		
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
@@ -717,7 +773,7 @@ namespace Pixel {
 			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::Common);
 		}
 		//editor frame buffer
-		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[4]), ResourceStates::Common);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[5]), ResourceStates::Common);
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
 
 		//------second pass:light pass------
@@ -807,10 +863,11 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[1].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[1]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[2].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[2]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[3].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[3]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[4]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[8].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		//bind texture resources
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
@@ -847,6 +904,36 @@ namespace Pixel {
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
 
+		//------copy current scene------
+		pContext->CopyBuffer(*m_CurrentScene, *(pLightFrame->m_pColorBuffers[0]));
+		//------copy current scene------
+
+		//------TAA------
+		Ref<DirectXFrameBuffer> pGeometryFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+		Ref<DescriptorCpuHandle> pDsv = pGeometryFrameBuffer->m_pDepthBuffer->GetDepthSRV();
+		Ref<DescriptorCpuHandle> pCurrentScene = m_CurrentScene->GetSRV();
+		Ref<DescriptorCpuHandle> velocityTexture = pGeometryFrameBuffer->m_pColorBuffers[2]->GetSRV();//velocity texture, get from the geometry framebuffer
+		Ref<DescriptorCpuHandle> previousScene = m_PreviousScene->GetSRV();
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[0].GetCpuHandle(), pCurrentScene, DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[1].GetCpuHandle(), previousScene, DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[2].GetCpuHandle(), velocityTexture, DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[3].GetCpuHandle(), pDsv, DescriptorHeapType::CBV_UAV_SRV);
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_TAATextureDescriptorHeap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_TAAFirstTextureDescriptorHandle->GetGpuHandle());
+		pContext->SetPipelineState(*m_TAAPSO);
+		pContext->SetRootSignature(*m_TAARootSignature);
+		TAAPass taaPass;
+		taaPass.frameCount = m_FrameCount;
+		taaPass.Width = pDirectxFrameBuffer->GetSpecification().Width;
+		taaPass.Height = pDirectxFrameBuffer->GetSpecification().Height;
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(TAAPass), &taaPass);//maybe cause damage face
+		pContext->SetRenderTarget(pLightFrame->m_pColorBuffers[0]->GetRTV());
+		pContext->TransitionResource(*(pLightFrame->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+		pContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
+		//------TAA------
+
 		//for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
 		//{
 		//	pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
@@ -859,9 +946,24 @@ namespace Pixel {
 
 		//InitializeAndConvertHDRToCubeMap(texturePath);
 
-		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
-		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
+		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
+		pContext->CopyBuffer(*pBlurTexture, *(pLightFrame->m_pColorBuffers[1]));
 
+		m_lastWidth = m_Width;
+		m_lastHeight = m_Height;
+
+		//------use for TAA------
+		m_CbufferGeometryPass.previousViewProjection = gViewProjection;
+		//copy the current scene buffer to previous buffer
+		pContext->CopyBuffer(*m_PreviousScene, *m_CurrentScene);
+		//------use for TAA------
+	}
+
+	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, 
+	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds)
+	{
+		m_Width = pFrameBuffer->GetSpecification().Width;
+		m_Height = pFrameBuffer->GetSpecification().Height;
 		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
 		{
 			int32_t widthAndHeight[2] = { m_Width, m_Height };
@@ -876,24 +978,22 @@ namespace Pixel {
 
 			m_PickerBuffer = CreateRef<StructuredBuffer>();
 			std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
+
+			//------use for TAA------
+			m_PreviousScene = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_PreviousScene)->Create(L"PreviousScene", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+
+			m_CurrentScene = CreateRef<DirectXColorBuffer>();
+			std::static_pointer_cast<DirectXColorBuffer>(m_CurrentScene)->Create(L"CurrentScene", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
+			//------use for TAA------
 		}
 
-		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
-		pContext->CopyBuffer(*pBlurTexture, *(pLightFrame->m_pColorBuffers[1]));
-
-		m_lastWidth = m_Width;
-		m_lastHeight = m_Height;
-	}
-
-	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, 
-	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds)
-	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
 		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
-		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "color buffer's size is not equal to 5!");
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "color buffer's size is not equal to 6!");
 
 		//------shadow map------
 		LightComponent* mainDirectLight = nullptr;//find the direct light to generate shadow map
@@ -945,7 +1045,7 @@ namespace Pixel {
 		//------get the cpu descriptor handle------
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
-		pGraphicsContext->SetRenderTargets(5, m_CpuHandles, dsvHandle);
+		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
 		{
@@ -981,10 +1081,22 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		//bind resources
+		CbufferGeometryPass cbufferGeometryPass;
 		glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform()));
 		glm::mat4x4 Projection = glm::transpose(pCamera->GetProjection());
 		glm::mat4x4 gViewProjection = View * Projection;
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4x4), glm::value_ptr(gViewProjection));
+		cbufferGeometryPass.ViewProjection = gViewProjection;
+		if (m_IsFirst)
+		{
+			m_IsFirst = false;
+			//m_PreviousScene = Framebuffer::Create(pLightFrameBuffer->GetSpecification());//use for TAA
+			cbufferGeometryPass.previousViewProjection = gViewProjection;
+		}
+		cbufferGeometryPass.frameCount = m_FrameCount;
+		cbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
+		cbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
+		++m_FrameCount;
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &cbufferGeometryPass);
 
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
@@ -997,7 +1109,7 @@ namespace Pixel {
 			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::Common);
 		}
 		//editor frame buffer
-		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[4]), ResourceStates::Common);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[5]), ResourceStates::Common);
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
 
 		//------second pass:light pass------
@@ -1087,10 +1199,11 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[1].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[1]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[2].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[2]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[3].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[3]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[4]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[8].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
 		//bind texture resources
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
 		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
@@ -1127,6 +1240,36 @@ namespace Pixel {
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
 
+		//------copy current scene------
+		pContext->CopyBuffer(*m_CurrentScene, *(pLightFrame->m_pColorBuffers[0]));
+		//------copy current scene------
+
+		//------TAA------
+		Ref<DirectXFrameBuffer> pGeometryFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+		Ref<DescriptorCpuHandle> pDsv = pGeometryFrameBuffer->m_pDepthBuffer->GetDepthSRV();
+		Ref<DescriptorCpuHandle> pCurrentScene = m_CurrentScene->GetSRV();
+		Ref<DescriptorCpuHandle> velocityTexture = pGeometryFrameBuffer->m_pColorBuffers[2]->GetSRV();//velocity texture, get from the geometry framebuffer
+		Ref<DescriptorCpuHandle> previousScene = m_PreviousScene->GetSRV();
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[0].GetCpuHandle(), pCurrentScene, DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[1].GetCpuHandle(), previousScene, DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[2].GetCpuHandle(), velocityTexture, DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_TAAFirstTextureDescriptorHandles[3].GetCpuHandle(), pDsv, DescriptorHeapType::CBV_UAV_SRV);
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_TAATextureDescriptorHeap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_TAAFirstTextureDescriptorHandle->GetGpuHandle());
+		pContext->SetPipelineState(*m_TAAPSO);
+		pContext->SetRootSignature(*m_TAARootSignature);
+		TAAPass taaPass;
+		taaPass.frameCount = m_FrameCount;
+		taaPass.Width = pDirectxFrameBuffer->GetSpecification().Width;
+		taaPass.Height = pDirectxFrameBuffer->GetSpecification().Height;
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(TAAPass), &taaPass);
+		pContext->SetRenderTarget(pLightFrame->m_pColorBuffers[0]->GetRTV());
+		pContext->TransitionResource(*(pLightFrame->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+		pContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
+		//------TAA------
+
 		//for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
 		//{
 		//	pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::Common);
@@ -1139,30 +1282,17 @@ namespace Pixel {
 
 		//InitializeAndConvertHDRToCubeMap(texturePath);
 
-		m_Width = pDirectxFrameBuffer->GetSpecification().Width;
-		m_Height = pDirectxFrameBuffer->GetSpecification().Height;
-
-		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
-		{
-			int32_t widthAndHeight[2] = { m_Width, m_Height };
-			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
-			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
-
-			m_BlurTexture = CreateRef<DirectXColorBuffer>();
-			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture)->Create(L"BlurTexture", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
-
-			m_BlurTexture2 = CreateRef<DirectXColorBuffer>();
-			std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture2)->Create(L"BlurTexture2", m_Width, m_Height, 0, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, nullptr);
-
-			m_PickerBuffer = CreateRef<StructuredBuffer>();
-			std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer)->Create(L"PickerBuffer", m_Width * m_Height, sizeof(int32_t), nullptr);
-		}
-
 		Ref<DirectXColorBuffer> pBlurTexture = std::static_pointer_cast<DirectXColorBuffer>(m_BlurTexture);
 		pContext->CopyBuffer(*pBlurTexture, *(pLightFrame->m_pColorBuffers[1]));
 
 		m_lastWidth = m_Width;
 		m_lastHeight = m_Height;
+
+		//------use for TAA------
+		m_CbufferGeometryPass.previousViewProjection = gViewProjection;
+		//copy the current scene buffer to previous buffer
+		pContext->CopyBuffer(*m_PreviousScene, *m_CurrentScene);
+		//------use for TAA------
 	}
 
 	void DirectXRenderer::RenderImageToBackBuffer(Ref<GpuResource> pDestResource, Ref<GpuResource> pSrcResource, Ref<Context> context)
@@ -1711,9 +1841,9 @@ namespace Pixel {
 		m_OutlinePso->SetDepthState(pDepthState);
 		m_OutlinePso->SetRasterizerState(pRasterState);
 
-		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
 		ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
-		m_OutlinePso->SetRenderTargetFormats(5, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_OutlinePso->SetRenderTargetFormats(6, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_OutlinePso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
 
 		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
@@ -1725,6 +1855,58 @@ namespace Pixel {
 		std::static_pointer_cast<GraphicsPSO>(m_OutlinePso)->SetInputLayout(layout.GetElements().size(), OutLineElementArray);
 
 		m_OutlinePso->Finalize();
+	}
+
+	void DirectXRenderer::CreateTAAPipeline()
+	{
+		m_TAAVs = Shader::Create("assets/shaders/AA/TAA.hlsl", "VS", "vs_5_0");
+		m_TAAPs = Shader::Create("assets/shaders/AA/TAA.hlsl", "PS", "ps_5_0");
+
+		m_TAAPSO = PSO::CreateGraphicsPso(L"OutlinePso");
+		auto [TAAVsShaderBinary, TAAVsShaderSize] = std::static_pointer_cast<DirectXShader>(m_TAAVs)->GetShaderBinary();
+		auto [TAAPsShaderBinary, TAAPsShaderSize] = std::static_pointer_cast<DirectXShader>(m_TAAPs)->GetShaderBinary();
+
+		m_TAAPSO->SetVertexShader(TAAVsShaderBinary, TAAVsShaderSize);
+		m_TAAPSO->SetPixelShader(TAAPsShaderBinary, TAAPsShaderSize);
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+		Ref<DepthState> pDepthState = DepthState::Create();
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		Ref<RasterState> pRasterState = RasterState::Create();
+		pDepthState->DepthTest(false);
+		//pBlendState->SetRenderTargetBlendState(2, true);
+		//pBlendState->SetIndependentBlendEnable(true);
+		//pRasterState->SetCullMode(CullMode::Front);
+
+		m_TAARootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		m_TAARootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		(*m_TAARootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		(*m_TAARootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		(*m_TAARootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		(*m_TAARootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_TAARootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		(*m_TAARootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		(*m_TAARootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		m_TAARootSignature->Finalize(L"TAARootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_TAAPSO->SetRootSignature(m_TAARootSignature);
+
+		m_TAAPSO->SetBlendState(pBlendState);
+		m_TAAPSO->SetDepthState(pDepthState);
+		m_TAAPSO->SetRasterizerState(pRasterState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT };
+		m_TAAPSO->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
+		m_TAAPSO->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
+			{ShaderDataType::Float2, "Texcoord", Semantics::TEXCOORD, false}};
+
+		D3D12_INPUT_ELEMENT_DESC* TAAElementArray = FromBufferLayoutToCreateDirectXVertexLayout(layout);
+
+		std::static_pointer_cast<GraphicsPSO>(m_TAAPSO)->SetInputLayout(layout.GetElements().size(), TAAElementArray);
+
+		m_TAAPSO->Finalize();
 	}
 
 	void DirectXRenderer::RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer)
@@ -1940,9 +2122,9 @@ namespace Pixel {
 	{
 		//get the editor buffer
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
-		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 5, "frame color buffer's size error!");
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "frame color buffer's size error!");
 
-		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[4];
+		Ref<DirectXColorBuffer> pColorBuffer = pDirectxFrameBuffer->m_pColorBuffers[5];
 
 		//creat the structed buffer
 		//m_PickerBuffer = CreateRef<StructuredBuffer>();
@@ -2273,9 +2455,9 @@ namespace Pixel {
 		m_DefaultGeometryShadingPso->SetRasterizerState(pRasterState);
 		m_DefaultGeometryShadingPso->SetDepthState(pDepthState);
 
-		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
 		ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
-		m_DefaultGeometryShadingPso->SetRenderTargetFormats(5, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_DefaultGeometryShadingPso->SetRenderTargetFormats(6, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_DefaultGeometryShadingPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
 
 		m_GeometryVertexShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "VS", "vs_5_0");

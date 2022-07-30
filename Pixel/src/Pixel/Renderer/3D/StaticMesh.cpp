@@ -291,6 +291,11 @@ namespace Pixel {
 
 		m_MeshConstant.world = glm::transpose(transform);
 		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
+		if (isFirst)
+		{
+			isFirst = false;
+			m_MeshConstant.previousWorld = glm::transpose(transform);
+		}
 		m_MeshConstant.editor = entityId;
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
@@ -330,6 +335,8 @@ namespace Pixel {
 		//unbind descriptor heap
 		Ref<DescriptorHeap> nullHeap = DescriptorHeap::Create();
 		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
+
+		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
 
 	void StaticMesh::DrawShadowMap(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId)
@@ -355,6 +362,11 @@ namespace Pixel {
 
 		m_MeshConstant.world = glm::transpose(transform);
 		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
+		if (isFirst)
+		{
+			isFirst = false;
+			m_MeshConstant.previousWorld = glm::transpose(transform);
+		}
 		m_MeshConstant.editor = -1;
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
@@ -362,6 +374,9 @@ namespace Pixel {
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+
+		//record last world
+		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
 
 	//Ref<VertexArray> StaticMesh::GetVerterArray()

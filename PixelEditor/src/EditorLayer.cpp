@@ -54,26 +54,28 @@ namespace Pixel
 		R			G			B			A 
 		position.r	position.g	position.b	x
 		normal.r	normal.g	normal.b	x
+		velocity.r	velocity.g	velocity.b  x
 		albedo.r	albedo.g	albedo.b	x
 		roughness	metallic	emissive	x
 		--------------------------------------*/
-
-		//last is bloom texture
+	
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, 
+		FramebufferTextureFormat::RGBA16F,FramebufferTextureFormat::RGBA8,
 		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
-		///*------Create Geometry Framebuffer------*/
+		/*------Create Geometry Framebuffer------*/
 
-		///*------Create Framebuffer------*/	
+		//last is bloom texture
+		/*------Create Framebuffer------*/	
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth};
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 			
-		///*------Create Framebuffer------*/
+		/*------Create Framebuffer------*/
 
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
 		fbSpec.Width = 1280;

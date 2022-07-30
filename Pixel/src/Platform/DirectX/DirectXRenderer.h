@@ -277,6 +277,23 @@ namespace Pixel {
 		Ref<IndexBuffer> m_OutlineIndex;
 		//OutLinePass m_OutLinePass;
 		//------outline------
+
+		//------TAA------
+		uint32_t m_FrameCount;
+		bool m_IsFirst;
+		CbufferGeometryPass m_CbufferGeometryPass;
+		void CreateTAAPipeline();
+		Ref<PSO> m_TAAPSO;
+		Ref<RootSignature> m_TAARootSignature;
+		Ref<Shader> m_TAAVs;
+		Ref<Shader> m_TAAPs;
+		Ref<DescriptorHeap> m_TAATextureDescriptorHeap;
+		Ref<DescriptorHandle> m_TAAFirstTextureDescriptorHandle;
+		std::vector<DescriptorHandle> m_TAAFirstTextureDescriptorHandles;
+
+		Ref<GpuResource> m_PreviousScene;//previous scene texture
+		Ref<GpuResource> m_CurrentScene;//current scene texture
+		//------TAA------
 	};
 }
  

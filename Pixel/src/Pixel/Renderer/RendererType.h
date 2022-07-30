@@ -278,4 +278,15 @@ namespace Pixel {
 	{
 		MIN_MAG_MIP_LINEAR
 	};
+
+	//------use for geometry pass------
+	struct alignas(256) CbufferGeometryPass
+	{
+		glm::mat4 ViewProjection;
+		glm::mat4 previousViewProjection;//use for TAA
+		uint32_t frameCount;
+		float width;
+		float height;
+	};
+	//------use for geometry pass------
 }

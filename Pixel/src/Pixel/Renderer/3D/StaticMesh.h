@@ -15,6 +15,7 @@ namespace Pixel {
 	{
 		glm::mat4 world;
 		glm::mat4 invWorld;
+		glm::mat4 previousWorld;//use for TAA
 		int editor;
 	};
 

@@ -3,6 +3,7 @@ cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;//world matrix
 	float4x4 ginvWorld;//inverse world matrix
+	float4x4 previousWorld;//use for TAA
 	int gEditor;
 };
 //------mesh constants------
@@ -34,9 +35,10 @@ struct PixelOut
 {
 	float4 gBufferPosition : SV_Target;
 	float4 gBufferNormal : SV_Target1;
-	float4 gBufferAlbedo : SV_Target2;
-	float4 gBufferRoughnessMetallicEmissive : SV_Target3;
-	int gEditor : SV_Target4;
+	float4 gVelocity : SV_Target2;
+	float4 gBufferAlbedo : SV_Target3;
+	float4 gBufferRoughnessMetallicEmissive : SV_Target4;
+	int gEditor : SV_Target5;
 };
 
 VertexOut VS(VertexIn vin)
@@ -69,7 +71,7 @@ PixelOut PS(VertexOut pin)
 	pixelOut.gBufferPosition.xyz = pin.PosW;
 
 	//if don't have normal map, then use the vertex's normal
-	pixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;//[-1, 1]->[0, 1]
+	pixelOut.gBufferNormal.xyz = float3(-1.0f, -1.0f, -1.0f);
 
 	pixelOut.gBufferAlbedo.xyz = float3(1.0f, 1.0f, 0.0f);
 
