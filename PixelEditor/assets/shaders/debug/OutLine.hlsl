@@ -12,6 +12,7 @@ cbuffer cbPass : register(b1)
 {
 	float4x4 gViewProjection;
 	float3	camPos;//camera pos
+	float gWidth;//width
 };
 
 cbuffer CbMaterial : register(b2)
@@ -59,8 +60,11 @@ VertexOut VS(VertexIn vin)
 
 	//to world space
 	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
+
+	float camPosToWorldPosLength = length(camPos - posW);
+
 	//offset outline
-	posW.xyz += vout.NormalW * 0.5f;
+	posW.xyz += vout.NormalW * camPosToWorldPosLength / max(gWidth, 0.01f) * 2.0f;
 
 	vout.PosW = posW.xyz;
 

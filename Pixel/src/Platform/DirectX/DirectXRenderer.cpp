@@ -72,6 +72,7 @@ namespace Pixel {
 	{
 		glm::mat4 ViewProjection;
 		glm::vec3 camPos;
+		float width;
 	};
 	//------use for outline pass------
 
@@ -764,6 +765,7 @@ namespace Pixel {
 			glm::mat4x4 gViewProjection = glm::transpose(camera.GetViewProjection());
 			outLinePass.ViewProjection = gViewProjection;
 			outLinePass.camPos = camera.GetPosition();
+			outLinePass.width = m_Width;
 			//------outline pass------
 			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(OutLinePass), &outLinePass);
 			OutLineMesh->mesh.DrawOutLine(OutLineMeshTransform->GetGlobalTransform(scene->GetRegistry()), pGraphicsContext);
