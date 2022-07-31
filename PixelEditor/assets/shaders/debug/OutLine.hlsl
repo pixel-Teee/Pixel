@@ -14,6 +14,16 @@ cbuffer cbPass : register(b1)
 	float3	camPos;//camera pos
 };
 
+cbuffer CbMaterial : register(b2)
+{
+	float3 gAlbedo;
+	float gRoughness;
+	float gMetallic;
+	float gEmissive;
+	bool HaveNormal;//have normal
+	int ShadingModelID;//shading model id
+};
+
 struct VertexIn
 {
 	float3 PosL : POSITION;
@@ -50,7 +60,7 @@ VertexOut VS(VertexIn vin)
 	//to world space
 	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
 	//offset outline
-	posW.xyz += vout.NormalW * 0.2f;
+	posW.xyz += vout.NormalW * 0.5f;
 
 	vout.PosW = posW.xyz;
 
@@ -82,6 +92,7 @@ PixelOut PS(VertexOut pin)
 	pixelOut.gBufferRoughnessMetallicEmissive.x = 0.0f;
 	pixelOut.gBufferRoughnessMetallicEmissive.y = 1.0f;
 	pixelOut.gBufferRoughnessMetallicEmissive.z = 1.0f;
+	pixelOut.gBufferRoughnessMetallicEmissive.w = ShadingModelID / 255.0f;
 	pixelOut.gEditor = pin.Editor;
 
 	return pixelOut;

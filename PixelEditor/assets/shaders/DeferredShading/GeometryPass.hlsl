@@ -24,6 +24,7 @@ cbuffer CbMaterial : register(b2)
 	float gMetallic;
 	float gEmissive;
 	bool HaveNormal;//have normal
+	int ShadingModelID;//shading model id
 };
 
 struct VertexIn
@@ -152,6 +153,7 @@ PixelOut PS(VertexOut pin)
 	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;
 	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).x * gMetallic;
 	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).x * gEmissive;
+	pixelOut.gBufferRoughnessMetallicEmissive.w = ShadingModelID / 255.0f;//shading model
 	pixelOut.gEditor = pin.Editor;
 
 	//------velocity------

@@ -324,6 +324,7 @@ namespace Pixel {
 		m_MaterialConstant.Metallic = pMaterial->gMetallic;
 		m_MaterialConstant.Roughness = pMaterial->gRoughness;
 		m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
+		m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
 
@@ -368,8 +369,10 @@ namespace Pixel {
 			m_MeshConstant.previousWorld = glm::transpose(transform);
 		}
 		m_MeshConstant.editor = -1;
+		m_MaterialConstant.shadingModel = (uint32_t)ShadingModel::SM_Unlit;//unlit
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

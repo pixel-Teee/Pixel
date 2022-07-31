@@ -167,8 +167,18 @@ namespace Pixel {
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
+	enum class ShadingModel
+	{
+		SM_Unlit = 0,
+		SM_DefaultLit = 1,
+		SM_ClearCoat = 2,
+		SM_NRP = 3,
+		SM_MAX = 4
+	};
+
 	struct MaterialComponent
 	{
+		ShadingModel shadingModel = ShadingModel::SM_DefaultLit;
 		Ref<Texture2D> Albedo;
 		Ref<Texture2D> Roughness;
 		Ref<Texture2D> NormalMap;

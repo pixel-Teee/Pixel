@@ -265,6 +265,7 @@ namespace Pixel {
 		float Metallic = 0.0f;
 		float Emissive = 0.0f;
 		uint32_t HaveNormal = false;
+		uint32_t shadingModel = 0;
 	};
 
 	enum class AddressMode

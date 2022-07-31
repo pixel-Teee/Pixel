@@ -56,7 +56,7 @@ namespace Pixel
 		normal.r	normal.g	normal.b	x
 		velocity.r	velocity.g	velocity.b  x
 		albedo.r	albedo.g	albedo.b	x
-		roughness	metallic	emissive	x
+		roughness	metallic	emissive	ShadingModelId
 		--------------------------------------*/
 	
 		FramebufferSpecification fbSpec;

@@ -59,6 +59,10 @@ struct Light
 };
 
 #define PI 3.1415926535
+#define SHADINGMODEL_UNLIT 0
+#define SHADINGMODEL_DEFAULTLIT 1
+#define SHADINGMODEL_CLEARCOAT 2
+#define SHADINGMODEL_NRP 3
 
 cbuffer LightPass : register(b1)
 {
@@ -160,71 +164,79 @@ PixelOut PS(VertexOut pin)
 	float Roughness = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).x;
 	float Metallic = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).y;
 	float Emissive = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).z;
-
+	uint ShadingModelId = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).w * 255.0f;
 	//------shadow map------
 	float4 FragPosLightSpace = mul(float4(PosW, 1.0f), LightSpaceMatrix);
 	float Shadow = ShadowCalculation(FragPosLightSpace);
 	//------shadow map------
 
-	float3 N = normalize(NormalW);
-	float3 V = normalize(CameraPos - PosW);
-	float3 R = reflect(-V, N);
-
-	float3 f0 = float3(0.04, 0.04, 0.04);//non-metal's base reflectance
-	f0 = lerp(f0, Albedo, Metallic);//metal's reflectance
-	
 	float3 Lo = float3(0.0f, 0.0f, 0.0f);
-	for (int i = 0; i < PointLightNumber; ++i)
+	switch (ShadingModelId)
 	{
-		float3 L = lights[i].Position - PosW;//point light direction
-		float distance = length(L);
-		L = normalize(L);
-		if (distance < lights[i].Radius)
+	case SHADINGMODEL_UNLIT:
+		Lo = Albedo;
+		break;
+	case SHADINGMODEL_DEFAULTLIT:
+	{
+		float3 N = normalize(NormalW);
+		float3 V = normalize(CameraPos - PosW);
+		float3 R = reflect(-V, N);
+
+		float3 f0 = float3(0.04, 0.04, 0.04);//non-metal's base reflectance
+		f0 = lerp(f0, Albedo, Metallic);//metal's reflectance
+
+		for (int i = 0; i < PointLightNumber; ++i)
 		{
-			//calculate lights
+			float3 L = lights[i].Position - PosW;//point light direction
+			float distance = length(L);
+			L = normalize(L);
+			if (distance < lights[i].Radius)
+			{
+				//calculate lights
+				float3 H = normalize(V + L);
+				float NoV = max(dot(N, V), 0.0f);
+				float NoL = max(dot(N, L), 0.0f);
+				float NoH = max(dot(N, H), 0.0f);
+				float LoH = max(dot(L, H), 0.0f);
+
+				Lo += AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, f0, Albedo);
+			}
+		}
+
+		//direct light
+		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
+		{
+			float3 L = normalize(-lights[i].Direction);
+
 			float3 H = normalize(V + L);
 			float NoV = max(dot(N, V), 0.0f);
 			float NoL = max(dot(N, L), 0.0f);
 			float NoH = max(dot(N, H), 0.0f);
 			float LoH = max(dot(L, H), 0.0f);
 
-			Lo += AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, f0, Albedo);
+			float D = DistributionGGX(NoH, Roughness);
+			float3 F = F_Shlick(LoH, f0, 1.0);
+			float V = GeometrySmith(NoV, NoL, Roughness);
+
+			//specular brdf
+			float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
+
+			//diffuse brdf
+			float3 Fd = Albedo * Fd_Lambert();
+
+			Lo += (Fr + Fd) * lights[i].Color * NoL;
 		}
-	}
 
-	//direct light
-	for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
-	{
-		float3 L = normalize(-lights[i].Direction);
+		//ambient lighting(we now use IBL as the ambient term)
+		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 
-		float3 H = normalize(V + L);
-		float NoV = max(dot(N, V), 0.0f);
-		float NoL = max(dot(N, L), 0.0f);
-		float NoH = max(dot(N, H), 0.0f);
-		float LoH = max(dot(L, H), 0.0f);
+		//------shadow map------
+		//Lo *= (1 - Shadow);//will cause point light not effect
+		//------shadow map------
 
-		float D = DistributionGGX(NoH, Roughness);
-		float3 F = F_Shlick(LoH, f0, 1.0);
-		float V = GeometrySmith(NoV, NoL, Roughness);
-
-		//specular brdf
-		float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
-
-		//diffuse brdf
-		float3 Fd = Albedo * Fd_Lambert();
-
-		Lo += (Fr + Fd) * lights[i].Color * NoL;
-	}
-	//ambient lighting(we now use IBL as the ambient term)
-	float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
-
-	//------shadow map------
-	//Lo *= (1 - Shadow);//will cause point light not effect
-	//------shadow map------
-	
-	//------IBL------
-	//if (receiveAmbientLight)
-	//{
+		//------IBL------
+		//if (receiveAmbientLight)
+		//{
 		float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
 		float3 kD = 1.0f - kS;
 		kD *= 1.0 - Metallic;
@@ -240,9 +252,19 @@ PixelOut PS(VertexOut pin)
 		float3 ambient = kD * diffuse + specular;
 
 		Lo += ambient;
-	//}
-	//------IBL------
+		//}
+		//------IBL------
+		break;
+	}
+	case SHADINGMODEL_NRP:
+	{
+		//test
+		Lo = float3(1.0f, 0.0f, 0.0f);
+		break;
+	}
+	}
 
+	
 	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
 
 	if (brightness > 1.0f)
@@ -253,11 +275,6 @@ PixelOut PS(VertexOut pin)
 	float Gamma = 1.0f / 2.2f;
 
 	Lo = pow(Lo, float3(Gamma, Gamma, Gamma));*/
-
 	pixelOut.Color = float4(Lo, 1.0f);
-
-	if (NormalW.x == -1.0f && NormalW.y == -1.0f && NormalW.z == -1.0f)
-		pixelOut.Color = float4(Albedo.x, Albedo.y, Albedo.z, 1.0f);
-
 	return pixelOut;
 }

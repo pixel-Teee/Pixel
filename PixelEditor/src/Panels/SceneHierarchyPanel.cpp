@@ -642,6 +642,26 @@ namespace Pixel
 				//ImGui::InputFloat("Emissive Value:", &component.gEmissive);
 
 				//ImGui::DragFloat("Shininess", &component.shininess, 2.0f, 2.0f, 64.0f);
+
+				//------Shading Model------
+				const char* ShadingModelString[] = { "UnLit", "DefaultLit", "ClearCoat", "NRP"};
+				const char* currentShadingModelString = ShadingModelString[(int)component.shadingModel];
+				if (ImGui::BeginCombo("Shading Model", currentShadingModelString))
+				{
+					for (int i = 0; i < 4; ++i)
+					{
+						bool isSelected = currentShadingModelString == ShadingModelString[i];
+						if (ImGui::Selectable(ShadingModelString[i], isSelected))
+						{
+							currentShadingModelString = ShadingModelString[i];
+							component.shadingModel = (ShadingModel)i;
+						}
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+				//------Shading Model------
 			}
 		);
 		

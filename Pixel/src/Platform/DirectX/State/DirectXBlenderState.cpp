@@ -38,6 +38,10 @@ namespace Pixel {
 
 		m_DefaultBlendDesc.RenderTarget[3].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
+		m_DefaultBlendDesc.RenderTarget[4].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+		m_DefaultBlendDesc.RenderTarget[5].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
 		m_BlendDisable = m_DefaultBlendDesc;
 
 		m_CurrentBlend = m_BlendDisable;
