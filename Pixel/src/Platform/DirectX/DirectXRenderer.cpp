@@ -49,6 +49,8 @@
 
 #include "stb_image.h"
 
+#include "Pixel/Scene/Scene.h"
+
 namespace Pixel {
 
 	struct UV
@@ -580,7 +582,7 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//set pipeline state object
-			meshs[i].mesh.Draw(trans[i].GetTransform(), pGraphicsContext, entityIds[i]);
+			meshs[i].mesh.Draw(trans[i].GetLocalTransform(), pGraphicsContext, entityIds[i]);
 		}
 
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[0]), ResourceStates::Common);
@@ -605,7 +607,7 @@ namespace Pixel {
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
 	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials,
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform)
+	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene)
 	{
 		m_Width = pFrameBuffer->GetSpecification().Width;
 		m_Height = pFrameBuffer->GetSpecification().Height;
@@ -666,7 +668,7 @@ namespace Pixel {
 			float farPlane = 500.0f;
 
 			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane));
-			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetTransform()));
+			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(scene->GetRegistry())));
 			lightSpaceMatrix = lightView * lightProjection;
 
 			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
@@ -674,7 +676,7 @@ namespace Pixel {
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
 				//draw every mesh
-				meshs[i]->mesh.DrawShadowMap(trans[i]->GetTransform(), pContext, entityIds[i]);
+				meshs[i]->mesh.DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
@@ -742,14 +744,14 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//draw every mesh
-			meshs[i]->mesh.Draw(trans[i]->GetTransform(), pContext, entityIds[i], materials[i]);
+			meshs[i]->mesh.Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
 		}
 
 		//draw runtime camera's model
 
 		for (uint32_t i = 0; i < cameraTransformant.size(); ++i)
 		{
-			pCameraModel->Draw(cameraTransformant[i]->GetTransform(), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get());
+			pCameraModel->Draw(cameraTransformant[i]->GetGlobalTransform(scene->GetRegistry()), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get());
 		}
 
 		//------draw outline mesh------
@@ -764,7 +766,7 @@ namespace Pixel {
 			outLinePass.camPos = camera.GetPosition();
 			//------outline pass------
 			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(OutLinePass), &outLinePass);
-			OutLineMesh->mesh.DrawOutLine(OutLineMeshTransform->GetTransform(), pGraphicsContext);
+			OutLineMesh->mesh.DrawOutLine(OutLineMeshTransform->GetGlobalTransform(scene->GetRegistry()), pGraphicsContext);
 		}
 		//------draw outline mesh------
 
@@ -960,7 +962,7 @@ namespace Pixel {
 	}
 
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, 
-	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds)
+	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<Scene> scene)
 	{
 		m_Width = pFrameBuffer->GetSpecification().Width;
 		m_Height = pFrameBuffer->GetSpecification().Height;
@@ -1021,7 +1023,7 @@ namespace Pixel {
 			float farPlane = 500.0f;
 
 			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane));
-			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetTransform()));
+			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(scene->GetRegistry())));
 			lightSpaceMatrix = lightView * lightProjection;
 
 			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
@@ -1029,7 +1031,7 @@ namespace Pixel {
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
 				//draw every mesh
-				meshs[i]->mesh.DrawShadowMap(trans[i]->GetTransform(), pContext, entityIds[i]);
+				meshs[i]->mesh.DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
@@ -1081,7 +1083,7 @@ namespace Pixel {
 		pContext->SetViewportAndScissor(vp, scissor);
 
 		//bind resources
-		glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetTransform()));
+		glm::mat4x4 View = glm::transpose(glm::inverse(pCameraTransformComponent->GetGlobalTransform(scene->GetRegistry())));
 		glm::mat4x4 Projection = glm::transpose(pCamera->GetProjection());
 		glm::mat4x4 gViewProjection = View * Projection;
 		m_CbufferGeometryPass.ViewProjection = gViewProjection;
@@ -1099,7 +1101,7 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//draw every mesh
-			meshs[i]->mesh.Draw(trans[i]->GetTransform(), pContext, entityIds[i], materials[i]);
+			meshs[i]->mesh.Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
@@ -1344,7 +1346,7 @@ namespace Pixel {
 		return m_ShadowMap->GetDepthSRV();
 	}
 
-	void DirectXRenderer::DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer)
+	void DirectXRenderer::DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer, Ref<Scene> scene)
 	{
 		if (pCamera != nullptr && pCameraTransformComponent != nullptr)
 		{
@@ -1365,7 +1367,7 @@ namespace Pixel {
 			glm::vec4 worldFrustum[8];
 			for (uint32_t i = 0; i < 8; ++i)
 			{
-				glm::vec4 newVertices = vec4Vertices[i] * glm::transpose(glm::inverse(pCamera->GetProjection())) * glm::transpose(pCameraTransformComponent->GetTransform());
+				glm::vec4 newVertices = vec4Vertices[i] * glm::transpose(glm::inverse(pCamera->GetProjection())) * glm::transpose(pCameraTransformComponent->GetGlobalTransform(scene->GetRegistry()));
 				worldFrustum[i].x = newVertices.x / newVertices.w;
 				worldFrustum[i].y = newVertices.y / newVertices.w;
 				worldFrustum[i].z = newVertices.z / newVertices.w;
@@ -2001,7 +2003,7 @@ namespace Pixel {
 		pContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
 	}
 
-	void DirectXRenderer::RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer)
+	void DirectXRenderer::RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer, Ref<Scene> scene)
 	{
 		if (lights != nullptr && lightTrans != nullptr)
 		{

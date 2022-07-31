@@ -1,61 +1,8 @@
 Scene: Untitled
 Entities:
-  - Entity: 12947208305678159280
+  - Entity: 15372724293668567924
     TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [-4.60515976, 1.48715353, 0]
-      Rotation: [0.306999654, 3.63215804e-08, -0.0859626755]
-      Scale: [1, 0.999999762, 1]
-    LightComponent:
-      LightType: 1
-      Color: [1, 1, 1]
-      GenerateShadowMap: false
-  - Entity: 18155112817752264871
-    TagComponent:
-      Tag: Sphere0
-    TransformComponent:
-      Translation: [0, 1.49011612e-08, 2.55206776]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [1, 0, 0]
-      gNormal: [1, 1, 1]
-      gRoughness: 0
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: true
-  - Entity: 8480665845767175797
-    TagComponent:
-      Tag: Sphere1
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [0, 1, 0]
-      gNormal: [1, 1, 1]
-      gRoughness: 1
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: true
-  - Entity: 1251121313468958758
-    TagComponent:
-      Tag: Sphere
+      Tag: BlueSphere
     TransformComponent:
       Translation: [0, 0, -3.59187984]
       Rotation: [0, 0, 0]
@@ -74,3 +21,56 @@ Entities:
       gMetallic: 1
       gEmissive: 0.200000003
       HaveNormal: true
+  - Entity: 12337737106972249293
+    TagComponent:
+      Tag: GreenSphere
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true
+  - Entity: 10731141115615136318
+    TagComponent:
+      Tag: RedSphere
+    TransformComponent:
+      Translation: [0, 1.49011612e-08, 2.55206776]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true
+  - Entity: 16093869695746079129
+    TagComponent:
+      Tag: light
+    TransformComponent:
+      Translation: [-4.60515976, 1.48715353, 0]
+      Rotation: [0.306999654, 3.63215804e-08, -0.0859626755]
+      Scale: [1, 0.999999762, 1]
+    LightComponent:
+      LightType: 1
+      Color: [1, 1, 1]
+      GenerateShadowMap: false

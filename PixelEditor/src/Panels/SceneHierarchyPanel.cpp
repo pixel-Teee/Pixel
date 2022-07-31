@@ -47,7 +47,11 @@ namespace Pixel
 			m_Context->m_Registry.each([&](auto entityID)
 				{
 					Entity entity{ entityID, m_Context.get() };
-					DrawEntityNode(entity);
+					//DrawEntityNode(entity);
+					if (entity.GetComponent<TransformComponent>().parentEntityId == -1)
+					{
+						DrawEntityNode(entity);
+					}
 				}
 			);
 
@@ -81,45 +85,115 @@ namespace Pixel
 		m_SelectionContext = entity;
 	}
 
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	void SceneHierarchyPanel::RecursiveDrawEntity(entt::entity entity, Ref<Scene> scene)
 	{
-		auto& tag = entity.GetComponent<TagComponent>().Tag;
-		
 		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
-		if (ImGui::IsItemClicked())
+		auto& tag = scene->GetRegistry().get<TagComponent>(entity).Tag;
+		std::vector<uint32_t> childrenEntity = scene->GetRegistry().get<TransformComponent>(entity).childrensEntityId;
+		//draw self
+		if (ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str()))
 		{
-			m_SelectionContext = entity;
-		}
-
-		bool entityDeleted = false;
-		if (ImGui::BeginPopupContextItem())
-		{
-			if(ImGui::MenuItem("Delete Entity"))
-				entityDeleted = true;
-
-			ImGui::EndPopup();
-		}
-
-		if (opened)
-		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-			flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-			bool opened = ImGui::TreeNodeEx((void*)123455, flags, tag.c_str());
-			if (opened)
+			//drag entity to parent entity
+			if (ImGui::BeginDragDropSource())
 			{
-				ImGui::TreePop();
+				uint32_t childrenEntityId = static_cast<uint32_t>(entity);
+				ImGui::SetDragDropPayload("ChildrenEntity", &childrenEntityId, sizeof(uint32_t), ImGuiCond_Once);
+				ImGui::EndDragDropSource();
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ChildrenEntity"))
+				{
+					uint32_t* childrenEntity = (uint32_t*)payload->Data;
+					TransformComponent& transformComponent = scene->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(*childrenEntity));//drag source
+
+					if (transformComponent.parentEntityId != -1)
+					{
+						//delete the link of the children entity and parent entity
+						TransformComponent& parentTransformComponent = scene->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(transformComponent.parentEntityId));
+						
+						//find the children and delete
+						for (uint32_t i = 0; i < parentTransformComponent.childrensEntityId.size(); ++i)
+						{
+							if (parentTransformComponent.childrensEntityId[i] == *childrenEntity)
+							{
+								parentTransformComponent.childrensEntityId.erase(parentTransformComponent.childrensEntityId.begin() + i);
+								break;
+							}
+						}
+
+						transformComponent.parentEntityId = -1;
+					}
+
+					//create the new link of the children entity and current entity
+					TransformComponent& currentTransformComponent = scene->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(entity));
+					currentTransformComponent.childrensEntityId.push_back(*childrenEntity);
+					transformComponent.parentEntityId = static_cast<uint32_t>(entity);
+				}
+
+				ImGui::EndDragDropTarget();
+			}
+
+			if (ImGui::BeginPopupContextItem())
+			{
+				if (ImGui::MenuItem("Delete Entity"))
+				{
+					needDeltedEntity = Entity{ entity, scene.get() };
+					m_entityDeleted = true;
+				}
+
+				ImGui::EndPopup();
+			}
+
+			if (ImGui::IsItemClicked())
+			{
+				m_SelectionContext = Entity{ entity, scene.get() };
+			}
+
+			for (uint32_t i = 0; i < childrenEntity.size(); ++i)
+			{
+				RecursiveDrawEntity(static_cast<entt::entity>(childrenEntity[i]), scene);
 			}
 			ImGui::TreePop();
 		}
+	}
 
-		if (entityDeleted)
+	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	{
+		m_entityDeleted = false;
+
+		RecursiveDrawEntity(entity, m_Context);
+
+		if (m_entityDeleted)
 		{
-			m_Context->DestroyEntity(entity);
+			//find the link
+			TransformComponent& currentTransformComponent = m_Context->GetRegistry().get<TransformComponent>(needDeltedEntity);
+			
+			if (currentTransformComponent.parentEntityId != -1)
+			{
+				TransformComponent* parentTransformComponent = m_Context->GetRegistry().try_get<TransformComponent>(static_cast<entt::entity>(currentTransformComponent.parentEntityId));
+				for (uint32_t i = 0; i < parentTransformComponent->childrensEntityId.size(); ++i)
+				{
+					if (parentTransformComponent->childrensEntityId[i] == static_cast<uint32_t>(needDeltedEntity))
+					{
+						parentTransformComponent->childrensEntityId.erase(parentTransformComponent->childrensEntityId.begin() + i);
+						break;
+					}
+				}
+			}
+			
+			for (uint32_t i = 0; i < currentTransformComponent.childrensEntityId.size(); ++i)
+			{
+				TransformComponent& childrenTransformComponent = m_Context->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(currentTransformComponent.childrensEntityId[i]));
+				childrenTransformComponent.parentEntityId = -1;
+			}
 
-			if (m_SelectionContext == entity)
+			m_Context->DestroyEntity(needDeltedEntity);
+
+			if (m_SelectionContext == needDeltedEntity)
 				m_SelectionContext = {};
 		}
 	}

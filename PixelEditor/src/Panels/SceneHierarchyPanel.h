@@ -22,10 +22,14 @@ namespace Pixel
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 	private:
+		void RecursiveDrawEntity(entt::entity entity, Ref<Scene> scene);
 		Ref<Scene> m_Context;
 		Entity m_SelectionContext;
 
 		//aim:for material texture component handle
 		Ref<DescriptorHandle> m_MaterialComponentHandle;
+
+		bool m_entityDeleted = false;
+		Entity needDeltedEntity;
 	};
 }

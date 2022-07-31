@@ -537,7 +537,7 @@ namespace Pixel
 			}
 			else
 			{
-				Shape = ConstructConvex(model.mesh.GetMeshes(), transform.GetTransform());
+				Shape = ConstructConvex(model.mesh.GetMeshes(), transform.GetLocalTransform());
 			}
 			
 			btQuaternion rotation;
@@ -742,13 +742,13 @@ namespace Pixel
 			OutLineEntity = m_Registry.try_get<TransformComponent, StaticMeshComponent>(SelectedEntity);
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys, std::get<1>(OutLineEntity), std::get<0>(OutLineEntity));
+		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys, std::get<1>(OutLineEntity), std::get<0>(OutLineEntity), shared_from_this());
 
 		for (uint32_t i = 0; i < cameras.size(); ++i)
 		{
 			if (displayCameras[i])
 			{
-				Application::Get().GetRenderer()->DrawFrustum(pContext, camera, cameras[i], cameraTransformComponents[i], pLightFrameBuffer);
+				Application::Get().GetRenderer()->DrawFrustum(pContext, camera, cameras[i], cameraTransformComponents[i], pLightFrameBuffer, shared_from_this());
 			}
 		}
 
@@ -756,7 +756,7 @@ namespace Pixel
 		{
 			if (lights[i]->DisplayLightVolume && lights[i]->lightType == LightType::PointLight)
 			{
-				Application::Get().GetRenderer()->RenderPointLightVolume(pContext, camera, lights[i], lightTrans[i], pLightFrameBuffer);
+				Application::Get().GetRenderer()->RenderPointLightVolume(pContext, camera, lights[i], lightTrans[i], pLightFrameBuffer, shared_from_this());
 			}
 		}
 		pContext->Finish(true);
@@ -834,7 +834,7 @@ namespace Pixel
 
 
 			Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-			Application::Get().GetRenderer()->DeferredRendering(pContext, mainCamera, cameraTransform, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds);
+			Application::Get().GetRenderer()->DeferredRendering(pContext, mainCamera, cameraTransform, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this());
 			pContext->Finish(true);
 
 			Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);

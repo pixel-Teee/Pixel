@@ -4,6 +4,7 @@
 #include "Pixel/Core/UUID.h"
 #include "Pixel/Renderer/Texture.h"
 
+#include "entt.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -35,21 +36,52 @@ namespace Pixel {
 
 	struct TransformComponent
 	{
+		uint32_t parentEntityId = -1;//parent entityId, -1:magic number
+		std::vector<uint32_t> childrensEntityId;//just for draw
+		//------local transform------
 		glm::vec3 Translation = {0.0f, 0.0f, 0.0f};
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+		//------local transform------
+		glm::mat4 globalTransform = glm::mat4(1.0f);
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const glm::vec3& translation) : Translation(translation){}
 
-		glm::mat4 GetTransform() const
+		glm::mat4 GetLocalTransform() const
 		{
 			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-			
+
 			return glm::translate(glm::mat4(1.0f), Translation)
 			* rotation
 			* glm::scale(glm::mat4(1.0f), Scale);
+		}
+
+		glm::mat4 GetGlobalTransform(entt::registry& scene) const
+		{
+			if (parentEntityId != -1)
+			{
+				TransformComponent parentTransformComponent = scene.get<TransformComponent>(static_cast<entt::entity>(parentEntityId));
+				return GetLocalTransform() * parentTransformComponent.GetGlobalTransform(scene);//additive
+			}
+			else
+			{
+				return GetLocalTransform();
+			}
+		}
+
+		glm::mat4 GetGlobalParentTransform(entt::registry& scene) const
+		{
+			if (parentEntityId != -1)
+			{
+				TransformComponent parentTransformComponent = scene.get<TransformComponent>(static_cast<entt::entity>(parentEntityId));
+				return parentTransformComponent.GetGlobalTransform(scene);
+			}
+			else
+			{
+				return glm::mat4(1.0f);
+			}
 		}
 
 		void SetScale(glm::vec3 scale)

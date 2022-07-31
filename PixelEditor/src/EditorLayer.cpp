@@ -350,7 +350,7 @@ namespace Pixel
 
 			//entity transform
 			auto& tc = selectedEntity.GetComponent<TransformComponent>();
-			glm::mat4 transform = tc.GetTransform();
+			glm::mat4 transform = tc.GetGlobalTransform(m_ActiveScene->GetRegistry());
 			glm::vec3 originalRotation = tc.Rotation;
 
 			//snap
@@ -374,6 +374,10 @@ namespace Pixel
 			if (ImGuizmo::IsUsing())
 			{
 				glm::vec3 translation, rotation, scale;
+
+				//global transform to local transform
+				transform *= inverse(tc.GetGlobalParentTransform(m_ActiveScene->GetRegistry()));
+
 				Math::DecomposeTransform(transform, translation, rotation, scale);
 
 				glm::vec3 originRotation = tc.Rotation;

@@ -92,7 +92,7 @@ namespace Pixel {
 
 	void Renderer3D::BeginScene(const Camera& camera, TransformComponent& transform, Ref<Framebuffer> geometryFramebuffer)
 	{
-		viewProj = camera.GetProjection() * glm::inverse(transform.GetTransform());
+		//viewProj = camera.GetProjection() * glm::inverse(transform.GetGlobalTransform());
 		geometryFramebuffer->Bind();
 		m_GeoPass->Bind();
 
@@ -271,7 +271,7 @@ namespace Pixel {
 		RenderCommand::DepthFunc(DepthComp::LEQUAL);
 		m_SkyBoxShader->Bind();
 
-		glm::mat4 view = glm::mat4(glm::mat3(glm::inverse(trans.GetTransform())));
+		glm::mat4 view = glm::mat4(glm::mat3(glm::inverse(trans.GetLocalTransform())));
 		glm::mat4 proj = camera.GetProjection();
 		glm::mat4 viewProj = proj * view;
 
@@ -347,7 +347,7 @@ namespace Pixel {
 
 		//m_LightStencilPass->SetMat4("u_ViewProjection", viewProj);
 		//m_LightStencilPass->SetMat4("u_Model", Trans[LightIndex].GetTransform());
-		glm::mat4 lightTrans = Trans[LightIndex].GetTransform();
+		glm::mat4 lightTrans = Trans[LightIndex].GetLocalTransform();
 		m_MVPUuniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(lightTrans));
 		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 
@@ -385,7 +385,7 @@ namespace Pixel {
 
 		/*m_LightPass->SetMat4("u_ViewProjection", viewProj);
 		m_LightPass->SetMat4("u_Model", Trans[LightIndex].GetTransform());*/
-		glm::mat4 lightTrans = Trans[LightIndex].GetTransform();
+		glm::mat4 lightTrans = Trans[LightIndex].GetLocalTransform();
 		m_MVPUuniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(lightTrans));
 		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 
@@ -446,7 +446,7 @@ namespace Pixel {
 
 		//m_LightPass->SetMat4("u_ViewProjection", viewProj);
 		//m_LightPass->SetMat4("u_Model", Trans[LightIndex].GetTransform());
-		glm::mat4 lightTrans = Trans[LightIndex].GetTransform();
+		glm::mat4 lightTrans = Trans[LightIndex].GetLocalTransform();
 		m_MVPUuniformBuffer->SetData(0, sizeof(glm::mat4), glm::value_ptr(lightTrans));
 		m_MVPUuniformBuffer->SetData(sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewProj));
 
