@@ -18,6 +18,7 @@
 #include <thread>
 
 #include "Pixel/Core/Log.h"
+#include "Pixel/Core/Reflect.h"
 #include "Pixel/Debug/Instrumentor.h"
 #include "Pixel/Utils/Hash.h"
 
