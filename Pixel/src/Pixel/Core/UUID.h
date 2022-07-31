@@ -19,7 +19,7 @@ namespace Pixel {
 }
 
 namespace std {
-	//Provide Hash Function
+	//provide hash function
 
 	template<>
 	struct hash<Pixel::UUID>

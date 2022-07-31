@@ -23,7 +23,7 @@ namespace Pixel {
 		}
 	};
 
-	// Interface representing a desktop system based Window
+	// interface representing a desktop system based Window
 	class PIXEL_API Window
 	{
 	public:
@@ -42,7 +42,7 @@ namespace Pixel {
 		virtual void SetCursorViewPortCenter() = 0;
 		virtual void SetViewPortCenterPoint(int32_t x, int32_t y) = 0;
 
-		// Window attributes
+		// window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;

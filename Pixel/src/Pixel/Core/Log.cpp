@@ -1,7 +1,12 @@
 #include "pxpch.h"
-#include "Log.h"
 
+//------my library------
+#include "Log.h"
+//------my library------
+
+//------other library------
 #include "spdlog/sinks/stdout_color_sinks.h"
+//------other library------
 
 namespace Pixel {
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
@@ -16,5 +21,4 @@ namespace Pixel {
 		s_ClientLogger = spdlog::stdout_color_mt("APP");
 		s_ClientLogger->set_level(spdlog::level::trace);
 	}
-
 }

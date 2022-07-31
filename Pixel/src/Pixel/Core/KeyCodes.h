@@ -5,9 +5,9 @@ namespace Pixel {
         PX_KEY_SPACE = 32,
         PX_KEY_APOSTROPHE = 39,
         PX_KEY_COMMA = 44,
-        PX_KEY_MINUS = 45, /* - */
-        PX_KEY_PERIOD = 46, /* . */
-        PX_KEY_SLASH = 47, /* / */
+        PX_KEY_MINUS = 45,
+        PX_KEY_PERIOD = 46,
+        PX_KEY_SLASH = 47,
         PX_KEY_0 = 48,
         PX_KEY_1 = 49,
         PX_KEY_2 = 50,
@@ -18,8 +18,8 @@ namespace Pixel {
         PX_KEY_7 = 55,
         PX_KEY_8 = 56,
         PX_KEY_9 = 57,
-        PX_KEY_SEMICOLON = 59, /* ; */
-        PX_KEY_EQUAL = 61, /* = */
+        PX_KEY_SEMICOLON = 59,
+        PX_KEY_EQUAL = 61,
         PX_KEY_A = 65,
         PX_KEY_B = 66,
         PX_KEY_C = 67,
@@ -46,12 +46,12 @@ namespace Pixel {
         PX_KEY_X = 88,
         PX_KEY_Y = 89,
         PX_KEY_Z = 90,
-        PX_KEY_LEFT_BRACKET = 91, /* [ */
-        PX_KEY_BACKSLASH = 92, /* \ */
-        PX_KEY_RIGHT_BRACKET = 93, /* ] */
-        PX_KEY_GRAVE_ACCENT = 96, /* ` */
-        PX_KEY_WORLD_1 = 161, /* non-US #1 */
-        PX_KEY_WORLD_2 = 162, /* non-US #2 */
+        PX_KEY_LEFT_BRACKET = 91,
+        PX_KEY_BACKSLASH = 92,
+        PX_KEY_RIGHT_BRACKET = 93,
+        PX_KEY_GRAVE_ACCENT = 96,
+        PX_KEY_WORLD_1 = 161,
+        PX_KEY_WORLD_2 = 162,
         PX_KEY_ESCAPE = 256,
         PX_KEY_ENTER = 257,
         PX_KEY_TAB = 258,

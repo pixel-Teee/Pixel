@@ -9,11 +9,16 @@ namespace Pixel {
 	class PIXEL_API Input
 	{
 	public:
+		//------polling function------
 		static bool IsKeyPressed(int key);
 
 		static bool IsMouseButtonPressed(int button);
+
 		static std::pair<float, float> GetMousePosition();
+
 		static float GetMouseX();
+
 		static float GetMouseY();
+		//------polling function------
 	};
 }
