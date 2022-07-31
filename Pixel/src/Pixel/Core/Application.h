@@ -1,40 +1,48 @@
 #pragma once
 
-#include "Core.h"
+//-----others library------
+#include "Pixel/ImGui/ImGuiLayer.h"
+//-----others library------
 
-#include "Window.h"
+//------my library------
+#include "Pixel/Core/Core.h"
+#include "Pixel/Core/Window.h"
+#include "Pixel/Core/Timestep.h"
 #include "Pixel/Core/LayerStack.h"
+
 #include "Pixel/Events/Event.h"
 #include "Pixel/Events/ApplicationEvent.h"
-
-#include "Pixel/Core/Timestep.h"
-
-#include "Pixel/ImGui/ImGuiLayer.h"
-
+//------my library------
 
 namespace Pixel {
+
 	class BaseRenderer;
+
 	class PIXEL_API Application
 	{
 	public:
 		Application(const std::string& name = "Pixel Engine");
+
 		virtual ~Application();
 
 		void Run();
 		
 		void OnEvent(Event& e);
 
-		//放置普通的层
+		//place normal layer
 		void PushLayer(Layer* layer);
-		//放置Overlay在最后，UI层最后渲染，绘制在最上面
+		//place overlay in the endest
 		void PushOverlay(Layer* layer);
 
-		inline static Application& Get(){return *s_Instance;}
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+
+		Ref<BaseRenderer> GetRenderer();
+
+		inline static Application& Get(){ return *s_Instance;}
+
 		inline Window& GetWindow(){ return *m_Window; }
 
 		void Close();
-
-		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
 		Layer* GetLayer(int32_t layerIndex)
 		{
@@ -45,26 +53,35 @@ namespace Pixel {
 			return *(it + layerIndex);
 		}
 
-		Ref<BaseRenderer> GetRenderer();
+	private:
+
+		bool OnWindowClose(WindowCloseEvent& e);
+
+		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
-		bool OnWindowClose(WindowCloseEvent& e);
-		bool OnWindowResize(WindowResizeEvent& e);
-	private:
+
 		Ref<BaseRenderer> m_pRenderer;
-		std::unique_ptr<Window> m_Window;
+
+		Scope<Window> m_Window;
+
 		ImGuiLayer* m_ImGuiLayer;
+
 		bool m_Running = true;
+
 		bool m_Minimized = false;
+
 		LayerStack m_LayerStack;
 
 		Timestep m_Timestep;
+
 		float m_LastFrameTime = 0.0f;
+
 	private:
 		static Application* s_Instance;
 	};
 
-	//To be defined in CLIENT
+	//to be defined in client
 	Application* CreateApplication();
 }
 

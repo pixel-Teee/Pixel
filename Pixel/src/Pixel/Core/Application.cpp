@@ -1,50 +1,44 @@
 #include "pxpch.h"
-#include "Application.h"
 
-#include "Pixel/Core/Log.h"
-
+//------others library------
 #include <glad/glad.h>
-#include "Pixel/Renderer/Renderer.h"
-
-#include "Input.h"
-
 #include "glm/glm.hpp"
-
 #include "GLFW/glfw3.h"
+//------others library------
 
-#if defined(_DEBUG)
-#include <dxgi1_3.h>
-#include <dxgidebug.h>
-#endif
-
-#ifndef PX_OPENGL
-#include <wrl/client.h>
-#include "Platform/DirectX/d3dx12.h"
-#include "Platform/DirectX/DirectXRenderer.h"
+//------my library------
+#include "Pixel/Core/Application.h"
+#include "Pixel/Core/Input.h"
+#include "Pixel/Core/Log.h"
+#include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Renderer/Device/Device.h"
-#endif
+//------my library------
 
 namespace Pixel {
-
-#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application(const std::string& name)
 	{
-		PX_CORE_ASSERT(!s_Instance, "Application already exists!")
+		PX_CORE_ASSERT(!s_Instance, "application already exists!")
+
 		s_Instance = this;
+		//------create window------
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
-		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEvent));
+		//------create window------
 
-		//Renderer::Init();
-
+		//------create imgui layer------
 		m_ImGuiLayer = new ImGuiLayer(m_Window->GetDevice());
 		PushOverlay(m_ImGuiLayer);	
+		//------create imgui layer------
 
+		//------create renderer------
 		m_pRenderer = BaseRenderer::Create();
 		m_pRenderer->Initialize();
+		//------create renderer------
 	}
+
 	Application::~Application()
 	{
 
@@ -63,10 +57,14 @@ namespace Pixel {
 			m_Minimized = true;
 			return false;
 		}
+
 		m_Minimized = false;
+		//------destory imgui layer's swap chain, because imgui layer holds the swap chain buffer------
 		m_ImGuiLayer->ResetSwapChain();
-		//Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		//------destroy imgui layer's swap chain, because imgui layer holds the swap chain buffer------
+		
 		Device::Get()->SetClientSize(e.GetWidth(), e.GetHeight());
+
 		//recreate swap chain
 		Device::Get()->ReCreateSwapChain();
 
@@ -78,16 +76,17 @@ namespace Pixel {
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
-		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
-		//PIXEL_TRACE("{0}", e);
+		dispatcher.Dispatch<WindowCloseEvent>(PX_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(PX_BIND_EVENT_FN(Application::OnWindowResize));
 
+		//------dispatch all layer------
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
 		{
 			if (e.Handled)
 				break;
 			(*--it)->OnEvent(e);			
 		}
+		//------dispatch all layer------
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -116,8 +115,10 @@ namespace Pixel {
 	{
 		while (m_Running)
 		{
-			float time = (float)glfwGetTime();//这是平台相关的获取Time的函数，未来会换掉
+			float time = (float)glfwGetTime();//this platform-depend function, will get rid in the future
+
 			Timestep timestep = time - m_LastFrameTime;
+
 			m_LastFrameTime = time;
 			
 			if (!m_Minimized)
@@ -130,11 +131,6 @@ namespace Pixel {
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
 			m_ImGuiLayer->End();
-			
-			auto[x, y] = Input::GetMousePosition();
-			//PIXEL_CORE_TRACE("{0}, {1}", x, y);
-
-			//Input::IsKeyPressed();
 
 			m_Window->OnUpdate();
 		}
