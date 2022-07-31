@@ -20,14 +20,18 @@ Select the PixelEditor as the StartupProject
 
 # ScreenShot
 
-![ReadMe1](./ReadMe1.png)
+![ReadMe1](./ScreenShots/ReadMe1.png)
 
 # Features
 
 - Image-Based Lighting
-- Deferred Rendering
+
+  ![](ScreenShots/IBL.png)
+
 - Bloom
+- TAA
+- DeferredShading
+- PointLight Scope Visualization
+- CameraFrustum Visualization
 - PBR
-- Editor and Game Runtime
 - ShadowMap
-- ...
