@@ -1,38 +1,26 @@
 #pragma once
 
-#include "SceneCamera.h"
-#include "Pixel/Core/UUID.h"
-#include "Pixel/Renderer/Texture.h"
-
+//------other library------
 #include "entt.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+//------other library------
 
+//------my library------
+#include "Pixel/Core/UUID.h"
+#include "Pixel/Scene/SceneCamera.h"
+#include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/3D/Model.h"
 #include "Pixel/Renderer/3D/Material.h"
 
+#include "Pixel/Scene/Components/IDComponent.h"
+#include "Pixel/Scene/Components/TagComponent.h"
+//------my library------
+
 namespace Pixel {
-	
-	struct IDComponent
-	{
-		UUID ID;
-
-		IDComponent() = default;
-		IDComponent(const IDComponent&) = default;
-	};
-
-	struct TagComponent
-	{
-		std::string Tag;
-
-		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
-		TagComponent(const std::string& tag)
-		:Tag(tag){}
-	};
 
 	struct TransformComponent
 	{

@@ -58,7 +58,7 @@ namespace Pixel {
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
-				//先调用，再赋值，表示是否处理完函数对象func。
+				//first step is call, second is assign
 				m_Event.Handled = func(*(T*)&m_Event);
 				return true;
 			}

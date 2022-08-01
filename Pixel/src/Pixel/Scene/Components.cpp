@@ -1,6 +1,6 @@
 #include "pxpch.h"
-#include "Components.h"
 
+#include "Components.h"
 #include "ScriptableEntity.h"
 
 namespace Pixel {

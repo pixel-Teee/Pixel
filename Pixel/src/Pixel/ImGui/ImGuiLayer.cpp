@@ -1,40 +1,50 @@
 #include "pxpch.h"
-#include "ImGuiLayer.h"
 
+//------other libary------
 #include "imgui.h"
+#include "ImGuizmo.h"
 
-#ifdef PX_OPENGL
-#include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_glfw.h"
-#else
-#include "backends/imgui_impl_dx12.h"
-#include "backends/imgui_impl_glfw.h"
-#include "Platform/DirectX/DirectXDevice.h"
-#include "Platform/DirectX/DirectXSwapChain.h"
-#include "Platform/DirectX/Descriptor/DirectXDescriptorHeap.h"
-#include "Pixel/Renderer/Descriptor/HeapType.h"
-#include "Pixel/Renderer/Context/ContextManager.h"
-#include "Platform/DirectX/Context/DirectXContext.h"
-#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
-#include "Platform/DirectX/d3dx12.h"
-#include "Pixel/Renderer/Buffer/GpuResource.h"
-#include "Platform/DirectX/Context/GraphicsContext.h"
-#include "Pixel/Renderer/PipelineStateObject/RootSignature.h"
-#include "Pixel/Renderer/PipelineStateObject/RootParameter.h"
-#include "Platform/DirectX/DirectXDevice.h"
-#include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
-#include "Pixel/Renderer/Texture.h"
-#include "Platform/DirectX/Texture/DirectXTexture.h"
-#include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
-#endif
-
-#include "Pixel/Core/Application.h"
-
-//TEMPORARAY
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#include "ImGuizmo.h"
+#include "backends/imgui_impl_dx12.h"
+#include "backends/imgui_impl_glfw.h"
+//------other libary------
+
+#include "ImGuiLayer.h"
+
+#include "Pixel/Core/Application.h"
+
+//------descriptor related------
+#include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
+#include "Platform/DirectX/Descriptor/DirectXDescriptorHeap.h"
+#include "Pixel/Renderer/Descriptor/HeapType.h"
+//------descriptor related------
+
+//------buffer related------
+#include "Pixel/Renderer/Buffer/GpuResource.h"
+#include "Pixel/Renderer/Texture.h"
+#include "Platform/DirectX/Buffer/DirectXColorBuffer.h"
+#include "Platform/DirectX/Texture/DirectXTexture.h"
+//------buffer related------
+
+//------global object related------
+#include "Platform/DirectX/DirectXDevice.h"
+#include "Platform/DirectX/DirectXSwapChain.h"
+//------global object related------
+
+//------context related------
+#include "Pixel/Renderer/Context/ContextManager.h"
+#include "Platform/DirectX/Context/DirectXContext.h"
+#include "Platform/DirectX/Context/GraphicsContext.h"
+//------context related------
+#include "Platform/DirectX/d3dx12.h"
+
+//------pipeline state object related------
+#include "Pixel/Renderer/PipelineStateObject/RootSignature.h"
+#include "Pixel/Renderer/PipelineStateObject/RootParameter.h"
+//------pipeline state object related------
 
 namespace Pixel {
 	ImGuiLayer::ImGuiLayer()
@@ -87,17 +97,8 @@ namespace Pixel {
 		Application& app = Application::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
-#ifdef PX_OPENGL
-		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init("#version 410");
-#else
-		//m_contextManager = ContextManager::Create();
-
 		m_srvHeap = DescriptorHeap::Create(L"ImGuiLayerSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 256);
-		//m_imageSrvHeap = DescriptorHeap::Create(L"ImageSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 1);
 		
-
 		std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetComPtrHeap()->SetName(L"Imgui Descriptor Heap");
 
 		m_srvHeap->Alloc(1);
@@ -108,60 +109,28 @@ namespace Pixel {
 			std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetHeapPointer()->GetCPUDescriptorHandleForHeapStart(),
 			std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetHeapPointer()->GetGPUDescriptorHandleForHeapStart()
 		);
-		
-		//m_imageHandle = m_srvHeap->Alloc(1)->GetCpuHandle();
-		
-		////------Create Back Buffer-------
+
+		//------Create Back Buffer-------
 		m_BackBuffer[0] = GpuResource::CreateColorBuffer();
 		m_BackBuffer[1] = GpuResource::CreateColorBuffer();
-		////------Create Back Buffer-------
+		//------Create Back Buffer-------
 
-		////-------Create Back Buffer Resource------
+		//-------Create Back Buffer Resource------
 		std::static_pointer_cast<DirectXColorBuffer>(m_BackBuffer[0])->CreateFromSwapChain(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetBackBufferSource(0), L"BackBuffer[0]");
 		std::static_pointer_cast<DirectXColorBuffer>(m_BackBuffer[1])->CreateFromSwapChain(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetBackBufferSource(1), L"BackBuffer[1]");
-		////-------Create Back Buffer Resource------
-
-		//m_pTexture = Texture2D::Create("assets//textures//Material_Albedo.dds");
-		
-		//copy the texture's handle to descriptor heap's handle, then bind the heap
-
-		//Device::Get()->CopyDescriptorsSimple(1, m_imageHandle, m_pTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);;
-		//Device::Get()->CopyDescriptorsSimple(1, std::static_pointer_cast<DirectXDescriptorHeap>(m_imageSrvHe)
-#endif
+		//-------Create Back Buffer Resource------
 	}
 
 	void ImGuiLayer::OnDetach()
 	{
-		//ImGuiIO& io = ImGui::GetIO();
-		//io.Fonts->Clear();
-#ifdef PX_OPENGL
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
-#else
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-#endif
 	}
 
 	void ImGuiLayer::OnImGuiRender()
 	{
-		//ImGui::ShowDemoWindow();
-		//
-		//Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 
-		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_srvHeap);
-		////pContext->SetDescriptorHeap()
-		////Ref<Context> 
-		//ImGui::Begin("DirectX12 Texture Test");
-
-		//Ref<DescriptorGpuHandle> handle = (*m_srvHeap)[1].GetGpuHandle();
-		////EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
-		//ImGui::Image((ImTextureID)(handle->GetGpuPtr()), ImVec2(256, 256));
-		//ImGui::End();
-
-		//pContext->Finish(true);
 	}
 
 	void ImGuiLayer::OnEvent(Event& e)
@@ -176,11 +145,7 @@ namespace Pixel {
 
 	void ImGuiLayer::Begin()
 	{
-#ifdef PX_OPENGL
-		ImGui_ImplOpenGL3_NewFrame();
-#else
 		ImGui_ImplDX12_NewFrame();
-#endif
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
@@ -195,10 +160,7 @@ namespace Pixel {
 
 		// Rendering
 		ImGui::Render();
-#ifdef PX_OPENGL
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#else
-		
+
 		Ref<Context> EndContext = Device::Get()->GetContextManager()->CreateGraphicsContext(L"ImGuiLayer");
 
 		uint32_t index = std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetCurrentBackBufferIndex();
@@ -209,19 +171,12 @@ namespace Pixel {
 		Ref<DescriptorCpuHandle> rtvHandle = DescriptorCpuHandle::Create();
 		rtvHandle->SetCpuHandle(&(std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetRtvHandle(index)));
 		handles.push_back(rtvHandle);
-		////output merge stage
-		EndContext->SetRenderTargets(1, handles);
-		//
-		//float color[4] = { 0.6f, 0.3f, 0.7f, 1.0f };
 
-		//EndContext->ClearColor(*m_BackBuffer[index].get(), color);
+		//output merge stage
+		EndContext->SetRenderTargets(1, handles);
 
 		EndContext->FlushResourceBarriers();
 
-		//ImGui::Begin("DirectX12 Texture Test");
-		//EndContext->TransitionResource(*(std::static_pointer_cast<DirectXTexture>(m_pTexture)->m_pGpuResource), ResourceStates::Present);
-		//ImGui::Image((ImTextureID)(m_pTexture->GetRendererID()), ImVec2(256, 256));
-		//ImGui::End();
 		EndContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_srvHeap);
 
 		ImGui::Render();
@@ -229,11 +184,10 @@ namespace Pixel {
 		
 		EndContext->TransitionResource(*m_BackBuffer[index], ResourceStates::Present, true);
 
-		////dx present
+		//dx present
 		std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->Present();
 
 		EndContext->Finish(true);
-#endif
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
@@ -327,7 +281,6 @@ namespace Pixel {
 	Ref<GpuResource> ImGuiLayer::GetBackBuffer()
 	{
 		uint32_t index = std::static_pointer_cast<DirectXDevice>(Device::Get())->GetSwapChain()->GetCurrentBackBufferIndex();
-		//PIXEL_CORE_INFO("{0}", index);
 		return m_BackBuffer[index];
 	}
 

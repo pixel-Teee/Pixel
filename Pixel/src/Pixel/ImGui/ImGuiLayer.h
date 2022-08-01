@@ -1,22 +1,25 @@
 #pragma once
 
+//------my library------
 #include "Pixel/Core/Layer.h"
-
 #include "Pixel/Events/ApplicationEvent.h"
 #include "Pixel/Events/KeyEvent.h"
 #include "Pixel/Events/MouseEvent.h"
+//------my library------
 
 namespace Pixel {
-
-#ifndef PX_OPENGL
+	//------forward declare------
+	class DescriptorCpuHandle;
 	class DescriptorHeap;
-	class ContextManager;
+
 	class Device;
+	class ContextManager;
+	
 	class GpuResource;
 	class PixelBuffer;
-	class DescriptorCpuHandle;
+	
 	class Texture2D;
-#endif
+	//------forward declare------
 
 	class PIXEL_API ImGuiLayer : public Layer
 	{
@@ -33,32 +36,27 @@ namespace Pixel {
 		void End();
 
 		void BlockEvents(bool block) { m_BlockEvents = block; }
+		//------theme related------
 		void SetDarkThemeColors();
 		void SetPurpleThemeColors();
+		//------theme related------
+
+		//------swap chain related------
 		void ResetSwapChain();
 		void ReCreateSwapChain();
 		Ref<GpuResource> GetBackBuffer();
-
+		//------swap chain related------
+		
 		Ref<DescriptorHeap> GetSrvHeap();
 	private:
 		bool m_BlockEvents = true;
 		float m_Time = 0.0f;
 
-#ifndef PX_OPENGL
+		//------image related------
 		Ref<DescriptorHeap> m_srvHeap;
-		Ref<DescriptorHeap> m_imageSrvHeap;
 		Ref<DescriptorCpuHandle> m_imageHandle;
-		////TODO:need to fix
-		////ID3D12DescriptorHeap* m_SrvHeap;
-		//Ref<ContextManager> m_contextManager;
-		//Ref<Device> m_pDevice;
+		//------image related------
 
 		Ref<GpuResource> m_BackBuffer[2];
-		////Ref<Context> m_DrawContext;
-
-
-		//test image
-		Ref<Texture2D> m_pTexture;
-#endif
 	};
 }

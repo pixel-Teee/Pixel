@@ -65,7 +65,7 @@ namespace Pixel {
 
 			return ss.str();
 		}
-		//该宏为其创建判断类型的函数
+		//this macro to create check type's function
 		EVENT_CLASS_TYPE(KeyTyped)
 	};
 }
