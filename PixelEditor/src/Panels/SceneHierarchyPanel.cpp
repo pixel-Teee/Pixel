@@ -48,7 +48,7 @@ namespace Pixel
 				{
 					Entity entity{ entityID, m_Context.get() };
 					//DrawEntityNode(entity);
-					if (entity.GetComponent<TransformComponent>().parentEntityId == -1)
+					if (entity.GetComponent<TransformComponent>().parentUUID == 0)
 					{
 						DrawEntityNode(entity);
 					}
@@ -91,7 +91,9 @@ namespace Pixel
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
 		auto& tag = scene->GetRegistry().get<TagComponent>(entity).Tag;
-		std::vector<uint32_t> childrenEntity = scene->GetRegistry().get<TransformComponent>(entity).childrensEntityId;
+
+		const std::vector<UUID>& childrensUUID = scene->GetRegistry().get<TransformComponent>(entity).childrensUUID;
+
 		//draw self
 		if (ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str()))
 		{
@@ -110,28 +112,30 @@ namespace Pixel
 					uint32_t* childrenEntity = (uint32_t*)payload->Data;
 					TransformComponent& transformComponent = scene->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(*childrenEntity));//drag source
 
-					if (transformComponent.parentEntityId != -1)
+					if (transformComponent.parentUUID != 0)
 					{
 						//delete the link of the children entity and parent entity
-						TransformComponent& parentTransformComponent = scene->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(transformComponent.parentEntityId));
-						
-						//find the children and delete
-						for (uint32_t i = 0; i < parentTransformComponent.childrensEntityId.size(); ++i)
+						TransformComponent parentTransformComponent;
+						auto& UUIDs = scene->GetRegistry().view<IDComponent>();
+						for (auto& UUIDOwner : UUIDs)
 						{
-							if (parentTransformComponent.childrensEntityId[i] == *childrenEntity)
+							if (scene->GetRegistry().get<IDComponent>(UUIDOwner).ID == transformComponent.parentUUID)
 							{
-								parentTransformComponent.childrensEntityId.erase(parentTransformComponent.childrensEntityId.begin() + i);
-								break;
+								//parent's children UUID
+								auto& childrensUUID = scene->GetRegistry().get<TransformComponent>(UUIDOwner).childrensUUID;
+								auto& iter = std::find(childrensUUID.begin(), childrensUUID.end(), scene->GetRegistry().get<IDComponent>(static_cast<entt::entity>(*childrenEntity)).ID);
+								childrensUUID.erase(iter);//delete it
 							}
-						}
+						}					
 
-						transformComponent.parentEntityId = -1;
+						transformComponent.parentUUID = 0;
 					}
 
 					//create the new link of the children entity and current entity
 					TransformComponent& currentTransformComponent = scene->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(entity));
-					currentTransformComponent.childrensEntityId.push_back(*childrenEntity);
-					transformComponent.parentEntityId = static_cast<uint32_t>(entity);
+					UUID childrenUUID = scene->GetRegistry().get<IDComponent>(static_cast<entt::entity>(*childrenEntity)).ID;
+					currentTransformComponent.childrensUUID.push_back(childrenUUID);
+					transformComponent.parentUUID = scene->GetRegistry().get<IDComponent>(static_cast<entt::entity>(entity)).ID;
 				}
 
 				ImGui::EndDragDropTarget();
@@ -153,9 +157,21 @@ namespace Pixel
 				m_SelectionContext = Entity{ entity, scene.get() };
 			}
 
-			for (uint32_t i = 0; i < childrenEntity.size(); ++i)
+			//------from the all uuid to find the children's entity------
+			auto& allUUIDs = scene->GetRegistry().view<IDComponent>();
+			std::vector<entt::entity> neededToDrawEntity;
+			for (auto& UUIDOwner : allUUIDs)
 			{
-				RecursiveDrawEntity(static_cast<entt::entity>(childrenEntity[i]), scene);
+				if (std::find(childrensUUID.begin(), childrensUUID.end(), scene->GetRegistry().get<IDComponent>(UUIDOwner).ID) != childrensUUID.end())
+				{
+					neededToDrawEntity.push_back(UUIDOwner);
+				}
+			}
+			//------from the all uuid to find the children's entity------
+
+			for (uint32_t i = 0; i < neededToDrawEntity.size(); ++i)
+			{
+				RecursiveDrawEntity(neededToDrawEntity[i], scene);
 			}
 			ImGui::TreePop();
 		}
@@ -172,23 +188,35 @@ namespace Pixel
 			//find the link
 			TransformComponent& currentTransformComponent = m_Context->GetRegistry().get<TransformComponent>(needDeltedEntity);
 			
-			if (currentTransformComponent.parentEntityId != -1)
+			//delete the link of the current entity and it's parent entity
+			if (currentTransformComponent.parentUUID != 0)
 			{
-				TransformComponent* parentTransformComponent = m_Context->GetRegistry().try_get<TransformComponent>(static_cast<entt::entity>(currentTransformComponent.parentEntityId));
-				for (uint32_t i = 0; i < parentTransformComponent->childrensEntityId.size(); ++i)
+				auto& UUIDs = m_Context->GetRegistry().view<UUID>();
+				for (auto& UUIDOwner : UUIDs)
 				{
-					if (parentTransformComponent->childrensEntityId[i] == static_cast<uint32_t>(needDeltedEntity))
+					UUID parentUUID = m_Context->GetRegistry().get<IDComponent>(UUIDOwner).ID;
+					if (parentUUID == currentTransformComponent.parentUUID)
 					{
-						parentTransformComponent->childrensEntityId.erase(parentTransformComponent->childrensEntityId.begin() + i);
+						TransformComponent& parentTransformComponent = m_Context->GetRegistry().get<TransformComponent>(UUIDOwner);
+						auto& iter = std::find(parentTransformComponent.childrensUUID.begin(), parentTransformComponent.childrensUUID.end(), m_Context->GetRegistry().get<IDComponent>(needDeltedEntity).ID);
+						parentTransformComponent.childrensUUID.erase(iter);
 						break;
 					}
 				}
-			}
-			
-			for (uint32_t i = 0; i < currentTransformComponent.childrensEntityId.size(); ++i)
+				currentTransformComponent.parentUUID = 0;
+			}		
+
+			//delete the link of the current entity and it's children entity
+			auto& UUIDs = m_Context->GetRegistry().view<UUID>();
+			for (auto& UUIDOwner : UUIDs)
 			{
-				TransformComponent& childrenTransformComponent = m_Context->GetRegistry().get<TransformComponent>(static_cast<entt::entity>(currentTransformComponent.childrensEntityId[i]));
-				childrenTransformComponent.parentEntityId = -1;
+				UUID childrenUUID = m_Context->GetRegistry().get<IDComponent>(UUIDOwner).ID;
+
+				if (std::find(currentTransformComponent.childrensUUID.begin(), currentTransformComponent.childrensUUID.end(), childrenUUID) != currentTransformComponent.childrensUUID.end())
+				{
+					UUID& parentUUID = m_Context->GetRegistry().get<TransformComponent>(UUIDOwner).parentUUID;
+					parentUUID = 0;
+				}
 			}
 
 			m_Context->DestroyEntity(needDeltedEntity);

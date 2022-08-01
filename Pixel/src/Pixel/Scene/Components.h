@@ -36,8 +36,8 @@ namespace Pixel {
 
 	struct TransformComponent
 	{
-		uint32_t parentEntityId = -1;//parent entityId, -1:magic number
-		std::vector<uint32_t> childrensEntityId;//just for draw
+		UUID parentUUID = 0;//parent uuid
+		std::vector<UUID> childrensUUID;//children uuid
 		//------local transform------
 		glm::vec3 Translation = {0.0f, 0.0f, 0.0f};
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
@@ -60,9 +60,23 @@ namespace Pixel {
 
 		glm::mat4 GetGlobalTransform(entt::registry& scene) const
 		{
-			if (parentEntityId != -1)
+			if (parentUUID != 0)
 			{
-				TransformComponent parentTransformComponent = scene.get<TransformComponent>(static_cast<entt::entity>(parentEntityId));
+				//parent entity
+				entt::entity parentEntity;
+				//find uuid's owner
+				auto& UUIDs = scene.view<IDComponent>();
+				for (auto entity : UUIDs)
+				{
+					const IDComponent& id = scene.get<IDComponent>(entity);
+					if (id.ID == parentUUID)
+					{
+						parentEntity = entity;
+						break;
+					}
+				}
+
+				TransformComponent parentTransformComponent = scene.get<TransformComponent>(parentEntity);
 				return GetLocalTransform() * parentTransformComponent.GetGlobalTransform(scene);//additive
 			}
 			else
@@ -73,9 +87,23 @@ namespace Pixel {
 
 		glm::mat4 GetGlobalParentTransform(entt::registry& scene) const
 		{
-			if (parentEntityId != -1)
+			if (parentUUID != 0)
 			{
-				TransformComponent parentTransformComponent = scene.get<TransformComponent>(static_cast<entt::entity>(parentEntityId));
+				//parent entity
+				entt::entity parentEntity;
+				//find uuid's owner
+				auto& UUIDs = scene.view<IDComponent>();
+				for (auto entity : UUIDs)
+				{
+					const IDComponent& id = scene.get<IDComponent>(entity);
+					if (id.ID == parentUUID)
+					{
+						parentEntity = entity;
+						break;
+					}
+				}
+
+				TransformComponent parentTransformComponent = scene.get<TransformComponent>(parentEntity);
 				return parentTransformComponent.GetGlobalTransform(scene);
 			}
 			else
