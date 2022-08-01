@@ -1,8 +1,76 @@
 Scene: Untitled
 Entities:
-  - Entity: 15372724293668567924
+  - Entity: 13749536702277636527
     TagComponent:
-      Tag: BlueSphere
+      Tag: light2
+    TransformComponent:
+      Translation: [4.26733446, 5.08327818, 3.37574911]
+      Rotation: [-0.186468452, 8.94069672e-08, -0.0859625787]
+      Scale: [1, 1, 1]
+    LightComponent:
+      LightType: 0
+      Color: [0.915907621, 0.921952546, 0.98841697]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 18154023842764527051
+    TagComponent:
+      Tag: light1
+    TransformComponent:
+      Translation: [8.1363678, 1.19935012, -2.54593039]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    LightComponent:
+      LightType: 0
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.963500023
+  - Entity: 581117318651865970
+    TagComponent:
+      Tag: greenball2
+    TransformComponent:
+      Translation: [3.60872984, -0.155827135, -1.10434234]
+      Rotation: [-1.9368161, 0.0518060736, 0.0402323082]
+      Scale: [0.999998331, 1.00000048, 0.999998689]
+    StaticMeshComponent:
+      Path: assets\models\Ball\scene.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\Ball\Baked_baseColor.png
+      normalMapPath: assets\textures\Ball\Baked_normal.png
+      roughnessPath: assets\textures\Ball\Baked_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: false
+  - Entity: 15962652479145549648
+    TagComponent:
+      Tag: greenball
+    TransformComponent:
+      Translation: [6.49876308, -0.03949029, -1.25431955]
+      Rotation: [-1.93681681, 0.0518062524, 0.0402325951]
+      Scale: [0.999998331, 1.00001097, 1.00000751]
+    StaticMeshComponent:
+      Path: assets\models\Ball\scene.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\Ball\Baked_baseColor.png
+      normalMapPath: assets\textures\Ball\Baked_normal.png
+      roughnessPath: assets\textures\Ball\Baked_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.349999994
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: false
+  - Entity: 17370085911751902288
+    TagComponent:
+      Tag: BlueSphere1
     TransformComponent:
       Translation: [0, 0, -3.59187984]
       Rotation: [0, 0, 0]
@@ -21,28 +89,18 @@ Entities:
       gMetallic: 1
       gEmissive: 0.200000003
       HaveNormal: true
-  - Entity: 12337737106972249293
+  - Entity: 2523268891109504852
     TagComponent:
-      Tag: GreenSphere
+      Tag: light
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [0, 1, 0]
-      gNormal: [1, 1, 1]
-      gRoughness: 1
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: true
-  - Entity: 10731141115615136318
+      Translation: [-5.29992247, 1.54702508, 9.26438872e-08]
+      Rotation: [-0.178274527, -0.0549616851, -0.381880999]
+      Scale: [0.999999523, 0.999996781, 0.999999762]
+    LightComponent:
+      LightType: 1
+      Color: [0.934268296, 0.957528949, 0.399278492]
+      GenerateShadowMap: false
+  - Entity: 5746412978789827513
     TagComponent:
       Tag: RedSphere
     TransformComponent:
@@ -63,14 +121,45 @@ Entities:
       gMetallic: 1
       gEmissive: 0.200000003
       HaveNormal: true
-  - Entity: 16093869695746079129
+  - Entity: 15807943662779283326
     TagComponent:
-      Tag: light
+      Tag: GreenSphere
     TransformComponent:
-      Translation: [-4.60515976, 1.48715353, 0]
-      Rotation: [0.306999654, 3.63215804e-08, -0.0859626755]
-      Scale: [1, 0.999999762, 1]
-    LightComponent:
-      LightType: 1
-      Color: [1, 1, 1]
-      GenerateShadowMap: false
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true
+  - Entity: 8609669593629342800
+    TagComponent:
+      Tag: BlueSphere
+    TransformComponent:
+      Translation: [-3.32715034, 0, -3.59187984]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true

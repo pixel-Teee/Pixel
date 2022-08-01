@@ -123,7 +123,7 @@ float V_Kelemen(float LoH) {
 	return 0.25f / (LoH * LoH);
 }
 
-float3 F0ClearCoatToSurface(float3 f0) {
+float3 BaseLayerF0ToClearCoat(float3 f0) {
 	return saturate(f0 * (f0 * (.941892f - .263008f * f0) + .346479f) - .0285998f);
 }
 
@@ -221,122 +221,9 @@ PixelOut PS(VertexOut pin)
 				float LoH = max(dot(L, H), 0.0f);
 
 				//Lo += AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, f0, Albedo);
-				PointLightResult pointLightResult = AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, F0ClearCoatToSurface(f0), Albedo);
-
-				Lo += lights[i].Color * (pointLightResult.Fd + pointLightResult.Fr) * NoL;
-			}
-		}
-
-		//direct light
-		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
-		{
-			float3 L = normalize(-lights[i].Direction);
-
-			float3 H = normalize(V + L);
-			float NoV = max(dot(N, V), 0.0f);
-			float NoL = max(dot(N, L), 0.0f);
-			float NoH = max(dot(N, H), 0.0f);
-			float LoH = max(dot(L, H), 0.0f);
-
-			float D = DistributionGGX(NoH, Roughness);
-			float3 F = F_Shlick(LoH, F0ClearCoatToSurface(f0), 1.0);
-			float V = GeometrySmith(NoV, NoL, Roughness);
-
-			//specular brdf
-			float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
-
-			//diffuse brdf
-			float3 Fd = Albedo * Fd_Lambert();
-
-			float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
-			float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
-
-			//------clear coat------
-			float  Dc = GeometrySchlickGGX(clearCoatRoughness, NoH);
-			float  Vc = V_Kelemen(LoH);
-			float  Fc = F_Shlick(LoH, 0.04f, 1.0f) * ClearCoat; // clear coat strength
-			float  Frc = (Dc * Vc) * Fc;
-			//------clear coat------
-
-			Lo += lights[i].Color * (Fd + Fr) * NoL;
-		}
-
-		//ambient lighting(we now use IBL as the ambient term)
-		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
-
-		//------shadow map------
-		//Lo *= (1 - Shadow);//will cause point light not effect
-		//------shadow map------
-
-		//------IBL------
-		//if (receiveAmbientLight)
-		//{
-		float Fc = F_Shlick(max(dot(N, V), 0.0f), 0.04f, 1.0) * ClearCoat;//for clear coat
-
-		float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
-		float3 kD = 1.0f - kS;
-		kD *= 1.0 - Metallic;
-		float3 Irradiance = IrradianceMap.Sample(gsamPointWrap, N).xyz;
-		float3 diffuse = Irradiance * Albedo;
-
-		float MAX_REFLECTION_LOD = 4.0f;
-		float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, Roughness * MAX_REFLECTION_LOD).xyz;
-		float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), Roughness));
-
-		float3 specular = prefilterColor * (F * brdf.x + brdf.y);
-
-		float3 ambient = kD * diffuse * (1.0f - Fc) + specular * sqrt(1.0f - Fc);
-
-		//------clear coat------
-		float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
-		float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
-		//------clear coat------
-		
-		float3 clearCoatF = F_Shlick(max(dot(N, V), 0.0f), 0.04f, clearCoatRoughness);
-		float3 clearCoatBrdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), clearCoatRoughness)) * (1.0f - Fc);
-		float3 clearCoatSpecular = prefilterColor * (clearCoatF * clearCoatBrdf.x + clearCoatBrdf.y);
-		ambient += clearCoatSpecular;
-		Lo += ambient;
-		//}
-		//------IBL------
-		break;
-	}
-	case SHADINGMODEL_CLEARCOAT:
-	{
-		float3 N = normalize(NormalW);
-		float3 V = normalize(CameraPos - PosW);
-		float3 R = reflect(-V, N);
-
-		float3 f0 = float3(0.04, 0.04, 0.04);//non-metal's base reflectance
-		f0 = lerp(f0, Albedo, Metallic);//metal's reflectance
-
-		for (int i = 0; i < PointLightNumber; ++i)
-		{
-			float3 L = lights[i].Position - PosW;//point light direction
-			float distance = length(L);
-			L = normalize(L);
-			if (distance < lights[i].Radius)
-			{
-				//calculate lights
-				float3 H = normalize(V + L);
-				float NoV = max(dot(N, V), 0.0f);
-				float NoL = max(dot(N, L), 0.0f);
-				float NoH = max(dot(N, H), 0.0f);
-				float LoH = max(dot(L, H), 0.0f);
-
-				float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
-				float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
-
-				//------clear coat------
-				float  Dc = GeometrySchlickGGX(clearCoatRoughness, NoH);
-				float  Vc = V_Kelemen(LoH);
-				float  Fc = F_Shlick(LoH, 0.04f, 1.0f) * ClearCoat; // clear coat strength
-				float  Frc = (Dc * Vc) * Fc;
-				//------clear coat------
-
 				PointLightResult pointLightResult = AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], Roughness, f0, Albedo);
 
-				Lo += lights[i].Color * ((pointLightResult.Fd + pointLightResult.Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL;
+				Lo += lights[i].Color * (pointLightResult.Fd + pointLightResult.Fr) * NoL;
 			}
 		}
 
@@ -361,17 +248,7 @@ PixelOut PS(VertexOut pin)
 			//diffuse brdf
 			float3 Fd = Albedo * Fd_Lambert();
 
-			float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
-			float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
-
-			//------clear coat------
-			float  Dc = GeometrySchlickGGX(clearCoatRoughness, NoH);
-			float  Vc = V_Kelemen(LoH);
-			float  Fc = F_Shlick(LoH, 0.04f, 1.0f) * ClearCoat; // clear coat strength
-			float  Frc = (Dc * Vc) * Fc;
-			//------clear coat------
-
-			Lo += lights[i].Color * ((Fd + Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL;
+			Lo += lights[i].Color * (Fd + Fr) * NoL;
 		}
 
 		//ambient lighting(we now use IBL as the ambient term)
@@ -397,6 +274,120 @@ PixelOut PS(VertexOut pin)
 		float3 specular = prefilterColor * (F * brdf.x + brdf.y);
 
 		float3 ambient = kD * diffuse + specular;
+
+		Lo += ambient;
+		//}
+		//------IBL------
+		break;
+	}
+	case SHADINGMODEL_CLEARCOAT:
+	{
+		float3 N = normalize(NormalW);
+		float3 V = normalize(CameraPos - PosW);
+		float3 R = reflect(-V, N);
+
+		float3 f0 = float3(0.04, 0.04, 0.04);//non-metal's base reflectance
+		f0 = BaseLayerF0ToClearCoat(lerp(f0, Albedo, Metallic));//metal's reflectance
+
+		//f0 = (1.0f - 5.0f * sqrt(f0)) * (1.0f - 5.0f * sqrt(f0)) / (5.0f - sqrt(f0));
+
+		float roughness = lerp(Roughness, max(Roughness, ClearCoatRoughness), ClearCoat);
+
+		for (int i = 0; i < PointLightNumber; ++i)
+		{
+			float3 L = lights[i].Position - PosW;//point light direction
+			float distance = length(L);
+			L = normalize(L);
+			if (distance < lights[i].Radius)
+			{
+				//calculate lights
+				float3 H = normalize(V + L);
+				float NoV = max(dot(N, V), 0.0f);
+				float NoL = max(dot(N, L), 0.0f);
+				float NoH = max(dot(N, H), 0.0f);
+				float LoH = max(dot(L, H), 0.0f);
+
+				//------clear coat------
+				float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
+				float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
+				float Dc = GeometrySchlickGGX(clearCoatRoughness, NoH);
+				float Vc = V_Kelemen(LoH);
+				float Fc = F_Shlick(LoH, 0.04f, 1.0f) * ClearCoat; // clear coat strength
+				float Frc = (Dc * Vc) * Fc;
+				//------clear coat------
+
+				PointLightResult pointLightResult = AccumulatePointLight(NoV, NoL, NoH, LoH, lights[i], roughness, f0, Albedo);
+
+				Lo += lights[i].Color * ((pointLightResult.Fd + pointLightResult.Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL;
+			}
+		}
+
+		//direct light
+		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
+		{
+			float3 L = normalize(-lights[i].Direction);
+
+			float3 H = normalize(V + L);
+			float NoV = max(dot(N, V), 0.0f);
+			float NoL = max(dot(N, L), 0.0f);
+			float NoH = max(dot(N, H), 0.0f);
+			float LoH = max(dot(L, H), 0.0f);
+
+			float D = DistributionGGX(NoH, roughness);
+			float3 F = F_Shlick(LoH, f0, 1.0);
+			float V = GeometrySmith(NoV, NoL, roughness);
+
+			//specular brdf
+			float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
+
+			//diffuse brdf
+			float3 Fd = Albedo * Fd_Lambert();
+
+			//------clear coat------
+			float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
+			float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
+			float  Dc = GeometrySchlickGGX(clearCoatRoughness, NoH);
+			float  Vc = V_Kelemen(LoH);
+			float  Fc = F_Shlick(LoH, 0.04f, 1.0f) * ClearCoat; // clear coat strength
+			float  Frc = (Dc * Vc) * Fc;
+			//------clear coat------
+
+			Lo += lights[i].Color * ((Fd + Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL;
+		}
+
+		//ambient lighting(we now use IBL as the ambient term)
+		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
+		
+		//------shadow map------
+		//Lo *= (1 - Shadow);//will cause point light not effect
+		//------shadow map------
+
+		//------IBL------
+		//if (receiveAmbientLight)
+		//{
+		float3 kS = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0);
+		float3 kD = 1.0f - kS;
+		kD *= 1.0 - Metallic;
+		float3 Irradiance = IrradianceMap.Sample(gsamPointWrap, N).xyz;
+		float3 diffuse = Irradiance * Albedo;
+
+		float MAX_REFLECTION_LOD = 4.0f;
+		float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, roughness * MAX_REFLECTION_LOD).xyz;
+		float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), roughness));
+
+		float3 specular = prefilterColor * (F * brdf.x + brdf.y);
+
+		//------clear coat indirect specular------
+		float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
+		float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
+		float3 clearCoatPrefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, clearCoatRoughness * MAX_REFLECTION_LOD).xyz;
+		float3 ClearCoatBrdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), clearCoatRoughness));
+
+		float3 clearCoatSpecular = clearCoatPrefilterColor * (F * brdf.x + brdf.y);
+		float3 Fc = F_Shlick(max(dot(N, V), 0.0f), f0, 1.0f) * ClearCoat;
+		//------clear coat indirect specular------
+
+		float3 ambient = (kD * diffuse + specular * (1.0f - Fc)) * (1.0 - Fc) + clearCoatSpecular * Fc;
 
 		Lo += ambient;
 		//}

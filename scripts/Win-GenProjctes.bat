@@ -1,6 +1,6 @@
 pushd ..\
 mkdir build
 cd build
-cmake .. 
+cmake .. -G"Visual Studio 16 2019"
 popd
 PAUSE
