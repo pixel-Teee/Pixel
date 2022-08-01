@@ -18,184 +18,14 @@
 
 #include "Pixel/Scene/Components/IDComponent.h"
 #include "Pixel/Scene/Components/TagComponent.h"
+#include "Pixel/Scene/Components/TransformComponent.h"
+#include "Pixel/Scene/Components/CameraComponent.h"
+#include "Pixel/Scene/Components/SpriteRendererComponent.h"
+#include "Pixel/Scene/Components/NativeScriptComponent.h"
+#include "Pixel/Scene/Components/Rigidbody2DComponent.h"
 //------my library------
 
 namespace Pixel {
-
-	struct TransformComponent
-	{
-		UUID parentUUID = 0;//parent uuid
-		std::vector<UUID> childrensUUID;//children uuid
-		//------local transform------
-		glm::vec3 Translation = {0.0f, 0.0f, 0.0f};
-		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
-		//------local transform------
-		glm::mat4 globalTransform = glm::mat4(1.0f);
-
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& translation) : Translation(translation){}
-
-		glm::mat4 GetLocalTransform() const
-		{
-			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-
-			return glm::translate(glm::mat4(1.0f), Translation)
-			* rotation
-			* glm::scale(glm::mat4(1.0f), Scale);
-		}
-
-		glm::mat4 GetGlobalTransform(entt::registry& scene) const
-		{
-			if (parentUUID != 0)
-			{
-				//parent entity
-				entt::entity parentEntity;
-				//find uuid's owner
-				auto& UUIDs = scene.view<IDComponent>();
-				for (auto entity : UUIDs)
-				{
-					const IDComponent& id = scene.get<IDComponent>(entity);
-					if (id.ID == parentUUID)
-					{
-						parentEntity = entity;
-						break;
-					}
-				}
-
-				TransformComponent parentTransformComponent = scene.get<TransformComponent>(parentEntity);
-				return GetLocalTransform() * parentTransformComponent.GetGlobalTransform(scene);//additive
-			}
-			else
-			{
-				return GetLocalTransform();
-			}
-		}
-
-		glm::mat4 GetGlobalParentTransform(entt::registry& scene) const
-		{
-			if (parentUUID != 0)
-			{
-				//parent entity
-				entt::entity parentEntity;
-				//find uuid's owner
-				auto& UUIDs = scene.view<IDComponent>();
-				for (auto entity : UUIDs)
-				{
-					const IDComponent& id = scene.get<IDComponent>(entity);
-					if (id.ID == parentUUID)
-					{
-						parentEntity = entity;
-						break;
-					}
-				}
-
-				TransformComponent parentTransformComponent = scene.get<TransformComponent>(parentEntity);
-				return parentTransformComponent.GetGlobalTransform(scene);
-			}
-			else
-			{
-				return glm::mat4(1.0f);
-			}
-		}
-
-		void SetScale(glm::vec3 scale)
-		{
-			Scale = scale;
-		}
-	};
-
-	struct SpriteRendererComponent
-	{
-		glm::vec4 Color{1.0f, 1.0f, 1.0f, 1.0f};
-		Ref<Texture2D> Texture;
-		float TilingFactor = 1.0f;
-		//Ref<Material>
-		SpriteRendererComponent() = default;
-		SpriteRendererComponent(const SpriteRendererComponent&) = default;
-		SpriteRendererComponent(const glm::vec4& color) : Color(color) {}
-
-		operator glm::vec4& () { return Color; }
-		operator const glm::vec4& () const { return Color; };
-	};
-
-	struct CameraComponent
-	{
-		SceneCamera camera;
-		//think about move to scene
-		bool Primary = true;
-		//when OnResize, whether is SetViewport
-		bool FixedAspectRatio = false;
-
-		//draw frustum
-		//editor only
-		bool DisplayFurstum = false;
-
-		CameraComponent() = default;
-		CameraComponent(const CameraComponent&) = default;
-		//CameraComponent(const glm::mat4& projection);
-	};
-
-	//Forward declartion
-	class ScriptableEntity;
-	struct NativeScriptComponent
-	{
-		//------
-		ScriptableEntity* Instance = nullptr;
-
-		//ScriptableEntity*(*InstantiateScript)();
-		//void (*DestroyScript)(NativeScriptComponent*);
-
-		std::string m_path;
-
-		void Instantiate(std::string path);
-
-		void Destroy();
-
-		
-		/*template<typename T>
-		void Bind()
-		{
-			InstantiateScript = [](){ return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
-		}*/
-		//------
-		
-		/*lua_State* m_pLuaState;
-
-		void (*InstantiateScript)(NativeScriptComponent* nsc);
-		void (*DestroyScript)(NativeScriptComponent*);
-
-		void Bind()
-		{
-			InstantiateScript = [](NativeScriptComponent* nsc) { nsc->m_pLuaState = luaL_newstate();
-				luaL_openlibs(nsc->m_pLuaState);
-			};
-			DestroyScript = [](NativeScriptComponent* nsc) { lua_close(nsc->m_pLuaState); };
-		}*/
-	};
-
-	//Physics
-
-	struct Rigidbody2DComponent
-	{
-		enum class BodyType {
-			Static = 0,
-			Dynamic,
-			Kinematic
-		};
-
-		BodyType Type = BodyType::Static;
-
-		bool FixedRotation = false;
-
-		//Storage for runtime
-		void* RuntimeBody = nullptr;
-
-		Rigidbody2DComponent() = default;
-		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
-	};
 
 	struct BoxCollider2DComponent
 	{
@@ -246,6 +76,8 @@ namespace Pixel {
 		float gMetallic = 1.0f;
 		float gEmissive = 0.2f;
 		bool HaveNormal = false;
+		float ClearCoat = 1.0f;
+		float ClearCoatRoughness = 1.0f;
 
 		bool nextFrameNeedLoadTexture[5];
 

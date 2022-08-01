@@ -25,6 +25,8 @@ cbuffer CbMaterial : register(b2)
 	float gEmissive;
 	bool HaveNormal;//have normal
 	int ShadingModelID;//shading model id
+	float ClearCoat;//for clear coat
+	float ClearCoatRoughness;//for clear coat
 };
 
 struct VertexIn
@@ -149,7 +151,8 @@ PixelOut PS(VertexOut pin)
 	else
 		pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;//[-1, 1]->[0, 1]
 	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz * gAlbedo;
-	pixelOut.gBufferAlbedo.w = 1.0f;
+	pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
+	pixelOut.gVelocity.w = ClearCoat;
 	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;
 	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).x * gMetallic;
 	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).x * gEmissive;

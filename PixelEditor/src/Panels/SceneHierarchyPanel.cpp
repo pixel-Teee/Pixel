@@ -745,6 +745,12 @@ namespace Pixel
 
 				//ImGui::DragFloat("Shininess", &component.shininess, 2.0f, 2.0f, 64.0f);
 
+				if (component.shadingModel == ShadingModel::SM_ClearCoat)
+				{
+					ImGui::DragFloat("ClearCoat", &component.ClearCoat, 0.05f, 0.0f, 1.0f);
+					ImGui::DragFloat("ClearCoatRoughness", &component.ClearCoatRoughness, 0.05f, 0.0f, 1.0f);
+				}
+
 				//------Shading Model------
 				const char* ShadingModelString[] = { "UnLit", "DefaultLit", "ClearCoat", "NRP"};
 				const char* currentShadingModelString = ShadingModelString[(int)component.shadingModel];

@@ -54,8 +54,8 @@ namespace Pixel
 		R			G			B			A 
 		position.r	position.g	position.b	x
 		normal.r	normal.g	normal.b	x
-		velocity.r	velocity.g	velocity.b  x
-		albedo.r	albedo.g	albedo.b	x
+		velocity.r	velocity.g	velocity.b  ClearCoat
+		albedo.r	albedo.g	albedo.b	ClearCoatRoughness
 		roughness	metallic	emissive	ShadingModelId
 		--------------------------------------*/
 	

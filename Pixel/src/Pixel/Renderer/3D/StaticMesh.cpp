@@ -325,6 +325,8 @@ namespace Pixel {
 		m_MaterialConstant.Roughness = pMaterial->gRoughness;
 		m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
 		m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
+		m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
+		m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
 
