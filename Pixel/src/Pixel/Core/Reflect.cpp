@@ -3,6 +3,8 @@
 
 namespace Pixel {
 	namespace reflect {
+		
+		//------primitive type descriptor------
 		struct TypeDescriptor_Int : TypeDescriptor {
 			TypeDescriptor_Int() : TypeDescriptor{ "int", sizeof(int) } {
 
@@ -14,5 +16,6 @@ namespace Pixel {
 			static TypeDescriptor_Int typeDesc;
 			return &typeDesc;
 		}
+		//------primitive type descriptor------
 	}	
 }

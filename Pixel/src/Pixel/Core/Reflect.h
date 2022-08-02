@@ -6,8 +6,8 @@
 namespace Pixel {
 	namespace reflect {
 		//------
-	//base class of all type descriptors
-	//------
+		//base class of all type descriptors
+		//------
 
 		struct TypeDescriptor {
 			const char* name;//type name
