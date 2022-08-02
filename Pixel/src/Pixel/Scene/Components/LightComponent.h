@@ -9,7 +9,8 @@
 //------other library------
 
 //------my library------
-#include <Pixel/Scene/Components/LightComponent.h>
+#include "Pixel/Scene/Components/TransformComponent.h"
+#include "Pixel/Core/Reflect.h"
 //------my library------
 
 
@@ -58,5 +59,7 @@ namespace Pixel {
 				* rotation
 				* glm::scale(glm::mat4(1.0f), transformComponent.Scale * GetSphereLightVolumeRadius());
 		}
+
+		REFLECT()
 	};
 }
