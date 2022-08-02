@@ -35,3 +35,5 @@ Select the PixelEditor as the StartupProject
 - CameraFrustum Visualization
 - PBR
 - ShadowMap
+- ClearCoat
+- Unlit
