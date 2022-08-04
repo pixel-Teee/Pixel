@@ -3,65 +3,76 @@
 #include <string>
 #include <vector>
 
-namespace Pixel {
-	namespace reflect {
-		//------
-		//base class of all type descriptors
-		//------
+namespace YAML
+{
+	class Emitter;
+	class Node;
+}
 
+namespace Pixel {
+	namespace Reflect
+	{
 		struct TypeDescriptor {
-			const char* name;//type name
+			const char* name;
 			size_t size;
 
-			TypeDescriptor(const char* name, size_t size) : name{ name }, size{ size }{}
+			TypeDescriptor(const char* name, size_t size) : name{ name }, size{ size } {}
 			virtual ~TypeDescriptor() {}
-			virtual std::string GetFullName() const { return name; }
-
-			//dump?
+			virtual std::string getFullName() const { return name; }
+			virtual void Serializer(YAML::Emitter& out, void* obj) = 0;//write to yaml
+			virtual void Deserializer(YAML::Node& node, void* obj, const char* name) = 0;//write to obj
 		};
+		//------finding type descriptors------
 
-		//------
-		//finding type descriptors
-		//------
-
-		//declare the function template that handles primitive types such as int, std::string, etc
+		//------declare the function template that handles primitive types such as int, std::string, etc.------
 		template<typename T>
 		TypeDescriptor* getPrimitiveDescriptor();
 
-		//a helper class to find TypeDescriptors in different ways:
-		struct DefaultResolver {
-			template<typename T> static char func(decltype(&T::Reflection));
-			template<typename T> static int func(...);//sfinae
+		TypeDescriptor* getEnumerateDescriptor();
 
+		//------a helper class to find TypeDescriptors in different ways:------
+		struct DefaultResolver
+		{
+			template<typename T> static char func(decltype(&T::Reflection));
+			template<typename T> static int func(...);
 			template<typename T>
-			struct IsReflected {
-				static constexpr bool value = sizeof(func<T>(nullptr)) == sizeof(char);
+			struct IsReflected
+			{
+				static constexpr int value = sizeof(func<T>(nullptr)) == sizeof(char);
 			};
 
-			//this version is called if T has a static member named "Reflection"
-			template<typename T, typename std::enable_if<IsReflected<T>::value, int>::type = 0>
-			struct TypeDescriptor* get() {
+			//------this version is called if T has a static member named "Reflection"------
+			template<typename T, typename std::enable_if<IsReflected<T>::value, int>::type = 0, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+			static TypeDescriptor* get()
+			{
 				return &T::Reflection;
 			}
 
-			//this version is called otherwise:
-			template<typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0>
-			static TypeDescriptor* get() {
+			//------this version is called otherwise------
+			template<typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
+			static TypeDescriptor* get()
+			{
 				return getPrimitiveDescriptor<T>();
+			}
+
+			template<typename T, typename std::enable_if<!IsReflected<T>::value, int>::type = 0, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+			static TypeDescriptor* get()
+			{
+				return getEnumerateDescriptor();
 			}
 		};
 
-		//this is the primary class template for finding all TypeDescriptors:
+		//------this is primary class template for finding all TypeDescriptors------
 		template<typename T>
-		struct TypeResolver {
-			static TypeDescriptor* get() {
+		struct TypeResolver
+		{
+			static TypeDescriptor* get()
+			{
 				return DefaultResolver::get<T>();
 			}
 		};
 
-		//------
-		//type descriptors for user-defined structs/classes
-		//------
+		//------type descriptors for user-defined structs/classes------
 		struct TypeDescriptor_Struct : TypeDescriptor {
 			struct Member {
 				const char* name;
@@ -71,35 +82,34 @@ namespace Pixel {
 
 			std::vector<Member> members;
 
-			TypeDescriptor_Struct(void (*init)(TypeDescriptor_Struct*)) : TypeDescriptor(nullptr, 0) {
+			TypeDescriptor_Struct(void (*init)(TypeDescriptor_Struct*)) : TypeDescriptor{ nullptr, 0 } {
 				init(this);
 			}
-
-			TypeDescriptor_Struct(const char* name, size_t size, const std::initializer_list<Member>& init) :
-				TypeDescriptor{ nullptr, 0 }, members{ init }
-			{
-
+			TypeDescriptor_Struct(const char* name, size_t size, const std::initializer_list<Member>& init) : TypeDescriptor{ nullptr, 0 }, members{ init } {
 			}
+
+			void Serializer(YAML::Emitter& out, void* obj) override;
+			void Deserializer(YAML::Node& node, void* obj, const char* name) override;
 		};
 
-#define REFLECT()\
-	friend struct reflect::DefaultResolver; \
-	static reflect::TypeDescriptor_Struct Reflection; \
-	static void initReflection(reflect::TypeDescriptor_Struct*);
+#define REFLECT() \
+    friend struct Reflect::DefaultResolver; \
+    static Reflect::TypeDescriptor_Struct Reflection; \
+    static void initReflection(Reflect::TypeDescriptor_Struct*);
 
-#define REFLECT_STRUCT_BEGIN(type)\
-	reflect::TypeDescriptor_Struct type::Reflection{type::initReflection};\
-	void type::initReflection(reflect::TypeDescriptor_Struct* typeDesc){\
-		using T = type;\
-		typeDesc->name = #type;\
-		typeDesc->size = sizeof(T);\
-		typeDesc->members = {
+#define REFLECT_STRUCT_BEGIN(type) \
+    Reflect::TypeDescriptor_Struct type::Reflection{type::initReflection}; \
+    void type::initReflection(Reflect::TypeDescriptor_Struct* typeDesc) { \
+        using T = type; \
+        typeDesc->name = #type; \
+        typeDesc->size = sizeof(T); \
+        typeDesc->members = {
 
-#define REFLECT_STRUCT_MEMBER(name)\
-	{#name, offsetof(T, name), reflect::TypeResolver<decltype(T::name)>::get()},
+#define REFLECT_STRUCT_MEMBER(name) \
+            {#name, offsetof(T, name), Reflect::TypeResolver<decltype(T::name)>::get()},
 
-#define REFLECT_STRUCT_END()\
-		};\
-	}
-	}	
+#define REFLECT_STRUCT_END() \
+        }; \
+    }
+		}
 }

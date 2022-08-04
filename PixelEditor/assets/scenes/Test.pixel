@@ -1,0 +1,17 @@
+Scene: Untitled
+Entities:
+  - Entity: 5689761073442285673
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    LightComponent:
+      lightType: 0
+      color: [1, 1, 1]
+      GenerateShadowMap: false
+      DisplayLightVolume: false
+      constant: 1
+      linear: 0.0900000036
+      quadratic: 0.0320000015

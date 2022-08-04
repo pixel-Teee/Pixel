@@ -101,5 +101,7 @@ namespace Pixel {
 		{
 			Scale = scale;
 		}
+
+		REFLECT()
 	};
 }

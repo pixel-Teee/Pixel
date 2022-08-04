@@ -1,9 +1,15 @@
 #include "pxpch.h"
 
-#include "LightComponent.h"
+#include <yaml-cpp/yaml.h>
 
-namespace Pixel {
+//------my library------
+#include "LightComponent.h"
+//------my library------
+
+namespace Pixel
+{
 	REFLECT_STRUCT_BEGIN(LightComponent)
+	REFLECT_STRUCT_MEMBER(lightType)
 	REFLECT_STRUCT_MEMBER(color)
 	REFLECT_STRUCT_MEMBER(GenerateShadowMap)
 	REFLECT_STRUCT_MEMBER(DisplayLightVolume)

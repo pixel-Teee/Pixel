@@ -137,6 +137,33 @@ namespace Pixel {
 		return SceneCamera::ProjectionType::Perspective;
 	}
 
+	//------glm::vec3------
+	struct TypeDescriptor_GlmVec3 : Reflect::TypeDescriptor
+	{
+		TypeDescriptor_GlmVec3() : TypeDescriptor("glm::vec3", sizeof(glm::vec3))
+		{}
+
+		void Serializer(YAML::Emitter& out, void* obj) override
+		{
+			glm::vec3 value = *(static_cast<glm::vec3*>(obj));
+			out << YAML::Flow;
+			out << YAML::BeginSeq << value.x << value.y << value.z << YAML::EndSeq;
+		}
+
+		void Deserializer(YAML::Node& node, void* obj, const char* variableName) override
+		{
+			*(static_cast<glm::vec3*>(obj)) = node[variableName].as<glm::vec3>();
+		}
+	};
+
+	template<>
+	Reflect::TypeDescriptor* Reflect::getPrimitiveDescriptor<glm::vec3>()
+	{
+		static TypeDescriptor_GlmVec3 typeDesc;
+		return &typeDesc;
+	}
+	//------glm::vec3------
+
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 	:m_Scene(scene)
 	{
@@ -193,24 +220,24 @@ namespace Pixel {
 
 		if (entity.HasComponent<TagComponent>())
 		{
-			out << YAML::Key << "TagComponent";
+			out << YAML::Key << Reflect::TypeResolver<TagComponent>::get()->getFullName();
 			out << YAML::BeginMap; // TagComponent
 
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			out << YAML::Key << "Tag" << YAML::Value << tag;
+			Reflect::TypeResolver<TagComponent>::get()->Serializer(out, &tag);
+
 
 			out << YAML::EndMap; // TagComponent
 		}
 
 		if (entity.HasComponent<TransformComponent>())
 		{
-			out << YAML::Key << "TransformComponent";
+			out << YAML::Key << Reflect::TypeResolver<TransformComponent>::get()->getFullName();
 			out << YAML::BeginMap; // TransformComponent
 
 			auto& tc = entity.GetComponent<TransformComponent>();
-			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
-			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
-			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
+
+			Reflect::TypeResolver<TransformComponent>::get()->Serializer(out, &tc);
 
 			out << YAML::EndMap; // TransformComponent
 		}
@@ -292,30 +319,16 @@ namespace Pixel {
 
 		if (entity.HasComponent<LightComponent>())
 		{
-			out << YAML::Key << "LightComponent";
+			out << YAML::Key << Reflect::TypeResolver<LightComponent>::get()->getFullName();
 			out << YAML::BeginMap;
 
 			auto& lightComponent = entity.GetComponent<LightComponent>();
 
-			uint32_t lightType = (uint32_t)lightComponent.lightType;
-
-			out << YAML::Key << "LightType" << YAML::Value << lightType;
-			
-			out << YAML::Key << "Color" << YAML::Value << lightComponent.color;
-			if (lightComponent.lightType == LightType::PointLight)
-			{
-				out << YAML::Key << "Constant" << YAML::Value << lightComponent.constant;
-				out << YAML::Key << "Linear" << YAML::Value << lightComponent.linear;
-				out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.quadratic;
-			}
-			else if (lightComponent.lightType == LightType::DirectLight)
-			{
-				out << YAML::Key << "GenerateShadowMap" << YAML::Value << lightComponent.GenerateShadowMap;
-			}
+			Reflect::TypeResolver<LightComponent>::get()->Serializer(out, &lightComponent);
 
 			out << YAML::EndMap;
 		}
-
+		
 		if (entity.HasComponent<MaterialComponent>())
 		{
 			out << YAML::Key << "MaterialComponent";
@@ -462,7 +475,9 @@ namespace Pixel {
 			std::string name;
 			auto tagComponent = entity["TagComponent"];
 			if (tagComponent)
-				name = tagComponent["Tag"].as<std::string>();
+			{
+				Reflect::TypeResolver<std::string>::get()->Deserializer(tagComponent, &name, nullptr);
+			}
 
 			PIXEL_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
@@ -473,9 +488,7 @@ namespace Pixel {
 			{
 				// Entities always have transforms
 				auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-				tc.Translation = transformComponent["Translation"].as<glm::vec3>();
-				tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
-				tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+				Reflect::TypeResolver<TransformComponent>::get()->Deserializer(transformComponent, &tc, nullptr);
 			}
 
 			auto cameraComponent = entity["CameraComponent"];
@@ -533,27 +546,12 @@ namespace Pixel {
 				auto& src = deserializedEntity.AddComponent<StaticMeshComponent>(str);
 			}
 
-			auto lightComponent = entity["LightComponent"];
+			auto lightComponent = entity[Reflect::TypeResolver<LightComponent>::get()->getFullName()];
 			if (lightComponent)
 			{
 				auto& light = deserializedEntity.AddComponent<LightComponent>();
 
-				uint32_t lightType = lightComponent["LightType"].as<int32_t>();
-				if (lightType == 0) light.lightType = LightType::PointLight;
-				else if (lightType == 1) light.lightType = LightType::DirectLight;
-				else light.lightType = LightType::SpotLight;
-
-				light.color = lightComponent["Color"].as<glm::vec3>();
-				if (lightType == 0)
-				{
-					light.constant = lightComponent["Constant"].as<float>();
-					light.linear = lightComponent["Linear"].as<float>();
-					light.quadratic = lightComponent["Quadratic"].as<float>();
-				}		
-				else if (lightType == 1)
-				{
-					light.GenerateShadowMap = lightComponent["GenerateShadowMap"].as<bool>();
-				}
+				Reflect::TypeResolver<LightComponent>::get()->Deserializer(lightComponent, &light, nullptr);
 			}
 
 			auto materialComponent = entity["MaterialComponent"];

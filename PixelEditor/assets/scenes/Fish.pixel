@@ -1,0 +1,25 @@
+Scene: Untitled
+Entities:
+  - Entity: 5049367307656024690
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      parentUUID: m_UUID
+      0: Translation
+      [0, 0, 0]: Rotation
+      [0, 0, 0]: Scale
+      [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Fish\Fish_LP_combined.obj
+    MaterialComponent:
+      albedoPath: assets\textures\Fish\Fish_Albedo.png
+      normalMapPath: assets\textures\Fish\Fish_Normalmap.png
+      roughnessPath: assets\textures\Fish\Fish_Roughness.png
+      emissivePath: ""
+      metallicPath: assets\textures\Fish\Fish_Metallic.png
+      gAlbedo: [1, 1, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: false

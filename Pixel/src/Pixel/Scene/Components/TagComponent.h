@@ -9,5 +9,7 @@ namespace Pixel {
 		TagComponent(const TagComponent&) = default;
 		TagComponent(const std::string& tag)
 			:Tag(tag) {}
+
+		REFLECT()
 	};
 }
