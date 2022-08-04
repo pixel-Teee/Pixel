@@ -3,10 +3,12 @@
 #include <string>
 #include <vector>
 
-namespace YAML
+namespace rapidjson
 {
-	class Emitter;
-	class Node;
+	template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = CrtAllocator, unsigned writeFlags = kWriteDefaultFlags>
+	class Writer;
+	class StringBuffer;
+	class Document;
 }
 
 namespace Pixel {
@@ -19,8 +21,10 @@ namespace Pixel {
 			TypeDescriptor(const char* name, size_t size) : name{ name }, size{ size } {}
 			virtual ~TypeDescriptor() {}
 			virtual std::string getFullName() const { return name; }
-			virtual void Serializer(YAML::Emitter& out, void* obj) = 0;//write to yaml
-			virtual void Deserializer(YAML::Node& node, void* obj, const char* name) = 0;//write to obj
+
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) = 0;//write to json
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) = 0;//read to obj
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) = 0;
 		};
 		//------finding type descriptors------
 
@@ -88,8 +92,13 @@ namespace Pixel {
 			TypeDescriptor_Struct(const char* name, size_t size, const std::initializer_list<Member>& init) : TypeDescriptor{ nullptr, 0 }, members{ init } {
 			}
 
-			void Serializer(YAML::Emitter& out, void* obj) override;
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override;
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override;
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override;
+
+			// Inherited via TypeDescriptor
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override;
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override;
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override;
 		};
 
 #define REFLECT() \

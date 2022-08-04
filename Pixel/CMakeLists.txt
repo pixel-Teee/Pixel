@@ -88,6 +88,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/imgui-node-editor"
 "vendor/lua"
 "vendor/bullet3/src"
+"vendor/json/include"
 )
 
 target_compile_definitions(Pixel

@@ -8,6 +8,9 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <yaml-cpp/yaml.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/document.h>
 //------other library------
 
 #include "Reflect.h"
@@ -20,16 +23,28 @@ namespace Pixel {
 			TypeDescriptor_Int() : TypeDescriptor("int", sizeof(int))
 			{}
 
-			void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << *(static_cast<int*>(obj));
+				writer.Key(name);
+				writer.Int(*(static_cast<int*>(obj)));
 			}
 
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				//write to obj
-				*(static_cast<int*>(obj)) = node[name].as<int>();
+				if (doc.HasMember(name) && doc[name].IsInt())
+				{
+					*static_cast<int*>(obj) = doc[name].GetInt();
+				}
 			}
+
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.IsInt())
+				{
+					*static_cast<int*>(obj) = value.GetInt();
+				}
+			}
+
 		};
 
 		template<>
@@ -43,18 +58,28 @@ namespace Pixel {
 		//------uint64_t------
 		struct TypeDescriptor_Uint64_t : TypeDescriptor
 		{
-			TypeDescriptor_Uint64_t() : TypeDescriptor("int", sizeof(int))
+			TypeDescriptor_Uint64_t() : TypeDescriptor("uint64_t", sizeof(uint64_t))
 			{}
 
-			void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << *(static_cast<uint64_t*>(obj));
+				writer.Key(name);
+				writer.Uint64(*static_cast<uint64_t*>(obj));
 			}
 
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				//write to obj
-				*(static_cast<uint64_t*>(obj)) = node[name].as<uint64_t>();
+				if (doc.HasMember(name) && doc[name].IsUint64())
+				{
+					*static_cast<uint64_t*>(obj) = doc[name].GetUint64();
+				}
+			}
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.IsInt())
+				{
+					*static_cast<uint64_t*>(obj) = value.GetUint64();
+				}
 			}
 		};
 
@@ -72,15 +97,28 @@ namespace Pixel {
 			TypeDescriptor_Float() : TypeDescriptor("float", sizeof(float))
 			{}
 
-			void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << *(static_cast<float*>(obj));
+				writer.Key(name);
+				writer.Double(*static_cast<double*>(obj));
 			}
 
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				*(static_cast<float*>(obj)) = node[name].as<float>();
+				if (doc.HasMember(name) && doc[name].IsDouble())
+				{
+					*static_cast<double*>(obj) = doc[name].GetDouble();
+				}
 			}
+
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.IsInt())
+				{
+					*static_cast<double*>(obj) = value.GetDouble();
+				}
+			}
+
 		};
 
 		template<>
@@ -97,14 +135,26 @@ namespace Pixel {
 			TypeDescriptor_Bool() : TypeDescriptor("bool", sizeof(bool))
 			{}
 
-			void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << *(static_cast<bool*>(obj));
+				writer.Key(name);
+				writer.Bool(*static_cast<bool*>(obj));
 			}
 
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				*(static_cast<bool*>(obj)) = node[name].as<bool>();
+				if (doc.HasMember(name) && doc[name].IsBool())
+				{
+					*static_cast<bool*>(obj) = doc[name].GetBool();
+				}
+			}
+
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.IsBool())
+				{
+					*static_cast<bool*>(obj) = value.GetBool();
+				}
 			}
 		};
 
@@ -122,14 +172,26 @@ namespace Pixel {
 			TypeDescriptor_String() : TypeDescriptor("string", sizeof(std::string))
 			{}
 
-			void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << *(static_cast<std::string*>(obj));
+				writer.Key(name);
+				writer.String((*static_cast<std::string*>(obj)).data());
 			}
 
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				*(static_cast<std::string*>(obj)) = node[name].as<std::string>();
+				if (doc.HasMember(name) && doc[name].IsString())
+				{
+					*static_cast<std::string*>(obj) = doc[name].GetString();
+				}
+			}
+
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.IsString())
+				{
+					*static_cast<std::string*>(obj) = value.GetString();
+				}
 			}
 		};
 
@@ -142,21 +204,32 @@ namespace Pixel {
 		//------String------
 
 		//------struct/class------
-		void TypeDescriptor_Struct::Serializer(YAML::Emitter& out, void* obj)
+		void TypeDescriptor_Struct::Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name)
 		{
 			for (const Member& member : members)
 			{
-				out << YAML::Key;
-				out << member.name;//variable name
-				out << YAML::Value;
-				member.type->Serializer(out, (char*)obj + member.offset);
+				member.type->Write(writer, (char*)obj + member.offset, member.name);
 			}
 		}
-		void TypeDescriptor_Struct::Deserializer(YAML::Node& node, void* obj, const char* name)
+		void TypeDescriptor_Struct::Read(rapidjson::Document& doc, void* obj, const char* name)
 		{
-			for(const Member& member : members)
+			for (const Member& member : members)
 			{
-				member.type->Deserializer(node, (char*)obj + member.offset, member.name);
+				member.type->Read(doc, (char*)obj + member.offset, member.name);
+			}
+		}
+		void TypeDescriptor_Struct::Read(rapidjson::Value& value, void* obj, const char* name)
+		{
+			for (const Member& member : members)
+			{
+				member.type->Read(value, (char*)obj + member.offset, member.name);
+			}
+		}
+		void TypeDescriptor_Struct::Read(rapidjson::Document& doc, void* obj, const char* name)
+		{
+			for (const Member& member : members)
+			{
+				member.type->Read(doc, (char*)obj + member.offset, name);
 			}
 		}
 		//------struct/class------
@@ -167,15 +240,28 @@ namespace Pixel {
 			TypeDescriptor_Enum() : TypeDescriptor("enumerate", sizeof(int32_t))
 			{}
 
-			void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << *(static_cast<int*>(obj));
+				writer.Key(name);
+				writer.Int(*static_cast<int*>(obj));
 			}
 
-			void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				*(static_cast<int*>(obj)) = node[name].as<int>();
+				if (doc.HasMember(name) && doc[name].IsInt())
+				{
+					*static_cast<int*>(obj) = doc[name].GetInt();
+				}
 			}
+
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.IsInt())
+				{
+					*static_cast<int*>(obj) = value.GetInt();
+				}
+			}
+
 		};
 
 		TypeDescriptor* getEnumerateDescriptor()
@@ -221,28 +307,30 @@ namespace Pixel {
 				return std::string("std::vector<") + itemType->getFullName() + ">";
 			}
 
-			virtual void Serializer(YAML::Emitter& out, void* obj) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
-				out << YAML::BeginSeq;
-				size_t itemSize = getSize(obj);
-				for(size_t i = 0; i < itemSize; ++i)
+				writer.Key(name);
+				writer.StartArray();
+				size_t vecSize = getSize(obj);
+				for (size_t i = 0; i < vecSize; ++i)
 				{
-					out << YAML::Key << itemType->name << YAML::Value;
-					itemType->Serializer(out, const_cast<void*>(getItem(obj, i)));
+					itemType->Write(writer, const_cast<void*>(getItem(obj, i)), name);
 				}
-				out << YAML::EndSeq;
+				writer.EndArray();
 			}
 
-			virtual void Deserializer(YAML::Node& node, void* obj, const char* name) override
+			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
 			{
-				//resize
-				ReSize(obj, node[name].size());
-
-				for(size_t i = 0; i < node[name].size(); ++i)
+				if (doc.HasMember(name) && doc[name].IsArray())
 				{
-					itemType->Deserializer(node[name][i], const_cast<void*>(getItem(obj, i)), itemType->name);
+					rapidjson::Value& array = doc[name];
+					for (size_t i = 0; i < array.Size(); ++i)
+					{
+						itemType->Read(array[i], const_cast<void*>(getItem(obj, i)), name);
+					}
 				}
 			}
+
 		};
 
 		//partially specialize TypeResolver<> for std::vectors:
