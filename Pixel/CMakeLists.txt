@@ -57,6 +57,8 @@ file(GLOB_RECURSE PixelSrc
 "vendor/lua/*.h"
 "vendor/bullet3/src/*.h"
 "vendor/bullet3/src/*.cpp"
+"vendor/json/include/*.h"
+"vendor/json/include/*.cpp"
 )
 
 set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")

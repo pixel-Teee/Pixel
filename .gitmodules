@@ -32,3 +32,6 @@
 [submodule "Pixel/vendor/bullet3"]
 	path = Pixel/vendor/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
+[submodule "Pixel/vendor/json"]
+	path = Pixel/vendor/json
+	url = https://github.com/pixel-Teee/rapidjson.git

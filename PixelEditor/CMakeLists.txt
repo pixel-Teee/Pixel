@@ -45,6 +45,7 @@ PRIVATE
 "../Pixel/vendor/Box2D"
 "../Pixel/vendor/imgui-node-editor"
 "../Pixel/vendor/lua"
+"../Pixel/vendor/json"
 )
 
 target_compile_definitions(PixelEditor PRIVATE
