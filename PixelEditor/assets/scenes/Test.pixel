@@ -1,6 +1,3 @@
 {
-    "Entities": [
-        {"IDComponent":{"m_UUID":4213964418337164360},"TagComponent":{"Tag":"Empty Entity"},"TransformComponent":{"m_UUID":0,"childrensUUID":[{}],"Translation":[0.0,0.0,0.0],"Rotation":[0.0,0.0,0.0],"Scale":[1.0,1.0,1.0]},"LightComponent":{"lightType":0,"color":[1.0,1.0,1.0],"GenerateShadowMap":false,"DisplayLightVolume":false,"constant":2.211892125079766e-11,"linear":8.469673808690732e-15,"quadratic":-6.277436744456949e66}
-        }
-    ]
+    "Entities": []
 }

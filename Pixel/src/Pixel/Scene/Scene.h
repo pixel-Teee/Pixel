@@ -60,6 +60,7 @@ namespace Pixel
 		entt::registry& GetRegistry() { return m_Registry;  }
 
 		btDiscreteDynamicsWorld* GetPhysicalWorld() { return m_world; }
+
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
@@ -84,6 +85,7 @@ namespace Pixel
 		btDiscreteDynamicsWorld* m_world = nullptr;
 		PhysicsDraw* m_debugDraw = nullptr;
 		//-----Physical------
+
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;

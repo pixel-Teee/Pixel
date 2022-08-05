@@ -64,7 +64,9 @@ namespace Pixel
 			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
 				if (ImGui::MenuItem("Create Empty Entity"))
-					m_Context->CreateEntity("Empty Entity");
+				{
+					Entity& newEntity = m_Context->CreateEntity("Empty Entity");
+				}
 
 				ImGui::EndPopup();
 			}			
@@ -115,7 +117,6 @@ namespace Pixel
 					if (transformComponent.parentUUID != 0)
 					{
 						//delete the link of the children entity and parent entity
-						TransformComponent parentTransformComponent;
 						auto& UUIDs = scene->GetRegistry().view<IDComponent>();
 						for (auto& UUIDOwner : UUIDs)
 						{
@@ -125,6 +126,7 @@ namespace Pixel
 								auto& childrensUUID = scene->GetRegistry().get<TransformComponent>(UUIDOwner).childrensUUID;
 								auto& iter = std::find(childrensUUID.begin(), childrensUUID.end(), scene->GetRegistry().get<IDComponent>(static_cast<entt::entity>(*childrenEntity)).ID);
 								childrensUUID.erase(iter);//delete it
+								break;
 							}
 						}					
 
@@ -207,7 +209,7 @@ namespace Pixel
 			}		
 
 			//delete the link of the current entity and it's children entity
-			auto& UUIDs = m_Context->GetRegistry().view<UUID>();
+			auto& UUIDs = m_Context->GetRegistry().view<IDComponent>();
 			for (auto& UUIDOwner : UUIDs)
 			{
 				UUID childrenUUID = m_Context->GetRegistry().get<IDComponent>(UUIDOwner).ID;
