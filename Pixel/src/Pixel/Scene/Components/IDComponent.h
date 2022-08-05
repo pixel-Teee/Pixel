@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Pixel/Core/UUID.h"
+#include "Pixel/Core/Reflect.h"
+
 namespace Pixel {
 	struct IDComponent
 	{
@@ -8,5 +11,7 @@ namespace Pixel {
 		IDComponent() = default;
 
 		IDComponent(const IDComponent&) = default;
+
+		REFLECT()
 	};
 }

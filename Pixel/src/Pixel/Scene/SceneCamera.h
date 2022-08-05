@@ -48,5 +48,7 @@ namespace Pixel {
 		float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 1000.0f;
 
 		float m_AspectRatio = 0.0f;
+
+		REFLECT()
 	};
 }

@@ -2,14 +2,11 @@
 
 #include <string>
 #include <vector>
+#include <type_traits>
 
-namespace rapidjson
-{
-	template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = CrtAllocator, unsigned writeFlags = kWriteDefaultFlags>
-	class Writer;
-	class StringBuffer;
-	class Document;
-}
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
 
 namespace Pixel {
 	namespace Reflect
@@ -23,7 +20,6 @@ namespace Pixel {
 			virtual std::string getFullName() const { return name; }
 
 			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) = 0;//write to json
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) = 0;//read to obj
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) = 0;
 		};
 		//------finding type descriptors------
@@ -93,13 +89,87 @@ namespace Pixel {
 			}
 
 			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override;
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override;
-
-			// Inherited via TypeDescriptor
-			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override;
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override;
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override;
 		};
+
+		//------std::vector<>------
+		struct TypeDescriptor_StdVector : TypeDescriptor
+		{
+			TypeDescriptor* itemType;
+			size_t(*getSize)(const void*);
+			const void* (*getItem)(const void*, size_t);
+			void (*ReSize)(void*, size_t);
+
+			template<typename ItemType>
+			TypeDescriptor_StdVector(ItemType*) :TypeDescriptor("std::vector<>", sizeof(std::vector<ItemType>)),
+				itemType(TypeResolver<ItemType>::get())
+			{
+				getSize = [](const void* vecPtr)->size_t
+				{
+					const auto& vec = *(const std::vector<ItemType>*) vecPtr;
+					return vec.size();
+				};
+
+				getItem = [](const void* vecPtr, size_t index)->const void*
+				{
+					const auto& vec = *(const std::vector<ItemType>*) vecPtr;
+					return &vec[index];
+				};
+
+				ReSize = [](void* vecPtr, size_t size)->void
+				{
+					auto& vec = *(std::vector<ItemType>*)vecPtr;
+					vec.resize(size);
+				};
+			}
+
+			virtual std::string getFullName() const override
+			{
+				return std::string("std::vector<") + itemType->getFullName() + ">";
+			}
+
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			{
+				writer.Key(name);
+				writer.StartArray();
+				size_t vecSize = getSize(obj);
+				writer.StartObject();
+				for (size_t i = 0; i < vecSize; ++i)
+				{
+					itemType->Write(writer, const_cast<void*>(getItem(obj, i)), name);
+				}
+				writer.EndObject();
+				writer.EndArray();
+			}
+
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
+			{
+				if (doc.HasMember(name) && doc[name].IsArray())
+				{
+					rapidjson::Value& array = doc[name];
+
+					ReSize(obj, array.Size());
+
+					for (rapidjson::SizeType i = 0; i < array.Size(); ++i)
+					{
+						itemType->Read(array[i], const_cast<void*>(getItem(obj, i)), itemType->name);
+					}
+				}
+			}
+
+		};
+
+		//partially specialize TypeResolver<> for std::vectors:
+		template<typename T>
+		struct TypeResolver<std::vector<T>>
+		{
+			static TypeDescriptor* get()
+			{
+				static TypeDescriptor_StdVector typeDesc(static_cast<T*>(nullptr));
+				return &typeDesc;
+			}
+		};
+		//------std::vector<>------
 
 #define REFLECT() \
     friend struct Reflect::DefaultResolver; \
@@ -115,7 +185,7 @@ namespace Pixel {
         typeDesc->members = {
 
 #define REFLECT_STRUCT_MEMBER(name) \
-            {#name, offsetof(T, name), Reflect::TypeResolver<decltype(T::name)>::get()},
+            {#name, offsetof(T, name), Reflect::TypeResolver<std::decay<decltype(T::name)>::type>::get()},
 
 #define REFLECT_STRUCT_END() \
         }; \

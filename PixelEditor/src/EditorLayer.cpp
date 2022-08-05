@@ -568,11 +568,26 @@ namespace Pixel
 					
 				break;
 			}
-
 			case PX_KEY_D:
 			{
 				if(control)
 					OnDuplicateEntity();
+				break;
+			}
+			case PX_KEY_G:
+			{
+				if(control)
+				{
+					SaveSceneAsTest();
+				}
+				break;
+			}
+			case PX_KEY_F:
+			{
+				if(control)
+				{
+					OpenSceneAsTest();
+				}
 				break;
 			}
 
@@ -650,6 +665,52 @@ namespace Pixel
 		{
 			SerializerScene(m_ActiveScene, filepath);
 
+			m_CurrentScenePath = filepath;
+		}
+	}
+
+	void EditorLayer::SaveSceneAsTest()
+	{
+		std::wstring filepath = FileDialogs::SaveFile(L"Pixel Scene (*.pixel)\0*.pixel\0");
+
+		if (!filepath.empty())
+		{
+			SerializerSceneTest(m_ActiveScene, filepath);
+
+			m_CurrentScenePath = filepath;
+		}
+	}
+
+	void EditorLayer::SerializerSceneTest(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Writer(path.string());
+	}
+
+	void EditorLayer::OpenSceneAsTest()
+	{
+		std::wstring filepath = FileDialogs::OpenFile(L"Pixel Scene (*.pixel)\0*.pixel\0");
+		OpenSceneTest(filepath);
+	}
+
+	void EditorLayer::OpenSceneTest(const std::filesystem::path filepath)
+	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
+		Ref<Scene> newScene = CreateRef<Scene>();
+		glm::vec2 viewPortSize = m_EditorScene->GetViewPortSize();
+		newScene->SetViewPortSize(viewPortSize.x, viewPortSize.y);
+		//newScene->SetSkyBox(Renderer3D::GetSkyBox());
+		SceneSerializer serializer(newScene);
+
+		if (serializer.Read(filepath.string()))
+		{
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
 			m_CurrentScenePath = filepath;
 		}
 	}

@@ -22,5 +22,12 @@ namespace Pixel {
 			//path[Path.size()] = '\0';
 			path = Path;
 		}
+
+		void PostLoad()
+		{
+			mesh = Model(path);
+		}
+
+		REFLECT()
 	};
 }

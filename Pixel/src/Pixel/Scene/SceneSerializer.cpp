@@ -137,33 +137,6 @@ namespace Pixel {
 		return SceneCamera::ProjectionType::Perspective;
 	}
 
-	//------glm::vec3------
-	struct TypeDescriptor_GlmVec3 : Reflect::TypeDescriptor
-	{
-		TypeDescriptor_GlmVec3() : TypeDescriptor("glm::vec3", sizeof(glm::vec3))
-		{}
-
-		void Serializer(YAML::Emitter& out, void* obj) override
-		{
-			glm::vec3 value = *(static_cast<glm::vec3*>(obj));
-			out << YAML::Flow;
-			out << YAML::BeginSeq << value.x << value.y << value.z << YAML::EndSeq;
-		}
-
-		void Deserializer(YAML::Node& node, void* obj, const char* variableName) override
-		{
-			*(static_cast<glm::vec3*>(obj)) = node[variableName].as<glm::vec3>();
-		}
-	};
-
-	template<>
-	Reflect::TypeDescriptor* Reflect::getPrimitiveDescriptor<glm::vec3>()
-	{
-		static TypeDescriptor_GlmVec3 typeDesc;
-		return &typeDesc;
-	}
-	//------glm::vec3------
-
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 	:m_Scene(scene)
 	{
@@ -220,24 +193,24 @@ namespace Pixel {
 
 		if (entity.HasComponent<TagComponent>())
 		{
-			out << YAML::Key << Reflect::TypeResolver<TagComponent>::get()->getFullName();
+			out << YAML::Key << "TagComponent";
 			out << YAML::BeginMap; // TagComponent
 
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			Reflect::TypeResolver<TagComponent>::get()->Serializer(out, &tag);
-
+			out << YAML::Key << "Tag" << YAML::Value << tag;
 
 			out << YAML::EndMap; // TagComponent
 		}
 
 		if (entity.HasComponent<TransformComponent>())
 		{
-			out << YAML::Key << Reflect::TypeResolver<TransformComponent>::get()->getFullName();
+			out << YAML::Key << "TransformComponent";
 			out << YAML::BeginMap; // TransformComponent
 
 			auto& tc = entity.GetComponent<TransformComponent>();
-
-			Reflect::TypeResolver<TransformComponent>::get()->Serializer(out, &tc);
+			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
+			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
+			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
 
 			out << YAML::EndMap; // TransformComponent
 		}
@@ -319,16 +292,26 @@ namespace Pixel {
 
 		if (entity.HasComponent<LightComponent>())
 		{
-			out << YAML::Key << Reflect::TypeResolver<LightComponent>::get()->getFullName();
+			out << YAML::Key << "LightComponent";
 			out << YAML::BeginMap;
 
 			auto& lightComponent = entity.GetComponent<LightComponent>();
 
-			Reflect::TypeResolver<LightComponent>::get()->Serializer(out, &lightComponent);
+			uint32_t lightType = (uint32_t)lightComponent.lightType;
+
+			out << YAML::Key << "LightType" << YAML::Value << lightType;
+			
+			out << YAML::Key << "Color" << YAML::Value << lightComponent.color;
+			if (lightComponent.lightType == LightType::PointLight)
+			{
+				out << YAML::Key << "Constant" << YAML::Value << lightComponent.constant;
+				out << YAML::Key << "Linear" << YAML::Value << lightComponent.linear;
+				out << YAML::Key << "Quadratic" << YAML::Value << lightComponent.quadratic;
+			}
 
 			out << YAML::EndMap;
 		}
-		
+
 		if (entity.HasComponent<MaterialComponent>())
 		{
 			out << YAML::Key << "MaterialComponent";
@@ -475,20 +458,20 @@ namespace Pixel {
 			std::string name;
 			auto tagComponent = entity["TagComponent"];
 			if (tagComponent)
-			{
-				Reflect::TypeResolver<std::string>::get()->Deserializer(tagComponent, &name, nullptr);
-			}
+				name = tagComponent["Tag"].as<std::string>();
 
 			PIXEL_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
-			Entity deserializedEntity = m_Scene->CreateEntityWithUUID(UUID(), name);
+			Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
 
 			auto transformComponent = entity["TransformComponent"];
 			if (transformComponent)
 			{
 				// Entities always have transforms
 				auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-				Reflect::TypeResolver<TransformComponent>::get()->Deserializer(transformComponent, &tc, nullptr);
+				tc.Translation = transformComponent["Translation"].as<glm::vec3>();
+				tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+				tc.Scale = transformComponent["Scale"].as<glm::vec3>();
 			}
 
 			auto cameraComponent = entity["CameraComponent"];
@@ -546,12 +529,23 @@ namespace Pixel {
 				auto& src = deserializedEntity.AddComponent<StaticMeshComponent>(str);
 			}
 
-			auto lightComponent = entity[Reflect::TypeResolver<LightComponent>::get()->getFullName()];
+			auto lightComponent = entity["LightComponent"];
 			if (lightComponent)
 			{
 				auto& light = deserializedEntity.AddComponent<LightComponent>();
 
-				Reflect::TypeResolver<LightComponent>::get()->Deserializer(lightComponent, &light, nullptr);
+				uint32_t lightType = lightComponent["LightType"].as<int32_t>();
+				if (lightType == 0) light.lightType = LightType::PointLight;
+				else if (lightType == 1) light.lightType == LightType::DirectLight;
+				else light.lightType = LightType::SpotLight;
+
+				light.color = lightComponent["Color"].as<glm::vec3>();
+				if (lightType == 0)
+				{
+					light.constant = lightComponent["Constant"].as<float>();
+					light.linear = lightComponent["Linear"].as<float>();
+					light.quadratic = lightComponent["Quadratic"].as<float>();
+				}			
 			}
 
 			auto materialComponent = entity["MaterialComponent"];
@@ -660,4 +654,174 @@ namespace Pixel {
 		return false;
 	}
 
+	static void WriteEntity(rapidjson::Writer<rapidjson::StringBuffer>& out, Entity& entity)
+	{
+		if(entity.HasComponent<IDComponent>())
+		{
+			//get the typedescriptor
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<IDComponent>().get();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<IDComponent>(), nullptr);
+			out.EndObject();
+		}
+		if (entity.HasComponent<TagComponent>())
+		{
+			//get the typedescriptor
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<TagComponent>().get();
+			//TagComponent& tagComponent = entity.GetComponent<TagComponent>();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<TagComponent>(), nullptr);
+			out.EndObject();
+		}
+		if(entity.HasComponent<TransformComponent>())
+		{
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<TransformComponent>().get();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<TransformComponent>(), nullptr);
+			out.EndObject();
+		}
+		if(entity.HasComponent<CameraComponent>())
+		{
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<CameraComponent>().get();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<CameraComponent>(), nullptr);
+			out.EndObject();
+		}
+		if(entity.HasComponent<StaticMeshComponent>())
+		{
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<StaticMeshComponent>().get();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<StaticMeshComponent>(), nullptr);
+			out.EndObject();
+		}
+		if(entity.HasComponent<MaterialComponent>())
+		{
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<MaterialComponent>().get();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<MaterialComponent>(), nullptr);
+			out.EndObject();
+		}
+		if(entity.HasComponent<LightComponent>())
+		{
+			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<LightComponent>().get();
+			out.Key(typeDesc->name);
+			out.StartObject();
+			typeDesc->Write(out, &entity.GetComponent<LightComponent>(), nullptr);
+			out.EndObject();
+		}
+	}
+
+	void SceneSerializer::Writer(const std::string& filepath)
+	{
+		rapidjson::StringBuffer strBuf;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+
+		writer.StartObject();
+		writer.Key("Entities");
+		writer.StartArray();
+		m_Scene->m_Registry.each([&](auto entityID)
+		{
+			writer.StartObject();
+			Entity entity = { entityID, m_Scene.get() };
+			if (!entity)
+				return;
+			
+			//Serialize Entity
+			WriteEntity(writer, entity);
+			writer.EndObject();
+		}
+		);
+		writer.EndArray();
+		writer.EndObject();
+		std::string data = strBuf.GetString();
+		std::ofstream fout(filepath);
+		fout << data.c_str();
+	}
+
+	bool SceneSerializer::Read(const std::string& filepath)
+	{
+		//rapidjson::Value doc;
+		rapidjson::Document doc;
+
+		std::ifstream stream(filepath);
+		std::stringstream strStream;
+		strStream << stream.rdbuf();
+
+		if(!doc.Parse(strStream.str().data()).HasParseError())
+		{
+			if(doc.HasMember("Entities") && doc["Entities"].IsArray())
+			{
+				const rapidjson::Value& entityArray = doc["Entities"];
+
+				rapidjson::SizeType len = entityArray.Size();
+
+				for(rapidjson::SizeType i = 0; i < len; ++i)
+				{
+					const rapidjson::Value& object = entityArray[i];
+
+					Entity& newEntity = m_Scene->CreateEntityWithUUID(UUID(), "");
+
+					//deserializer
+					Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<IDComponent>().get();
+					if(object.HasMember(typeDesc->name))
+					{
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<IDComponent>(), nullptr);
+					}
+
+					typeDesc = Reflect::TypeResolver<TagComponent>().get();
+					if(object.HasMember(typeDesc->name))
+					{
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<TagComponent>(), nullptr);
+					}
+
+					typeDesc = Reflect::TypeResolver<TransformComponent>().get();
+					if(object.HasMember(typeDesc->name))
+					{
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<TransformComponent>(), nullptr);
+					}
+
+					typeDesc = Reflect::TypeResolver<CameraComponent>().get();
+					if(object.HasMember(typeDesc->name))
+					{
+						auto& camera = newEntity.AddComponent<CameraComponent>();
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &camera, nullptr);
+					}
+
+					typeDesc = Reflect::TypeResolver<StaticMeshComponent>().get();
+					if (object.HasMember(typeDesc->name))
+					{
+						auto& mesh = newEntity.AddComponent<StaticMeshComponent>();
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &mesh, nullptr);
+						mesh.PostLoad();
+					}
+
+					typeDesc = Reflect::TypeResolver<MaterialComponent>().get();
+					if (object.HasMember(typeDesc->name))
+					{
+						auto& material = newEntity.AddComponent<MaterialComponent>();
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &material, nullptr);
+						material.PostLoad();
+					}
+
+					typeDesc = Reflect::TypeResolver<LightComponent>().get();
+					if (object.HasMember(typeDesc->name))
+					{
+						auto& light = newEntity.AddComponent<LightComponent>();
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &light, nullptr);
+					}
+				}
+			}
+		}
+		else
+		{
+			return false;
+		}
+		return true;
+	}
 }

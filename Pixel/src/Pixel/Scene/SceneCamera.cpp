@@ -51,4 +51,14 @@ namespace Pixel {
 		}	
 	}
 
+	REFLECT_STRUCT_BEGIN(SceneCamera)
+	REFLECT_STRUCT_MEMBER(m_ProjectionType)
+	REFLECT_STRUCT_MEMBER(m_OrthographicSize)
+	REFLECT_STRUCT_MEMBER(m_OrthographicNear)
+	REFLECT_STRUCT_MEMBER(m_OrthographicFar)
+	REFLECT_STRUCT_MEMBER(m_PerspectiveFOV)
+	REFLECT_STRUCT_MEMBER(m_PerspectiveNear)
+	REFLECT_STRUCT_MEMBER(m_PerspectiveFar)
+	REFLECT_STRUCT_MEMBER(m_AspectRatio)
+	REFLECT_STRUCT_END()
 }

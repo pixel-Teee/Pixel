@@ -285,4 +285,7 @@ namespace Pixel {
 		return staticMesh;
 	}
 
+	REFLECT_STRUCT_BEGIN(Model)
+	REFLECT_STRUCT_MEMBER(m_directory)
+	REFLECT_STRUCT_END()
 }

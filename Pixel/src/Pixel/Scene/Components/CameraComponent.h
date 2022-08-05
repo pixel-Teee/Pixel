@@ -19,5 +19,7 @@ namespace Pixel {
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 		//CameraComponent(const glm::mat4& projection);
+
+		REFLECT()
 	};
 }

@@ -1,101 +1,50 @@
 Scene: Untitled
 Entities:
-  - Entity: 18131929197163794715
+  - Entity: 7316487295994772659
     TagComponent:
-      Tag: BlueSphere
+      Tag: Camera
     TransformComponent:
-      Translation: [-3.32715034, 0, -3.59187984]
-      Rotation: [0, 0, 0]
+      Translation: [3.62624645, 0, -10.8250523]
+      Rotation: [0, -0.427310884, 0]
       Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [0, 0, 1]
-      gNormal: [1, 1, 1]
-      gRoughness: 1
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: true
-  - Entity: 13083299216461846787
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 25
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 11023043692234747770
     TagComponent:
-      Tag: GreenSphere
+      Tag: light2
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [0, 1, 0]
-      gNormal: [1, 1, 1]
-      gRoughness: 1
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: true
-  - Entity: 16293211588845879036
-    TagComponent:
-      Tag: RedSphere
-    TransformComponent:
-      Translation: [0, 1.49011612e-08, 2.55206776]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [1, 0, 0]
-      gNormal: [1, 1, 1]
-      gRoughness: 0
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: true
-  - Entity: 12716797966889641781
-    TagComponent:
-      Tag: light
-    TransformComponent:
-      Translation: [-5.29992247, 1.54702508, 9.26438872e-08]
-      Rotation: [-0.178274527, -0.0549616851, -0.381880999]
-      Scale: [0.999999523, 0.999996781, 0.999999762]
+      Translation: [5.46761751, 1.09387624, -13.9170084]
+      Rotation: [-0.328949839, 1.27591193e-07, -0.0859626085]
+      Scale: [1, 1, 0.99999994]
     LightComponent:
-      LightType: 1
-      Color: [0.934268296, 0.957528949, 0.399278492]
-      GenerateShadowMap: false
-  - Entity: 118595691629743486
+      LightType: 0
+      Color: [0.915907621, 0.921952546, 0.98841697]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.241500005
+  - Entity: 11974247929132413443
     TagComponent:
-      Tag: BlueSphere1
+      Tag: light1
     TransformComponent:
-      Translation: [0, 0, -3.59187984]
+      Translation: [0.402933955, 2.27358508, -7.19871616]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Sphere\Sphere.fbx
-    MaterialComponent:
-      albedoPath: ""
-      normalMapPath: ""
-      roughnessPath: ""
-      emissivePath: ""
-      metallicPath: ""
-      gAlbedo: [0.600000024, 0.600000024, 1]
-      gNormal: [1, 1, 1]
-      gRoughness: 0.25
-      gMetallic: 0.800000012
-      gEmissive: 1
-      HaveNormal: true
-  - Entity: 8151087812240186715
+    LightComponent:
+      LightType: 0
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.963500023
+  - Entity: 15894000371272746299
     TagComponent:
       Tag: Fish
     TransformComponent:
@@ -116,29 +65,100 @@ Entities:
       gMetallic: 1
       gEmissive: 0.200000003
       HaveNormal: false
-  - Entity: 13560955046247573036
+  - Entity: 8216144474789593044
     TagComponent:
-      Tag: light1
+      Tag: BlueSphere1
     TransformComponent:
-      Translation: [0.402933955, 2.27358508, -7.19871616]
+      Translation: [0, 0, -3.59187984]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    LightComponent:
-      LightType: 0
-      Color: [1, 1, 1]
-      Constant: 1
-      Linear: 0.0900000036
-      Quadratic: 0.963500023
-  - Entity: 13271668616023181877
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 0.25
+      gMetallic: 0.800000012
+      gEmissive: 1
+      HaveNormal: true
+  - Entity: 2488904943351350357
     TagComponent:
-      Tag: light2
+      Tag: light
     TransformComponent:
-      Translation: [5.46761751, 1.09387624, -13.9170084]
-      Rotation: [-0.328949839, 1.27591193e-07, -0.0859626085]
-      Scale: [1, 1, 0.99999994]
+      Translation: [-5.29992247, 1.54702508, 9.26438872e-08]
+      Rotation: [-0.178274527, -0.0549616851, -0.381880999]
+      Scale: [0.999999523, 0.999996781, 0.999999762]
     LightComponent:
       LightType: 0
-      Color: [0.915907621, 0.921952546, 0.98841697]
+      Color: [0.934268296, 0.957528949, 0.399278492]
       Constant: 1
       Linear: 0.0900000036
-      Quadratic: 0.241500005
+      Quadratic: 0.0320000015
+  - Entity: 1403676604211317138
+    TagComponent:
+      Tag: RedSphere
+    TransformComponent:
+      Translation: [0, 1.49011612e-08, 2.55206776]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [1, 0, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 0
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true
+  - Entity: 13973120838289914363
+    TagComponent:
+      Tag: GreenSphere
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 1, 0]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true
+  - Entity: 12963003508125888399
+    TagComponent:
+      Tag: BlueSphere
+    TransformComponent:
+      Translation: [-3.32715034, 0, -3.59187984]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Sphere\Sphere.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+      gAlbedo: [0, 0, 1]
+      gNormal: [1, 1, 1]
+      gRoughness: 1
+      gMetallic: 1
+      gEmissive: 0.200000003
+      HaveNormal: true

@@ -42,5 +42,7 @@ namespace Pixel {
 		void LoadModel(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		StaticMesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
+
+		REFLECT()
 	};
 }

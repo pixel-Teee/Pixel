@@ -1,5 +1,7 @@
 #include "pxpch.h"
 
+#include "Reflect.h"
+
 //------other library------
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,12 +10,9 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <yaml-cpp/yaml.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/document.h>
-//------other library------
 
-#include "Reflect.h"
+#include <rapidjson/stringbuffer.h>
+//------other library------
 
 namespace Pixel {
 	namespace Reflect {
@@ -29,19 +28,11 @@ namespace Pixel {
 				writer.Int(*(static_cast<int*>(obj)));
 			}
 
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
-			{
-				if (doc.HasMember(name) && doc[name].IsInt())
-				{
-					*static_cast<int*>(obj) = doc[name].GetInt();
-				}
-			}
-
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
 			{
-				if (value.IsInt())
+				if (value.HasMember(name) && value[name].IsInt())
 				{
-					*static_cast<int*>(obj) = value.GetInt();
+					*static_cast<int*>(obj) = value[name].GetInt();
 				}
 			}
 
@@ -67,18 +58,11 @@ namespace Pixel {
 				writer.Uint64(*static_cast<uint64_t*>(obj));
 			}
 
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
-			{
-				if (doc.HasMember(name) && doc[name].IsUint64())
-				{
-					*static_cast<uint64_t*>(obj) = doc[name].GetUint64();
-				}
-			}
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
 			{
-				if (value.IsInt())
+				if (value.HasMember(name) && value[name].IsUint64())
 				{
-					*static_cast<uint64_t*>(obj) = value.GetUint64();
+					*static_cast<uint64_t*>(obj) = value[name].GetUint64();
 				}
 			}
 		};
@@ -103,19 +87,11 @@ namespace Pixel {
 				writer.Double(*static_cast<double*>(obj));
 			}
 
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
-			{
-				if (doc.HasMember(name) && doc[name].IsDouble())
-				{
-					*static_cast<double*>(obj) = doc[name].GetDouble();
-				}
-			}
-
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
 			{
-				if (value.IsInt())
+				if (value.HasMember(name) && value[name].IsFloat())
 				{
-					*static_cast<double*>(obj) = value.GetDouble();
+					*static_cast<double*>(obj) = value[name].GetDouble();
 				}
 			}
 
@@ -141,19 +117,11 @@ namespace Pixel {
 				writer.Bool(*static_cast<bool*>(obj));
 			}
 
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
-			{
-				if (doc.HasMember(name) && doc[name].IsBool())
-				{
-					*static_cast<bool*>(obj) = doc[name].GetBool();
-				}
-			}
-
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
 			{
-				if (value.IsBool())
+				if (value.HasMember(name) && value[name].IsBool())
 				{
-					*static_cast<bool*>(obj) = value.GetBool();
+					*static_cast<bool*>(obj) = value[name].GetBool();
 				}
 			}
 		};
@@ -175,22 +143,16 @@ namespace Pixel {
 			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
 				writer.Key(name);
-				writer.String((*static_cast<std::string*>(obj)).data());
-			}
-
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
-			{
-				if (doc.HasMember(name) && doc[name].IsString())
-				{
-					*static_cast<std::string*>(obj) = doc[name].GetString();
-				}
+				//const std::string temp = *static_cast<std::string*>(obj) + '\0';
+				std::string& str = *static_cast<std::string*>(obj);
+				writer.String(str.c_str());
 			}
 
 			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
 			{
-				if (value.IsString())
+				if (value.HasMember(name) && value[name].IsString())
 				{
-					*static_cast<std::string*>(obj) = value.GetString();
+					*static_cast<std::string*>(obj) = value[name].GetString();
 				}
 			}
 		};
@@ -204,20 +166,6 @@ namespace Pixel {
 		//------String------
 
 		//------struct/class------
-		void TypeDescriptor_Struct::Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name)
-		{
-			for (const Member& member : members)
-			{
-				member.type->Write(writer, (char*)obj + member.offset, member.name);
-			}
-		}
-		void TypeDescriptor_Struct::Read(rapidjson::Document& doc, void* obj, const char* name)
-		{
-			for (const Member& member : members)
-			{
-				member.type->Read(doc, (char*)obj + member.offset, member.name);
-			}
-		}
 		void TypeDescriptor_Struct::Read(rapidjson::Value& value, void* obj, const char* name)
 		{
 			for (const Member& member : members)
@@ -225,11 +173,13 @@ namespace Pixel {
 				member.type->Read(value, (char*)obj + member.offset, member.name);
 			}
 		}
-		void TypeDescriptor_Struct::Read(rapidjson::Document& doc, void* obj, const char* name)
+
+		void TypeDescriptor_Struct::Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj,
+			const char* name)
 		{
 			for (const Member& member : members)
 			{
-				member.type->Read(doc, (char*)obj + member.offset, name);
+				member.type->Write(writer, (char*)obj + member.offset, member.name);
 			}
 		}
 		//------struct/class------
@@ -246,19 +196,11 @@ namespace Pixel {
 				writer.Int(*static_cast<int*>(obj));
 			}
 
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
 			{
 				if (doc.HasMember(name) && doc[name].IsInt())
 				{
 					*static_cast<int*>(obj) = doc[name].GetInt();
-				}
-			}
-
-			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
-			{
-				if (value.IsInt())
-				{
-					*static_cast<int*>(obj) = value.GetInt();
 				}
 			}
 
@@ -271,79 +213,40 @@ namespace Pixel {
 		}
 		//------enumerate------
 
-		//------std::vector<>------
-		struct TypeDescriptor_StdVector : TypeDescriptor
+		struct TypeDescriptor_GlmVec3 : TypeDescriptor
 		{
-			TypeDescriptor* itemType;
-			size_t(*getSize)(const void*);
-			const void* (*getItem)(const void*, size_t);
-			void (*ReSize)(void*, size_t);
-
-			template<typename ItemType>
-			TypeDescriptor_StdVector(ItemType*):TypeDescriptor("std::vector<>", sizeof(std::vector<ItemType>)),
-			itemType(TypeResolver<ItemType>::get())
-			{
-				getSize = [](const void* vecPtr)->size_t
-				{
-					const auto& vec = *(const std::vector<ItemType>*) vecPtr;
-					return vec.size();
-				};
-
-				getItem = [](const void* vecPtr, size_t index)->const void*
-				{
-					const auto& vec = *(const std::vector<ItemType>*) vecPtr;
-					return &vec[index];
-				};
-
-				ReSize = [](void* vecPtr, size_t size)->void
-				{
-					auto& vec = *(const std::vector<ItemType>*)vecPtr;
-					vec.resize(size);
-				};
-			}
-
-			virtual std::string getFullName() const override
-			{
-				return std::string("std::vector<") + itemType->getFullName() + ">";
-			}
+			TypeDescriptor_GlmVec3() : TypeDescriptor("glm::vec3", sizeof(int32_t))
+			{}
 
 			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
 			{
 				writer.Key(name);
+				glm::vec3& vec = *static_cast<glm::vec3*>(obj);
 				writer.StartArray();
-				size_t vecSize = getSize(obj);
-				for (size_t i = 0; i < vecSize; ++i)
-				{
-					itemType->Write(writer, const_cast<void*>(getItem(obj, i)), name);
-				}
+				writer.Double(vec.x);
+				writer.Double(vec.y);
+				writer.Double(vec.z);
 				writer.EndArray();
 			}
 
-			virtual void Read(rapidjson::Document& doc, void* obj, const char* name) override
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
 			{
 				if (doc.HasMember(name) && doc[name].IsArray())
 				{
-					rapidjson::Value& array = doc[name];
-					for (size_t i = 0; i < array.Size(); ++i)
-					{
-						itemType->Read(array[i], const_cast<void*>(getItem(obj, i)), name);
-					}
+					glm::vec3& vec = *static_cast<glm::vec3*>(obj);
+					vec.x = doc[name][0].GetDouble();
+					vec.y = doc[name][1].GetDouble();
+					vec.z = doc[name][2].GetDouble();
 				}
 			}
 
 		};
 
-		//partially specialize TypeResolver<> for std::vectors:
-		template<typename T>
-		class TypeResolver<std::vector<T>>
+		template<>
+		TypeDescriptor* getPrimitiveDescriptor<glm::vec3>()
 		{
-		public:
-			static TypeResolver* get()
-			{
-				static TypeDescriptor_StdVector typeDesc(static_cast<T*>(nullptr));
-				return &typeDesc;
-			}
-		};
-		//------std::vector<>------
+			static TypeDescriptor_GlmVec3 typeDesc;
+			return &typeDesc;
+		}
 	}	
 }

@@ -14,6 +14,9 @@ namespace Pixel {
 
 		bool Deserialize(const std::string& filepath);
 		bool DeserializeRuntime(const std::string& filepath);
+
+		void Writer(const std::string& filepath);
+		bool Read(const std::string& filepath);
 	private:
 		Ref<Scene> m_Scene;
 	};

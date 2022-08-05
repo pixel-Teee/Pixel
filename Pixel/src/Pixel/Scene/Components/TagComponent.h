@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Pixel/Core/Reflect.h"
+
 namespace Pixel {
 	struct TagComponent
 	{

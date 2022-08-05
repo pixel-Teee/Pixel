@@ -107,5 +107,47 @@ namespace Pixel {
 			for (uint32_t i = 0; i < 5; ++i)
 				nextFrameNeedLoadTexture[i] = false;
 		}
+
+		void PostLoad()
+		{
+			uint32_t whiteTextureData = 0xffffffff;
+			uint32_t whiteTextureData2 = 0xff;
+
+			if (albedoPath != "")
+				Albedo = Texture2D::Create(albedoPath);
+			else
+			{
+				Albedo = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
+			}
+			if (normalMapPath != "")
+				NormalMap = Texture2D::Create(normalMapPath);
+			else
+			{
+				NormalMap = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
+			}
+			if (roughnessPath != "")
+				Roughness = Texture2D::Create(roughnessPath);
+			else
+			{
+				Roughness = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
+			}
+			if (metallicPath != "")
+				Metallic = Texture2D::Create(metallicPath);
+			else
+			{
+				Metallic = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
+			}
+			if (emissivePath != "")
+				Emissive = Texture2D::Create(emissivePath);
+			else
+			{
+				Emissive = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
+			}
+
+			for (uint32_t i = 0; i < 5; ++i)
+				nextFrameNeedLoadTexture[i] = false;
+		}
+
+		REFLECT()
 	};
 }

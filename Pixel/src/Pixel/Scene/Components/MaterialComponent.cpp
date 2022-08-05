@@ -1,0 +1,23 @@
+#include "pxpch.h"
+
+#include "MaterialComponent.h"
+
+namespace Pixel
+{
+	REFLECT_STRUCT_BEGIN(MaterialComponent)
+	REFLECT_STRUCT_MEMBER(shadingModel)
+	REFLECT_STRUCT_MEMBER(albedoPath)
+	REFLECT_STRUCT_MEMBER(roughnessPath)
+	REFLECT_STRUCT_MEMBER(normalMapPath)
+	REFLECT_STRUCT_MEMBER(metallicPath)
+	REFLECT_STRUCT_MEMBER(emissivePath)
+	REFLECT_STRUCT_MEMBER(gAlbedo)
+	REFLECT_STRUCT_MEMBER(gNormal)
+	REFLECT_STRUCT_MEMBER(gRoughness)
+	REFLECT_STRUCT_MEMBER(gMetallic)
+	REFLECT_STRUCT_MEMBER(gEmissive)
+	REFLECT_STRUCT_MEMBER(HaveNormal)
+	REFLECT_STRUCT_MEMBER(ClearCoat)
+	REFLECT_STRUCT_MEMBER(ClearCoatRoughness)
+	REFLECT_STRUCT_END()
+}

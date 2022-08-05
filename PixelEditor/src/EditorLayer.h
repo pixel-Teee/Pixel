@@ -26,6 +26,12 @@ namespace Pixel
 		void OpenScene();
 		void OpenScene(const std::filesystem::path filepath);
 		void SaveSceneAs();
+		//------test------
+		void SaveSceneAsTest();
+		void SerializerSceneTest(Ref<Scene> scene, const std::filesystem::path& path);
+		void OpenSceneAsTest();
+		void OpenSceneTest(const std::filesystem::path filepath);
+		//------test------
 		void SaveScene();
 
 		void SerializerScene(Ref<Scene> scene, const std::filesystem::path& path);
