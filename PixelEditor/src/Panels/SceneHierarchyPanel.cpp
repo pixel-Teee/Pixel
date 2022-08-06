@@ -512,8 +512,14 @@ namespace Pixel
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						component.Texture = Texture2D::Create(texturePath.string());
+						//component.Texture = Texture2D::Create(texturePath.string());
 						
+						//check the texture alread in asset manager?
+						if (AssetManager::IsInAssetRegistry(texturePath))
+						{
+							component.Texture = AssetManager::GetTexture(AssetManager::GetAssetRegistryPath(texturePath));
+							//component.Path
+						}
 					}
 
 					ImGui::EndDragDropTarget();

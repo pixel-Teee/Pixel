@@ -37,6 +37,10 @@ namespace Pixel {
 		m_pRenderer = BaseRenderer::Create();
 		m_pRenderer->Initialize();
 		//------create renderer------
+
+		//------create asset manager------
+		//......
+		//------create asset manager------
 	}
 
 	Application::~Application()

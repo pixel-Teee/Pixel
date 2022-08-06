@@ -31,7 +31,7 @@ namespace Pixel {
 		glm::mat4 globalTransform = glm::mat4(1.0f);
 
 		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
+		TransformComponent(const TransformComponent&);
 		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
 
 		glm::mat4 GetLocalTransform() const

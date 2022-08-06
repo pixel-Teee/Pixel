@@ -742,6 +742,7 @@ namespace Pixel {
 		std::string data = strBuf.GetString();
 		std::ofstream fout(filepath);
 		fout << data.c_str();
+		fout.close();
 	}
 
 	bool SceneSerializer::Read(const std::string& filepath)
@@ -817,9 +818,11 @@ namespace Pixel {
 					}
 				}
 			}
+			stream.close();
 		}
 		else
 		{
+			stream.close();
 			return false;
 		}
 		return true;

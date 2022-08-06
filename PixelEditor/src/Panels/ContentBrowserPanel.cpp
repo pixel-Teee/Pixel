@@ -7,7 +7,14 @@
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 
+//------my library------
+#include "Pixel/Asset/AssetManager.h"
+#include "Pixel/Utils/PlatformUtils.h"
+//------my library------
+
+//------other library------
 #include <imgui/imgui.h>
+//------other library------
 
 namespace Pixel {
 
@@ -62,13 +69,24 @@ namespace Pixel {
 		}
 
 		if (ImGui::IsMouseClicked(1) && ImGui::IsWindowFocused())
-			ImGui::OpenPopup("Create Asset");
+			ImGui::OpenPopup("Content Browser");
 
-		if (ImGui::BeginPopup("Create Asset"))
+		if (ImGui::BeginPopup("Content Browser"))
 		{
 			if (ImGui::MenuItem("Create Material Asset"))
 			{
 				CreateMaterialAsset(m_CurrentDirectory.string());
+			}
+
+			if (ImGui::MenuItem("Import Model"))
+			{
+				//create model
+			}
+
+			if (ImGui::MenuItem("Import Texture"))
+			{
+				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0");
+				AssetManager::GetSingleton().AddTextureToAssetRegistry(filePath);
 			}
 			ImGui::EndPopup();
 		}
@@ -94,49 +112,67 @@ namespace Pixel {
 			std::string filenameString = relativePath.filename().string();
 
 			ImGui::PushID(filenameString.c_str());
-			//Check this whether is directory or file?
-			Ref<Texture2D> icon = directoryEntry.is_directory() ? m_Directory : m_File; 
 
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+			bool isDirectory = directoryEntry.is_directory();
+			bool isInAssetRegistry = AssetManager::GetSingleton().IsInAssetRegistry(relativePath.string());
 
-			if(icon == m_Directory)
-				ImGui::ImageButton((ImTextureID)(m_DirectoryHandle->GetGpuHandle()->GetGpuPtr()), {ThumbnailSize, ThumbnailSize}, {0, 1}, {1, 0});
-			else
+			if (isDirectory)
+			{
+				//check this whether is directory or file?
+				Ref<Texture2D> icon = directoryEntry.is_directory() ? m_Directory : m_File;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+				ImGui::ImageButton((ImTextureID)(m_DirectoryHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
+				ImGui::PopStyleColor();
+
+				if (ImGui::BeginDragDropSource())
+				{
+					const wchar_t* itemPath = relativePath.c_str();
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t), ImGuiCond_Once);
+					ImGui::EndDragDropSource();
+				}
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				{
+					if (directoryEntry.is_directory())
+					{
+						m_CurrentDirectory /= path.filename();
+					}
+
+					//------Open Asset Editor------
+					if (!directoryEntry.is_directory())
+					{
+						OpenAssetEditor(path.string());
+					}
+					//------Open Asset Editor------
+				}
+
+				ImGui::TextWrapped("%s", filenameString.c_str());
+				ImGui::NextColumn();
+			}
+			else if (!isDirectory && isInAssetRegistry)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 				ImGui::ImageButton((ImTextureID)(m_FileHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
-			ImGui::PopStyleColor();
+				ImGui::PopStyleColor();
 
-			if (ImGui::BeginDragDropSource())
-			{
-				const wchar_t* itemPath = relativePath.c_str();
-				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t), ImGuiCond_Once);
-				ImGui::EndDragDropSource();
-			}
-
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-			{
-				if (directoryEntry.is_directory())
+				if (ImGui::BeginDragDropSource())
 				{
-					m_CurrentDirectory /= path.filename();
+					const wchar_t* itemPath = relativePath.c_str();
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t), ImGuiCond_Once);
+					ImGui::EndDragDropSource();
 				}
 
-				//------Open Asset Editor------
-				if (!directoryEntry.is_directory())
-				{
-					OpenAssetEditor(path.string());
-				}
-				//------Open Asset Editor------
+				if (isInAssetRegistry)
+					ImGui::TextWrapped("%s", filenameString.c_str());
+				ImGui::NextColumn();
 			}
-			ImGui::TextWrapped("%s", filenameString.c_str());
-			ImGui::NextColumn();
 
 			ImGui::PopID();
 		}
 		ImGui::Columns(1);
 		ImGui::SliderFloat("ThumbnailSize", &ThumbnailSize, 16.0f, 512.0f);
 		ImGui::SliderFloat("Padding", &Padding, 2.0f, 16.0f);
-
-		//Right Click, Draw For Create Material File
-
 
 		ImGui::End();
 	}

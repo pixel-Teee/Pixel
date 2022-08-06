@@ -12,6 +12,8 @@
 
 #include "Pixel/Events/Event.h"
 #include "Pixel/Events/ApplicationEvent.h"
+
+#include "Pixel/Asset/AssetManager.h"
 //------my library------
 
 namespace Pixel {
@@ -62,6 +64,8 @@ namespace Pixel {
 	private:
 
 		Ref<BaseRenderer> m_pRenderer;
+
+		AssetManager m_assetManager;//asset manager
 
 		Scope<Window> m_Window;
 

@@ -13,4 +13,14 @@ namespace Pixel
 	REFLECT_STRUCT_MEMBER(Rotation)
 	REFLECT_STRUCT_MEMBER(Scale)
 	REFLECT_STRUCT_END()
+
+	TransformComponent::TransformComponent(const TransformComponent& others)
+	{
+		parentUUID = 0;
+		Translation = others.Translation;
+		Rotation = others.Rotation;
+		Scale = others.Scale;
+		globalTransform = others.globalTransform;
+	}
+
 }
