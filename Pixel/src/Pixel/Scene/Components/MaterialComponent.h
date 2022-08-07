@@ -1,6 +1,9 @@
 #pragma once
 
+//------my library------
 #include "Pixel/Renderer/Texture.h"
+#include "Pixel/Asset/AssetManager.h"
+//------my library------
 
 namespace Pixel {
 	enum class ShadingModel
@@ -114,31 +117,31 @@ namespace Pixel {
 			uint32_t whiteTextureData2 = 0xff;
 
 			if (albedoPath != "")
-				Albedo = Texture2D::Create(albedoPath);
+				Albedo = AssetManager::GetSingleton().GetTexture(albedoPath);
 			else
 			{
 				Albedo = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
 			}
 			if (normalMapPath != "")
-				NormalMap = Texture2D::Create(normalMapPath);
+				NormalMap = AssetManager::GetSingleton().GetTexture(normalMapPath);
 			else
 			{
 				NormalMap = Texture2D::Create(4, 1, 1, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, (const void*)&whiteTextureData);
 			}
 			if (roughnessPath != "")
-				Roughness = Texture2D::Create(roughnessPath);
+				Roughness = AssetManager::GetSingleton().GetTexture(roughnessPath);
 			else
 			{
 				Roughness = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			}
 			if (metallicPath != "")
-				Metallic = Texture2D::Create(metallicPath);
+				Metallic = AssetManager::GetSingleton().GetTexture(metallicPath);
 			else
 			{
 				Metallic = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);
 			}
 			if (emissivePath != "")
-				Emissive = Texture2D::Create(emissivePath);
+				Emissive = AssetManager::GetSingleton().GetTexture(emissivePath);
 			else
 			{
 				Emissive = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, (const void*)&whiteTextureData2);

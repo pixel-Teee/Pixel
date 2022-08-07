@@ -7,10 +7,17 @@
 
 namespace Pixel {
 	class Texture2D;
-
+	class Model;
 	class AssetManager : public Singleton<AssetManager>
 	{
 	public:
+		enum class AssetType
+		{
+			TEXTURE,
+			MODEL,
+			SCENE
+		};
+
 		AssetManager();
 
 		virtual ~AssetManager();
@@ -21,11 +28,23 @@ namespace Pixel {
 
 		void AddTextureToAssetRegistry(const std::wstring& filePath);
 
+		void AddSceneToAssetRegistry(const std::string& filePath);
+
 		std::string GetAssetRegistryPath(const std::string& physicalFilePath);
+
+		std::string GetAssetPhysicalPath(const std::string& filePath);
 
 		bool IsInAssetRegistry(std::string filepath);
 
 		Ref<Texture2D> GetTexture(const std::string& assetRegistry);
+
+		Ref<Model> GetModel(const std::string& modelRegistry);
+
+		void AddModelToAssetRegistry(const std::string& filePath);
+
+		std::string  to_string(std::wstring wstr);
+
+		std::wstring to_wsrting(std::string str);
 	private:
 		std::map<std::string, std::string> m_textureAssetRegistry;//asset registry path <=> asset physical path
 
@@ -35,14 +54,20 @@ namespace Pixel {
 		std::map<std::string, Ref<Texture2D>> m_textures;//asset registry path <=> asset texture
 
 		//model
+		std::map<std::string, Ref<Model>> m_models;//asset registry path <=> asset model
 
+		std::map<std::string, std::string> m_AssetRegistryModel;//asset physical path <=> asset registry path
+
+		std::map<std::string, std::string> m_ModelAssetRegistry;//asset registry path <=> asset physical path
+
+		//scene
+		std::map<std::string, std::string> m_AssetRegistryScene;//asset physical path <=> asset registry path
+
+		std::map<std::string, std::string> m_SceneAssetRegistry;//asset registry path <=> asset physical path
 
 		//------converter------
 		using convert_t = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<convert_t, wchar_t> m_strconverter;
-
-		std::string  to_string(std::wstring wstr);
-		std::wstring to_wsrting(std::string str);
 		//------converter------
 	};
 }

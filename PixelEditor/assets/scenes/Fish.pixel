@@ -1,25 +1,10 @@
-Scene: Untitled
-Entities:
-  - Entity: 5049367307656024690
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      parentUUID: m_UUID
-      0: Translation
-      [0, 0, 0]: Rotation
-      [0, 0, 0]: Scale
-      [1, 1, 1]
-    StaticMeshComponent:
-      Path: assets\models\Fish\Fish_LP_combined.obj
-    MaterialComponent:
-      albedoPath: assets\textures\Fish\Fish_Albedo.png
-      normalMapPath: assets\textures\Fish\Fish_Normalmap.png
-      roughnessPath: assets\textures\Fish\Fish_Roughness.png
-      emissivePath: ""
-      metallicPath: assets\textures\Fish\Fish_Metallic.png
-      gAlbedo: [1, 1, 1]
-      gNormal: [1, 1, 1]
-      gRoughness: 1
-      gMetallic: 1
-      gEmissive: 0.200000003
-      HaveNormal: false
+{
+    "Entities": [
+        {"IDComponent":{"m_UUID":1767416619325240359},"TagComponent":{"Tag":"Fish"},"TransformComponent":{"m_UUID":0,"childrensUUID":[{"m_UUID":17469172035767344679}],"Translation":[3.820283889770508,0.0,0.0],"Rotation":[0.0,0.0,0.0],"Scale":[1.0,1.0,1.0]},"StaticMeshComponent":{"path":"Fish_LP_combined"},"MaterialComponent":{"shadingModel":1,"albedoPath":"Fish_Albedo","roughnessPath":"Fish_Roughness","normalMapPath":"Fish_Normalmap","metallicPath":"Fish_Metallic","emissivePath":"","gAlbedo":[1.0,1.0,1.0],"gNormal":[1.0,1.0,1.0],"gRoughness":0.007812501848093234,"gMetallic":1.3411048258027414e-8,"gEmissive":-6.276777916028617e66,"HaveNormal":false,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315}
+        },
+        {"IDComponent":{"m_UUID":4752411955199196666},"TagComponent":{"Tag":"Camera"},"TransformComponent":{"m_UUID":0,"childrensUUID":[{}],"Translation":[-3.3806076049804688,-0.008173316717147827,-0.7100212574005127],"Rotation":[0.0,1.3637773990631104,0.0],"Scale":[0.9999985694885254,1.0,0.9999985694885254]},"CameraComponent":{"m_ProjectionType":0,"m_OrthographicSize":-0.007812501895386958,"m_OrthographicNear":0.007812505573383532,"m_OrthographicFar":0.0007648296877960092,"m_PerspectiveFOV":5.377642805342118e-19,"m_PerspectiveNear":805306488.28,"m_PerspectiveFar":0.06572164636600064,"m_AspectRatio":-8.741752759261014e62,"Primary":true,"FixedAspectRatio":false,"DisplayFurstum":true}
+        },
+        {"IDComponent":{"m_UUID":12047795161396330895},"TagComponent":{"Tag":"Fish1"},"TransformComponent":{"m_UUID":0,"childrensUUID":[{}],"Translation":[0.0,0.0,0.0],"Rotation":[0.0,0.0,0.0],"Scale":[1.0,1.0,1.0]},"StaticMeshComponent":{"path":"Fish_LP_combined"},"MaterialComponent":{"shadingModel":1,"albedoPath":"Fish_Albedo","roughnessPath":"Fish_Roughness","normalMapPath":"Fish_Normalmap","metallicPath":"Fish_Metallic","emissivePath":"","gAlbedo":[1.0,0.8999999761581421,0.0],"gNormal":[1.0,1.0,1.0],"gRoughness":0.007812501848093234,"gMetallic":1.3411048258027414e-8,"gEmissive":-6.276777916028617e66,"HaveNormal":false,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315}
+        }
+    ]
+}

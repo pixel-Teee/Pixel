@@ -537,7 +537,7 @@ namespace Pixel
 			}
 			else
 			{
-				Shape = ConstructConvex(model.mesh.GetMeshes(), transform.GetLocalTransform());
+				Shape = ConstructConvex(model.m_Model->GetMeshes(), transform.GetLocalTransform());
 			}
 			
 			btQuaternion rotation;
@@ -1196,7 +1196,7 @@ namespace Pixel
 		m_Registry.view<StaticMeshComponent>().each(
 			[=](auto entity, auto& smc)
 		{
-			smc.mesh.SetEntityDirty(true);
+			smc.m_Model->SetEntityDirty(true);
 		});
 	}
 
@@ -1239,7 +1239,8 @@ namespace Pixel
 	template<>
 	void Scene::OnComponentAdded<StaticMeshComponent>(Entity entity, StaticMeshComponent& component)
 	{
-		component.mesh = Model(component.path);
+		//component.mesh = Model(component.path);
+		//component.PostLoad();
 	}
 
 	template<>

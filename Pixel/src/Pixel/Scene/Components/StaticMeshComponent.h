@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Pixel/Renderer/3D/Model.h"
-
 namespace Pixel {
+	class Model;
 	struct StaticMeshComponent
 	{
-		Model mesh;
+		Ref<Model> m_Model;
 		//std::string path;
 
 		//char path[256];
@@ -23,10 +22,7 @@ namespace Pixel {
 			path = Path;
 		}
 
-		void PostLoad()
-		{
-			mesh = Model(path);
-		}
+		void PostLoad();
 
 		REFLECT()
 	};

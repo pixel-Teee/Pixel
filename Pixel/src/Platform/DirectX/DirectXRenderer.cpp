@@ -583,7 +583,7 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//set pipeline state object
-			meshs[i].mesh.Draw(trans[i].GetLocalTransform(), pGraphicsContext, entityIds[i]);
+			meshs[i].m_Model->Draw(trans[i].GetLocalTransform(), pGraphicsContext, entityIds[i]);
 		}
 
 		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[0]), ResourceStates::Common);
@@ -676,8 +676,9 @@ namespace Pixel {
 
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
+				if(meshs[i]->m_Model != nullptr)
 				//draw every mesh
-				meshs[i]->mesh.DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
+					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
@@ -745,7 +746,8 @@ namespace Pixel {
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
 			//draw every mesh
-			meshs[i]->mesh.Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
+			if(meshs[i]->m_Model != nullptr)
+				meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
 		}
 
 		//draw runtime camera's model
@@ -756,7 +758,7 @@ namespace Pixel {
 		}
 
 		//------draw outline mesh------
-		if (OutLineMesh != nullptr)
+		if (OutLineMesh != nullptr && OutLineMesh->m_Model != nullptr)
 		{
 			pGraphicsContext->SetPipelineState(*m_OutlinePso);
 			pGraphicsContext->SetRootSignature(*m_OutlineRootSignature);
@@ -768,7 +770,7 @@ namespace Pixel {
 			outLinePass.width = m_Width;
 			//------outline pass------
 			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(OutLinePass), &outLinePass);
-			OutLineMesh->mesh.DrawOutLine(OutLineMeshTransform->GetGlobalTransform(scene->GetRegistry()), pGraphicsContext);
+			OutLineMesh->m_Model->DrawOutLine(OutLineMeshTransform->GetGlobalTransform(scene->GetRegistry()), pGraphicsContext);
 		}
 		//------draw outline mesh------
 
@@ -1032,8 +1034,9 @@ namespace Pixel {
 
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
+				if(meshs[i]->m_Model != nullptr)
 				//draw every mesh
-				meshs[i]->mesh.DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
+					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
@@ -1102,8 +1105,9 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{
+			if (meshs[i]->m_Model != nullptr)
 			//draw every mesh
-			meshs[i]->mesh.Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
+				meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)

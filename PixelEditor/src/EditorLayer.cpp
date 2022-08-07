@@ -553,17 +553,22 @@ namespace Pixel
 			case PX_KEY_O:
 			{
 				if (control)
-					OpenScene();
+				{
+					OpenSceneAsTest();
+
+				}
 				break;
 			}
 			case PX_KEY_S:
 			{
 				if (control)
 				{
-					if(shift)
-						SaveSceneAs();
-					else
-						SaveScene();
+					if (shift)
+					{
+						SaveSceneAsTest();
+					}
+					//else
+					//SaveScene();
 				}
 					
 				break;
@@ -574,22 +579,22 @@ namespace Pixel
 					OnDuplicateEntity();
 				break;
 			}
-			case PX_KEY_G:
-			{
-				if(control)
-				{
-					SaveSceneAsTest();
-				}
-				break;
-			}
-			case PX_KEY_F:
-			{
-				if(control)
-				{
-					OpenSceneAsTest();
-				}
-				break;
-			}
+			//case PX_KEY_G:
+			//{
+			//	if(control)
+			//	{
+			//		SaveSceneAsTest();
+			//	}
+			//	break;
+			//}
+			//case PX_KEY_F:
+			//{
+			//	if(control)
+			//	{
+			//		OpenSceneAsTest();
+			//	}
+			//	break;
+			//}
 
 			//Gizmos
 			case PX_KEY_Q:
@@ -646,7 +651,7 @@ namespace Pixel
 		//newScene->SetSkyBox(Renderer3D::GetSkyBox());
 		SceneSerializer serializer(newScene);
 
-		if (serializer.Deserialize(filepath.string()))
+		if (serializer.Read(filepath.string()))//deserializer to read
 		{
 			m_EditorScene = newScene;
 			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -679,6 +684,7 @@ namespace Pixel
 
 			m_CurrentScenePath = filepath;
 		}
+		AssetManager::GetSingleton().AddSceneToAssetRegistry(AssetManager::GetSingleton().to_string(filepath));
 	}
 
 	void EditorLayer::SerializerSceneTest(Ref<Scene> scene, const std::filesystem::path& path)

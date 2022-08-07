@@ -46,6 +46,11 @@ namespace Pixel {
 			m_Meshes[i].DrawOutLine(pContext, transform);
 	}
 
+	Ref<Model> Model::Create(const std::string& path)
+	{
+		return std::make_shared<Model>(path);
+	}
+
 	void Model::DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)

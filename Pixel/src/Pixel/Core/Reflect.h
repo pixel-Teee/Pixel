@@ -185,7 +185,7 @@ namespace Pixel {
         typeDesc->members = {
 
 #define REFLECT_STRUCT_MEMBER(name) \
-            {#name, offsetof(T, name), Reflect::TypeResolver<std::decay<decltype(T::name)>::type>::get()},
+            {#name, offsetof(T, name), Reflect::TypeResolver<decltype(T::name)>::get()},
 
 #define REFLECT_STRUCT_END() \
         }; \

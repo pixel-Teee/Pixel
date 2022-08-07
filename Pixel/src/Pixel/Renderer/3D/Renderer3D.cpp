@@ -87,7 +87,7 @@ namespace Pixel {
 		MaterialTextures.push_back(Material.Metallic);
 		MaterialTextures.push_back(Material.Emissive);
 
- 		MeshComponent.mesh.Draw(transform, m_GeoPass, MaterialTextures, EntityID, m_MVPUuniformBuffer);
+ 		MeshComponent.m_Model->Draw(transform, m_GeoPass, MaterialTextures, EntityID, m_MVPUuniformBuffer);
 	}
 
 	void Renderer3D::BeginScene(const Camera& camera, TransformComponent& transform, Ref<Framebuffer> geometryFramebuffer)

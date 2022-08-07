@@ -45,9 +45,15 @@ namespace Pixel {
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-					Application::Get().GetRenderer()->InitializeAndConvertHDRToCubeMap(texturePath.string());
+					//const wchar_t* path = (const wchar_t*)payload->Data;
+					//std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+					const char* virtualPath = (const char*)payload->Data;
+
+					//query the physical path
+					const std::string& physicalPath = AssetManager::GetSingleton().GetAssetPhysicalPath(virtualPath);
+
+					Application::Get().GetRenderer()->InitializeAndConvertHDRToCubeMap(g_AssetPath.string() + "\\" + physicalPath);
+
 					Device::Get()->CopyDescriptorsSimple(1, m_HDRTextureHandle->GetCpuHandle(), Application::Get().GetRenderer()->GetHDRDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 				}
 				ImGui::EndDragDropTarget();

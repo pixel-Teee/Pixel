@@ -515,9 +515,9 @@ namespace Pixel
 						//component.Texture = Texture2D::Create(texturePath.string());
 						
 						//check the texture alread in asset manager?
-						if (AssetManager::IsInAssetRegistry(texturePath))
+						if (AssetManager::GetSingleton().IsInAssetRegistry(texturePath.string()))
 						{
-							component.Texture = AssetManager::GetTexture(AssetManager::GetAssetRegistryPath(texturePath));
+							component.Texture = AssetManager::GetSingleton().GetTexture(AssetManager::GetSingleton().GetAssetRegistryPath(texturePath.string()));
 							//component.Path
 						}
 					}
@@ -583,9 +583,11 @@ namespace Pixel
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path meshPath = std::filesystem::path(g_AssetPath) / path;
-						component.mesh = Model(meshPath.string());
+						//const wchar_t* path = (const wchar_t*)payload->Data;
+						//std::filesystem::path meshPath = std::filesystem::path(g_AssetPath) / path;
+						//component.mesh = Model(meshPath.string());
+
+						//component.mesh = AssetManager::GetSingleton().GetModel()
 
 						/*
 						std::string filepath = meshPath.string();
@@ -596,8 +598,13 @@ namespace Pixel
 						std::string Name = filepath.substr(lastSlash, count);
 						*/
 						//memcpy(component.path, meshPath.string().c_str(), meshPath.string().size());
-						component.path = meshPath.string();
+						//component.path = meshPath.string();
 						//memcpy(const_cast<char*>(component.path), const_cast<char*>(meshPath.string().c_str()), sizeof(char) * const_cast<char*>(meshPath.string().c_str()));
+						const char* virtualPath = (const char*)payload->Data;
+
+						component.m_Model = AssetManager::GetSingleton().GetModel(virtualPath);
+
+						component.path = virtualPath;
 					}
 
 					ImGui::EndDragDropTarget();
@@ -611,31 +618,32 @@ namespace Pixel
 				if(component.nextFrameNeedLoadTexture[0])
 				{
 					component.nextFrameNeedLoadTexture[0] = false;
-					component.Albedo = Texture2D::Create(component.albedoPath);
+					//component.Albedo = Texture2D::Create(component.albedoPath);
+					component.Albedo = AssetManager::GetSingleton().GetTexture(component.albedoPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[1])
 				{
 					component.nextFrameNeedLoadTexture[1] = false;
-					component.NormalMap = Texture2D::Create(component.normalMapPath);
+					component.NormalMap = AssetManager::GetSingleton().GetTexture(component.normalMapPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[2])
 				{
 					component.nextFrameNeedLoadTexture[2] = false;
-					component.Roughness = Texture2D::Create(component.roughnessPath);
+					component.Roughness = AssetManager::GetSingleton().GetTexture(component.roughnessPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[3])
 				{
 					component.nextFrameNeedLoadTexture[3] = false;
-					component.Metallic = Texture2D::Create(component.metallicPath);
+					component.Metallic = AssetManager::GetSingleton().GetTexture(component.metallicPath);
 				}
 
 				if (component.nextFrameNeedLoadTexture[4])
 				{
 					component.nextFrameNeedLoadTexture[4] = false;
-					component.Emissive = Texture2D::Create(component.emissivePath);
+					component.Emissive = AssetManager::GetSingleton().GetTexture(component.emissivePath);
 				}
 
 				//copy descriptor to imgui srv descriptor heap
@@ -666,11 +674,16 @@ namespace Pixel
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						//component.Albedo = Texture2D::Create(texturePath.string());
+						//const wchar_t* path = (const wchar_t*)payload->Data;
+						//std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						////component.Albedo = Texture2D::Create(texturePath.string());
+						//component.nextFrameNeedLoadTexture[0] = true;
+						//component.albedoPath = texturePath.string();
+						const char* virtualPath = (const char*)payload->Data;
+
 						component.nextFrameNeedLoadTexture[0] = true;
-						component.albedoPath = texturePath.string();
+
+						component.albedoPath = virtualPath;
 					}
 
 					ImGui::EndDragDropTarget();
@@ -684,11 +697,11 @@ namespace Pixel
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						//component.NormalMap = Texture2D::Create(texturePath.string());
+						const char* virtualPath = (const char*)payload->Data;
+
 						component.nextFrameNeedLoadTexture[1] = true;
-						component.normalMapPath = texturePath.string();
+
+						component.normalMapPath = virtualPath;
 					}
 
 					ImGui::EndDragDropTarget();
@@ -703,11 +716,11 @@ namespace Pixel
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						//component.Roughness = Texture2D::Create(texturePath.string());
+						const char* virtualPath = (const char*)payload->Data;
+
 						component.nextFrameNeedLoadTexture[2] = true;
-						component.roughnessPath = texturePath.string();
+
+						component.roughnessPath = virtualPath;
 					}
 
 					ImGui::EndDragDropTarget();
@@ -721,11 +734,11 @@ namespace Pixel
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						//component.Metallic = Texture2D::Create(texturePath.string());
+						const char* virtualPath = (const char*)payload->Data;
+
 						component.nextFrameNeedLoadTexture[3] = true;
-						component.metallicPath = texturePath.string();
+
+						component.metallicPath = virtualPath;
 					}
 
 					ImGui::EndDragDropTarget();
@@ -739,11 +752,11 @@ namespace Pixel
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						//component.Emissive = Texture2D::Create(texturePath.string());
+						const char* virtualPath = (const char*)payload->Data;
+
 						component.nextFrameNeedLoadTexture[4] = true;
-						component.emissivePath = texturePath.string();
+
+						component.emissivePath = virtualPath;
 					}
 
 					ImGui::EndDragDropTarget();

@@ -81,11 +81,13 @@ namespace Pixel {
 			if (ImGui::MenuItem("Import Model"))
 			{
 				//create model
+				std::wstring filePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj");
+				AssetManager::GetSingleton().AddModelToAssetRegistry(AssetManager::GetSingleton().to_string(filePath));
 			}
 
 			if (ImGui::MenuItem("Import Texture"))
 			{
-				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0");
+				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr");
 				AssetManager::GetSingleton().AddTextureToAssetRegistry(filePath);
 			}
 			ImGui::EndPopup();
@@ -127,8 +129,15 @@ namespace Pixel {
 
 				if (ImGui::BeginDragDropSource())
 				{
-					const wchar_t* itemPath = relativePath.c_str();
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t), ImGuiCond_Once);
+					//const wchar_t* itemPath = relativePath.c_str();
+					const std::string& itemPath = relativePath.string();
+
+					//query the asset virtual path
+					const std::string& virtualPath = AssetManager::GetSingleton().GetAssetRegistryPath(itemPath);
+
+					//pass the asset virtual path
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
+
 					ImGui::EndDragDropSource();
 				}
 
@@ -158,8 +167,15 @@ namespace Pixel {
 
 				if (ImGui::BeginDragDropSource())
 				{
-					const wchar_t* itemPath = relativePath.c_str();
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t), ImGuiCond_Once);
+					//const wchar_t* itemPath = relativePath.c_str();
+					const std::string& itemPath = relativePath.string();
+
+					//query the asset virtual path
+					const std::string& virtualPath = AssetManager::GetSingleton().GetAssetRegistryPath(itemPath);
+
+					//pass the asset virtual path
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
+
 					ImGui::EndDragDropSource();
 				}
 
