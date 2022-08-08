@@ -81,13 +81,13 @@ namespace Pixel {
 			if (ImGui::MenuItem("Import Model"))
 			{
 				//create model
-				std::wstring filePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj");
+				std::wstring filePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj\0");
 				AssetManager::GetSingleton().AddModelToAssetRegistry(AssetManager::GetSingleton().to_string(filePath));
 			}
 
 			if (ImGui::MenuItem("Import Texture"))
 			{
-				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr");
+				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr\0");
 				AssetManager::GetSingleton().AddTextureToAssetRegistry(filePath);
 			}
 			ImGui::EndPopup();
