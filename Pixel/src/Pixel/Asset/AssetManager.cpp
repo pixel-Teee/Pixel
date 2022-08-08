@@ -288,13 +288,13 @@ namespace Pixel {
 				physicalAssetPath = m_textureAssetRegistry[assetRegistry];
 
 				//load texture to map
-				m_textures[physicalAssetPath] = Texture2D::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
+				m_textures[assetRegistry] = Texture2D::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
 			}
 			else
 			{
 				//TODO:open the small window to tell user to fix asset registry
 			}
-			return m_textures[physicalAssetPath];
+			return m_textures[assetRegistry];
 		}
 	}
 
@@ -314,13 +314,13 @@ namespace Pixel {
 				physicalAssetPath = m_ModelAssetRegistry[modelRegistry];
 
 				//load texture to map
-				m_models[physicalAssetPath] = Model::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
+				m_models[modelRegistry] = Model::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
 			}
 			else
 			{
 				//TODO:open the small window to tell user to fix asset registry
 			}
-			return m_models[physicalAssetPath];
+			return m_models[modelRegistry];
 		}
 	}
 
