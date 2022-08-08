@@ -120,7 +120,7 @@ float Fd_Lambert() {
 }
 
 float V_Kelemen(float LoH) {
-	return 0.25f / (LoH * LoH);
+	return 0.25f / max((LoH * LoH), 0.00001f);
 }
 
 float3 BaseLayerF0ToClearCoat(float3 f0) {
