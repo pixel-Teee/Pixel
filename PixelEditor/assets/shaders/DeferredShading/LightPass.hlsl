@@ -47,6 +47,7 @@ Texture2D ShadowMap : register(t8);
 //------gbuffer sampler------
 SamplerState gsamPointWrap : register(s0);//static sampler
 SamplerState gShadowMapBorder : register(s1);
+SamplerState gsamPointClamp : register(s2);
 //------gbuffer sampler------
 
 struct Light
@@ -269,7 +270,8 @@ PixelOut PS(VertexOut pin)
 
 		float MAX_REFLECTION_LOD = 4.0f;
 		float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, Roughness * MAX_REFLECTION_LOD).xyz;
-		float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), Roughness));
+		//float NoV = dot(N, V);
+		float3 brdf = BrdfLut.Sample(gsamPointClamp, float2(max(dot(N, V), 0.0f), Roughness));
 
 		float3 specular = prefilterColor * (F * brdf.x + brdf.y);
 
@@ -373,7 +375,7 @@ PixelOut PS(VertexOut pin)
 
 		float MAX_REFLECTION_LOD = 4.0f;
 		float3 prefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, Roughness * MAX_REFLECTION_LOD).xyz;
-		float3 brdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), Roughness));
+		float3 brdf = BrdfLut.Sample(gsamPointClamp, float2(max(dot(N, V), 0.0f), Roughness));
 
 		float3 specular = prefilterColor * (F * brdf.x + brdf.y);
 
@@ -381,7 +383,7 @@ PixelOut PS(VertexOut pin)
 		float clearCoatPerceptualRoughness = clamp(ClearCoatRoughness, 0.089, 1.0);
 		float clearCoatRoughness = clearCoatPerceptualRoughness;
 		float3 clearCoatPrefilterColor = PrefilterMap.SampleLevel(gsamPointWrap, R, clearCoatRoughness * MAX_REFLECTION_LOD).xyz;
-		float3 ClearCoatBrdf = BrdfLut.Sample(gsamPointWrap, float2(max(dot(N, V), 0.0f), clearCoatRoughness));
+		float3 ClearCoatBrdf = BrdfLut.Sample(gsamPointClamp, float2(max(dot(N, V), 0.0f), clearCoatRoughness));
 
 		float3 clearCoatSpecular = clearCoatPrefilterColor * (F * brdf.x + brdf.y);
 		float3 Fc = F_Shlick(max(dot(N, V), 0.0f), 0.04f, 1.0f) * ClearCoat;

@@ -1835,7 +1835,7 @@ namespace Pixel {
 		(*m_OutlineRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
 		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
 		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
-		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		(*m_OutlineRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 2, 10, ShaderVisibility::Pixel);
 		(*m_OutlineRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
 		(*m_OutlineRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_OutlineRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
@@ -2489,14 +2489,19 @@ namespace Pixel {
 		ShadowMapDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 		ShadowMapDesc->SetTextureAddressMode(AddressMode::BORDER);
 
+		Ref<SamplerDesc> pointClampDesc = SamplerDesc::Create();
+		pointClampDesc->SetTextureAddressMode(AddressMode::CLAMP);
+
 		//-------create root signature------
-		m_pDeferredShadingLightRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 2);
+		m_pDeferredShadingLightRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 3);
 		m_pDeferredShadingLightRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
 		m_pDeferredShadingLightRootSignature->InitStaticSampler(1, ShadowMapDesc, ShaderVisibility::Pixel);
+		m_pDeferredShadingLightRootSignature->InitStaticSampler(2, pointClampDesc, ShaderVisibility::Pixel);
+		//m_pDeferredShadingLightRootSignature->InitStaticSampler(2, pointClampDesc, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
-		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 2, 10, ShaderVisibility::Pixel);
+		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 3, 10, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_pDeferredShadingLightRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
