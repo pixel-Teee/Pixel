@@ -50,7 +50,7 @@ PixelOut PS(VertexOut pin)
 	float3 right = normalize(cross(up, N));
 	up = normalize(cross(N, right));
 
-	float3 sampleDelta = 0.025f;
+	float sampleDelta = 0.025f;
 	float nrSamples = 0.0f;
 
 	for (float phi = 0.0f; phi < 2.0f * PI; phi += sampleDelta)

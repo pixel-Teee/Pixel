@@ -37,6 +37,10 @@ namespace Pixel {
 		float quadratic = 0.032f;
 		//------for point light's volume radius------
 
+		//------for spot light------
+		float CutOff = 45.0f;
+		//------for spot light------
+
 		LightComponent() = default;
 		LightComponent(const LightComponent&) = default;
 

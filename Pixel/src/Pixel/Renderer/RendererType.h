@@ -233,8 +233,8 @@ namespace Pixel {
 	struct Light
 	{
 		glm::vec3 Position;//point light, to calculate attenuation
-		float pad;
-		glm::vec3 Direction;//direction light
+		float CutOff;//spot light's cut off angle
+		glm::vec3 Direction;//direction light, spot light's light direction
 		float pad2;
 		glm::vec3 Color;//point light/direction light
 		float Radius;//point light, volume radius

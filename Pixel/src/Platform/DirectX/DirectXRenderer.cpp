@@ -596,7 +596,7 @@ namespace Pixel {
 
 		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
 		{
-			int widthAndHeight[2] = { m_Width, m_Height };
+			uint32_t widthAndHeight[2] = { m_Width, m_Height };
 			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
 			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
 		}
@@ -614,7 +614,7 @@ namespace Pixel {
 		m_Height = pFrameBuffer->GetSpecification().Height;
 		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
 		{
-			int32_t widthAndHeight[2] = { m_Width, m_Height };
+			uint32_t widthAndHeight[2] = { m_Width, m_Height };
 			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
 			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
 
@@ -818,6 +818,7 @@ namespace Pixel {
 		std::vector<LightComponent*> ReSortedDirectLight;
 		std::vector<TransformComponent*> ReSortedDirectLightTrans;
 		std::vector<LightComponent*> ReSortedSpotLight;
+		std::vector<TransformComponent*> ReSortedSpotLightTrans;
 
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
@@ -832,11 +833,17 @@ namespace Pixel {
 				ReSortedDirectLight.push_back(lights[i]);
 				ReSortedDirectLightTrans.push_back(lightTrans[i]);
 			}
+			else if(lights[i]->lightType == LightType::SpotLight)
+			{
+				ReSortedSpotLight.push_back(lights[i]);
+				ReSortedSpotLightTrans.push_back(lightTrans[i]);
+			}
 			//---restored point light---
 		}
 
 		m_lightPass.PointLightNumber = ReSortedPointLight.size();
 		m_lightPass.DirectLightNumber = ReSortedDirectLight.size();
+		m_lightPass.SpotLightNumber = ReSortedSpotLight.size();
 
 		for (uint32_t i = 0; i < ReSortedPointLight.size(); ++i)
 		{
@@ -853,6 +860,13 @@ namespace Pixel {
 			{
 				m_lightPass.lights[i + m_lightPass.PointLightNumber].GenerateShadow = 1;
 			}
+		}
+
+		for(size_t i = 0; i < ReSortedSpotLight.size(); ++i)
+		{
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Position = (*ReSortedSpotLightTrans[i]).Translation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].CutOff = glm::cos(glm::radians(( * ReSortedSpotLight[i]).CutOff));
 		}
 
 		if (mainDirectLight != nullptr)
@@ -972,7 +986,7 @@ namespace Pixel {
 		m_Height = pFrameBuffer->GetSpecification().Height;
 		if (m_lastHeight != m_Height || m_lastWidth != m_Width)
 		{
-			int32_t widthAndHeight[2] = { m_Width, m_Height };
+			uint32_t widthAndHeight[2] = { m_Width, m_Height };
 			m_editorImageWidthHeightBuffer = CreateRef<DirectXGpuBuffer>();
 			std::static_pointer_cast<DirectXGpuBuffer>(m_editorImageWidthHeightBuffer)->Create(L"ImageWidthBuffer", 2, sizeof(int32_t), &widthAndHeight);
 
@@ -1154,6 +1168,7 @@ namespace Pixel {
 		std::vector<LightComponent*> ReSortedDirectLight;
 		std::vector<TransformComponent*> ReSortedDirectLightTrans;
 		std::vector<LightComponent*> ReSortedSpotLight;
+		std::vector<TransformComponent*> ReSortedSpotLightTrans;
 
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
@@ -1168,11 +1183,17 @@ namespace Pixel {
 				ReSortedDirectLight.push_back(lights[i]);
 				ReSortedDirectLightTrans.push_back(lightTrans[i]);
 			}
+			else if (lights[i]->lightType == LightType::SpotLight)
+			{
+				ReSortedSpotLight.push_back(lights[i]);
+				ReSortedSpotLightTrans.push_back(lightTrans[i]);
+			}
 			//---restored point light---
 		}
 
 		m_lightPass.PointLightNumber = ReSortedPointLight.size();
 		m_lightPass.DirectLightNumber = ReSortedDirectLight.size();
+		m_lightPass.SpotLightNumber = ReSortedSpotLight.size();
 
 		for (uint32_t i = 0; i < ReSortedPointLight.size(); ++i)
 		{
@@ -1189,6 +1210,13 @@ namespace Pixel {
 			{
 				m_lightPass.lights[i + m_lightPass.PointLightNumber].GenerateShadow = 1;
 			}
+		}
+
+		for (size_t i = 0; i < ReSortedSpotLight.size(); ++i)
+		{
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Position = (*ReSortedSpotLightTrans[i]).Translation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].CutOff = glm::cos(glm::radians((*ReSortedSpotLight[i]).CutOff));
 		}
 
 		if (mainDirectLight != nullptr)

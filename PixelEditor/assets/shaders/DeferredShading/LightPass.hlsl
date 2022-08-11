@@ -53,6 +53,7 @@ SamplerState gsamPointClamp : register(s2);
 struct Light
 {
 	float3 Position;
+	float CutOff;//spot light's cut off
 	float3 Direction;
 	float3 Color;
 	float Radius;
@@ -252,6 +253,37 @@ PixelOut PS(VertexOut pin)
 			Lo += lights[i].Color * (Fd + Fr) * NoL;
 		}
 
+		int totalNumberOfLight = PointLightNumber + DirectLightNumber + SpotLightNumber;
+
+		//spot light
+		for(int i = PointLightNumber + DirectLightNumber; i < totalNumberOfLight; ++i)
+		{
+			float3 L = PosW - lights[i].Position;//spot light's light dir
+			float theta = dot(L, normalize(-lights[i].Direction));
+
+			if(theta > lights[i].CutOff)
+			{
+				L = -L;//flip the direction
+				float3 H = normalize(V + L);
+				float NoV = max(dot(N, V), 0.0f);
+				float NoL = max(dot(N, L), 0.0f);
+				float NoH = max(dot(N, H), 0.0f);
+				float LoH = max(dot(L, H), 0.0f);
+
+				float D = DistributionGGX(NoH, Roughness);
+				float3 F = F_Shlick(LoH, f0, 1.0);
+				float V = GeometrySmith(NoV, NoL, Roughness);
+
+				//specular brdf
+				float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
+
+				//diffuse brdf
+				float3 Fd = Albedo * Fd_Lambert();
+
+				Lo += lights[i].Color * (Fd + Fr) * NoL;
+			}
+		}
+
 		//ambient lighting(we now use IBL as the ambient term)
 		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 
@@ -355,6 +387,37 @@ PixelOut PS(VertexOut pin)
 			//------clear coat------
 
 			Lo += lights[i].Color * ((Fd + Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL;
+		}
+
+		int totalNumberOfLight = PointLightNumber + DirectLightNumber + SpotLightNumber;
+
+		//spot light
+		for (int i = PointLightNumber + DirectLightNumber; i < totalNumberOfLight; ++i)
+		{
+			float3 L = PosW - lights[i].Position;//spot light's light dir
+			float theta = dot(L, normalize(-lights[i].Direction));
+
+			if (theta > lights[i].CutOff)
+			{
+				L = -L;//flip the direction
+				float3 H = normalize(V + L);
+				float NoV = max(dot(N, V), 0.0f);
+				float NoL = max(dot(N, L), 0.0f);
+				float NoH = max(dot(N, H), 0.0f);
+				float LoH = max(dot(L, H), 0.0f);
+
+				float D = DistributionGGX(NoH, Roughness);
+				float3 F = F_Shlick(LoH, f0, 1.0);
+				float V = GeometrySmith(NoV, NoL, Roughness);
+
+				//specular brdf
+				float3 Fr = (D * V) * F / (4.0 * NoV * NoL + 0.0001);
+
+				//diffuse brdf
+				float3 Fd = Albedo * Fd_Lambert();
+
+				Lo += lights[i].Color * (Fd + Fr) * NoL;
+			}
 		}
 
 		//ambient lighting(we now use IBL as the ambient term)
