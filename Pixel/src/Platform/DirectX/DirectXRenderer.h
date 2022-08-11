@@ -71,7 +71,8 @@ namespace Pixel {
 
 		virtual void RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer, Ref<Scene> scene) override;
 
-		//virtual void RenderOutLine(Ref<Context> pGraphicsContext, const EditorCamera& camera, TransformComponent* )
+		virtual void RenderSpotLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer) override;
+
 		virtual void SetExposure(float exposure) override;
 	private:
 

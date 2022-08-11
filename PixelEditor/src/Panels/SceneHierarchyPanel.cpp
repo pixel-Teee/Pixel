@@ -831,6 +831,7 @@ namespace Pixel
 				{
 					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
 					ImGui::DragFloat("Light CutOff", &component.CutOff, 1.0f, 1.0f, 90.0f, "%.2f");
+					ImGui::Checkbox("DisplayPointLightVolume", &component.DisplayLightVolume);
 				}
 			}
 		);

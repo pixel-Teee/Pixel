@@ -232,7 +232,7 @@ PixelOut PS(VertexOut pin)
 		//direct light
 		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
 		{
-			float3 L = normalize(-lights[i].Direction);
+			float3 L = normalize(lights[i].Direction);
 
 			float3 H = normalize(V + L);
 			float NoV = max(dot(N, V), 0.0f);
@@ -258,8 +258,8 @@ PixelOut PS(VertexOut pin)
 		//spot light
 		for(int i = PointLightNumber + DirectLightNumber; i < totalNumberOfLight; ++i)
 		{
-			float3 L = PosW - lights[i].Position;//spot light's light dir
-			float theta = dot(L, normalize(-lights[i].Direction));
+			float3 L = normalize(PosW - lights[i].Position);//spot light's light dir
+			float theta = dot(L, normalize(lights[i].Direction));
 
 			if(theta > lights[i].CutOff)
 			{
@@ -359,7 +359,7 @@ PixelOut PS(VertexOut pin)
 		//direct light
 		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
 		{
-			float3 L = normalize(-lights[i].Direction);
+			float3 L = normalize(lights[i].Direction);
 
 			float3 H = normalize(V + L);
 			float NoV = max(dot(N, V), 0.0f);
@@ -394,8 +394,8 @@ PixelOut PS(VertexOut pin)
 		//spot light
 		for (int i = PointLightNumber + DirectLightNumber; i < totalNumberOfLight; ++i)
 		{
-			float3 L = PosW - lights[i].Position;//spot light's light dir
-			float theta = dot(L, normalize(-lights[i].Direction));
+			float3 L = normalize(PosW - lights[i].Position);//spot light's light dir
+			float theta = dot(L, normalize(lights[i].Direction));
 
 			if (theta > lights[i].CutOff)
 			{

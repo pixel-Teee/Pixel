@@ -193,6 +193,25 @@ namespace Pixel {
 		return ElementArray;//life time managed by others
 	}
 
+	static glm::vec3 Perp(const glm::vec3& v)
+	{
+		float minComponent = fabsf(v.x);
+		glm::vec3 cardinalAxis(1.0f, 0.0f, 0.0f);
+
+		if(fabsf(v.y) < minComponent)
+		{
+			minComponent = fabsf(v.y);
+			cardinalAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+		}
+
+		if(fabsf(v.z) < minComponent)
+		{
+			cardinalAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+		}
+
+		return glm::cross(v, cardinalAxis);
+	}
+
 	DirectXRenderer::DirectXRenderer()
 	{		
 		CreateDefaultForwardRendererPso();//for every model, model will create a forward pso, in terms of forward pso's vertex layout
@@ -854,7 +873,7 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < ReSortedDirectLight.size(); ++i)
 		{
-			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).GetForwardDirection();
 			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*ReSortedDirectLight[i]).color;
 			if (ReSortedDirectLight[i] == mainDirectLight)
 			{
@@ -865,7 +884,8 @@ namespace Pixel {
 		for(size_t i = 0; i < ReSortedSpotLight.size(); ++i)
 		{
 			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Position = (*ReSortedSpotLightTrans[i]).Translation;
-			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).GetForwardDirection();
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Color = (*ReSortedSpotLight[i]).color;
 			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].CutOff = glm::cos(glm::radians(( * ReSortedSpotLight[i]).CutOff));
 		}
 
@@ -1204,7 +1224,7 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < ReSortedDirectLight.size(); ++i)
 		{
-			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).GetForwardDirection();
 			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*ReSortedDirectLight[i]).color;
 			if (ReSortedDirectLight[i] == mainDirectLight)
 			{
@@ -1215,7 +1235,8 @@ namespace Pixel {
 		for (size_t i = 0; i < ReSortedSpotLight.size(); ++i)
 		{
 			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Position = (*ReSortedSpotLightTrans[i]).Translation;
-			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).Rotation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).GetForwardDirection();
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Color = (*ReSortedSpotLight[i]).color;
 			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].CutOff = glm::cos(glm::radians((*ReSortedSpotLight[i]).CutOff));
 		}
 
@@ -2072,6 +2093,73 @@ namespace Pixel {
 			pGraphicsContext->SetVertexBuffer(0, m_PointLightVolumeVertex->GetVBV());
 			pGraphicsContext->SetIndexBuffer(m_PointLightVolumeIndex->GetIBV());
 			pGraphicsContext->DrawIndexed(m_PointLightVolumeIndex->GetCount());
+		}
+	}
+
+	void DirectXRenderer::RenderSpotLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& editorCamera,
+		LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer)
+	{
+		if (lights != nullptr && lightTrans != nullptr)
+		{
+			pGraphicsContext->SetPipelineState(*m_PointLightVolumePso);
+			pGraphicsContext->SetRootSignature(*m_PointLightVolumeRootSignature);
+			pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::LINELIST);
+
+			Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pLightFrameBuffer);
+			pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+			pGraphicsContext->SetRenderTarget(pDirectXFrameBuffer->m_pColorBuffers[0]->GetRTV());
+
+			glm::mat4 viewProjection = glm::transpose(editorCamera.GetViewProjection());
+			//bind resource
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(glm::mat4), glm::value_ptr(glm::transpose(lights->GetTransformComponent(*lightTrans))));
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(viewProjection));
+
+			ViewPort vp;
+			vp.TopLeftX = 0.0f;
+			vp.TopLeftY = 0.0f;
+			vp.Width = pLightFrameBuffer->GetSpecification().Width;
+			vp.Height = pLightFrameBuffer->GetSpecification().Height;
+			vp.MaxDepth = 1.0f;
+			vp.MinDepth = 0.0f;
+
+			PixelRect scissor;
+			scissor.Left = 0;
+			scissor.Right = pLightFrameBuffer->GetSpecification().Width;
+			scissor.Top = 0;
+			scissor.Bottom = pLightFrameBuffer->GetSpecification().Height;
+
+			pGraphicsContext->SetViewportAndScissor(vp, scissor);
+			//pGraphicsContext->SetVertexBuffer(0, m_PointLightVolumeVertex->GetVBV());
+			//pGraphicsContext->SetIndexBuffer(m_PointLightVolumeIndex->GetIBV());
+
+			glm::vec3 c = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)) * 10.0f;//10.0f : height
+			glm::vec3 e0 = Perp(-glm::vec3(0.0f, 0.0f, -1.0f));
+			glm::vec3 e1 = glm::cross(e0, -glm::vec3(0.0f, 0.0f, -1.0f));
+			float angInc = glm::radians(360.0f / 8.0f);
+
+			float radius = 10.0f * glm::sin(glm::radians(lights->CutOff));
+
+			//glm::mat4 invWorld = glm::inverse(lights->GetTransformComponent(*lightTrans));
+			//calculate points around directrix
+			std::vector<glm::vec3> SpotLightVolumeVertex;
+			SpotLightVolumeVertex.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+			for(size_t i = 0; i < 8; ++i)
+			{
+				float rad = angInc * i;
+				glm::vec3 p = c + (e0 * glm::cos(rad) + e1 * glm::sin(rad)) * radius;
+				SpotLightVolumeVertex.push_back(p);
+			}
+
+			std::vector<uint16_t> SpotLightVolumeIndex;
+			for(uint32_t i = 0; i < 8; ++i)
+			{
+				SpotLightVolumeIndex.push_back(0);
+				SpotLightVolumeIndex.push_back(i + 1);
+			}
+
+			pGraphicsContext->SetDynamicVB(0, SpotLightVolumeVertex.size(), sizeof(glm::vec3), SpotLightVolumeVertex.data());
+			pGraphicsContext->SetDynamicIB(SpotLightVolumeIndex.size(), SpotLightVolumeIndex.data());
+			pGraphicsContext->DrawIndexed(SpotLightVolumeIndex.size());
 		}
 	}
 

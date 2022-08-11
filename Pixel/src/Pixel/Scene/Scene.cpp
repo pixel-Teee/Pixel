@@ -706,6 +706,9 @@ namespace Pixel
 		std::vector<LightComponent*> lights;
 		std::vector<TransformComponent*> lightTrans;
 		auto lightGroup = m_Registry.group<LightComponent>(entt::get<TransformComponent>);
+
+		std::vector<LightComponent*> SpotLights;
+		std::vector<TransformComponent*> SpotLightTrans;
 		for (auto entity : lightGroup)
 		{
 			auto& [trans, light] = lightGroup.get<TransformComponent, LightComponent>(entity);
@@ -713,6 +716,12 @@ namespace Pixel
 			//in terms of transform and mesh to draw
 			lightTrans.push_back(&trans);
 			lights.push_back(&light);
+
+			if(light.lightType == LightType::SpotLight)
+			{
+				SpotLights.push_back(&light);
+				SpotLightTrans.push_back(&trans);
+			}
 		}
 
 		//------draw frustum------
@@ -759,6 +768,16 @@ namespace Pixel
 				Application::Get().GetRenderer()->RenderPointLightVolume(pContext, camera, lights[i], lightTrans[i], pLightFrameBuffer, shared_from_this());
 			}
 		}
+
+		//draw sphere cone
+		for(size_t i = 0; i < SpotLights.size(); ++i)
+		{
+			if(lights[i]->DisplayLightVolume && lights[i]->lightType == LightType::SpotLight)
+			{
+				Application::Get().GetRenderer()->RenderSpotLightVolume(pContext, camera, SpotLights[i], SpotLightTrans[i], pLightFrameBuffer);
+			}
+		}
+
 		pContext->Finish(true);
 
 		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
