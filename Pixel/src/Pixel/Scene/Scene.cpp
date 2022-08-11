@@ -772,7 +772,7 @@ namespace Pixel
 		//draw sphere cone
 		for(size_t i = 0; i < SpotLights.size(); ++i)
 		{
-			if(lights[i]->DisplayLightVolume && lights[i]->lightType == LightType::SpotLight)
+			if(SpotLights[i]->DisplayLightVolume && SpotLights[i]->lightType == LightType::SpotLight)
 			{
 				Application::Get().GetRenderer()->RenderSpotLightVolume(pContext, camera, SpotLights[i], SpotLightTrans[i], pLightFrameBuffer);
 			}

@@ -298,6 +298,11 @@ namespace Pixel {
 		//------TAA------
 
 		float m_exposure;
+
+		//------for direct light------
+		Ref<Model> m_pArrowModel;
+		Ref<MaterialComponent> m_pArrowModelMaterial;
+		//------for direct light------
 	};
 }
  

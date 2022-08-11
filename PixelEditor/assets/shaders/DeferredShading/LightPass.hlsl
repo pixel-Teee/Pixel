@@ -163,7 +163,7 @@ float ShadowCalculation(float4 fragPosLightSpace)
 	float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	//projCoords = projCoords * 0.5f + 0.5f;
 	projCoords.xy = projCoords.xy * 0.5f + 0.5f;
-	projCoords.y = 1.0f - projCoords.y;
+	//projCoords.y = projCoords.y;
 	float closestDepth = ShadowMap.Sample(gShadowMapBorder, projCoords.xy).x;
 	float currentDepth = projCoords.z;
 	float bias = 0.005f;
@@ -288,7 +288,7 @@ PixelOut PS(VertexOut pin)
 		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 
 		//------shadow map------
-		//Lo *= (1 - Shadow);//will cause point light not effect
+		Lo *= (1 - Shadow);//will cause point light not effect
 		//------shadow map------
 
 		//------IBL------
@@ -424,7 +424,7 @@ PixelOut PS(VertexOut pin)
 		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 		
 		//------shadow map------
-		//Lo *= (1 - Shadow);//will cause point light not effect
+		Lo *= (1 - Shadow);//will cause point light not effect
 		//------shadow map------
 
 		//------IBL------

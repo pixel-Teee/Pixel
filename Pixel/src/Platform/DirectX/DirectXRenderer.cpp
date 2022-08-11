@@ -426,6 +426,11 @@ namespace Pixel {
 		}
 		m_FrameCount = 0;
 		//------TAA------
+
+		//------create arrow for direct light------
+		m_pArrowModel = CreateRef<Model>("Resources/models/arrow/arrow.fbx");
+		m_pArrowModelMaterial = CreateRef<MaterialComponent>();
+		//------create arrow for direct light------
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -774,6 +779,16 @@ namespace Pixel {
 		for (uint32_t i = 0; i < cameraTransformant.size(); ++i)
 		{
 			pCameraModel->Draw(cameraTransformant[i]->GetGlobalTransform(scene->GetRegistry()), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get());
+		}
+
+		//draw direct light's arrow model
+
+		for (uint32_t i = 0; i < lights.size(); ++i)
+		{
+			if (lights[i]->lightType == LightType::DirectLight)
+			{
+				m_pArrowModel->Draw(lightTrans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, -1, m_pArrowModelMaterial.get());
+			}
 		}
 
 		//------draw outline mesh------
