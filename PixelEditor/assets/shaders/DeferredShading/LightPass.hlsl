@@ -232,7 +232,7 @@ PixelOut PS(VertexOut pin)
 		//direct light
 		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
 		{
-			float3 L = normalize(lights[i].Direction);
+			float3 L = -normalize(lights[i].Direction);
 
 			float3 H = normalize(V + L);
 			float NoV = max(dot(N, V), 0.0f);
@@ -359,7 +359,7 @@ PixelOut PS(VertexOut pin)
 		//direct light
 		for (int i = PointLightNumber; i < PointLightNumber + DirectLightNumber; ++i)
 		{
-			float3 L = normalize(lights[i].Direction);
+			float3 L = -normalize(lights[i].Direction);
 
 			float3 H = normalize(V + L);
 			float NoV = max(dot(N, V), 0.0f);

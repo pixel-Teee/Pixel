@@ -771,7 +771,7 @@ namespace Pixel
 		//draw direct light's shadow map camera frustum, for debug
 		for(size_t i = 0; i < DirectLights.size(); ++i)
 		{
-			if(DirectLights[i]->GenerateShadowMap)
+			if(DirectLights[i]->GenerateShadowMap && DirectLights[i]->DisplayShowdowMapFrustum)
 			{
 				Application::Get().GetRenderer()->DrawShadowMapFrustum(pContext, camera, DirectLights[i], DirectLightTrans[i], pLightFrameBuffer, shared_from_this());
 			}

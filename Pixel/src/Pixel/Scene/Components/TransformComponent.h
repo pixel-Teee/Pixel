@@ -46,7 +46,7 @@ namespace Pixel {
 		glm::vec3 GetForwardDirection()
 		{
 			//just for light direction
-			return glm::rotate(glm::quat(Rotation), glm::vec3(0.0f, 0.0f, -1.0f));
+			return glm::rotate(glm::quat(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		}
 
 		glm::mat4 GetGlobalTransform(entt::registry& scene) const

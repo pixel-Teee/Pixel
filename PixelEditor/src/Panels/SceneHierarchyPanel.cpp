@@ -828,6 +828,7 @@ namespace Pixel
 					ImGui::Checkbox("GenerateShadowMap", &component.GenerateShadowMap);
 					ImGui::DragFloat("ShadowMap ViewPort Range", &component.Range, 1.0f, 0.0f, 60.0f, "%.2f");
 					ImGui::DragFloat("ShadowMap Distance", &component.MaxDistance, 1.0f, 0.0f, 500.0f, "%.2f");
+					ImGui::Checkbox("Display ShadowMap Frustum", &component.DisplayShowdowMapFrustum);
 				}
 				else if(component.lightType == LightType::SpotLight)
 				{

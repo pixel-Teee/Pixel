@@ -44,6 +44,7 @@ namespace Pixel {
 		//------for direct light------
 		float MaxDistance = 500.0f;
 		float Range = 20.0f;
+		bool DisplayShowdowMapFrustum = false;
 		//------for direct light------
 
 		LightComponent() = default;

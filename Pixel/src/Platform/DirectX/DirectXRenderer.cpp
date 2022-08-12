@@ -2271,9 +2271,9 @@ namespace Pixel {
 			//pGraphicsContext->SetVertexBuffer(0, m_PointLightVolumeVertex->GetVBV());
 			//pGraphicsContext->SetIndexBuffer(m_PointLightVolumeIndex->GetIBV());
 
-			glm::vec3 c = glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)) * 10.0f;//10.0f : height
-			glm::vec3 e0 = Perp(-glm::vec3(0.0f, 0.0f, -1.0f));
-			glm::vec3 e1 = glm::cross(e0, -glm::vec3(0.0f, 0.0f, -1.0f));
+			glm::vec3 c = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 10.0f;//10.0f : height
+			glm::vec3 e0 = Perp(-glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::vec3 e1 = glm::cross(e0, -glm::vec3(0.0f, 0.0f, 1.0f));
 			float angInc = glm::radians(360.0f / 8.0f);
 
 			float radius = 10.0f * glm::sin(glm::radians(lights->CutOff));
