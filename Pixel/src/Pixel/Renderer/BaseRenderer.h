@@ -44,6 +44,8 @@ namespace Pixel {
 
 		virtual void DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer, Ref<Scene> scene) = 0;
 
+		virtual void DrawShadowMapFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* pLight, TransformComponent* pLightTransformComponent, Ref<Framebuffer> pFrameBuffer, Ref<Scene> scene) = 0;
+
 		virtual void RenderPointLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer, Ref<Scene> scene) = 0;
 
 		virtual void RenderSpotLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer) = 0;

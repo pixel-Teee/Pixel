@@ -163,7 +163,7 @@ float ShadowCalculation(float4 fragPosLightSpace)
 	float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	//projCoords = projCoords * 0.5f + 0.5f;
 	projCoords.xy = projCoords.xy * 0.5f + 0.5f;
-	//projCoords.y = projCoords.y;
+	projCoords.y = 1.0f - projCoords.y;
 	float closestDepth = ShadowMap.Sample(gShadowMapBorder, projCoords.xy).x;
 	float currentDepth = projCoords.z;
 	float bias = 0.005f;

@@ -41,6 +41,11 @@ namespace Pixel {
 		float CutOff = 45.0f;
 		//------for spot light------
 
+		//------for direct light------
+		float MaxDistance = 500.0f;
+		float Range = 20.0f;
+		//------for direct light------
+
 		LightComponent() = default;
 		LightComponent(const LightComponent&) = default;
 

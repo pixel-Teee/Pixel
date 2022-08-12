@@ -709,6 +709,8 @@ namespace Pixel
 
 		std::vector<LightComponent*> SpotLights;
 		std::vector<TransformComponent*> SpotLightTrans;
+		std::vector<LightComponent*> DirectLights;
+		std::vector<TransformComponent*> DirectLightTrans;
 		for (auto entity : lightGroup)
 		{
 			auto& [trans, light] = lightGroup.get<TransformComponent, LightComponent>(entity);
@@ -721,6 +723,11 @@ namespace Pixel
 			{
 				SpotLights.push_back(&light);
 				SpotLightTrans.push_back(&trans);
+			}
+			else if(light.lightType == LightType::DirectLight)
+			{
+				DirectLights.push_back(&light);
+				DirectLightTrans.push_back(&trans);
 			}
 		}
 
@@ -758,6 +765,15 @@ namespace Pixel
 			if (displayCameras[i])
 			{
 				Application::Get().GetRenderer()->DrawFrustum(pContext, camera, cameras[i], cameraTransformComponents[i], pLightFrameBuffer, shared_from_this());
+			}
+		}
+
+		//draw direct light's shadow map camera frustum, for debug
+		for(size_t i = 0; i < DirectLights.size(); ++i)
+		{
+			if(DirectLights[i]->GenerateShadowMap)
+			{
+				Application::Get().GetRenderer()->DrawShadowMapFrustum(pContext, camera, DirectLights[i], DirectLightTrans[i], pLightFrameBuffer, shared_from_this());
 			}
 		}
 

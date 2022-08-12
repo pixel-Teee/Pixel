@@ -692,7 +692,7 @@ namespace Pixel {
 			float nearPlane = 0.01f;
 			float farPlane = 500.0f;
 
-			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-20.0f, 20.0f, -20.0f, 20.0f, nearPlane, farPlane));
+			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-mainDirectLight->Range, mainDirectLight->Range, -mainDirectLight->Range, mainDirectLight->Range, nearPlane, mainDirectLight->MaxDistance));
 			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(scene->GetRegistry())));
 			lightSpaceMatrix = lightView * lightProjection;
 
@@ -1531,6 +1531,130 @@ namespace Pixel {
 			//test
 			//pGraphicsContext->DrawIndexed(48);
 		}		
+	}
+
+	void DirectXRenderer::DrawShadowMapFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* pLight,
+		TransformComponent* pLightTransformComponent, Ref<Framebuffer> pFrameBuffer, Ref<Scene> scene)
+	{
+		if (pLight != nullptr && pLightTransformComponent != nullptr)
+		{
+			glm::vec4 vec4Vertices[8] = {
+				//near plane
+				{-1.0f, 1.0f, 0.0f, 1.0f},
+				{1.0f, 1.0f, 0.0f, 1.0f},
+				{-1.0f, -1.0f, 0.0f, 1.0f},
+				{1.0f, -1.0f, 0.0f, 1.0f},
+
+				//far plane
+				{-1.0f, 1.0f, 1.0f, 1.0f},
+				{1.0f, 1.0f, 1.0f, 1.0f},
+				{-1.0f, -1.0f, 1.0f, 1.0f},
+				{1.0f, -1.0f, 1.0f, 1.0f}
+			};
+
+			float nearPlane = 0.01f;
+			float farPlane = 500.0f;
+
+			glm::mat4 lightProjection = glm::orthoLH_ZO(-pLight->Range, pLight->Range, -pLight->Range, pLight->Range, nearPlane, pLight->MaxDistance);
+			glm::mat4 lightView = pLightTransformComponent->GetGlobalTransform(scene->GetRegistry());
+
+			glm::vec4 worldFrustum[8];
+			for (uint32_t i = 0; i < 8; ++i)
+			{
+				glm::vec4 newVertices = vec4Vertices[i] * glm::transpose(glm::inverse(lightProjection)) * glm::transpose(lightView);
+				worldFrustum[i].x = newVertices.x / newVertices.w;
+				worldFrustum[i].y = newVertices.y / newVertices.w;
+				worldFrustum[i].z = newVertices.z / newVertices.w;
+			}
+			float newVertices[24];
+			for (uint32_t i = 0; i < 8; ++i)
+			{
+				newVertices[i * 3] = worldFrustum[i].x;
+				newVertices[i * 3 + 1] = worldFrustum[i].y;
+				newVertices[i * 3 + 2] = worldFrustum[i].z;
+			}
+
+			uint16_t indices[48] = {
+				1, 0,
+				1, 3,
+				3, 2,
+				0, 2,//near plane
+
+				1, 5,
+				5, 7,
+				7, 3,
+				3, 1,//right plane
+
+				0, 4,
+				4, 6,
+				6, 2,
+				2, 0,//left plane
+
+				0, 1,
+				1, 5,
+				5, 4,
+				4, 0,//top plane
+
+				2, 3,
+				3, 7,
+				7, 6,
+				6, 2,//down plane,
+
+				6, 7,
+				7, 3,
+				3, 2,
+				2, 6//far plane
+			};
+
+			pGraphicsContext->SetPipelineState(*m_CameraFrustumPso);
+			pGraphicsContext->SetRootSignature(*m_CameraFrustumRootSignature);
+			pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::LINELIST);
+
+			Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+
+			std::vector<Ref<DescriptorCpuHandle>> rtvHandles;
+			rtvHandles.push_back(pDirectXFrameBuffer->m_pColorBuffers[0]->GetRTV());
+
+			pGraphicsContext->SetRenderTargets(1, rtvHandles);
+
+			//transition resource
+			pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget);
+			//pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pDepthBuffer), ResourceStates::DepthWrite);
+			//set viewport and scissor
+			ViewPort vp;
+			vp.TopLeftX = 0.0f;
+			vp.TopLeftY = 0.0f;
+			vp.Width = pFrameBuffer->GetSpecification().Width;
+			vp.Height = pFrameBuffer->GetSpecification().Height;
+			vp.MaxDepth = 1.0f;
+			vp.MinDepth = 0.0f;
+
+			PixelRect scissor;
+			scissor.Left = 0;
+			scissor.Right = pFrameBuffer->GetSpecification().Width;
+			scissor.Top = 0;
+			scissor.Bottom = pFrameBuffer->GetSpecification().Height;
+
+			pGraphicsContext->SetViewportAndScissor(vp, scissor);
+
+			glm::mat4 viewProjection = glm::transpose(camera.GetViewProjection());
+			//bind resource
+			pGraphicsContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(viewProjection));
+
+			//------test-------
+			/*float line[24] = { 0.0f, 0.0f, 0.0f, 0.5, 0.5f, 1.0f, 0.5f, 0.5f, 1.0f, 3.0f, 3.4f, 2.5f,
+			0.0f, 0.0f, 0.0f, 0.5, 0.5f, 1.0f, 0.5f, 0.5f, 1.0f, 3.0f, 3.4f, 2.5f };
+			uint16_t lineIndex[8] = { 0, 1, 2, 3, 4, 5, 6, 7};*/
+			//------test-------
+
+
+			pGraphicsContext->SetDynamicVB(0, 8, sizeof(float) * 3, newVertices);
+			pGraphicsContext->SetDynamicIB(48, indices);
+			pGraphicsContext->DrawIndexed(48);
+
+			//test
+			//pGraphicsContext->DrawIndexed(48);
+		}
 	}
 
 	void DirectXRenderer::CreateRenderImageToBackBufferPipeline()

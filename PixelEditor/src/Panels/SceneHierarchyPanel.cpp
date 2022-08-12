@@ -826,6 +826,8 @@ namespace Pixel
 				{
 					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
 					ImGui::Checkbox("GenerateShadowMap", &component.GenerateShadowMap);
+					ImGui::DragFloat("ShadowMap ViewPort Range", &component.Range, 1.0f, 0.0f, 60.0f, "%.2f");
+					ImGui::DragFloat("ShadowMap Distance", &component.MaxDistance, 1.0f, 0.0f, 500.0f, "%.2f");
 				}
 				else if(component.lightType == LightType::SpotLight)
 				{
