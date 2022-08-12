@@ -76,6 +76,8 @@ namespace Pixel {
 		virtual void RenderSpotLightVolume(Ref<Context> pGraphicsContext, const EditorCamera& camera, LightComponent* lights, TransformComponent* lightTrans, Ref<Framebuffer> pLightFrameBuffer) override;
 
 		virtual void SetExposure(float exposure) override;
+
+		virtual void SetSigmma(float sigmma) override;
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -248,6 +250,8 @@ namespace Pixel {
 
 		Ref<DescriptorHandle> m_BlurTexture2UavHandle;//vert
 		Ref<DescriptorHandle> m_BlurTextureSrvHandle;
+
+		float m_sigmma = 2.5f;
 		//------bloom------
 
 		//------additive blending------

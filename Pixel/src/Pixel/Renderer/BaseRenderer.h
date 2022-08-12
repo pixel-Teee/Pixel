@@ -66,6 +66,8 @@ namespace Pixel {
 
 		virtual void SetExposure(float exposure) = 0;
 
+		virtual void SetSigmma(float sigmma) = 0;
+
 		static Ref<BaseRenderer> Create();
 	};
 }

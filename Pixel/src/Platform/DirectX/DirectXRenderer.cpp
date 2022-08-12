@@ -2123,7 +2123,7 @@ namespace Pixel {
 		pComputeContext->SetRootSignature(*m_BlurRootSignature);
 
 		auto weights = CalcGaussWeights(2.5f);
-		int32_t blurRadius = (int32_t)weights.size() / 2;
+		int32_t blurRadius = std::max((int32_t)weights.size() / 2, 5);
 
 		pComputeContext->SetConstantArray(0, 1, &blurRadius, 0);
 		pComputeContext->SetConstantArray(0, weights.size(), weights.data(), 1);
@@ -2305,6 +2305,11 @@ namespace Pixel {
 	void DirectXRenderer::SetExposure(float exposure)
 	{
 		m_exposure = exposure;
+	}
+
+	void DirectXRenderer::SetSigmma(float sigmma)
+	{
+		m_sigmma = sigmma;
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()

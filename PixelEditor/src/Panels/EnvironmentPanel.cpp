@@ -26,6 +26,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_HDRTextureHandle->GetCpuHandle(), Application::Get().GetRenderer()->GetHDRDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		Application::Get().GetRenderer()->SetExposure(m_Exposure);
+		//Application::Get().GetRenderer()->SetSigmma(m_BloomSigmma);
 	}
 	
 	EnvironmentPanel::~EnvironmentPanel()
@@ -70,6 +71,13 @@ namespace Pixel {
 			//ImGui::PopStyleColor(3);
 			ImGui::TreePop();
 		}
+		/*if(ImGui::TreeNode("Bloom"))
+		{
+			ImGui::Text("Bloom Blur Sigmma");
+			ImGui::DragFloat("Bloom Blur", &m_BloomSigmma, 0.05f, -4.0f, 4.0f);
+			Application::Get().GetRenderer()->SetSigmma(m_BloomSigmma);
+			ImGui::TreePop();
+		}*/
 		ImGui::End();
 	}
 

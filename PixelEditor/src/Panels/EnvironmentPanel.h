@@ -13,6 +13,7 @@ namespace Pixel {
 		void OnImGuiRender();
 	private:
 		float m_Exposure = 1.0f;
+		float m_BloomSigmma = 2.5f;
 		Ref<DescriptorHandle> m_HDRTextureHandle;
 	};
 }

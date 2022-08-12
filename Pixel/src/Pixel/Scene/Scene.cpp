@@ -797,7 +797,11 @@ namespace Pixel
 		pContext->Finish(true);
 
 		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
-		Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
+		//Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
+		for(uint32_t i = 0; i < 4; ++i)
+		{
+			Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
+		}
 		pComputeContext->Finish(true);
 
 		Ref<Context> pPickerComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
