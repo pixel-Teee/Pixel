@@ -761,7 +761,7 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
-				ImGui::DragFloat("Emissive Value:", &component.gEmissive, 0.05f, 0.0f, 1.0f);
+				ImGui::DragFloat("Emissive Value:", &component.gEmissive, 0.5f, 0.0f, 32.0f);
 				//ImGui::InputFloat("Emissive Value:", &component.gEmissive);
 
 				//ImGui::DragFloat("Shininess", &component.shininess, 2.0f, 2.0f, 64.0f);

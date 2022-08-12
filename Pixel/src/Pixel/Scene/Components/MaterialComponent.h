@@ -35,7 +35,7 @@ namespace Pixel {
 		glm::vec3 gNormal = { 1.0f, 1.0f, 1.0f };
 		float gRoughness = 1.0f;
 		float gMetallic = 1.0f;
-		float gEmissive = 0.2f;
+		float gEmissive = 0.0f;
 		bool HaveNormal = false;
 		float ClearCoat = 1.0f;
 		float ClearCoatRoughness = 1.0f;

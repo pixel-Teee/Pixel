@@ -467,6 +467,7 @@ PixelOut PS(VertexOut pin)
 	}
 	}
 
+	Lo += Emissive * Albedo;
 	
 	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
 
