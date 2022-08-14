@@ -46,6 +46,19 @@ namespace Pixel
 	REFLECT_STRUCT_MEMBER(ClearCoatRoughness)
 	REFLECT_STRUCT_END()
 
+	SubMaterial::SubMaterial(const std::string& AlbedoMapPath, const std::string& NormalMapPath, const std::string& MetallicMapPath, const std::string& RoughnessMapPath, const std::string& AoMapPath, bool haveNormal)
+	{
+		albedoMap = Texture2D::Create(AlbedoMapPath);//directly use physical path
+		normalMap = Texture2D::Create(NormalMapPath);
+		metallicMap = Texture2D::Create(MetallicMapPath);
+		roughnessMap = Texture2D::Create(RoughnessMapPath);
+		aoMap = Texture2D::Create(AoMapPath);
+
+		//dont decord these physical path
+
+		HaveNormal = haveNormal;
+	}
+
 	void SubMaterial::Initialize(const std::string& filePath)
 	{
 		//filepath is physical path
@@ -66,9 +79,9 @@ namespace Pixel
 		stream.close();
 	}
 
-	void MaterialComponent::AddMaterial()
+	void MaterialComponent::AddMaterial(const std::string& assetRegistryPath)
 	{
-		//from the asset manager to get a material
+		//from the asset manager to get the sub material
 	}
 
 	void MaterialComponent::PostLoad()

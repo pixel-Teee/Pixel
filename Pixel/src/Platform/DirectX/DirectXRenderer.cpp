@@ -357,9 +357,11 @@ namespace Pixel {
 		std::string metallicPath = "Resources/Icons/Camera_metallic.png";
 		std::string emissivePath = "Resources/Icons/Camera_emissive.png";
 
-		pCameraMaterialComponent = CreateRef<MaterialComponent>(
-		albedoPath, normalPath, roughnessPath, metallicPath,
-		emissivePath, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f, 1.0f, false);
+		Ref<SubMaterial> pSubMaterial = CreateRef<SubMaterial>(albedoPath, normalPath, roughnessPath, metallicPath, emissivePath, false);
+
+		pCameraMaterialComponent = CreateRef<MaterialComponent>();
+
+		pCameraMaterialComponent->m_Materials.push_back(pSubMaterial);
 		//------create camera model, for editor debug------
 
 		//------create blur texture handle------

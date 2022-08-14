@@ -3,7 +3,6 @@
 
 #include "Pixel/Renderer/3D/Mul.h"
 #include "Pixel/Renderer/3D/TexSampler.h"
-#include "Pixel/Scene/SerializerMaterial.h"
 
 namespace Pixel {
 
@@ -252,8 +251,8 @@ namespace Pixel {
 				pShaderFunction->SetFunctionNodePos(glm::vec2(pos.x, pos.y));
 			}
 			//m_materialPass.Draw();
-			SerializerMaterial seralizer;
-			seralizer.SerializerMaterialAsset(m_filePath, m_pMaterial, m_pMaterialInstance);
+			//SerializerMaterial seralizer;
+			//seralizer.SerializerMaterialAsset(m_filePath, m_pMaterial, m_pMaterialInstance);
 		}
 			
 		CreateNewNodeMenu();

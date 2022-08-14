@@ -23,18 +23,14 @@ namespace Pixel
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 		void NewScene();
-		void OpenScene();
-		void OpenScene(const std::filesystem::path filepath);
-		void SaveSceneAs();
-		//------test------
-		void SaveSceneAsTest();
-		void SerializerSceneTest(Ref<Scene> scene, const std::filesystem::path& path);
-		void OpenSceneAsTest();
-		void OpenSceneTest(const std::filesystem::path filepath);
-		//------test------
 		void SaveScene();
-
+		void OpenScene();
+		//------test------
+		void SaveSceneAs();
 		void SerializerScene(Ref<Scene> scene, const std::filesystem::path& path);
+		void OpenSceneAs();
+		void OpenScene(const std::filesystem::path filepath);
+		//------test------
 
 		void OnScenePlay();
 		void OnSceneStop();

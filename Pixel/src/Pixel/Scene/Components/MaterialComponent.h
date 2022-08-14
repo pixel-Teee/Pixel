@@ -44,7 +44,12 @@ namespace Pixel {
 
 		SubMaterial();
 
-		void Initialize(const std::string& filePath);
+		//------just for editor camera use------
+		SubMaterial(const std::string& AlbedoMapPath, const std::string& NormalMapPath, const std::string& MetallicMapPath,
+		const std::string& RoughnessMapPath, const std::string& AoMapPath, bool haveNormal);
+		//------just for editor camera use------
+
+		void Initialize(const std::string& filePath);//
 
 		REFLECT()
 	};
@@ -60,7 +65,7 @@ namespace Pixel {
 		MaterialComponent() {}
 		MaterialComponent(const MaterialComponent&) = default;
 		
-		void AddMaterial();
+		void AddMaterial(const std::string& assetRegistryPath);
 
 		void PostLoad();//load mutiple materials
 

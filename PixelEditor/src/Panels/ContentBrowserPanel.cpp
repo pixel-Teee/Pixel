@@ -1,7 +1,6 @@
 #include "pxpch.h"
 #include "ContentBrowserPanel.h"
 
-#include "Pixel/Scene/SerializerMaterial.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/Device/Device.h"
@@ -35,28 +34,8 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 	}
 
-	void ContentBrowserPanel::OpenAssetEditor(const std::string& filename)
-	{
-		Ref<Material> pMaterial;
-		Ref<MaterialInstance> pMaterialInstance;
-		SerializerMaterial seralizer;
-		seralizer.DeserializerMaterialAssetAndCreateMaterial(filename, pMaterial, pMaterialInstance);
-
-		if (pMaterial != nullptr)
-		{
-			m_bIsOpen = true;
-			//Open The Node Graph
-			m_NodeGraph = CreateRef<NodeGraph>(pMaterial, pMaterialInstance, filename);
-		}
-	}
-
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		if (m_NodeGraph != nullptr && m_bIsOpen)
-		{
-			m_NodeGraph->OnImGuiRender();
-		}
-
 		//list all the files in the assets directory
 		ImGui::Begin("Content Browser");
 		
@@ -157,13 +136,6 @@ namespace Pixel {
 					{
 						m_CurrentDirectory /= path.filename();
 					}
-
-					//------Open Asset Editor------
-					if (!directoryEntry.is_directory())
-					{
-						OpenAssetEditor(path.string());
-					}
-					//------Open Asset Editor------
 				}
 
 				ImGui::TextWrapped("%s", filenameString.c_str());
@@ -201,17 +173,6 @@ namespace Pixel {
 		ImGui::SliderFloat("Padding", &Padding, 2.0f, 16.0f);
 
 		ImGui::End();
-	}
-
-	void ContentBrowserPanel::CreateMaterialAsset(std::string filePath)
-	{
-		Ref<Material> pMaterial = CreateRef<Material>("Material");
-		Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>(pMaterial);
-
-		filePath += "\\Test.mut";
-
-		SerializerMaterial serializerMaterial;
-		serializerMaterial.SerializerMaterialAsset(filePath, pMaterial, pMaterialInstance);
 	}
 
 }

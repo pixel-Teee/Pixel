@@ -12,8 +12,6 @@ namespace Pixel {
 	public:
 		ContentBrowserPanel();
 
-		void OpenAssetEditor(const std::string& filename);
-
 		void OnImGuiRender();
 
 		void CreateMaterialAsset(std::string filePath);
@@ -24,9 +22,6 @@ namespace Pixel {
 		/*------
 		Node Graph
 		-------*/
-
-		bool m_bIsOpen = false;
-		Ref<NodeGraph> m_NodeGraph;
 
 		Ref<Texture2D> m_Directory;
 		Ref<Texture2D> m_File;
