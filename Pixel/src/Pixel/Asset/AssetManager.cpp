@@ -13,6 +13,7 @@
 //------my library------
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/3D/Model.h"
+#include "Pixel/Scene/Components/MaterialComponent.h"
 //------my library------
 
 namespace Pixel {
@@ -255,22 +256,27 @@ namespace Pixel {
 		}
 	}
 
-	void AssetManager::AddMaterialToAssetRegistry(const std::string& filePath)
+	void AssetManager::AddMaterialToAssetRegistry(const std::wstring& filePath)
 	{
-		size_t pos = filePath.find_last_of("\\");
+		//file path is texture's physical file path
+
+		//extract the filename of filePath as the asset registry
+		std::string convertedFilePath = to_string(filePath);
+
+		size_t pos = convertedFilePath.find_last_of("\\");
 
 		if (pos != std::string::npos)
 		{
 			//extract the filename
 			std::string fileName;
-			size_t dotPos = filePath.substr(pos).find_last_of(".");
+			size_t dotPos = convertedFilePath.substr(pos).find_last_of(".");
 			if (dotPos != std::string::npos)
 			{
-				fileName = filePath.substr(pos + 1).substr(0, dotPos - 1);
+				fileName = convertedFilePath.substr(pos + 1).substr(0, dotPos - 1);
 			}
 			else
 			{
-				fileName = filePath.substr(pos);
+				fileName = convertedFilePath.substr(pos);
 			}
 
 			std::filesystem::path physicalPath(filePath);
@@ -281,8 +287,8 @@ namespace Pixel {
 
 			//construct the virtual path
 			std::string virtualFilePath = fileName;
-			m_SceneAssetRegistry.insert({ virtualFilePath, relativePathString });
-			m_AssetRegistryScene.insert({ relativePathString, virtualFilePath });
+			m_textureAssetRegistry.insert({ virtualFilePath, relativePathString });
+			m_AssetRegistryTexture.insert({ relativePathString, virtualFilePath });
 
 			SaveRegistry();
 		}
@@ -372,7 +378,8 @@ namespace Pixel {
 				physicalAssetPath = m_AssetRegistryToPhysicalMaterial[materialRegistry];
 
 				//load sub material
-				m_Materials[materialRegistry] = CreateRef<SubMaterial>(physicalAssetPath);
+				m_Materials[materialRegistry] = CreateRef<SubMaterial>();
+				m_Materials[materialRegistry]->Initialize(physicalAssetPath);
 			}
 			else
 			{
@@ -413,6 +420,28 @@ namespace Pixel {
 
 			SaveRegistry();
 		}
+	}
+
+	void AssetManager::CreateSubMaterial(const std::string& physicalPath)
+	{
+		//create a temporary default sub material and write to file
+		Ref<SubMaterial> pSubMaterial = CreateRef<SubMaterial>();
+
+		rapidjson::StringBuffer strBuf;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+
+		writer.StartObject();
+		writer.Key("SubMaterial");
+		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>().get();
+		writer.Key(typeDesc->name);
+		writer.StartObject();
+		typeDesc->Write(writer, &pSubMaterial, nullptr);//write a new sub material file
+		writer.EndObject();
+		writer.EndObject();
+		std::string data = strBuf.GetString();
+		std::ofstream fout(physicalPath);
+		fout << data.c_str();
+		fout.close();
 	}
 
 	std::string AssetManager::to_string(std::wstring wstr)

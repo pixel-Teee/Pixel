@@ -263,7 +263,7 @@ namespace Pixel {
 		glm::vec3 Albedo = { 1.0f, 1.0f, 1.0f };
 		float Roughness = 1.0f;
 		float Metallic = 0.0f;
-		float Emissive = 0.0f;
+		float Ao = 0.0f;
 		uint32_t HaveNormal = false;
 		uint32_t shadingModel = 0;
 		float ClearCoat = 1.0f;

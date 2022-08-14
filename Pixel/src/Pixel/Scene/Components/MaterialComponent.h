@@ -54,7 +54,7 @@ namespace Pixel {
 	{
 		ShadingModel shadingModel = ShadingModel::SM_DefaultLit;
 		
-		std::vector<SubMaterial> m_Materials;
+		std::vector<Ref<SubMaterial>> m_Materials;
 		std::vector<std::string> m_MaterialPaths;
 
 		MaterialComponent() {}

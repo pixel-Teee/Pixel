@@ -32,7 +32,7 @@ namespace Pixel {
 
 		void AddSceneToAssetRegistry(const std::string& filePath);
 
-		void AddMaterialToAssetRegistry(const std::string& filePath);
+		void AddMaterialToAssetRegistry(const std::wstring& filePath);
 
 		std::string GetAssetRegistryPath(const std::string& physicalFilePath);
 
@@ -47,6 +47,8 @@ namespace Pixel {
 		Ref<SubMaterial> GetMaterial(const std::string& materialRegistry);
 
 		void AddModelToAssetRegistry(const std::string& filePath);
+
+		void CreateSubMaterial(const std::string& physicalPath);
 
 		std::string  to_string(std::wstring wstr);
 

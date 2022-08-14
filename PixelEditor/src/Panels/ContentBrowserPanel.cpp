@@ -73,10 +73,10 @@ namespace Pixel {
 
 		if (ImGui::BeginPopup("Content Browser"))
 		{
-			if (ImGui::MenuItem("Create Material Asset"))
+			/*if (ImGui::MenuItem("Create Material Asset"))
 			{
 				CreateMaterialAsset(m_CurrentDirectory.string());
-			}
+			}*/
 
 			if (ImGui::MenuItem("Import Model"))
 			{
@@ -89,6 +89,16 @@ namespace Pixel {
 			{
 				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr\0");
 				AssetManager::GetSingleton().AddTextureToAssetRegistry(filePath);
+			}
+
+			if (ImGui::MenuItem("Create Material"))
+			{
+				std::wstring filePath = FileDialogs::SaveFile(L"material(*.mat)\0*.mat\0");
+
+				//write a default material and add to asset registry
+				AssetManager::GetSingleton().CreateSubMaterial(AssetManager::GetSingleton().to_string(filePath));
+
+				AssetManager::GetSingleton().AddMaterialToAssetRegistry(filePath);
 			}
 			ImGui::EndPopup();
 		}

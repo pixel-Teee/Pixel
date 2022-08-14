@@ -57,9 +57,9 @@ namespace Pixel
 
 		if (!doc.Parse(strStream.str().data()).HasParseError())
 		{
-			if (doc.HasMember("SubMaterial") && doc["SubMaterial"].IsObject())
+			if (doc.HasMember("SubMaterial") && doc["SubMaterial"].IsObject())//SubMaterial is object's array
 			{
-
+				
 			}
 		}
 
@@ -68,12 +68,18 @@ namespace Pixel
 
 	void MaterialComponent::AddMaterial()
 	{
-		m_Materials.push_back(SubMaterial());//add default sub material
+		//from the asset manager to get a material
 	}
 
 	void MaterialComponent::PostLoad()
 	{
+		//from the m_MaterialPaths to load sub material
+		m_Materials.resize(m_MaterialPaths.size());
 
+		for (size_t i = 0; i < m_Materials.size(); ++i)
+		{
+			m_Materials[i] = AssetManager::GetSingleton().GetMaterial(m_MaterialPaths[i]);
+		}
 	}
 
 	REFLECT_STRUCT_BEGIN(MaterialComponent)
