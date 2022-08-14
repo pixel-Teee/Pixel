@@ -44,6 +44,8 @@ namespace Pixel {
 
 		SubMaterial();
 
+		void Initialize(const std::string& filePath);
+
 		REFLECT()
 	};
 	//------material component is consist of material------

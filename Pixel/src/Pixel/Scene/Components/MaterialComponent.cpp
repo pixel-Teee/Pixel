@@ -26,11 +26,11 @@ namespace Pixel
 	}
 
 	REFLECT_STRUCT_BEGIN(SubMaterial)
-	REFLECT_STRUCT_MEMBER(albedoMap)
-	REFLECT_STRUCT_MEMBER(normalMap)
-	REFLECT_STRUCT_MEMBER(metallicMap)
-	REFLECT_STRUCT_MEMBER(roughnessMap)
-	REFLECT_STRUCT_MEMBER(aoMap)
+	//REFLECT_STRUCT_MEMBER(albedoMap)
+	//REFLECT_STRUCT_MEMBER(normalMap)
+	//REFLECT_STRUCT_MEMBER(metallicMap)
+	//REFLECT_STRUCT_MEMBER(roughnessMap)
+	//REFLECT_STRUCT_MEMBER(aoMap)
 	REFLECT_STRUCT_MEMBER(albedoMapPath)
 	REFLECT_STRUCT_MEMBER(normalMapPath)
 	REFLECT_STRUCT_MEMBER(roughnessMapPath)
@@ -46,6 +46,26 @@ namespace Pixel
 	REFLECT_STRUCT_MEMBER(ClearCoatRoughness)
 	REFLECT_STRUCT_END()
 
+	void SubMaterial::Initialize(const std::string& filePath)
+	{
+		//filepath is physical path
+		rapidjson::Document doc;
+
+		std::ifstream stream(filePath);
+		std::stringstream strStream;
+		strStream << stream.rdbuf();
+
+		if (!doc.Parse(strStream.str().data()).HasParseError())
+		{
+			if (doc.HasMember("SubMaterial") && doc["SubMaterial"].IsObject())
+			{
+
+			}
+		}
+
+		stream.close();
+	}
+
 	void MaterialComponent::AddMaterial()
 	{
 		m_Materials.push_back(SubMaterial());//add default sub material
@@ -57,7 +77,7 @@ namespace Pixel
 	}
 
 	REFLECT_STRUCT_BEGIN(MaterialComponent)
-	REFLECT_STRUCT_MEMBER(m_Materials)
+	//REFLECT_STRUCT_MEMBER(m_Materials)
 	REFLECT_STRUCT_MEMBER(m_MaterialPaths)
 	REFLECT_STRUCT_END()
 

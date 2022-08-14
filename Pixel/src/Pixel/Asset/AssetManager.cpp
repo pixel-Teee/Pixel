@@ -255,6 +255,39 @@ namespace Pixel {
 		}
 	}
 
+	void AssetManager::AddMaterialToAssetRegistry(const std::string& filePath)
+	{
+		size_t pos = filePath.find_last_of("\\");
+
+		if (pos != std::string::npos)
+		{
+			//extract the filename
+			std::string fileName;
+			size_t dotPos = filePath.substr(pos).find_last_of(".");
+			if (dotPos != std::string::npos)
+			{
+				fileName = filePath.substr(pos + 1).substr(0, dotPos - 1);
+			}
+			else
+			{
+				fileName = filePath.substr(pos);
+			}
+
+			std::filesystem::path physicalPath(filePath);
+
+			auto relativePath = std::filesystem::relative(physicalPath, g_AssetPath);
+
+			std::string relativePathString = relativePath.string();
+
+			//construct the virtual path
+			std::string virtualFilePath = fileName;
+			m_SceneAssetRegistry.insert({ virtualFilePath, relativePathString });
+			m_AssetRegistryScene.insert({ relativePathString, virtualFilePath });
+
+			SaveRegistry();
+		}
+	}
+
 	bool AssetManager::IsInAssetRegistry(std::string filepath)
 	{
 		if (m_AssetRegistryTexture.find(filepath) != m_AssetRegistryTexture.end())
@@ -321,6 +354,31 @@ namespace Pixel {
 				//TODO:open the small window to tell user to fix asset registry
 			}
 			return m_models[modelRegistry];
+		}
+	}
+
+	Ref<SubMaterial> AssetManager::GetMaterial(const std::string& materialRegistry)
+	{
+		if (m_Materials.find(materialRegistry) != m_Materials.end())
+		{
+			return m_Materials[materialRegistry];
+		}
+		else
+		{
+			std::string physicalAssetPath;
+
+			if (m_AssetRegistryToPhysicalMaterial.find(materialRegistry) != m_AssetRegistryToPhysicalMaterial.end())
+			{
+				physicalAssetPath = m_AssetRegistryToPhysicalMaterial[materialRegistry];
+
+				//load sub material
+				m_Materials[materialRegistry] = CreateRef<SubMaterial>(physicalAssetPath);
+			}
+			else
+			{
+				//TODO:open the small window to tell user to fix asset registry
+			}
+			return m_Materials[materialRegistry];
 		}
 	}
 
