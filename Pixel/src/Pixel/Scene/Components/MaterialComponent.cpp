@@ -26,6 +26,7 @@ namespace Pixel
 	}
 
 	REFLECT_STRUCT_BEGIN(SubMaterial)
+	REFLECT_STRUCT_MEMBER(shadingModel)
 	//REFLECT_STRUCT_MEMBER(albedoMap)
 	//REFLECT_STRUCT_MEMBER(normalMap)
 	//REFLECT_STRUCT_MEMBER(metallicMap)
@@ -42,7 +43,6 @@ namespace Pixel
 	REFLECT_STRUCT_MEMBER(gMetallic)
 	REFLECT_STRUCT_MEMBER(gRoughness)
 	REFLECT_STRUCT_MEMBER(gAo)
-	REFLECT_STRUCT_MEMBER(gEmissive)
 	REFLECT_STRUCT_MEMBER(ClearCoat)
 	REFLECT_STRUCT_MEMBER(ClearCoatRoughness)
 	REFLECT_STRUCT_END()
@@ -74,9 +74,11 @@ namespace Pixel
 			aoMap = AssetManager::GetSingleton().GetTexture(aoMapPath);
 	}
 
-	void MaterialComponent::AddMaterial(const std::string& assetRegistryPath)
+	void MaterialComponent::AddMaterial()
 	{
 		//from the asset manager to get the sub material
+		m_Materials.push_back(nullptr);
+		m_MaterialPaths.push_back(std::string());
 	}
 
 	void MaterialComponent::PostLoad()

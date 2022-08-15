@@ -45,6 +45,7 @@ namespace Pixel {
 			return m_SceneAssetRegistry[physicalFilePath];
 		if (m_PhysicalToAssetRegistryMaterial.find(physicalFilePath) != m_PhysicalToAssetRegistryMaterial.end())
 			return m_PhysicalToAssetRegistryMaterial[physicalFilePath];
+		return "";
 	}
 
 	std::string AssetManager::GetAssetPhysicalPath(const std::string& filePath)
@@ -57,6 +58,7 @@ namespace Pixel {
 			return m_SceneAssetRegistry[filePath];
 		if (m_AssetRegistryToPhysicalMaterial.find(filePath) != m_AssetRegistryToPhysicalMaterial.end())
 			return m_AssetRegistryToPhysicalMaterial[filePath];
+		return "";
 	}
 
 	void AssetManager::LoadRegistry()
@@ -428,7 +430,7 @@ namespace Pixel {
 				//load sub material
 				m_Materials[materialRegistry] = CreateRef<SubMaterial>();
 
-				Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Ref<SubMaterial>>::get();
+				Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
 
 				rapidjson::Document doc;
 
@@ -441,7 +443,7 @@ namespace Pixel {
 					//read the sub material
 					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 					{
-						typeDesc->Read(doc[typeDesc->name], &m_Materials[materialRegistry], nullptr);
+						typeDesc->Read(doc[typeDesc->name], m_Materials[materialRegistry].get(), nullptr);
 					}
 				}
 				stream.close();
@@ -490,19 +492,18 @@ namespace Pixel {
 		}
 	}
 
-	void AssetManager::CreateSubMaterial(const std::string& physicalPath)
+	void AssetManager::CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial)
 	{
 		//create a temporary default sub material and write to file
-		Ref<SubMaterial> pSubMaterial = CreateRef<SubMaterial>();
 
 		rapidjson::StringBuffer strBuf;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
 
 		writer.StartObject();
-		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<std::shared_ptr<SubMaterial>>().get();
+		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>().get();
 		writer.Key(typeDesc->name);
 		writer.StartObject();
-		typeDesc->Write(writer, &pSubMaterial, nullptr);//write a new sub material file
+		typeDesc->Write(writer, pSubMaterial.get(), nullptr);//write a new sub material file
 		writer.EndObject();
 		writer.EndObject();
 		std::string data = strBuf.GetString();
@@ -521,4 +522,8 @@ namespace Pixel {
 		return m_strconverter.from_bytes(str);
 	}
 
+	std::map<std::string, std::string>& AssetManager::GetMaterialAssetRegistry()
+	{
+		return m_AssetRegistryToPhysicalMaterial;
+	}
 }

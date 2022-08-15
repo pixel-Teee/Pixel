@@ -280,7 +280,7 @@ namespace Pixel {
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
 	}
 
-	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, MaterialComponent* pMaterial)
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial)
 	{
 		//if (!isFirst)
 		//{
@@ -303,33 +303,32 @@ namespace Pixel {
 		//get descriptor size
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 
-		//std::vector<DescriptorHandle> handles;
-		//for (uint32_t i = 0; i < 5; ++i)
-		//{
-		//	DescriptorHandle secondHandle = (*m_pTextureFirstHandle) + i * DescriptorSize;
-		//	handles.push_back(secondHandle);
-		//}	
-		//
-		//Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->Albedo->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->NormalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->Roughness->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->Metallic->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->Emissive->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_pDescriptorHeap);
-		////bind texture
-		//pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
-		//
-		//m_MaterialConstant.Albedo = pMaterial->gAlbedo;
-		//m_MaterialConstant.Ao = pMaterial->gEmissive;
-		//m_MaterialConstant.Metallic = pMaterial->gMetallic;
-		//m_MaterialConstant.Roughness = pMaterial->gRoughness;
-		//m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
-		//m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
-		//m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
-		//m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
+		std::vector<DescriptorHandle> handles;
+		for (uint32_t i = 0; i < 5; ++i)
+		{
+			DescriptorHandle secondHandle = (*m_pTextureFirstHandle) + i * DescriptorSize;
+			handles.push_back(secondHandle);
+		}	
+		
+		Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_pDescriptorHeap);
+		//bind texture
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
+		
+		m_MaterialConstant.Albedo = pMaterial->gAlbedo;
+		m_MaterialConstant.Ao = pMaterial->gAo;
+		m_MaterialConstant.Metallic = pMaterial->gMetallic;
+		m_MaterialConstant.Roughness = pMaterial->gRoughness;
+		m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
+		m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
+		m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
+		m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
 
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
-
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

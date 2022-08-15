@@ -50,11 +50,13 @@ namespace Pixel {
 
 		void AddModelToAssetRegistry(const std::string& filePath);
 
-		void CreateSubMaterial(const std::string& physicalPath);
+		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
 
 		std::string  to_string(std::wstring wstr);
 
 		std::wstring to_wsrting(std::string str);
+
+		std::map<std::string, std::string>& GetMaterialAssetRegistry();
 	private:
 		std::map<std::string, std::string> m_textureAssetRegistry;//asset registry path <=> asset physical path
 

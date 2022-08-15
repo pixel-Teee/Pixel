@@ -21,8 +21,9 @@ namespace Pixel {
 
 	class MaterialInstance;
 	class Context;
-	class MaterialComponent;
+	struct MaterialComponent;
 	class DescriptorHeap;
+	struct SubMaterial;
 	class StaticMesh
 	{
 	public:
@@ -43,7 +44,7 @@ namespace Pixel {
 		//TODO:Test
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
 
-		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, MaterialComponent* pMaterial);
+		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial);
 
 		void DrawShadowMap(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
 		void DrawOutLine(Ref<Context> pContext, const glm::mat4& transform);

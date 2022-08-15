@@ -17,6 +17,7 @@ namespace Pixel {
 
 	//------material component is consist of material------
 	struct SubMaterial {
+		ShadingModel shadingModel = ShadingModel::SM_DefaultLit;
 		Ref<Texture2D> albedoMap;
 		Ref<Texture2D> normalMap;
 		Ref<Texture2D> metallicMap;
@@ -36,7 +37,6 @@ namespace Pixel {
 		float gMetallic = 1.0f;
 		float gRoughness = 1.0f;
 		float gAo = 0.0f;
-		float gEmissive = 0.0f;
 		float ClearCoat = 1.0f;
 		float ClearCoatRoughness = 1.0f;
 
@@ -57,15 +57,13 @@ namespace Pixel {
 
 	struct MaterialComponent
 	{
-		ShadingModel shadingModel = ShadingModel::SM_DefaultLit;
-		
 		std::vector<Ref<SubMaterial>> m_Materials;
-		std::vector<std::string> m_MaterialPaths;
+		std::vector<std::string> m_MaterialPaths;//material's virtual path
 
 		MaterialComponent() {}
 		MaterialComponent(const MaterialComponent&) = default;
 		
-		void AddMaterial(const std::string& assetRegistryPath);
+		void AddMaterial();
 
 		void PostLoad();//load mutiple materials
 

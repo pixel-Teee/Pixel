@@ -37,7 +37,10 @@ namespace Pixel {
 	MaterialComponent* pMaterialCompoent)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
-			m_Meshes[i].Draw(pContext, transform, entityId, pMaterialCompoent);
+		{
+			if(pMaterialCompoent->m_Materials.size() > i && pMaterialCompoent->m_Materials[i] != nullptr)
+				m_Meshes[i].Draw(pContext, transform, entityId, pMaterialCompoent->m_Materials[i]);
+		}
 	}
 
 	void Model::DrawOutLine(const glm::mat4& transform, Ref<Context> pContext)

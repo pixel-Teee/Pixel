@@ -16,6 +16,7 @@
 
 //------other library------
 #include <imgui/imgui.h>
+#include "glm/gtc/type_ptr.hpp"
 //------other library------
 
 namespace Pixel {
@@ -80,8 +81,10 @@ namespace Pixel {
 			{
 				std::wstring filePath = FileDialogs::SaveFile(L"material(*.mat)\0*.mat\0");
 
+				Ref<SubMaterial> pSubMaterial = CreateRef<SubMaterial>();
+
 				//write a default material and add to asset registry
-				AssetManager::GetSingleton().CreateSubMaterial(AssetManager::GetSingleton().to_string(filePath));
+				AssetManager::GetSingleton().CreateSubMaterial(AssetManager::GetSingleton().to_string(filePath), pSubMaterial);
 
 				AssetManager::GetSingleton().AddMaterialToAssetRegistry(filePath);
 			}
@@ -162,7 +165,7 @@ namespace Pixel {
 					const std::string& virtualPath = AssetManager::GetSingleton().GetAssetRegistryPath(itemPath);
 
 					//pass the asset virtual path
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
 
 					ImGui::EndDragDropSource();
 				}
@@ -181,7 +184,7 @@ namespace Pixel {
 
 							//read the sub material from the material path
 							m_pSubMaterial = CreateRef<SubMaterial>();
-							Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Ref<SubMaterial>>::get();
+							Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
 
 							rapidjson::Document doc;
 
@@ -193,7 +196,7 @@ namespace Pixel {
 								//read the sub material
 								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 								{
-									typeDesc->Read(doc[typeDesc->name], &m_pSubMaterial, nullptr);
+									typeDesc->Read(doc[typeDesc->name], m_pSubMaterial.get(), nullptr);
 								}
 							}
 							stream.close();
@@ -242,6 +245,19 @@ namespace Pixel {
 
 	void ContentBrowserPanel::RenderMaterialAssetPanel()
 	{
+		//check
+		if(m_pSubMaterial->nextFrameNeedLoadTexture[0])
+		{
+			m_pSubMaterial->albedoMap = AssetManager::GetSingleton().GetTexture(m_pSubMaterial->albedoMapPath);
+			m_pSubMaterial->nextFrameNeedLoadTexture[0] = false;
+		}
+
+		if (m_pSubMaterial->nextFrameNeedLoadTexture[1])
+		{
+			m_pSubMaterial->normalMap = AssetManager::GetSingleton().GetTexture(m_pSubMaterial->normalMapPath);
+			m_pSubMaterial->nextFrameNeedLoadTexture[1] = false;
+		}
+
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 
 		std::vector<DescriptorHandle> handles;
@@ -252,21 +268,84 @@ namespace Pixel {
 			handles.push_back(handle);
 		}
 
+		Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), m_pSubMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
 		//render material asset panel
 		ImGui::Begin("Material Asset Panel");
+
+		if(ImGui::Button("Close Button"))
+		{
+			m_IsOpen = false;
+		}
+
+		if(ImGui::Button("Save Button"))
+		{
+			//save the material asset
+
+			AssetManager::GetSingleton().CreateSubMaterial(m_CurrentSubMaterialPath, m_pSubMaterial);
+			AssetManager::GetSingleton().AddMaterialToAssetRegistry(AssetManager::GetSingleton().to_wsrting(m_CurrentSubMaterialPath));
+		}
+
 		ImGui::Text("albedoMap");
 		ImGui::Image(ImTextureID(handles[0].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		if(ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				//check the texture is in asset manager's asset registry
+				std::string textureVirtualPath = static_cast<const char*>(payload->Data);
+
+				if(AssetManager::GetSingleton().GetTexture(textureVirtualPath) != nullptr)
+				{
+					m_pSubMaterial->albedoMapPath = textureVirtualPath;
+
+					//next frame to load the texture
+					m_pSubMaterial->nextFrameNeedLoadTexture[0] = true;
+				}
+			}
+		}
+		ImGui::ColorEdit3("Albedo", glm::value_ptr(m_pSubMaterial->gAlbedo));
 		ImGui::Text("normalMap");
 		ImGui::Image(ImTextureID(handles[1].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				//check the texture is in asset manager's asset registry
+				std::string textureVirtualPath = static_cast<const char*>(payload->Data);
+
+				if (AssetManager::GetSingleton().GetTexture(textureVirtualPath) != nullptr)
+				{
+					m_pSubMaterial->normalMapPath = textureVirtualPath;
+
+					//next frame to load the texture
+					m_pSubMaterial->nextFrameNeedLoadTexture[1] = true;
+				}
+			}
+		}
+		ImGui::ColorEdit3("Normal", glm::value_ptr(m_pSubMaterial->gNormal));
+		ImGui::Checkbox("HaveNormal", &(m_pSubMaterial->HaveNormal));
 		ImGui::Text("metallicMap");
 		ImGui::Image(ImTextureID(handles[2].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		if (ImGui::BeginDragDropTarget())
+		{
+
+		}
+		ImGui::DragFloat("Metallic", &(m_pSubMaterial->gMetallic), 0.05f, 0.0f, 1.0f);
 		ImGui::Text("roughnessMap");
 		ImGui::Image(ImTextureID(handles[3].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		if (ImGui::BeginDragDropTarget())
+		{
+
+		}
+		ImGui::DragFloat("Roughness", &(m_pSubMaterial->gRoughness), 0.05f, 0.0f, 1.0f);
 		ImGui::Text("aoMap");
 		ImGui::Image(ImTextureID(handles[4].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
-		//will render a save button, to save the current sub material's virtual path to file
+		if (ImGui::BeginDragDropTarget())
+		{
 
-		//will render a button, to close current panel
+		}
+		ImGui::DragFloat("Ao", &(m_pSubMaterial->gAo), 0.05f, 0.0f, 1.0f);
 		ImGui::End();
 	}
 }
