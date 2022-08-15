@@ -512,6 +512,66 @@ namespace Pixel {
 		fout.close();
 	}
 
+	void AssetManager::UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial)
+	{
+		//first, to find the needed update material
+		std::string assetRegistryPath = GetAssetRegistryPath(physicalPath);
+
+		if (m_Materials.find(assetRegistryPath) != m_Materials.end())
+		{
+			Ref<SubMaterial> pNeededUpdateSubMaterial = m_Materials[assetRegistryPath];
+
+			//TODO:in the future, will in be terms of the difference, automatically update the material
+
+			if (pNeededUpdateSubMaterial->albedoMapPath != pSubMaterial->albedoMapPath)
+			{
+				pNeededUpdateSubMaterial->albedoMap = pSubMaterial->albedoMap;
+				pNeededUpdateSubMaterial->albedoMapPath = pSubMaterial->albedoMapPath;
+			}
+
+			if (pNeededUpdateSubMaterial->normalMapPath != pSubMaterial->normalMapPath)
+			{
+				pNeededUpdateSubMaterial->normalMap = pSubMaterial->normalMap;
+				pNeededUpdateSubMaterial->normalMapPath = pSubMaterial->normalMapPath;
+			}
+
+			if (pNeededUpdateSubMaterial->metallicMapPath != pSubMaterial->metallicMapPath)
+			{
+				pNeededUpdateSubMaterial->metallicMap = pSubMaterial->metallicMap;
+				pNeededUpdateSubMaterial->metallicMapPath = pSubMaterial->metallicMapPath;
+			}
+
+			if(pNeededUpdateSubMaterial->roughnessMapPath != pSubMaterial->roughnessMapPath)
+			{
+				pNeededUpdateSubMaterial->roughnessMap = pSubMaterial->roughnessMap;
+				pNeededUpdateSubMaterial->roughnessMapPath = pSubMaterial->roughnessMapPath;
+			}
+
+			if(pNeededUpdateSubMaterial->aoMapPath != pSubMaterial->aoMapPath)
+			{
+				pNeededUpdateSubMaterial->aoMap = pSubMaterial->aoMap;
+				pNeededUpdateSubMaterial->aoMapPath = pSubMaterial->aoMapPath;
+			}
+
+			if (pNeededUpdateSubMaterial->gAlbedo != pSubMaterial->gAlbedo)
+				pNeededUpdateSubMaterial->gAlbedo = pSubMaterial->gAlbedo;
+			if (pNeededUpdateSubMaterial->gNormal != pSubMaterial->gNormal)
+				pNeededUpdateSubMaterial->gNormal = pSubMaterial->gNormal;
+			if (pNeededUpdateSubMaterial->HaveNormal != pSubMaterial->HaveNormal)
+				pNeededUpdateSubMaterial->HaveNormal = pSubMaterial->HaveNormal;
+			if (pNeededUpdateSubMaterial->gMetallic != pSubMaterial->gMetallic)
+				pNeededUpdateSubMaterial->gMetallic = pSubMaterial->gMetallic;
+			if (pNeededUpdateSubMaterial->gRoughness != pSubMaterial->gRoughness)
+				pNeededUpdateSubMaterial->gRoughness = pSubMaterial->gRoughness;
+			if (pNeededUpdateSubMaterial->gAo != pSubMaterial->gAo)
+				pNeededUpdateSubMaterial->gAo = pSubMaterial->gAo;
+			if (pNeededUpdateSubMaterial->ClearCoat != pSubMaterial->ClearCoat)
+				pNeededUpdateSubMaterial->ClearCoat = pSubMaterial->ClearCoat;
+			if (pNeededUpdateSubMaterial->ClearCoatRoughness != pSubMaterial->ClearCoat)
+				pNeededUpdateSubMaterial->ClearCoatRoughness = pSubMaterial->ClearCoatRoughness;
+		}
+	}
+
 	std::string AssetManager::to_string(std::wstring wstr)
 	{
 		return m_strconverter.to_bytes(wstr);

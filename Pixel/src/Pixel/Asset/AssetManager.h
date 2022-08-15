@@ -52,6 +52,8 @@ namespace Pixel {
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
 
+		void UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
+
 		std::string  to_string(std::wstring wstr);
 
 		std::wstring to_wsrting(std::string str);

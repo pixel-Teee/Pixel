@@ -258,6 +258,24 @@ namespace Pixel {
 			m_pSubMaterial->nextFrameNeedLoadTexture[1] = false;
 		}
 
+		if (m_pSubMaterial->nextFrameNeedLoadTexture[2])
+		{
+			m_pSubMaterial->metallicMap = AssetManager::GetSingleton().GetTexture(m_pSubMaterial->metallicMapPath);
+			m_pSubMaterial->nextFrameNeedLoadTexture[2] = false;
+		}
+
+		if (m_pSubMaterial->nextFrameNeedLoadTexture[3])
+		{
+			m_pSubMaterial->roughnessMap = AssetManager::GetSingleton().GetTexture(m_pSubMaterial->roughnessMapPath);
+			m_pSubMaterial->nextFrameNeedLoadTexture[3] = false;
+		}
+
+		if (m_pSubMaterial->nextFrameNeedLoadTexture[4])
+		{
+			m_pSubMaterial->aoMap = AssetManager::GetSingleton().GetTexture(m_pSubMaterial->aoMapPath);
+			m_pSubMaterial->nextFrameNeedLoadTexture[4] = false;
+		}
+
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 
 		std::vector<DescriptorHandle> handles;
@@ -269,6 +287,10 @@ namespace Pixel {
 		}
 
 		Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), m_pSubMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), m_pSubMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), m_pSubMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), m_pSubMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), m_pSubMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		//render material asset panel
 		ImGui::Begin("Material Asset Panel");
@@ -281,9 +303,15 @@ namespace Pixel {
 		if(ImGui::Button("Save Button"))
 		{
 			//save the material asset
-
 			AssetManager::GetSingleton().CreateSubMaterial(m_CurrentSubMaterialPath, m_pSubMaterial);
 			AssetManager::GetSingleton().AddMaterialToAssetRegistry(AssetManager::GetSingleton().to_wsrting(m_CurrentSubMaterialPath));
+
+			std::filesystem::path currentSubMaterialPath(m_CurrentSubMaterialPath);
+
+			auto& relativePath = std::filesystem::relative(currentSubMaterialPath, g_AssetPath);
+
+			//and if the asset manager have the same material, then to update that material
+			AssetManager::GetSingleton().UpdateMaterial(relativePath.string(), m_pSubMaterial);
 		}
 
 		ImGui::Text("albedoMap");
@@ -305,6 +333,7 @@ namespace Pixel {
 			}
 		}
 		ImGui::ColorEdit3("Albedo", glm::value_ptr(m_pSubMaterial->gAlbedo));
+
 		ImGui::Text("normalMap");
 		ImGui::Image(ImTextureID(handles[1].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
 		if (ImGui::BeginDragDropTarget())
@@ -325,25 +354,64 @@ namespace Pixel {
 		}
 		ImGui::ColorEdit3("Normal", glm::value_ptr(m_pSubMaterial->gNormal));
 		ImGui::Checkbox("HaveNormal", &(m_pSubMaterial->HaveNormal));
+
 		ImGui::Text("metallicMap");
 		ImGui::Image(ImTextureID(handles[2].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
 		if (ImGui::BeginDragDropTarget())
 		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				//check the texture is in asset manager's asset registry
+				std::string textureVirtualPath = static_cast<const char*>(payload->Data);
 
+				if (AssetManager::GetSingleton().GetTexture(textureVirtualPath) != nullptr)
+				{
+					m_pSubMaterial->metallicMapPath = textureVirtualPath;
+
+					//next frame to load the texture
+					m_pSubMaterial->nextFrameNeedLoadTexture[2] = true;
+				}
+			}
 		}
 		ImGui::DragFloat("Metallic", &(m_pSubMaterial->gMetallic), 0.05f, 0.0f, 1.0f);
+
 		ImGui::Text("roughnessMap");
 		ImGui::Image(ImTextureID(handles[3].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
 		if (ImGui::BeginDragDropTarget())
 		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				//check the texture is in asset manager's asset registry
+				std::string textureVirtualPath = static_cast<const char*>(payload->Data);
 
+				if (AssetManager::GetSingleton().GetTexture(textureVirtualPath) != nullptr)
+				{
+					m_pSubMaterial->roughnessMapPath = textureVirtualPath;
+
+					//next frame to load the texture
+					m_pSubMaterial->nextFrameNeedLoadTexture[3] = true;
+				}
+			}
 		}
 		ImGui::DragFloat("Roughness", &(m_pSubMaterial->gRoughness), 0.05f, 0.0f, 1.0f);
+
 		ImGui::Text("aoMap");
 		ImGui::Image(ImTextureID(handles[4].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
 		if (ImGui::BeginDragDropTarget())
 		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				//check the texture is in asset manager's asset registry
+				std::string textureVirtualPath = static_cast<const char*>(payload->Data);
 
+				if (AssetManager::GetSingleton().GetTexture(textureVirtualPath) != nullptr)
+				{
+					m_pSubMaterial->aoMapPath = textureVirtualPath;
+
+					//next frame to load the texture
+					m_pSubMaterial->nextFrameNeedLoadTexture[4] = true;
+				}
+			}
 		}
 		ImGui::DragFloat("Ao", &(m_pSubMaterial->gAo), 0.05f, 0.0f, 1.0f);
 		ImGui::End();

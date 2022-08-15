@@ -1,4 +1,4 @@
 {
-    "SubMaterial": {"shadingModel":1,"albedoMapPath":"Fish_Albedo","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":[1.0,0.44015443325042725,0.44015443325042725],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":0.007812501848093234,"gRoughness":5.263544247e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315
+    "SubMaterial": {"shadingModel":1,"albedoMapPath":"Fish_Albedo","normalMapPath":"Fish_Normalmap","metallicMapPath":"Fish_Metallic","roughnessMapPath":"Fish_Roughness","aoMapPath":"","gAlbedo":[0.9845559597015381,0.6879312992095947,0.6576377749443054],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":0.007812501848093234,"gRoughness":5.263544247e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315
     }
 }
