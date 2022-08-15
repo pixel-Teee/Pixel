@@ -293,12 +293,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), m_pSubMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		//render material asset panel
-		ImGui::Begin("Material Asset Panel");
-
-		if(ImGui::Button("Close Button"))
-		{
-			m_IsOpen = false;
-		}
+		ImGui::Begin("Material Asset Panel", &m_IsOpen);
 
 		if(ImGui::Button("Save Button"))
 		{
