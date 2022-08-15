@@ -37,7 +37,7 @@ Texture2D gBufferPosition : register(t0);
 Texture2D gBufferNormal : register(t1);
 Texture2D gVelocity : register(t2);//don't need to bind
 Texture2D gBufferAlbedo : register(t3);
-Texture2D gBufferRoughnessMetallicEmissive : register(t4);
+Texture2D gBufferRoughnessMetallicAo : register(t4);
 TextureCube IrradianceMap : register(t5);
 TextureCube PrefilterMap : register(t6);
 Texture2D BrdfLut : register(t7);
@@ -182,10 +182,10 @@ PixelOut PS(VertexOut pin)
 	NormalW = NormalW * 2.0f - 1.0f;
 	float3 PosW = gBufferPosition.Sample(gsamPointWrap, pin.TexCoord).xyz;
 	float3 Albedo = pow(gBufferAlbedo.Sample(gsamPointWrap, pin.TexCoord).xyz, 2.2);
-	float Roughness = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).x;
-	float Metallic = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).y;
-	float Emissive = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).z;
-	uint ShadingModelId = gBufferRoughnessMetallicEmissive.Sample(gsamPointWrap, pin.TexCoord).w * 255.0f;
+	float Roughness = gBufferRoughnessMetallicAo.Sample(gsamPointWrap, pin.TexCoord).x;
+	float Metallic = gBufferRoughnessMetallicAo.Sample(gsamPointWrap, pin.TexCoord).y;
+	float Ao = gBufferRoughnessMetallicAo.Sample(gsamPointWrap, pin.TexCoord).z;
+	uint ShadingModelId = gBufferRoughnessMetallicAo.Sample(gsamPointWrap, pin.TexCoord).w * 255.0f;
 	float ClearCoatRoughness = gBufferAlbedo.Sample(gsamPointWrap, pin.TexCoord).w;
 	float ClearCoat = gVelocity.Sample(gsamPointWrap, pin.TexCoord).w;
 	//------shadow map------
@@ -467,7 +467,7 @@ PixelOut PS(VertexOut pin)
 	}
 	}
 
-	Lo += Emissive * Albedo;
+	Lo += Albedo + Ao;
 	
 	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
 

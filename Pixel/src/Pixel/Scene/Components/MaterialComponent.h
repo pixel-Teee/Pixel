@@ -42,6 +42,8 @@ namespace Pixel {
 
 		bool nextFrameNeedLoadTexture[5];//load in the next frame
 
+		bool IsTransparent = false;//will draw in the transparent pass
+
 		SubMaterial();
 
 		//------just for editor camera use------

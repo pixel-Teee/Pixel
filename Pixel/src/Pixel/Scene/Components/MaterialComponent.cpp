@@ -9,10 +9,10 @@ namespace Pixel
 	{
 		uint32_t DefaultAlbedoMapTextureData[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 
-		uint32_t DefaultNormalMapTextureData[4] = { 0xffffffff, 0, 0xffffffff, 0 };
+		uint32_t DefaultNormalMapTextureData[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 
-		uint8_t DefaultMetallicMapTextureData, DefaultRoughnessMapTextureData, DefaultAoMapTextureData = 0xff;
-
+		uint8_t DefaultMetallicMapTextureData, DefaultRoughnessMapTextureData = 0xff;
+		uint8_t DefaultAoMapTextureData = 0;
 		//------create texture------
 		albedoMap = Texture2D::Create(8, 2, 2, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, DefaultAlbedoMapTextureData);
 		normalMap = Texture2D::Create(8, 2, 2, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, DefaultNormalMapTextureData);

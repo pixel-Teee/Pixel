@@ -22,6 +22,24 @@ namespace Pixel {
 	class Framebuffer;
 	class EditorCamera;
 
+	struct StaticMeshContext
+	{
+		glm::mat4 transform;
+
+		Ref<StaticMesh> pStaticMesh;
+
+		Ref<SubMaterial> pSubMaterial;
+
+		int32_t entityId;
+
+		float distance;//use for transparent
+
+		bool operator<(const StaticMeshContext& rhs) const
+		{
+			return this->distance < rhs.distance;
+		}
+	};
+
 	class DirectXRenderer : public BaseRenderer
 	{
 	public:
@@ -309,6 +327,10 @@ namespace Pixel {
 		Ref<Model> m_pArrowModel;
 		Ref<MaterialComponent> m_pArrowModelMaterial;
 		//------for direct light------
+
+		std::vector<StaticMeshContext> m_OpaqueItems;
+
+		std::vector<StaticMeshContext> m_TransParentItems;
 	};
 }
  

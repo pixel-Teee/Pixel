@@ -260,7 +260,7 @@ namespace Pixel
 		return b2_staticBody;
 	}
 
-	static btConvexHullShape* ConstructConvex(const std::vector<StaticMesh>& meshes, glm::mat4& transform)
+	static btConvexHullShape* ConstructConvex(const std::vector<Ref<StaticMesh>>& meshes, glm::mat4& transform)
 	{
 		btConvexHullShape* Convex = new btConvexHullShape();
 		int32_t i = 0;
@@ -271,8 +271,8 @@ namespace Pixel
 			float y = 0.0f;
 			float z = 0.0f;
 
-			unsigned char* data = mesh.GetDataBuffer(Semantics::POSITION);
-			uint32_t size = mesh.GetDataBufferSize(Semantics::POSITION);
+			unsigned char* data = mesh->GetDataBuffer(Semantics::POSITION);
+			uint32_t size = mesh->GetDataBufferSize(Semantics::POSITION);
 			for (size_t j = 0; j < size; j += 12)
 			{
 				memcpy(&x, data + j, 4);

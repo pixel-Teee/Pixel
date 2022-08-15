@@ -13,7 +13,7 @@ namespace Pixel {
 		m_pCamera = CreateRef<Camera>();
 
 		//TODO:improve the staticmesh class's architecture
-		m_pStaticMesh = CreateRef<StaticMesh>(m_previewBox.GetMeshes()[0]);
+		m_pStaticMesh = CreateRef<StaticMesh>(*m_previewBox.GetMeshes()[0]);
 		
 		m_pMaterial = CreateRef<Material>("Test", Material::MUT_GEO);
 		m_pMaterialInstance = CreateRef<MaterialInstance>(m_pMaterial);

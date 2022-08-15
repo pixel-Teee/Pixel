@@ -432,6 +432,9 @@ namespace Pixel {
 		//------create arrow for direct light------
 		m_pArrowModel = CreateRef<Model>("Resources/models/arrow/arrow.fbx");
 		m_pArrowModelMaterial = CreateRef<MaterialComponent>();
+		pSubMaterial = CreateRef<SubMaterial>();
+		m_pArrowModelMaterial->m_Materials.push_back(pSubMaterial);
+		pSubMaterial->shadingModel = ShadingModel::SM_Unlit;
 		//------create arrow for direct light------
 	}
 
@@ -768,6 +771,31 @@ namespace Pixel {
 		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
 		++m_FrameCount;
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		
+		m_OpaqueItems.clear();
+		m_TransParentItems.clear();
+
+		//in terms of the transparent to separate the models
+		for (size_t i = 0; i < meshs.size(); ++i)
+		{
+			if (meshs[i]->m_Model != nullptr)
+			{
+				std::vector<Ref<StaticMesh>> pStaticMeshs = meshs[i]->m_Model->GetMeshes();
+				std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
+				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pSubMaterials.size()); ++j)
+				{
+					if (pSubMaterials[j]->IsTransparent)
+					{
+						float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
+						m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
+					}
+					else
+					{
+						m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+					}
+				}
+			}
+		}
 		
 		for (uint32_t i = 0; i < meshs.size(); ++i)
 		{

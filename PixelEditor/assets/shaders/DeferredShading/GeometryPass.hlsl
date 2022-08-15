@@ -22,7 +22,7 @@ cbuffer CbMaterial : register(b2)
 	float3 gAlbedo;
 	float gRoughness;
 	float gMetallic;
-	float gEmissive;
+	float gAo;
 	bool HaveNormal;//have normal
 	int ShadingModelID;//shading model id
 	float ClearCoat;//for clear coat
@@ -57,7 +57,7 @@ struct PixelOut
 	float4 gBufferNormal : SV_Target1;
 	float4 gVelocity : SV_Target2;
 	float4 gBufferAlbedo : SV_Target3;
-	float4 gBufferRoughnessMetallicEmissive : SV_Target4;
+	float4 gBufferRoughnessMetallicAo : SV_Target4;
 	int gEditor : SV_Target5;
 };
 
@@ -114,7 +114,7 @@ Texture2D gAlbedoMap : register(t0);
 Texture2D gNormalMap : register(t1);
 Texture2D gRoughnessMap : register(t2);
 Texture2D gMetallicMap : register(t3);
-Texture2D gEmissiveMap : register(t4);
+Texture2D gAoMap : register(t4);
 //------material texture------
 
 //------material samplers------
@@ -153,10 +153,10 @@ PixelOut PS(VertexOut pin)
 	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz * gAlbedo;
 	pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
 	pixelOut.gVelocity.w = ClearCoat;
-	pixelOut.gBufferRoughnessMetallicEmissive.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;
-	pixelOut.gBufferRoughnessMetallicEmissive.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).x * gMetallic;
-	pixelOut.gBufferRoughnessMetallicEmissive.z = gEmissiveMap.Sample(gsamPointWrap, pin.TexCoord).x * gEmissive;
-	pixelOut.gBufferRoughnessMetallicEmissive.w = ShadingModelID / 255.0f;//shading model
+	pixelOut.gBufferRoughnessMetallicAo.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;
+	pixelOut.gBufferRoughnessMetallicAo.y = gMetallicMap.Sample(gsamPointWrap, pin.TexCoord).x * gMetallic;
+	pixelOut.gBufferRoughnessMetallicAo.z = gAoMap.Sample(gsamPointWrap, pin.TexCoord).x * gAo;
+	pixelOut.gBufferRoughnessMetallicAo.w = ShadingModelID / 255.0f;//shading model
 	pixelOut.gEditor = pin.Editor;
 
 	//------velocity------
