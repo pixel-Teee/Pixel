@@ -136,6 +136,11 @@ namespace Pixel {
 					{
 						m_CurrentDirectory /= path.filename();
 					}
+					else
+					{
+						//check the file type, and open different editor
+
+					}
 				}
 
 				ImGui::TextWrapped("%s", filenameString.c_str());

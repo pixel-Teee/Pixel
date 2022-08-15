@@ -431,8 +431,7 @@ namespace Pixel {
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
 
 		writer.StartObject();
-		writer.Key("SubMaterial");
-		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>().get();
+		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<std::shared_ptr<SubMaterial>>().get();
 		writer.Key(typeDesc->name);
 		writer.StartObject();
 		typeDesc->Write(writer, &pSubMaterial, nullptr);//write a new sub material file

@@ -1,0 +1,4 @@
+{
+    "std::shared_ptr<>": {"albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":[1.0,1.0,1.0],"gNormal":[1.0,1.0,1.0],"HaveNormal":false,"gMetallic":0.007812501848093234,"gRoughness":5.263544247e-315,"gAo":0.0,"gEmissive":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315
+    }
+}

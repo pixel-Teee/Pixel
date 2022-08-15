@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <type_traits>
 
 #include <rapidjson/document.h>
@@ -170,6 +171,49 @@ namespace Pixel {
 			}
 		};
 		//------std::vector<>------
+
+		//------std::shared_ptr<>------
+		struct TypeDescriptor_StdSharedPtr : TypeDescriptor
+		{
+			TypeDescriptor* targetType;
+			const void* (*getTarget)(const void*);
+
+			//template constructor
+			template<typename TargetType>
+			TypeDescriptor_StdSharedPtr(TargetType*):TypeDescriptor("std::shared_ptr<>",
+			sizeof(std::shared_ptr<TargetType>)), targetType(TypeResolver<TargetType>::get())
+			{
+				getTarget = [](const void* SharedPtrPtr)->const void*
+				{
+					const auto& SharedPtr = *(const std::shared_ptr<TargetType>*)SharedPtrPtr;
+					return SharedPtr.get();
+				};
+			}
+			virtual std::string getFullName() const override
+			{
+				return std::string("std::shared_ptr<") + targetType->getFullName() + ">";
+			}
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			{
+				targetType->Write(writer, const_cast<void*>(getTarget(obj)), name);
+			}
+
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
+			{
+				targetType->Read(doc, const_cast<void*>(getTarget(obj)), name);
+			}
+
+		};
+		template<typename T>
+		struct TypeResolver<std::shared_ptr<T>>
+		{
+			static TypeDescriptor* get()
+			{
+				static TypeDescriptor_StdSharedPtr typeDesc(static_cast<T*>(nullptr));
+				return &typeDesc;
+			}
+		};
+		//------std::shared_ptr<>------
 
 #define REFLECT() \
     friend struct Reflect::DefaultResolver; \
