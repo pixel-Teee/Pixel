@@ -43,6 +43,8 @@ namespace Pixel {
 			return m_AssetRegistryModel[physicalFilePath];
 		if(m_AssetRegistryScene.find(physicalFilePath) != m_AssetRegistryScene.end())
 			return m_SceneAssetRegistry[physicalFilePath];
+		if (m_PhysicalToAssetRegistryMaterial.find(physicalFilePath) != m_PhysicalToAssetRegistryMaterial.end())
+			return m_PhysicalToAssetRegistryMaterial[physicalFilePath];
 	}
 
 	std::string AssetManager::GetAssetPhysicalPath(const std::string& filePath)
@@ -53,6 +55,8 @@ namespace Pixel {
 			return m_AssetRegistryModel[filePath];
 		if (m_AssetRegistryScene.find(filePath) != m_AssetRegistryScene.end())
 			return m_SceneAssetRegistry[filePath];
+		if (m_AssetRegistryToPhysicalMaterial.find(filePath) != m_AssetRegistryToPhysicalMaterial.end())
+			return m_AssetRegistryToPhysicalMaterial[filePath];
 	}
 
 	void AssetManager::LoadRegistry()
@@ -130,6 +134,28 @@ namespace Pixel {
 					}
 				}
 			}
+
+			if(doc.HasMember("Material") && doc["Material"].IsArray())
+			{
+				rapidjson::Value& array = doc["Material"].GetArray();
+
+				std::string registyPath = "Material";
+
+				for (auto iter = array.Begin();
+					iter != array.End(); ++iter)
+				{
+					const rapidjson::Value& attribute = *iter;
+					PX_CORE_ASSERT(attribute.IsObject(), "attribute is not object!");
+
+					for (rapidjson::Value::ConstMemberIterator itr2 = attribute.MemberBegin();
+						itr2 != attribute.MemberEnd(); ++itr2)
+					{
+						std::string assetRegistryPath = itr2->name.GetString();//don't include the asset prefix, etc. asset\\scene\\fish.pixel
+						m_AssetRegistryToPhysicalMaterial[assetRegistryPath] = itr2->value.GetString();
+						m_PhysicalToAssetRegistryMaterial[itr2->value.GetString()] = assetRegistryPath;
+					}
+				}
+			}
 		}
 
 		stream.close();
@@ -166,6 +192,17 @@ namespace Pixel {
 		writer.Key("Model");
 		writer.StartArray();
 		for (auto& item : m_ModelAssetRegistry)
+		{
+			writer.StartObject();
+			writer.Key(item.first.c_str());
+			writer.String(item.second.c_str());
+			writer.EndObject();
+		}
+		writer.EndArray();
+
+		writer.Key("Material");
+		writer.StartArray();
+		for (auto& item : m_AssetRegistryToPhysicalMaterial)
 		{
 			writer.StartObject();
 			writer.Key(item.first.c_str());
@@ -287,8 +324,8 @@ namespace Pixel {
 
 			//construct the virtual path
 			std::string virtualFilePath = fileName;
-			m_textureAssetRegistry.insert({ virtualFilePath, relativePathString });
-			m_AssetRegistryTexture.insert({ relativePathString, virtualFilePath });
+			m_AssetRegistryToPhysicalMaterial.insert({ virtualFilePath, relativePathString });
+			m_PhysicalToAssetRegistryMaterial.insert({ relativePathString, virtualFilePath });
 
 			SaveRegistry();
 		}
@@ -308,6 +345,17 @@ namespace Pixel {
 		{
 			return true;
 		}
+		if(m_PhysicalToAssetRegistryMaterial.find(filepath) != m_PhysicalToAssetRegistryMaterial.end())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool AssetManager::IsInMaterialAssetRegistry(std::string virtualPath)
+	{
+		if (m_Materials.find(virtualPath) != m_Materials.end())
+			return true;
 		return false;
 	}
 

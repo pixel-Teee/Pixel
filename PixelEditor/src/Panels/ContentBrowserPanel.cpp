@@ -138,8 +138,14 @@ namespace Pixel {
 					}
 					else
 					{
+						const std::string& itemPath = relativePath.string();
 						//check the file type, and open different editor
+						if(AssetManager::GetSingleton().IsInMaterialAssetRegistry(itemPath))
+						{
+							//open the material panel
 
+							//write the texture asset virtual path to material
+						}
 					}
 				}
 

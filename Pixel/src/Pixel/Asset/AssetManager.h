@@ -40,6 +40,8 @@ namespace Pixel {
 
 		bool IsInAssetRegistry(std::string filepath);
 
+		bool IsInMaterialAssetRegistry(std::string virtualPath);
+
 		Ref<Texture2D> GetTexture(const std::string& assetRegistry);
 
 		Ref<Model> GetModel(const std::string& modelRegistry);
