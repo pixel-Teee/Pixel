@@ -354,7 +354,7 @@ namespace Pixel {
 
 	bool AssetManager::IsInMaterialAssetRegistry(std::string virtualPath)
 	{
-		if (m_Materials.find(virtualPath) != m_Materials.end())
+		if (m_AssetRegistryToPhysicalMaterial.find(virtualPath) != m_AssetRegistryToPhysicalMaterial.end())
 			return true;
 		return false;
 	}
@@ -427,7 +427,27 @@ namespace Pixel {
 
 				//load sub material
 				m_Materials[materialRegistry] = CreateRef<SubMaterial>();
-				m_Materials[materialRegistry]->Initialize(physicalAssetPath);
+
+				Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Ref<SubMaterial>>::get();
+
+				rapidjson::Document doc;
+
+				//from the physical asset path to load the material and post load
+				std::ifstream stream(g_AssetPath.string() + "\\" + physicalAssetPath);
+				std::stringstream strStream;
+				strStream << stream.rdbuf();
+				if (!doc.Parse(strStream.str().data()).HasParseError())
+				{
+					//read the sub material
+					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+					{
+						typeDesc->Read(doc[typeDesc->name], &m_Materials[materialRegistry], nullptr);
+					}
+				}
+				stream.close();
+
+				//post load the sub material
+				m_Materials[materialRegistry]->PostLoad();
 			}
 			else
 			{

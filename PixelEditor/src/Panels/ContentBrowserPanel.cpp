@@ -9,6 +9,9 @@
 //------my library------
 #include "Pixel/Asset/AssetManager.h"
 #include "Pixel/Utils/PlatformUtils.h"
+#include "Pixel/Scene/Components/MaterialComponent.h"
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 //------my library------
 
 //------other library------
@@ -29,9 +32,12 @@ namespace Pixel {
 		//copy the these thexture's descriptor to descriptor heap
 		m_DirectoryHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 		m_FileHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+		m_MaterialAssetTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(5);
 		
 		Device::Get()->CopyDescriptorsSimple(1, m_DirectoryHandle->GetCpuHandle(), m_Directory->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		m_IsOpen = false;
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -136,17 +142,6 @@ namespace Pixel {
 					{
 						m_CurrentDirectory /= path.filename();
 					}
-					else
-					{
-						const std::string& itemPath = relativePath.string();
-						//check the file type, and open different editor
-						if(AssetManager::GetSingleton().IsInMaterialAssetRegistry(itemPath))
-						{
-							//open the material panel
-
-							//write the texture asset virtual path to material
-						}
-					}
 				}
 
 				ImGui::TextWrapped("%s", filenameString.c_str());
@@ -172,8 +167,62 @@ namespace Pixel {
 					ImGui::EndDragDropSource();
 				}
 
-				if (isInAssetRegistry)
-					ImGui::TextWrapped("%s", filenameString.c_str());
+				if(ImGui::IsItemClicked(0))
+				{
+					const std::string& itemPath = relativePath.string();
+					//check the file type, and open different editor
+					if (AssetManager::GetSingleton().IsInMaterialAssetRegistry(AssetManager::GetSingleton().GetAssetRegistryPath(itemPath)))
+					{
+						const std::string& materialPhysicalPath = g_AssetPath.string() + "\\" + relativePath.string();
+
+						if (m_CurrentSubMaterialPath != materialPhysicalPath)
+						{
+							m_CurrentSubMaterialPath = materialPhysicalPath;
+
+							//read the sub material from the material path
+							m_pSubMaterial = CreateRef<SubMaterial>();
+							Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Ref<SubMaterial>>::get();
+
+							rapidjson::Document doc;
+
+							std::ifstream stream(materialPhysicalPath);
+							std::stringstream strStream;
+							strStream << stream.rdbuf();
+							if (!doc.Parse(strStream.str().data()).HasParseError())
+							{
+								//read the sub material
+								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+								{
+									typeDesc->Read(doc[typeDesc->name], &m_pSubMaterial, nullptr);
+								}
+							}
+							stream.close();
+
+							//post load the sub material
+							m_pSubMaterial->PostLoad();
+
+							//from the m_pSubMaterial texture handle, copy to imgui layer's srv heap
+							uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+
+							std::vector<DescriptorHandle> handles;
+							for (uint32_t i = 0; i < 5; ++i)
+							{
+								DescriptorHandle handle = (*m_MaterialAssetTextureHandle) + i * DescriptorSize;
+
+								handles.push_back(handle);
+							}
+
+							Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), m_pSubMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+							Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), m_pSubMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+							Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), m_pSubMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+							Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), m_pSubMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+							Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), m_pSubMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+						}
+
+						m_IsOpen = true;
+					}
+				}
+				ImGui::TextWrapped("%s", filenameString.c_str());
 				ImGui::NextColumn();
 			}
 
@@ -184,6 +233,40 @@ namespace Pixel {
 		ImGui::SliderFloat("Padding", &Padding, 2.0f, 16.0f);
 
 		ImGui::End();
+
+		if(m_IsOpen)
+		{
+			RenderMaterialAssetPanel();
+		}
 	}
 
+	void ContentBrowserPanel::RenderMaterialAssetPanel()
+	{
+		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+
+		std::vector<DescriptorHandle> handles;
+		for(uint32_t i = 0; i < 5; ++i)
+		{
+			DescriptorHandle handle = (*m_MaterialAssetTextureHandle) + i * DescriptorSize;
+
+			handles.push_back(handle);
+		}
+
+		//render material asset panel
+		ImGui::Begin("Material Asset Panel");
+		ImGui::Text("albedoMap");
+		ImGui::Image(ImTextureID(handles[0].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		ImGui::Text("normalMap");
+		ImGui::Image(ImTextureID(handles[1].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		ImGui::Text("metallicMap");
+		ImGui::Image(ImTextureID(handles[2].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		ImGui::Text("roughnessMap");
+		ImGui::Image(ImTextureID(handles[3].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		ImGui::Text("aoMap");
+		ImGui::Image(ImTextureID(handles[4].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));
+		//will render a save button, to save the current sub material's virtual path to file
+
+		//will render a button, to close current panel
+		ImGui::End();
+	}
 }

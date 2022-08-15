@@ -8,7 +8,7 @@
 namespace Pixel {
 	class Texture2D;
 	class Model;
-	class SubMaterial;
+	struct SubMaterial;
 	class AssetManager : public Singleton<AssetManager>
 	{
 	public:

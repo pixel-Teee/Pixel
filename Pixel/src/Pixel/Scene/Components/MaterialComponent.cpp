@@ -7,15 +7,15 @@ namespace Pixel
 	
 	SubMaterial::SubMaterial()
 	{
-		uint32_t DefaultAlbedoMapTextureData[4] = { 0xffffff, 0, 0xffffff, 0 };
+		uint32_t DefaultAlbedoMapTextureData[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 
-		uint32_t DefaultNormalMapTextureData[4] = { 0xffffff, 0, 0xffffff, 0 };
+		uint32_t DefaultNormalMapTextureData[4] = { 0xffffffff, 0, 0xffffffff, 0 };
 
-		uint32_t DefaultMetallicMapTextureData, DefaultRoughnessMapTextureData, DefaultAoMapTextureData = 0xff;
+		uint8_t DefaultMetallicMapTextureData, DefaultRoughnessMapTextureData, DefaultAoMapTextureData = 0xff;
 
 		//------create texture------
-		albedoMap = Texture2D::Create(8, 2, 2, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, &DefaultAlbedoMapTextureData);
-		normalMap = Texture2D::Create(8, 2, 2, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, &DefaultNormalMapTextureData);
+		albedoMap = Texture2D::Create(8, 2, 2, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, DefaultAlbedoMapTextureData);
+		normalMap = Texture2D::Create(8, 2, 2, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, DefaultNormalMapTextureData);
 		metallicMap = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, &DefaultMetallicMapTextureData);
 		roughnessMap = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, &DefaultRoughnessMapTextureData);
 		aoMap = Texture2D::Create(1, 1, 1, ImageFormat::PX_FORMAT_R8_UNORM, &DefaultAoMapTextureData);
@@ -60,24 +60,18 @@ namespace Pixel
 		HaveNormal = haveNormal;
 	}
 
-	void SubMaterial::Initialize(const std::string& filePath)
+	void SubMaterial::PostLoad()
 	{
-		//filepath is physical path
-		rapidjson::Document doc;
-
-		std::ifstream stream(filePath);
-		std::stringstream strStream;
-		strStream << stream.rdbuf();
-
-		if (!doc.Parse(strStream.str().data()).HasParseError())
-		{
-			if (doc.HasMember("SubMaterial") && doc["SubMaterial"].IsObject())//SubMaterial is object's array
-			{
-				
-			}
-		}
-
-		stream.close();
+		if (!albedoMapPath.empty())
+			albedoMap = AssetManager::GetSingleton().GetTexture(albedoMapPath);
+		if (!normalMapPath.empty())
+			normalMap = AssetManager::GetSingleton().GetTexture(normalMapPath);
+		if (!metallicMapPath.empty())
+			metallicMap = AssetManager::GetSingleton().GetTexture(metallicMapPath);
+		if (!roughnessMapPath.empty())
+			roughnessMap = AssetManager::GetSingleton().GetTexture(roughnessMapPath);
+		if (!aoMapPath.empty())
+			aoMap = AssetManager::GetSingleton().GetTexture(aoMapPath);
 	}
 
 	void MaterialComponent::AddMaterial(const std::string& assetRegistryPath)

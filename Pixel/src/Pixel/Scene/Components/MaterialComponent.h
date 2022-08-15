@@ -49,7 +49,7 @@ namespace Pixel {
 		const std::string& RoughnessMapPath, const std::string& AoMapPath, bool haveNormal);
 		//------just for editor camera use------
 
-		void Initialize(const std::string& filePath);//
+		void PostLoad();
 
 		REFLECT()
 	};

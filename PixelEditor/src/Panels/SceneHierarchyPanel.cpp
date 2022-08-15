@@ -614,7 +614,7 @@ namespace Pixel
 		
 		DrawComponent<MaterialComponent>("Material Component", entity, [this](auto& component)
 			{
-
+				
 			}
 		);
 		
