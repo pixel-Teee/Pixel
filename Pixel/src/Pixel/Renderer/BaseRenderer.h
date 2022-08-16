@@ -27,7 +27,7 @@ namespace Pixel {
 
 		virtual uint32_t CreateDeferredLightPso(BufferLayout& layout) = 0;
 
-		virtual Ref<PSO> GetPso(uint32_t psoIndex) = 0;
+		virtual Ref<PSO> GetPso(uint32_t psoIndex, bool isTransParent) = 0;
 
 		virtual void ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
 			std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds) = 0;

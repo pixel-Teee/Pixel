@@ -69,7 +69,8 @@ namespace Pixel {
 		Ref<VertexBuffer> m_VertexBuffer;
 		Ref<IndexBuffer> m_IndexBuffer;
 
-		uint32_t PsoIndex;//pipeline state object index
+		uint32_t PsoIndex;//pipeline state object index, one for opaque, one for transparent
+		uint32_t TransParentPsoIndex;
 
 		int EntityID = -1;
 

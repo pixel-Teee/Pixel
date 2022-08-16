@@ -469,10 +469,10 @@ namespace Pixel {
 		std::static_pointer_cast<GraphicsPSO>(pPso)->SetInputLayout(layout.GetElements().size(), ElementArray);
 		//initialize the pipeline state object
 		pPso->Finalize();
-		m_PsoArray.push_back(pPso);
+		m_ForwardPsoArray.push_back(pPso);
 
 		//return pso index
-		return m_PsoArray.size();
+		return m_ForwardPsoArray.size();
 	}
 
 	uint32_t DirectXRenderer::CreateDeferredLightPso(BufferLayout& layout)
@@ -547,7 +547,7 @@ namespace Pixel {
 	}
 
 	void DirectXRenderer::ForwardRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent>& trans,
-		std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
+	                                       std::vector<StaticMeshComponent>& meshs, std::vector<LightComponent>& lights, std::vector<TransformComponent>& lightTrans, Ref<Framebuffer> pFrameBuffer, std::vector<int32_t>& entityIds)
 	{
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 2, "color buffer's size is not equal to 2!");
@@ -784,24 +784,33 @@ namespace Pixel {
 				std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
 				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pSubMaterials.size()); ++j)
 				{
-					if (pSubMaterials[j]->IsTransparent)
+					if(pSubMaterials[j] != nullptr)
 					{
-						float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
-						m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
-					}
-					else
-					{
-						m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+						if (pSubMaterials[j]->IsTransparent)
+						{
+							float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
+							m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
+						}
+						else
+						{
+							m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+						}
 					}
 				}
 			}
 		}
 		
-		for (uint32_t i = 0; i < meshs.size(); ++i)
+		//for (uint32_t i = 0; i < meshs.size(); ++i)
+		//{
+		//	//draw every mesh
+		//	if(meshs[i]->m_Model != nullptr)
+		//		meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
+		//}
+
+		//draw opaque render item
+		for(size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			//draw every mesh
-			if(meshs[i]->m_Model != nullptr)
-				meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial);
 		}
 
 		//draw runtime camera's model
@@ -812,7 +821,6 @@ namespace Pixel {
 		}
 
 		//draw direct light's arrow model
-
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
 			if (lights[i]->lightType == LightType::DirectLight)
@@ -939,9 +947,9 @@ namespace Pixel {
 			m_lightPass.LightSpaceMatrix = lightSpaceMatrix;
 		}
 
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);
-
 		Ref<DirectXCubeTexture> m_pIrradianceCubeTexture = std::static_pointer_cast<DirectXCubeTexture>(m_irradianceCubeTexture);
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);
 
 		//copy descriptor handle
 		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[0].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[0]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
@@ -988,6 +996,19 @@ namespace Pixel {
 		pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
+
+		//------third pass:forward transparent pass------
+		pContext->SetRootSignature(*m_rootSignature);
+		pContext->SetViewportAndScissor(vp, scissor);
+		pContext->SetRenderTargets(1, m_lightFrameBufferCpuHandles, dsvHandle);
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		std::sort(m_TransParentItems.begin(), m_TransParentItems.end());//in terms of the distance(from the camera) to draw transparent object
+		//draw transparent render item
+		for (size_t i = 0; i < m_TransParentItems.size(); ++i)
+		{
+			m_TransParentItems[i].pStaticMesh->Draw(pContext, m_TransParentItems[i].transform, m_TransParentItems[i].entityId, m_TransParentItems[i].pSubMaterial);
+		}
+		//------third pass:forward transparent pass------
 
 		//------copy current scene------
 		pContext->CopyBuffer(*m_CurrentScene, *(pLightFrame->m_pColorBuffers[0]));
@@ -2368,6 +2389,7 @@ namespace Pixel {
 
 		//-----Create Blend State------
 		Ref<BlenderState> pBlendState = BlenderState::Create();
+		pBlendState->SetRenderTargetBlendState(0, true);
 		//-----Create Blend State------
 
 		//------Create Raster State------
@@ -2382,7 +2404,7 @@ namespace Pixel {
 		m_defaultPso->SetRasterizerState(pRasterState);
 		m_defaultPso->SetDepthState(pDepthState);
 
-		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R32_SINT };
 		m_defaultPso->SetRenderTargetFormats(2, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
 		m_defaultPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
 
@@ -2458,10 +2480,18 @@ namespace Pixel {
 		//pComputeContext->Finish(true);
 	}
 
-	Ref<PSO> DirectXRenderer::GetPso(uint32_t psoIndex)
+	Ref<PSO> DirectXRenderer::GetPso(uint32_t psoIndex, bool isTransParent)
 	{
-		PX_CORE_ASSERT(psoIndex <= m_PsoArray.size() && psoIndex >= 0, "out of pipeline state object's range!");
-		return m_PsoArray[psoIndex - 1];
+		if(!isTransParent)
+		{
+			PX_CORE_ASSERT(psoIndex <= m_PsoArray.size() && psoIndex >= 0, "out of pipeline state object's range!");
+			return m_PsoArray[psoIndex - 1];
+		}
+		else
+		{
+			PX_CORE_ASSERT(psoIndex <= m_ForwardPsoArray.size() && psoIndex >= 0, "out of pipeline state object's range!");
+			return m_ForwardPsoArray[psoIndex - 1];
+		}
 	}
 
 	int32_t DirectXRenderer::GetPickerValue(uint32_t x, uint32_t y)
@@ -2770,6 +2800,18 @@ namespace Pixel {
 		m_DefaultGeometryShadingPso->SetPixelShader(PsBinary, PsBinarySize);
 
 		m_DefaultGeometryShadingPso->SetRootSignature(m_pDeferredShadingRootSignature);
+
+		pBlendState->SetRenderTargetBlendState(3, true);//albedo gbuffer is blend
+		m_DefaultGeometryShadingTransParentPso = PSO::CreateGraphicsPso(L"DeferredShadingGeometryTransParentPso");
+		m_DefaultGeometryShadingTransParentPso->SetBlendState(pBlendState);
+		m_DefaultGeometryShadingTransParentPso->SetRasterizerState(pRasterState);
+		m_DefaultGeometryShadingTransParentPso->SetDepthState(pDepthState);
+		m_DefaultGeometryShadingTransParentPso->SetRenderTargetFormats(6, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		m_DefaultGeometryShadingTransParentPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+		m_DefaultGeometryShadingTransParentPso->SetVertexShader(VsBinary, VsBinarySize);
+		m_DefaultGeometryShadingTransParentPso->SetPixelShader(PsBinary, PsBinarySize);
+
+		m_DefaultGeometryShadingTransParentPso->SetRootSignature(m_pDeferredShadingRootSignature);
 		//------Create Deferred Geometry Renderer------
 
 		//------Create Deferred Light Renderer------

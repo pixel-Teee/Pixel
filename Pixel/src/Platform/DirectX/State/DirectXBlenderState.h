@@ -14,7 +14,6 @@ namespace Pixel {
 		~DirectXBlenderState();
 
 		virtual void SetBlendState(BlenderStateType type) override;
-
 		virtual void SetRenderTargetBlendState(uint32_t index, bool enableBlend) override;
 		virtual void SetIndependentBlendEnable(bool enable) override;
 

@@ -25,6 +25,7 @@ VertexOut VS(VertexIn vin)
 
 	//to clip space
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gViewProjection);
+	vout.PosH.z = vout.PosH.w;
 	vout.PosL = vin.PosL;
 	
 	return vout;

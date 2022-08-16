@@ -569,6 +569,8 @@ namespace Pixel {
 				pNeededUpdateSubMaterial->ClearCoat = pSubMaterial->ClearCoat;
 			if (pNeededUpdateSubMaterial->ClearCoatRoughness != pSubMaterial->ClearCoat)
 				pNeededUpdateSubMaterial->ClearCoatRoughness = pSubMaterial->ClearCoatRoughness;
+			if (pNeededUpdateSubMaterial->IsTransparent != pSubMaterial->IsTransparent)
+				pNeededUpdateSubMaterial->IsTransparent = pSubMaterial->IsTransparent;
 		}
 	}
 

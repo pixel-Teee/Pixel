@@ -22,6 +22,8 @@ Select the PixelEditor as the StartupProject
 
 ![ReadMe1](./ScreenShots/ReadMe1.png)
 
+![ReadMe2](./ScreenShots/ReadMe2.png)
+
 # Features
 
 - Image-Based Lighting

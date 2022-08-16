@@ -2,19 +2,19 @@
 cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;//world matrix
+	float4x4 ginvWorld;//inverse world matrix
+	float4x4 previousWorld;//use for TAA
+	int gEditor;
 };
 //------mesh constants------
 
 cbuffer cbPass : register(b1)
 {
-	float4x4 gView;
-	float4x4 gProjection;
 	float4x4 gViewProjection;
-	float3 cameraPos;
-	//------Light------
-	float3 LightPosition;
-	float3 LightColor;
-	//------Light------
+	float4x4 gPreviousViewProjection;//use for TAA
+	uint gFrameCount;
+	float gWidth;
+	float gHeight;
 };
 
 struct VertexIn
@@ -22,7 +22,6 @@ struct VertexIn
 	float3 PosL : POSITION;
 	float2 TexCoord : TEXCOORD;
 	float3 NormalL : NORMAL;
-	int Editor : EDITOR;
 };
 
 struct VertexOut
@@ -31,14 +30,13 @@ struct VertexOut
 	float3 PosW : POSITION;
 	float2 TexCoord : TEXCOORD;
 	float3 NormalW : NORMAL;
-	float4x4 Test : TEXCOORD2;
 	int Editor : EDITOR;
 };
 
 struct PixelOut
 {
 	float4 color1 : SV_Target;
-	int color2 : SV_Target1;
+	//int colo2 : SV_Target;//for editor
 };
 
 VertexOut VS(VertexIn vin)
@@ -55,43 +53,62 @@ VertexOut VS(VertexIn vin)
 	//vout.PosH = mul(posW, gView);
 	vout.PosH = mul(posW, gViewProjection);
 
-	vout.Test = mul(gView, gProjection);
-
 	vout.TexCoord = vin.TexCoord;
 
-	vout.Editor = vin.Editor;
+	vout.Editor = gEditor;
 	return vout;
 }
 
 //------material constants------
-cbuffer cbMaterail : register(b2)
+cbuffer CbMaterial : register(b2)
 {
-	float4x4 MatTransform;
+	float3 gAlbedo;
+	float gRoughness;
+	float gMetallic;
+	float gAo;
+	bool HaveNormal;//have normal
+	int ShadingModelID;//shading model id
+	float ClearCoat;//for clear coat
+	float ClearCoatRoughness;//for clear coat
 };
 //------material constants------
 
 //------material texture------
-Texture2D gDiffuseMap : register(t0);
+Texture2D gAlbedoMap : register(t0);
+Texture2D gNormalMap : register(t1);
+Texture2D gRoughnessMap : register(t2);
+Texture2D gMetallicMap : register(t3);
+Texture2D gAoMap : register(t4);
 //------material texture------
 
 //------material samplers------
-SamplerState gsamPointWrap : register(s0);
+SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
+
+float3 DecodeNormalMap(float2 uv, float3 worldPos, float3 normal)
+{
+	float3 TangentNormal = gNormalMap.Sample(gsamPointWrap, uv).xyz * 2.0f - 1.0f;
+
+	float3 Q1 = ddx(worldPos);
+	float3 Q2 = ddy(worldPos);
+	float2 st1 = ddx(uv);
+	float2 st2 = ddy(uv);
+
+	float3 N = normalize(normal);
+	float3 T = normalize(Q1 * st2.y - Q2 * st1.y);
+	float3 B = -normalize(cross(N, T));
+	float3x3 TBN = float3x3(T, B, N);
+
+	//let the texture map's normal to world's normal
+	return normalize(mul(TangentNormal, TBN));
+}
 
 PixelOut PS(VertexOut pin)
 {
-	pin.NormalW = normalize(pin.NormalW);
-	
-	float3 toLight = normalize(LightPosition - pin.PosW);
-
-	float3 ambient = LightColor * max(dot(pin.NormalW, toLight), 0.0f);
-	//float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
 	PixelOut pixelOut;
 
-	//return float4(ambient, 1.0f);
-	pixelOut.color1 = float4(ambient, 1.0f);
-	pixelOut.color2 = pin.Editor;
+	pixelOut.color1 = float4(0.6f, 0.3f, 0.6f, 0.3f);
 
 	return pixelOut;
 }

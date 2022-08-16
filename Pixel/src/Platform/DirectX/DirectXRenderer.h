@@ -64,7 +64,7 @@ namespace Pixel {
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
-		virtual Ref<PSO> GetPso(uint32_t psoIndex) override;
+		virtual Ref<PSO> GetPso(uint32_t psoIndex, bool isTransParent) override;
 
 		virtual int32_t GetPickerValue(uint32_t x, uint32_t y) override;
 
@@ -109,6 +109,7 @@ namespace Pixel {
 		Ref<RootSignature> m_rootSignature;
 		Ref<Shader> m_forwardPs;
 		Ref<Shader> m_forwardVs;
+		std::vector<Ref<PSO>> m_ForwardPsoArray;//for transparent pso
 
 		std::vector<Ref<PSO>> m_PsoArray;//for every models's pso
 		GlobalConstants m_globalConstants;
@@ -136,6 +137,7 @@ namespace Pixel {
 
 		//------Deferred Geometry Shading------
 		Ref<PSO> m_DefaultGeometryShadingPso;
+		Ref<PSO> m_DefaultGeometryShadingTransParentPso;
 		Ref<RootSignature> m_pDeferredShadingRootSignature;
 		Ref<Shader> m_GeometryVertexShader;
 		Ref<Shader> m_GeometryPixelShader;
@@ -309,6 +311,8 @@ namespace Pixel {
 		bool m_IsFirst;
 		CbufferGeometryPass m_CbufferGeometryPass;
 		void CreateTAAPipeline();
+		
+	private:
 		Ref<PSO> m_TAAPSO;
 		Ref<RootSignature> m_TAARootSignature;
 		Ref<Shader> m_TAAVs;

@@ -328,6 +328,7 @@ namespace Pixel {
 			}
 		}
 		ImGui::ColorEdit3("Albedo", glm::value_ptr(m_pSubMaterial->gAlbedo));
+		ImGui::Checkbox("IsTransParent", &m_pSubMaterial->IsTransparent);
 
 		ImGui::Text("normalMap");
 		ImGui::Image(ImTextureID(handles[1].GetGpuHandle()->GetGpuPtr()), ImVec2(64.0f, 64.0f));

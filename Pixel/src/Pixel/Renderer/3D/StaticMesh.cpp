@@ -269,7 +269,7 @@ namespace Pixel {
 		//	isFirst = true;
 		//	SetupMesh(entityId, false);
 		//}	
-		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
+		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex, false)));
 
 		m_MeshConstant.world = glm::transpose(transform);
 
@@ -287,7 +287,10 @@ namespace Pixel {
 		//	isFirst = true;
 		//	SetupMesh(entityId, false);
 		//}
-		pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex)));
+		if(pMaterial->IsTransparent)
+			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(TransParentPsoIndex, pMaterial->IsTransparent)));
+		else
+			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex, pMaterial->IsTransparent)));
 
 		m_MeshConstant.world = glm::transpose(transform);
 		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));

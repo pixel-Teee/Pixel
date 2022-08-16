@@ -288,7 +288,7 @@ PixelOut PS(VertexOut pin)
 		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 
 		//------shadow map------
-		Lo *= (1 - Shadow);//will cause point light not effect
+		//Lo *= (1 - Shadow);//will cause point light not effect
 		//------shadow map------
 
 		//------IBL------
@@ -467,7 +467,7 @@ PixelOut PS(VertexOut pin)
 	}
 	}
 
-	Lo += Albedo + Ao;
+	Lo += Ao;
 	
 	float brightness = dot(Lo, float3(0.2126, 0.715, 0.0722));//bloom
 

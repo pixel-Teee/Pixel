@@ -228,6 +228,7 @@ namespace Pixel {
 		//create pso
 		//staticMesh->PsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
 		staticMesh->PsoIndex = Application::Get().GetRenderer()->CreateDeferredPso(layout);
+		staticMesh->TransParentPsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
 		//std::vector<Vertex> vertices;
 		//std::vector<uint32_t> indices;
 
