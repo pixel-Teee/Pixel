@@ -250,7 +250,7 @@ PixelOut PS(VertexOut pin)
 			//diffuse brdf
 			float3 Fd = Albedo * Fd_Lambert();
 
-			Lo += lights[i].Color * (Fd + Fr) * NoL;
+			Lo += lights[i].Color * (Fd + Fr) * NoL * (1 - Shadow);
 		}
 
 		int totalNumberOfLight = PointLightNumber + DirectLightNumber + SpotLightNumber;
@@ -386,7 +386,7 @@ PixelOut PS(VertexOut pin)
 			float  Frc = (Dc * Vc) * Fc;
 			//------clear coat------
 
-			Lo += lights[i].Color * ((Fd + Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL;
+			Lo += lights[i].Color * ((Fd + Fr * (1.0f - Fc)) * (1.0f - Fc) + Frc) * NoL * (1 - Shadow);
 		}
 
 		int totalNumberOfLight = PointLightNumber + DirectLightNumber + SpotLightNumber;
@@ -424,7 +424,7 @@ PixelOut PS(VertexOut pin)
 		float3 F = F_Shlick(max(dot(N, V), 0.0f), f0, Roughness);
 		
 		//------shadow map------
-		Lo *= (1 - Shadow);//will cause point light not effect
+		//Lo *= (1 - Shadow);//will cause point light not effect
 		//------shadow map------
 
 		//------IBL------
