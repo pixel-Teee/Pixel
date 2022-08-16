@@ -12,7 +12,7 @@ struct VertexOut
 cbuffer CbPass : register(b1)
 {
 	float4x4 gViewProjection;
-	float4 gRoughness;
+	float gRoughness;
 };
 
 struct PixelOut

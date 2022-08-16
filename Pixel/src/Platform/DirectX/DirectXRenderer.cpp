@@ -1203,11 +1203,38 @@ namespace Pixel {
 		++m_FrameCount;
 		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
 
-		for (uint32_t i = 0; i < meshs.size(); ++i)
+		m_OpaqueItems.clear();
+		m_TransParentItems.clear();
+
+		//in terms of the transparent to separate the models
+		for (size_t i = 0; i < meshs.size(); ++i)
 		{
 			if (meshs[i]->m_Model != nullptr)
-			//draw every mesh
-				meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
+			{
+				std::vector<Ref<StaticMesh>> pStaticMeshs = meshs[i]->m_Model->GetMeshes();
+				std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
+				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pSubMaterials.size()); ++j)
+				{
+					if (pSubMaterials[j] != nullptr)
+					{
+						if (pSubMaterials[j]->IsTransparent)
+						{
+							float distance = glm::distance(pCameraTransformComponent->Translation, glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
+							m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
+						}
+						else
+						{
+							m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+						}
+					}
+				}
+			}
+		}
+
+		//draw opaque render item
+		for (size_t i = 0; i < m_OpaqueItems.size(); ++i)
+		{
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial);
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
@@ -1360,6 +1387,19 @@ namespace Pixel {
 		pContext->SetIndexBuffer(m_CubeIndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_CubeIndexBuffer->GetCount());
 		//------draw sky box------
+
+		//------third pass:forward transparent pass------
+		pContext->SetRootSignature(*m_rootSignature);
+		pContext->SetViewportAndScissor(vp, scissor);
+		pContext->SetRenderTargets(1, m_lightFrameBufferCpuHandles, dsvHandle);
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		std::sort(m_TransParentItems.begin(), m_TransParentItems.end());//in terms of the distance(from the camera) to draw transparent object
+		//draw transparent render item
+		for (size_t i = 0; i < m_TransParentItems.size(); ++i)
+		{
+			m_TransParentItems[i].pStaticMesh->Draw(pContext, m_TransParentItems[i].transform, m_TransParentItems[i].entityId, m_TransParentItems[i].pSubMaterial);
+		}
+		//------third pass:forward transparent pass------
 
 		//------copy current scene------
 		pContext->CopyBuffer(*m_CurrentScene, *(pLightFrame->m_pColorBuffers[0]));

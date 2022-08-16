@@ -523,6 +523,11 @@ namespace Pixel {
 
 			//TODO:in the future, will in be terms of the difference, automatically update the material
 
+			if(pNeededUpdateSubMaterial->shadingModel != pSubMaterial->shadingModel)
+			{
+				pNeededUpdateSubMaterial->shadingModel = pSubMaterial->shadingModel;
+			}
+
 			if (pNeededUpdateSubMaterial->albedoMapPath != pSubMaterial->albedoMapPath)
 			{
 				pNeededUpdateSubMaterial->albedoMap = pSubMaterial->albedoMap;
@@ -567,7 +572,7 @@ namespace Pixel {
 				pNeededUpdateSubMaterial->gAo = pSubMaterial->gAo;
 			if (pNeededUpdateSubMaterial->ClearCoat != pSubMaterial->ClearCoat)
 				pNeededUpdateSubMaterial->ClearCoat = pSubMaterial->ClearCoat;
-			if (pNeededUpdateSubMaterial->ClearCoatRoughness != pSubMaterial->ClearCoat)
+			if (pNeededUpdateSubMaterial->ClearCoatRoughness != pSubMaterial->ClearCoatRoughness)
 				pNeededUpdateSubMaterial->ClearCoatRoughness = pSubMaterial->ClearCoatRoughness;
 			if (pNeededUpdateSubMaterial->IsTransparent != pSubMaterial->IsTransparent)
 				pNeededUpdateSubMaterial->IsTransparent = pSubMaterial->IsTransparent;
