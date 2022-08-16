@@ -67,26 +67,26 @@ namespace Pixel {
 			if (ImGui::MenuItem("Import Model"))
 			{
 				//create model
-				std::wstring filePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj\0");
-				AssetManager::GetSingleton().AddModelToAssetRegistry(AssetManager::GetSingleton().to_string(filePath));
+				std::wstring physicalFilePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj\0model(*.gltf)\0*.gltf\0model(*.glb)\0*.glb\0");
+				AssetManager::GetSingleton().AddModelToAssetRegistry(AssetManager::GetSingleton().to_string(physicalFilePath));
 			}
 
 			if (ImGui::MenuItem("Import Texture"))
 			{
-				std::wstring filePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr\0");
-				AssetManager::GetSingleton().AddTextureToAssetRegistry(filePath);
+				std::wstring physicalFilePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr\0");
+				AssetManager::GetSingleton().AddTextureToAssetRegistry(physicalFilePath);
 			}
 
 			if (ImGui::MenuItem("Create Material"))
 			{
-				std::wstring filePath = FileDialogs::SaveFile(L"material(*.mat)\0*.mat\0");
+				std::wstring physicalFilePath = FileDialogs::SaveFile(L"material(*.mat)\0*.mat\0");
 
 				Ref<SubMaterial> pSubMaterial = CreateRef<SubMaterial>();
 
 				//write a default material and add to asset registry
-				AssetManager::GetSingleton().CreateSubMaterial(AssetManager::GetSingleton().to_string(filePath), pSubMaterial);
+				AssetManager::GetSingleton().CreateSubMaterial(AssetManager::GetSingleton().to_string(physicalFilePath), pSubMaterial);
 
-				AssetManager::GetSingleton().AddMaterialToAssetRegistry(filePath);
+				AssetManager::GetSingleton().AddMaterialToAssetRegistry(physicalFilePath);
 			}
 			ImGui::EndPopup();
 		}
@@ -131,10 +131,10 @@ namespace Pixel {
 					const std::string& itemPath = relativePath.string();
 
 					//query the asset virtual path
-					const std::string& virtualPath = AssetManager::GetSingleton().GetAssetRegistryPath(itemPath);
+					const std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
 
 					//pass the asset virtual path
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
 
 					ImGui::EndDragDropSource();
 				}
@@ -162,10 +162,10 @@ namespace Pixel {
 					const std::string& itemPath = relativePath.string();
 
 					//query the asset virtual path
-					const std::string& virtualPath = AssetManager::GetSingleton().GetAssetRegistryPath(itemPath);
+					const std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
 
 					//pass the asset virtual path
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
 
 					ImGui::EndDragDropSource();
 				}
@@ -174,7 +174,7 @@ namespace Pixel {
 				{
 					const std::string& itemPath = relativePath.string();
 					//check the file type, and open different editor
-					if (AssetManager::GetSingleton().IsInMaterialAssetRegistry(AssetManager::GetSingleton().GetAssetRegistryPath(itemPath)))
+					if (AssetManager::GetSingleton().IsInMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
 					{
 						const std::string& materialPhysicalPath = g_AssetPath.string() + "\\" + relativePath.string();
 

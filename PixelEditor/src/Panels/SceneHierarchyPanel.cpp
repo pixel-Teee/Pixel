@@ -517,7 +517,7 @@ namespace Pixel
 						//check the texture alread in asset manager?
 						if (AssetManager::GetSingleton().IsInAssetRegistry(texturePath.string()))
 						{
-							component.Texture = AssetManager::GetSingleton().GetTexture(AssetManager::GetSingleton().GetAssetRegistryPath(texturePath.string()));
+							component.Texture = AssetManager::GetSingleton().GetTexture(AssetManager::GetSingleton().GetVirtualPath(texturePath.string()));
 							//component.Path
 						}
 					}

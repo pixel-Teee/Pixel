@@ -1,4 +1,4 @@
 {
-    "SubMaterial": {"shadingModel":1,"albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":[0.9806950092315674,0.9011791944503784,0.42408430576324463],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":0.007812501848093234,"gRoughness":5.263544247e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315
+    "SubMaterial": {"shadingModel":1,"albedoMapPath":"Texture\\Sphere_DefaultMaterial_BaseColor","normalMapPath":"Texture\\Sphere_DefaultMaterial_Normal","metallicMapPath":"Texture\\Sphere_DefaultMaterial_Metallic","roughnessMapPath":"Texture\\Sphere_DefaultMaterial_Roughness","aoMapPath":"","gAlbedo":[1.0,1.0,1.0],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":0.007812501848093234,"gRoughness":5.263544247e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315,"IsTransparent":false
     }
 }

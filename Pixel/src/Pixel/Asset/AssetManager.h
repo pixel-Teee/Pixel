@@ -12,13 +12,6 @@ namespace Pixel {
 	class AssetManager : public Singleton<AssetManager>
 	{
 	public:
-		enum class AssetType
-		{
-			TEXTURE,
-			MODEL,
-			SCENE,
-			MATERIAL
-		};
 
 		AssetManager();
 
@@ -32,9 +25,9 @@ namespace Pixel {
 
 		void AddSceneToAssetRegistry(const std::string& filePath);
 
-		void AddMaterialToAssetRegistry(const std::wstring& filePath);
+		void AddMaterialToAssetRegistry(const std::wstring& physicalPath);
 
-		std::string GetAssetRegistryPath(const std::string& physicalFilePath);
+		std::string GetVirtualPath(const std::string& physicalFilePath);
 
 		std::string GetAssetPhysicalPath(const std::string& filePath);
 
@@ -42,17 +35,17 @@ namespace Pixel {
 
 		bool IsInMaterialAssetRegistry(std::string virtualPath);
 
-		Ref<Texture2D> GetTexture(const std::string& assetRegistry);
+		Ref<Texture2D> GetTexture(const std::string& virtualPath);
 
 		Ref<Model> GetModel(const std::string& modelRegistry);
 
-		Ref<SubMaterial> GetMaterial(const std::string& materialRegistry);
+		Ref<SubMaterial> GetMaterial(const std::string& virtualPath);
 
-		void AddModelToAssetRegistry(const std::string& filePath);
+		void AddModelToAssetRegistry(const std::string& physicalPath);
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
 
-		void UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
+		void UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);//difference update
 
 		std::string  to_string(std::wstring wstr);
 
@@ -60,31 +53,31 @@ namespace Pixel {
 
 		std::map<std::string, std::string>& GetMaterialAssetRegistry();
 	private:
-		std::map<std::string, std::string> m_textureAssetRegistry;//asset registry path <=> asset physical path
+		std::map<std::string, std::string> m_VirtualPathToPhysicalPathTexture;//asset virtual path <=> asset physical path
 
-		std::map<std::string, std::string> m_AssetRegistryTexture;//asset physical path <=> asset registry path
+		std::map<std::string, std::string> m_PhysicalPathToVirtualPathTexture;//asset physical path <=> asset virtual path
 
 		//texture
-		std::map<std::string, Ref<Texture2D>> m_textures;//asset registry path <=> asset texture
+		std::map<std::string, Ref<Texture2D>> m_textures;//asset virtual path <=> asset texture
 
 		//model
-		std::map<std::string, Ref<Model>> m_models;//asset registry path <=> asset model
+		std::map<std::string, Ref<Model>> m_models;//asset virtual path <=> asset model
 
-		std::map<std::string, std::string> m_AssetRegistryModel;//asset physical path <=> asset registry path
+		std::map<std::string, std::string> m_VirtualPathToPhysicalPathModel;//asset physical path <=> asset virtual path
 
-		std::map<std::string, std::string> m_ModelAssetRegistry;//asset registry path <=> asset physical path
+		std::map<std::string, std::string> m_PhysicalPathToVirtualPathModel;//asset virtual path <=> asset physical path
 
 		//scene
-		std::map<std::string, std::string> m_AssetRegistryScene;//asset physical path <=> asset registry path
+		std::map<std::string, std::string> m_VirtualPathToPhysicalPathScene;//asset physical path <=> asset virtual path
 
-		std::map<std::string, std::string> m_SceneAssetRegistry;//asset registry path <=> asset physical path
+		std::map<std::string, std::string> m_PhysicalPathToVirtualPathScene;//asset virtual path <=> asset physical path
 
 
 		std::map<std::string, Ref<SubMaterial>> m_Materials;
 
-		std::map<std::string, std::string> m_AssetRegistryToPhysicalMaterial;
+		std::map<std::string, std::string> m_VirtualPathToPhysicalPathMaterial;
 		
-		std::map<std::string, std::string> m_PhysicalToAssetRegistryMaterial;
+		std::map<std::string, std::string> m_PhysicalPathToVirtualPathMaterial;
 
 		//------converter------
 		using convert_t = std::codecvt_utf8<wchar_t>;

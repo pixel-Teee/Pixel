@@ -1,1 +1,11 @@
-{"Texture":[{"Cup_albedo":"textures\\Cup_albedo.jpg"},{"Fish_Albedo":"textures\\Fish\\Fish_Albedo.png"},{"Fish_Metallic":"textures\\Fish\\Fish_Metallic.png"},{"Fish_Normalmap":"textures\\Fish\\Fish_Normalmap.png"},{"Fish_Roughness":"textures\\Fish\\Fish_Roughness.png"},{"brown_photostudio_01_1k":"textures\\hdr\\brown_photostudio_01_1k.hdr"},{"pretville_cinema_1k":"textures\\hdr\\pretville_cinema_1k.hdr"},{"x":"scenes\\x.mat"}],"Scene":[{"Fish":"scenes\\Fish.pixel"},{"Test":"scenes\\Test.pixel"},{"Test2":"scenes\\Test2.pixel"}],"Model":[{"Cone":"models\\Test\\Cone.fbx"},{"Fish":"scenes\\Fish.pixel"},{"Fish_LP_combined":"models\\Fish\\Fish_LP_combined.obj"},{"Sphere":"models\\Sphere\\Sphere.fbx"},{"Square":"models\\Cube\\Square.fbx"}],"Material":[{"Cube":"materials\\Cube.mat"},{"Sphere":"materials\\Sphere.mat"},{"x":"materials\\x.mat"},{"x2":"materials\\x2.mat"}]}
+{
+  "Texture": [
+    { "Texture\\Sphere_DefaultMaterial_BaseColor": "textures\\Sphere\\Sphere_DefaultMaterial_BaseColor.png" },
+    { "Texture\\Sphere_DefaultMaterial_Metallic": "textures\\Sphere\\Sphere_DefaultMaterial_Metallic.png" },
+    { "Texture\\Sphere_DefaultMaterial_Normal": "textures\\Sphere\\Sphere_DefaultMaterial_Normal.png" },
+    { "Texture\\Sphere_DefaultMaterial_Roughness": "textures\\Sphere\\Sphere_DefaultMaterial_Roughness.png" }
+  ],
+  "Scene": [ { "scenes\\Test.pixel": "Scene\\Test" } ],
+  "Model": [ { "Model\\Sphere": "models\\Sphere\\Sphere.gltf" } ],
+  "Material": [ { "Material\\Sphere": "materials\\Sphere.mat" } ]
+}

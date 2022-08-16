@@ -45,6 +45,7 @@ namespace Pixel
 	REFLECT_STRUCT_MEMBER(gAo)
 	REFLECT_STRUCT_MEMBER(ClearCoat)
 	REFLECT_STRUCT_MEMBER(ClearCoatRoughness)
+	REFLECT_STRUCT_MEMBER(IsTransparent)
 	REFLECT_STRUCT_END()
 
 	SubMaterial::SubMaterial(const std::string& AlbedoMapPath, const std::string& NormalMapPath, const std::string& MetallicMapPath, const std::string& RoughnessMapPath, const std::string& AoMapPath, bool haveNormal)

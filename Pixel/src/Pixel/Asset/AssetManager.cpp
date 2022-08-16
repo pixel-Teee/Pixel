@@ -26,38 +26,40 @@ namespace Pixel {
 
 	AssetManager::~AssetManager()
 	{
-		m_textureAssetRegistry.clear();
-		m_AssetRegistryTexture.clear();
-		m_SceneAssetRegistry.clear();
-		m_textureAssetRegistry.clear();
-		m_ModelAssetRegistry.clear();
-		m_AssetRegistryModel.clear();
+		m_VirtualPathToPhysicalPathTexture.clear();
+		m_PhysicalPathToVirtualPathTexture.clear();
+		m_PhysicalPathToVirtualPathScene.clear();
+		m_VirtualPathToPhysicalPathTexture.clear();
+		m_PhysicalPathToVirtualPathModel.clear();
+		m_VirtualPathToPhysicalPathModel.clear();
+		m_PhysicalPathToVirtualPathMaterial.clear();
+		m_VirtualPathToPhysicalPathMaterial.clear();
 		m_textures.clear();
 	}
 
-	std::string AssetManager::GetAssetRegistryPath(const std::string& physicalFilePath)
+	std::string AssetManager::GetVirtualPath(const std::string& physicalFilePath)
 	{
-		if(m_AssetRegistryTexture.find(physicalFilePath) != m_AssetRegistryTexture.end())
-			return m_AssetRegistryTexture[physicalFilePath];
-		if (m_AssetRegistryModel.find(physicalFilePath) != m_AssetRegistryModel.end())
-			return m_AssetRegistryModel[physicalFilePath];
-		if(m_AssetRegistryScene.find(physicalFilePath) != m_AssetRegistryScene.end())
-			return m_SceneAssetRegistry[physicalFilePath];
-		if (m_PhysicalToAssetRegistryMaterial.find(physicalFilePath) != m_PhysicalToAssetRegistryMaterial.end())
-			return m_PhysicalToAssetRegistryMaterial[physicalFilePath];
+		if(m_PhysicalPathToVirtualPathTexture.find(physicalFilePath) != m_PhysicalPathToVirtualPathTexture.end())
+			return m_PhysicalPathToVirtualPathTexture[physicalFilePath];
+		if (m_VirtualPathToPhysicalPathModel.find(physicalFilePath) != m_VirtualPathToPhysicalPathModel.end())
+			return m_VirtualPathToPhysicalPathModel[physicalFilePath];
+		if(m_VirtualPathToPhysicalPathScene.find(physicalFilePath) != m_VirtualPathToPhysicalPathScene.end())
+			return m_PhysicalPathToVirtualPathScene[physicalFilePath];
+		if (m_PhysicalPathToVirtualPathMaterial.find(physicalFilePath) != m_PhysicalPathToVirtualPathMaterial.end())
+			return m_PhysicalPathToVirtualPathMaterial[physicalFilePath];
 		return "";
 	}
 
 	std::string AssetManager::GetAssetPhysicalPath(const std::string& filePath)
 	{
-		if (m_textureAssetRegistry.find(filePath) != m_textureAssetRegistry.end())
-			return m_textureAssetRegistry[filePath];
-		if (m_AssetRegistryModel.find(filePath) != m_AssetRegistryModel.end())
-			return m_AssetRegistryModel[filePath];
-		if (m_AssetRegistryScene.find(filePath) != m_AssetRegistryScene.end())
-			return m_SceneAssetRegistry[filePath];
-		if (m_AssetRegistryToPhysicalMaterial.find(filePath) != m_AssetRegistryToPhysicalMaterial.end())
-			return m_AssetRegistryToPhysicalMaterial[filePath];
+		if (m_VirtualPathToPhysicalPathTexture.find(filePath) != m_VirtualPathToPhysicalPathTexture.end())
+			return m_VirtualPathToPhysicalPathTexture[filePath];
+		if (m_VirtualPathToPhysicalPathModel.find(filePath) != m_VirtualPathToPhysicalPathModel.end())
+			return m_VirtualPathToPhysicalPathModel[filePath];
+		if (m_VirtualPathToPhysicalPathScene.find(filePath) != m_VirtualPathToPhysicalPathScene.end())
+			return m_PhysicalPathToVirtualPathScene[filePath];
+		if (m_VirtualPathToPhysicalPathMaterial.find(filePath) != m_VirtualPathToPhysicalPathMaterial.end())
+			return m_VirtualPathToPhysicalPathMaterial[filePath];
 		return "";
 	}
 
@@ -87,8 +89,8 @@ namespace Pixel {
 						itr2 != attribute.MemberEnd(); ++itr2)
 					{
 						std::string assetRegistryPath = itr2->name.GetString();//don't include the asset prefix, etc. asset\\scene\\fish.pixel
-						m_textureAssetRegistry[assetRegistryPath] = itr2->value.GetString();
-						m_AssetRegistryTexture[itr2->value.GetString()] = assetRegistryPath;
+						m_VirtualPathToPhysicalPathTexture[assetRegistryPath] = itr2->value.GetString();
+						m_PhysicalPathToVirtualPathTexture[itr2->value.GetString()] = assetRegistryPath;
 					}			
 				}
 			}
@@ -109,8 +111,8 @@ namespace Pixel {
 						itr2 != attribute.MemberEnd(); ++itr2)
 					{
 						std::string assetRegistryPath = itr2->name.GetString();//don't include the asset prefix, etc. asset\\scene\\fish.pixel
-						m_SceneAssetRegistry[assetRegistryPath] = itr2->value.GetString();
-						m_AssetRegistryScene[itr2->value.GetString()] = assetRegistryPath;
+						m_PhysicalPathToVirtualPathScene[assetRegistryPath] = itr2->value.GetString();
+						m_VirtualPathToPhysicalPathScene[itr2->value.GetString()] = assetRegistryPath;
 					}
 				}			
 			}
@@ -131,8 +133,8 @@ namespace Pixel {
 						itr2 != attribute.MemberEnd(); ++itr2)
 					{
 						std::string assetRegistryPath = itr2->name.GetString();//don't include the asset prefix, etc. asset\\scene\\fish.pixel
-						m_ModelAssetRegistry[assetRegistryPath] = itr2->value.GetString();
-						m_AssetRegistryModel[itr2->value.GetString()] = assetRegistryPath;
+						m_PhysicalPathToVirtualPathModel[assetRegistryPath] = itr2->value.GetString();
+						m_VirtualPathToPhysicalPathModel[itr2->value.GetString()] = assetRegistryPath;
 					}
 				}
 			}
@@ -153,8 +155,8 @@ namespace Pixel {
 						itr2 != attribute.MemberEnd(); ++itr2)
 					{
 						std::string assetRegistryPath = itr2->name.GetString();//don't include the asset prefix, etc. asset\\scene\\fish.pixel
-						m_AssetRegistryToPhysicalMaterial[assetRegistryPath] = itr2->value.GetString();
-						m_PhysicalToAssetRegistryMaterial[itr2->value.GetString()] = assetRegistryPath;
+						m_VirtualPathToPhysicalPathMaterial[assetRegistryPath] = itr2->value.GetString();
+						m_PhysicalPathToVirtualPathMaterial[itr2->value.GetString()] = assetRegistryPath;
 					}
 				}
 			}
@@ -171,7 +173,7 @@ namespace Pixel {
 		writer.StartObject();
 		writer.Key("Texture");
 		writer.StartArray();
-		for (auto& item : m_textureAssetRegistry)
+		for (auto& item : m_VirtualPathToPhysicalPathTexture)
 		{
 			writer.StartObject();
 			writer.Key(item.first.c_str());
@@ -182,7 +184,7 @@ namespace Pixel {
 
 		writer.Key("Scene");
 		writer.StartArray();
-		for (auto& item : m_SceneAssetRegistry)
+		for (auto& item : m_VirtualPathToPhysicalPathScene)
 		{
 			writer.StartObject();
 			writer.Key(item.first.c_str());
@@ -193,7 +195,7 @@ namespace Pixel {
 
 		writer.Key("Model");
 		writer.StartArray();
-		for (auto& item : m_ModelAssetRegistry)
+		for (auto& item : m_VirtualPathToPhysicalPathModel)
 		{
 			writer.StartObject();
 			writer.Key(item.first.c_str());
@@ -204,7 +206,7 @@ namespace Pixel {
 
 		writer.Key("Material");
 		writer.StartArray();
-		for (auto& item : m_AssetRegistryToPhysicalMaterial)
+		for (auto& item : m_VirtualPathToPhysicalPathMaterial)
 		{
 			writer.StartObject();
 			writer.Key(item.first.c_str());
@@ -250,9 +252,9 @@ namespace Pixel {
 			std::string relativePathString = relativePath.string();
 
 			//construct the virtual path
-			std::string virtualFilePath = fileName;
-			m_textureAssetRegistry.insert({ virtualFilePath, relativePathString });
-			m_AssetRegistryTexture.insert({ relativePathString, virtualFilePath });
+			std::string virtualFilePath = "Texture\\" + fileName;
+			m_VirtualPathToPhysicalPathTexture.insert({ virtualFilePath, relativePathString });
+			m_PhysicalPathToVirtualPathTexture.insert({ relativePathString, virtualFilePath });
 
 			SaveRegistry();
 		}
@@ -287,20 +289,20 @@ namespace Pixel {
 			std::string relativePathString = relativePath.string();
 
 			//construct the virtual path
-			std::string virtualFilePath = fileName;
-			m_SceneAssetRegistry.insert({ virtualFilePath, relativePathString });
-			m_AssetRegistryScene.insert({ relativePathString, virtualFilePath });
+			std::string virtualFilePath = "Scene\\" + fileName;
+			m_PhysicalPathToVirtualPathScene.insert({ virtualFilePath, relativePathString });
+			m_VirtualPathToPhysicalPathScene.insert({ relativePathString, virtualFilePath });
 
 			SaveRegistry();
 		}
 	}
 
-	void AssetManager::AddMaterialToAssetRegistry(const std::wstring& filePath)
+	void AssetManager::AddMaterialToAssetRegistry(const std::wstring& physicalPath)
 	{
 		//file path is texture's physical file path
 
 		//extract the filename of filePath as the asset registry
-		std::string convertedFilePath = to_string(filePath);
+		std::string convertedFilePath = to_string(physicalPath);
 
 		size_t pos = convertedFilePath.find_last_of("\\");
 
@@ -318,16 +320,16 @@ namespace Pixel {
 				fileName = convertedFilePath.substr(pos);
 			}
 
-			std::filesystem::path physicalPath(filePath);
+			std::filesystem::path PhysicalPath(physicalPath);
 
-			auto relativePath = std::filesystem::relative(physicalPath, g_AssetPath);
+			auto relativePath = std::filesystem::relative(PhysicalPath, g_AssetPath);
 
 			std::string relativePathString = relativePath.string();
 
 			//construct the virtual path
-			std::string virtualFilePath = fileName;
-			m_AssetRegistryToPhysicalMaterial.insert({ virtualFilePath, relativePathString });
-			m_PhysicalToAssetRegistryMaterial.insert({ relativePathString, virtualFilePath });
+			std::string virtualFilePath = "Material\\" + fileName;
+			m_VirtualPathToPhysicalPathMaterial.insert({ virtualFilePath, relativePathString });
+			m_PhysicalPathToVirtualPathMaterial.insert({ relativePathString, virtualFilePath });
 
 			SaveRegistry();
 		}
@@ -335,19 +337,19 @@ namespace Pixel {
 
 	bool AssetManager::IsInAssetRegistry(std::string filepath)
 	{
-		if (m_AssetRegistryTexture.find(filepath) != m_AssetRegistryTexture.end())
+		if (m_PhysicalPathToVirtualPathTexture.find(filepath) != m_PhysicalPathToVirtualPathTexture.end())
 		{
 			return true;
 		}
-		if (m_AssetRegistryModel.find(filepath) != m_AssetRegistryModel.end())
+		if (m_VirtualPathToPhysicalPathModel.find(filepath) != m_VirtualPathToPhysicalPathModel.end())
 		{
 			return true;
 		}
-		if (m_AssetRegistryTexture.find(filepath) != m_AssetRegistryTexture.end())
+		if (m_PhysicalPathToVirtualPathTexture.find(filepath) != m_PhysicalPathToVirtualPathTexture.end())
 		{
 			return true;
 		}
-		if(m_PhysicalToAssetRegistryMaterial.find(filepath) != m_PhysicalToAssetRegistryMaterial.end())
+		if(m_PhysicalPathToVirtualPathMaterial.find(filepath) != m_PhysicalPathToVirtualPathMaterial.end())
 		{
 			return true;
 		}
@@ -356,34 +358,34 @@ namespace Pixel {
 
 	bool AssetManager::IsInMaterialAssetRegistry(std::string virtualPath)
 	{
-		if (m_AssetRegistryToPhysicalMaterial.find(virtualPath) != m_AssetRegistryToPhysicalMaterial.end())
+		if (m_VirtualPathToPhysicalPathMaterial.find(virtualPath) != m_VirtualPathToPhysicalPathMaterial.end())
 			return true;
 		return false;
 	}
 
-	Ref<Texture2D> AssetManager::GetTexture(const std::string& assetRegistry)
+	Ref<Pixel::Texture2D> AssetManager::GetTexture(const std::string& virtualPath)
 	{
 		//first to query the m_textures
-		if (m_textures.find(assetRegistry) != m_textures.end())
+		if (m_textures.find(virtualPath) != m_textures.end())
 		{
-			return m_textures[assetRegistry];
+			return m_textures[virtualPath];
 		}
 		else
 		{
-			std::string physicalAssetPath;
+			std::string physicalPath;
 			//from the m_textureAssetRegistry get the physical path to load texture
-			if (m_textureAssetRegistry.find(assetRegistry) != m_textureAssetRegistry.end())
+			if (m_VirtualPathToPhysicalPathTexture.find(virtualPath) != m_VirtualPathToPhysicalPathTexture.end())
 			{
-				physicalAssetPath = m_textureAssetRegistry[assetRegistry];
+				physicalPath = m_VirtualPathToPhysicalPathTexture[virtualPath];
 
 				//load texture to map
-				m_textures[assetRegistry] = Texture2D::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
+				m_textures[virtualPath] = Texture2D::Create(g_AssetPath.string() + "\\" + physicalPath);
 			}
 			else
 			{
 				//TODO:open the small window to tell user to fix asset registry
 			}
-			return m_textures[assetRegistry];
+			return m_textures[virtualPath];
 		}
 	}
 
@@ -398,9 +400,9 @@ namespace Pixel {
 		{
 			std::string physicalAssetPath;
 			//from the m_textureAssetRegistry get the physical path to load texture
-			if (m_ModelAssetRegistry.find(modelRegistry) != m_ModelAssetRegistry.end())
+			if (m_PhysicalPathToVirtualPathModel.find(modelRegistry) != m_PhysicalPathToVirtualPathModel.end())
 			{
-				physicalAssetPath = m_ModelAssetRegistry[modelRegistry];
+				physicalAssetPath = m_PhysicalPathToVirtualPathModel[modelRegistry];
 
 				//load texture to map
 				m_models[modelRegistry] = Model::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
@@ -413,29 +415,29 @@ namespace Pixel {
 		}
 	}
 
-	Ref<SubMaterial> AssetManager::GetMaterial(const std::string& materialRegistry)
+	Ref<Pixel::SubMaterial> AssetManager::GetMaterial(const std::string& virtualPath)
 	{
-		if (m_Materials.find(materialRegistry) != m_Materials.end())
+		if (m_Materials.find(virtualPath) != m_Materials.end())
 		{
-			return m_Materials[materialRegistry];
+			return m_Materials[virtualPath];
 		}
 		else
 		{
-			std::string physicalAssetPath;
+			std::string physicalPath;
 
-			if (m_AssetRegistryToPhysicalMaterial.find(materialRegistry) != m_AssetRegistryToPhysicalMaterial.end())
+			if (m_VirtualPathToPhysicalPathMaterial.find(virtualPath) != m_VirtualPathToPhysicalPathMaterial.end())
 			{
-				physicalAssetPath = m_AssetRegistryToPhysicalMaterial[materialRegistry];
+				physicalPath = m_VirtualPathToPhysicalPathMaterial[virtualPath];
 
 				//load sub material
-				m_Materials[materialRegistry] = CreateRef<SubMaterial>();
+				m_Materials[virtualPath] = CreateRef<SubMaterial>();
 
 				Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
 
 				rapidjson::Document doc;
 
 				//from the physical asset path to load the material and post load
-				std::ifstream stream(g_AssetPath.string() + "\\" + physicalAssetPath);
+				std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
 				std::stringstream strStream;
 				strStream << stream.rdbuf();
 				if (!doc.Parse(strStream.str().data()).HasParseError())
@@ -443,50 +445,50 @@ namespace Pixel {
 					//read the sub material
 					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 					{
-						typeDesc->Read(doc[typeDesc->name], m_Materials[materialRegistry].get(), nullptr);
+						typeDesc->Read(doc[typeDesc->name], m_Materials[virtualPath].get(), nullptr);
 					}
 				}
 				stream.close();
 
 				//post load the sub material
-				m_Materials[materialRegistry]->PostLoad();
+				m_Materials[virtualPath]->PostLoad();
 			}
 			else
 			{
 				//TODO:open the small window to tell user to fix asset registry
 			}
-			return m_Materials[materialRegistry];
+			return m_Materials[virtualPath];
 		}
 	}
 
-	void AssetManager::AddModelToAssetRegistry(const std::string& filePath)
+	void AssetManager::AddModelToAssetRegistry(const std::string& physicalPath)
 	{
-		size_t pos = filePath.find_last_of("\\");
+		size_t pos = physicalPath.find_last_of("\\");
 
 		if (pos != std::string::npos)
 		{
 			//extract the filename
 			std::string fileName;
-			size_t dotPos = filePath.substr(pos).find_last_of(".");
+			size_t dotPos = physicalPath.substr(pos).find_last_of(".");
 			if (dotPos != std::string::npos)
 			{
-				fileName = filePath.substr(pos + 1).substr(0, dotPos - 1);
+				fileName = physicalPath.substr(pos + 1).substr(0, dotPos - 1);
 			}
 			else
 			{
-				fileName = filePath.substr(pos);
+				fileName = physicalPath.substr(pos);
 			}
 
-			std::filesystem::path physicalPath(filePath);
+			std::filesystem::path PhysicalPath(physicalPath);
 
-			auto relativePath = std::filesystem::relative(physicalPath, g_AssetPath);
+			auto relativePath = std::filesystem::relative(PhysicalPath, g_AssetPath);
 
 			std::string relativePathString = relativePath.string();
 
 			//construct the virtual path
-			std::string virtualFilePath = fileName;
-			m_ModelAssetRegistry.insert({ virtualFilePath, relativePathString });
-			m_AssetRegistryModel.insert({ relativePathString, virtualFilePath });
+			std::string virtualFilePath = "Model\\" + fileName;
+			m_VirtualPathToPhysicalPathModel.insert({ virtualFilePath, relativePathString });
+			m_PhysicalPathToVirtualPathModel.insert({ relativePathString, virtualFilePath });
 
 			SaveRegistry();
 		}
@@ -515,7 +517,7 @@ namespace Pixel {
 	void AssetManager::UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial)
 	{
 		//first, to find the needed update material
-		std::string assetRegistryPath = GetAssetRegistryPath(physicalPath);
+		std::string assetRegistryPath = GetVirtualPath(physicalPath);
 
 		if (m_Materials.find(assetRegistryPath) != m_Materials.end())
 		{
@@ -591,6 +593,6 @@ namespace Pixel {
 
 	std::map<std::string, std::string>& AssetManager::GetMaterialAssetRegistry()
 	{
-		return m_AssetRegistryToPhysicalMaterial;
+		return m_VirtualPathToPhysicalPathMaterial;
 	}
 }
