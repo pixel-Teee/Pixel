@@ -54,14 +54,23 @@ namespace Pixel {
 		return handle;
 	}
 
-
-
 	void DirectXSamplerDesc::SetBorderColor(glm::vec4 BoarderColor)
 	{
 		m_SamplerDesc.BorderColor[0] = BoarderColor.x;
 		m_SamplerDesc.BorderColor[1] = BoarderColor.y;
 		m_SamplerDesc.BorderColor[2] = BoarderColor.z;
 		m_SamplerDesc.BorderColor[3] = BoarderColor.w;
+	}
+
+	Ref<SamplerDesc> DirectXSamplerDesc::Clone()
+	{
+		Ref<SamplerDesc> result = SamplerDesc::Create();
+		
+		Ref<DirectXSamplerDesc> directxSamplerDesc = std::static_pointer_cast<DirectXSamplerDesc>(result);
+
+		directxSamplerDesc->m_SamplerDesc = this->m_SamplerDesc;
+
+		return directxSamplerDesc;
 	}
 
 } 

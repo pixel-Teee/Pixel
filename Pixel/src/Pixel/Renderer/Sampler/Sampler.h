@@ -8,7 +8,11 @@ namespace Pixel {
 		virtual void SetTextureAddressMode(AddressMode addressMode) = 0;
 
 		virtual void SetBorderColor(glm::vec4 BoarderColor) = 0;
+
 		virtual void SetFilter(Filter filter) = 0;
+
+		virtual Ref<SamplerDesc> Clone() = 0;
+
 		static Ref<SamplerDesc> Create();
 	};
 }

@@ -1,9 +1,13 @@
 #pragma once
 
-#include "Platform/DirectX/d3dx12.h"
+//------other library------
 #include <glm/glm.hpp>
+#include "Platform/DirectX/d3dx12.h"
+//------other library------
 
+//------my library------
 #include "Pixel/Renderer/Sampler/Sampler.h"
+//------my library------
 
 namespace Pixel {
 	class Device;
@@ -23,9 +27,8 @@ namespace Pixel {
 
 		D3D12_SAMPLER_DESC m_SamplerDesc;
 
-		//static Ref<SamplerDesc> Create();
-
 		virtual void SetBorderColor(glm::vec4 BoarderColor) override;
 
+		virtual Ref<SamplerDesc> Clone() override;
 	};
 }
