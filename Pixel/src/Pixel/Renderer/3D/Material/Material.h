@@ -3,9 +3,10 @@
 #include "MaterialBase.h"
 
 namespace Pixel {
+	//------forward declare------
 	class ShaderMainFunction;
 	class ShaderFunction;
-
+	//------forward declare------
 	class Material : public MaterialBase
 	{
 	public:
