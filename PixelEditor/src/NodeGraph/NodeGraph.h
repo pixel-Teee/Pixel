@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Pixel/Renderer/3D/Model.h"
-#include "Pixel/Renderer/3D/MaterialPass.h"
-#include "Pixel/Renderer/3D/GeometryPass.h"
 #include "imgui-node-editor/imgui_node_editor.h"
 
 #include "Node.h"

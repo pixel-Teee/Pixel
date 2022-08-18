@@ -3,7 +3,6 @@
 #include "Model.h"
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/UniformBuffer.h"
-#include "Pixel/Renderer/3D/Material.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
 

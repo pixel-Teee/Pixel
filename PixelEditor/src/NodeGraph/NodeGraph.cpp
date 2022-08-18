@@ -585,6 +585,7 @@ namespace Pixel {
 		//ed::Resume();
 		//
 		//return true;
+		return true;
 	}
 
 	void NodeGraph::CreateNodePin(Ref<GraphNode> graphNode, uint32_t locationId)

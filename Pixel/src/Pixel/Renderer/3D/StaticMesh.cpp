@@ -3,7 +3,6 @@
 #include "StaticMesh.h"
 #include "Pixel/Renderer/RenderCommand.h"
 #include "Pixel/Renderer/UniformBuffer.h"
-#include "Pixel/Renderer/3D/Material.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Renderer/Context/Context.h"
@@ -258,7 +257,7 @@ namespace Pixel {
 
 	void StaticMesh::Draw(const glm::mat4& transform, Ref<MaterialInstance> pMaterialInstance, int entityID)
 	{
-		Ref<Material> pMaterial = pMaterialInstance->GetMaterial();
+		
 		
 	}
 

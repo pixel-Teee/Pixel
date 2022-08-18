@@ -217,7 +217,6 @@ public:
 	}
 
 private:
-	Pixel::ShaderLibrary m_ShaderLibrary;
 	Pixel::Ref<Pixel::Shader> m_Shader;
 	Pixel::Ref<Pixel::VertexArray>  m_VertexArray;
 	Pixel::Ref<Pixel::VertexBuffer> m_VertexBuffer;

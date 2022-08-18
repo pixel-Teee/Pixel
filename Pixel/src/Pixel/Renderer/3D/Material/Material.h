@@ -27,14 +27,6 @@ namespace Pixel {
 
 		bool GetShaderTreeString(std::string& OutString);
 
-		void CreateConstantValueDesclare(std::string& OutString);
-
-		void CreateTextureDeclare(std::string& OutString);
-
-		void CreateCustomValue();
-
-		void CreateCustomTexture();
-
 		std::string& GetMaterialName() { return m_MaterialName; }
 
 		std::string m_MaterialName;//material name

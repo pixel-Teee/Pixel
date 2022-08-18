@@ -2,7 +2,7 @@
 #include "Renderer.h"
 #include "Renderer2D.h"
 #include "Pixel/Renderer/3D/Renderer3D.h"
-#include "Pixel/Renderer/3D/ShaderStringFactory.h"
+#include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Pixel {

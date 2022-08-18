@@ -438,7 +438,7 @@ namespace Pixel
 		CopyComponent<MaterialComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<StaticMeshComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<LightComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<MaterialTreeComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		//CopyComponent<MaterialTreeComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<RigidBody3DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
@@ -1196,7 +1196,7 @@ namespace Pixel
 		CopyComponentIfExists<MaterialComponent>(newEntity, entity);
 		CopyComponentIfExists<StaticMeshComponent>(newEntity, entity);
 		CopyComponentIfExists<LightComponent>(newEntity, entity);
-		CopyComponentIfExists<MaterialTreeComponent>(newEntity, entity);
+		//CopyComponentIfExists<MaterialTreeComponent>(newEntity, entity);
 		CopyComponentIfExists<RigidBody3DComponent>(newEntity, entity);
 
 		return newEntity;
@@ -1303,16 +1303,6 @@ namespace Pixel
 	template<>
 	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
 	{
-
-	}
-
-	template<>
-	void Scene::OnComponentAdded<MaterialTreeComponent>(Entity entity, MaterialTreeComponent& component)
-	{
-		//from path to load the logic material tree
-		std::string path = component.path;
-
-		//read the material logic node, and compile the shader
 
 	}
 
