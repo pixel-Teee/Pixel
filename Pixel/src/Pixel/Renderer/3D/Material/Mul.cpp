@@ -1,7 +1,7 @@
 #include "pxpch.h"
 #include "Mul.h"
 
-#include "Pixel/Renderer/3D/ShaderStringFactory.h"
+#include "ShaderStringFactory.h"
 
 namespace Pixel {
 

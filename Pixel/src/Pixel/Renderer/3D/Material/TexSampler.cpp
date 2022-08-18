@@ -121,7 +121,7 @@ namespace Pixel {
 		return true;
 	}
 
-	void TexSampler::ConstrcutPutNodeAndSetPutNodeOwner()
+	void TexSampler::ConstructPutNodeAndSetPutNodeOwner()
 	{
 		std::string InputId = std::to_string(++ShaderStringFactory::m_ShaderValueIndex);
 		//TexCoord

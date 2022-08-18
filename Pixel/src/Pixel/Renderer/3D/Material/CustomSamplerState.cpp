@@ -1,6 +1,6 @@
 #include "pxpch.h"
 
-#include "CustomTexSampler.h"
+#include "CustomSamplerState.h"
 
 namespace Pixel {
 

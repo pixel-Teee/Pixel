@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pixel/Renderer/3D/ShaderFunction.h"
+#include "ShaderFunction.h"
 
 namespace Pixel {
 	class Mul : public ShaderFunction

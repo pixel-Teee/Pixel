@@ -1,21 +1,22 @@
+#pragma once
 //------my library------
 #include "MaterialCustomPara.h"
 #include "Pixel/Renderer/Sampler/Sampler.h"
 //------my library------
 
 namespace Pixel {
-	class CustomTexSampler : public MaterialCustomPara
+	class CustomSamplerState : public MaterialCustomPara
 	{
 	public:
-		CustomTexSampler();
+		CustomSamplerState();
 
-		virtual ~CustomTexSampler();
+		virtual ~CustomSamplerState();
 
 		//sampler state
 		//TODO:Sampler Desc will renamed SamplerState
 		Ref<SamplerDesc> m_SamplerState;
 
-		CustomTexSampler& operator=(const CustomTexSampler& rhs)
+		CustomSamplerState& operator=(const CustomSamplerState& rhs)
 		{
 			//assign name
 			MaterialCustomPara::operator=(rhs);
@@ -25,7 +26,7 @@ namespace Pixel {
 			return *this;
 		}
 
-		friend bool operator==(const CustomTexSampler& lhs, const CustomTexSampler& rhs)
+		friend bool operator==(const CustomSamplerState& lhs, const CustomSamplerState& rhs)
 		{
 			return lhs.ConstValueName == rhs.ConstValueName;
 		}

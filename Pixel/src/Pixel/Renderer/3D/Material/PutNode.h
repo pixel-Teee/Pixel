@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Pixel/Core/Core.h"
-#include <string>
-
 namespace Pixel {
 	class PutNode {
 	public:
 		//shader variable type
-		//float vec2 vec3 vec4
-		enum ValueType
+		//float float2 float3 float4
+		enum class ValueType
 		{
 			VT_1,
 			VT_2,
@@ -16,86 +13,44 @@ namespace Pixel {
 			VT_4,
 			VT_MAX
 		};
+
 		PutNode() = default;
+
 		PutNode(ValueType valueType, std::string& nodeName)
 		{
-			m_valueType = valueType;
-			m_nodeName = nodeName;
+			m_ValueType = valueType;
+
+			m_NodeName = nodeName;
 		}
-		ValueType m_valueType;
-		std::string m_nodeName;
+
+		//------about value type------
 		ValueType GetValueType()
 		{
-			return m_valueType;
+			return m_ValueType;
 		}
+
 		void SetValueType(ValueType valueType)
 		{
-			m_valueType = valueType;
+			m_ValueType = valueType;
 		}
+		//------about value type------
+
+		//------about name------
 		std::string GetNodeName()
 		{
-			return m_nodeName;
+			return m_NodeName;
 		}
-		void SetNodeName(const std::string& name)
+
+		void SetNodeName(const std::string& nodeName)
 		{
-			m_nodeName = name;
+			m_NodeName = nodeName;
 		}
-	};
+		//------about name------
 
-	class ShaderFunction;
-	class OutputNode;
-	class InputNode : public PutNode
-	{
-	public:
-		//shader function
-		Ref<ShaderFunction> m_pOwner;
-		Ref<OutputNode> m_pOutputLink;
+		//node pin value type
+		ValueType m_ValueType;
 
-		InputNode() = default;
-		InputNode(ValueType valueType, std::string& nodeName, Ref<ShaderFunction> pShaderFunction) : PutNode(valueType, nodeName)
-		{
-			m_pOwner = pShaderFunction;
-		}
-
-		void Connection(Ref<OutputNode> outputNode);
-		void DisConnection();
-
-		const Ref<OutputNode> GetOutputLink() const
-		{
-			return m_pOutputLink;
-		}
-
-		//get shader function
-		Ref<ShaderFunction> GetOwner() const
-		{
-			return m_pOwner;
-		}
-	};
-
-	class OutputNode : public PutNode
-	{
-	public:
-		//shader function
-		Ref<ShaderFunction> m_pOwner;
-		std::vector<Ref<InputNode>> m_pInputLink;
-
-		OutputNode() = default;
-		OutputNode(ValueType valueType, std::string& nodeName, Ref<ShaderFunction> pShaderFunction) : PutNode(valueType, nodeName)
-		{
-			m_pOwner = pShaderFunction;
-		}
-
-		const std::vector<Ref<InputNode>>& GetInputLink() const
-		{
-			return m_pInputLink;
-		}
-
-		//get shader function
-		Ref<ShaderFunction> GetOwner() const
-		{
-			return m_pOwner;
-		}
-
-		void Connect(Ref<InputNode> inputNode);
+		//node pin name
+		std::string m_NodeName;
 	};
 }
