@@ -7,14 +7,15 @@ namespace Pixel {
 	{
 	public:
 		Mul();
+
 		Mul(const std::string& showName, Ref<Material> pMaterial);
+
 		virtual ~Mul();
-	public:
 
 		virtual bool GetFunctionString(std::string& OutString) const override;
 
 		virtual bool ResetValueType() const override;
 
-		virtual void ConstrcutPutNodeAndSetPutNodeOwner();
+		virtual void ConstructPutNodeAndSetPutNodeOwner();
 	};
 }

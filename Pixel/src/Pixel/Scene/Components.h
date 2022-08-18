@@ -14,7 +14,6 @@
 #include "Pixel/Scene/SceneCamera.h"
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/3D/Model.h"
-#include "Pixel/Renderer/3D/Material.h"
 
 #include "Pixel/Scene/Components/IDComponent.h"
 #include "Pixel/Scene/Components/TagComponent.h"

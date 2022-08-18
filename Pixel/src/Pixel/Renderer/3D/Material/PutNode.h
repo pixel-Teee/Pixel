@@ -5,7 +5,7 @@ namespace Pixel {
 	public:
 		//shader variable type
 		//float float2 float3 float4
-		enum class ValueType
+		enum ValueType
 		{
 			VT_1,
 			VT_2,

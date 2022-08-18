@@ -2,7 +2,7 @@
 
 //------my library------
 #include "Material.h"
-#include "ShaderFunction.h"
+#include "ShaderMainFunction.h"
 //------my library------
 
 namespace Pixel {

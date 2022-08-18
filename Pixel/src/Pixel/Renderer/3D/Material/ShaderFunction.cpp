@@ -2,6 +2,7 @@
 
 //------my library------
 #include "ShaderFunction.h"
+#include "ShaderStringFactory.h"
 #include "InputNode.h"
 #include "OutputNode.h"
 #include "Material.h"
@@ -12,7 +13,9 @@ namespace Pixel {
 	ShaderFunction::ShaderFunction(const std::string& ShowName, Ref<Material> pMaterial)
 	{
 		m_bIsVisited = false;
+		//------node name------
 		m_ShowName = ShowName;
+		//------node name------
 		m_pInputs.clear();
 		m_pOutputs.clear();
 		m_pOwner = pMaterial;
@@ -118,46 +121,46 @@ namespace Pixel {
 		std::string Temp;
 
 		//traverse all input
-		for (uint32_t i = 0; i < m_pInput.size(); ++i)
+		for (uint32_t i = 0; i < m_pInputs.size(); ++i)
 		{
 			//check type
-			if (m_pInput[i]->GetValueType() == PutNode::VT_1)
+			if (m_pInputs[i]->GetValueType() == PutNode::ValueType::VT_1)
 			{
-				//Get the Type
-				OutString += Renderer3D::Float() + (" ");
+				//get the type
+				OutString += ShaderStringFactory::Float() + (" ");
 
-				//Get the default value
-				Temp = Renderer3D::FloatConst("0");
+				//get the default value
+				Temp = ShaderStringFactory::FloatConst("0");
 			}
-			else if (m_pInput[i]->GetValueType() == PutNode::VT_2)
+			else if (m_pInputs[i]->GetValueType() == PutNode::ValueType::VT_2)
 			{
-				//Get the Type
-				OutString += Renderer3D::Float2() + (" ");
+				//get the Type
+				OutString += ShaderStringFactory::Float2() + (" ");
 
-				Temp = Renderer3D::FloatConst2("0", "0");
+				Temp = ShaderStringFactory::FloatConst2("0", "0");
 			}
-			else if (m_pInput[i]->GetValueType() == PutNode::VT_3)
+			else if (m_pInputs[i]->GetValueType() == PutNode::ValueType::VT_3)
 			{
-				OutString += Renderer3D::Float3() + (" ");
+				OutString += ShaderStringFactory::Float3() + (" ");
 
-				Temp = Renderer3D::FloatConst3("0", "0", "0");
+				Temp = ShaderStringFactory::FloatConst3("0", "0", "0");
 			}
 			else
 			{
-				OutString += Renderer3D::Float4() + (" ");
+				OutString += ShaderStringFactory::Float4() + (" ");
 
-				Temp = Renderer3D::FloatConst4("0", "0", "0", "1");
+				Temp = ShaderStringFactory::FloatConst4("0", "0", "0", "1");
 			}
 
 			//don't have any output node link the input node
-			if (!m_pInput[i]->GetOutputLink())
+			if (!m_pInputs[i]->GetOutputLink())
 			{
-				OutString += m_pInput[i]->GetNodeName() + " = " + Temp + ";\n";
+				OutString += m_pInputs[i]->GetNodeName() + " = " + Temp + ";\n";//float4 InputNodeName = float4(0, 0, 0, 1);
 				continue;
 			}
 
 			//else, let the input node equal to the output node
-			OutString += GetValueEqualString(m_pInput[i]->GetOutputLink(), m_pInput[i]);
+			OutString += GetValueEqualString(m_pInputs[i]->GetOutputLink(), m_pInputs[i]);
 		}
 		return true;
 	}
@@ -165,39 +168,40 @@ namespace Pixel {
 	bool ShaderFunction::GetOutputValueString(std::string& OutString) const
 	{
 		std::string Temp;
-		for (uint32_t i = 0; i < m_pOutput.size(); ++i)
+		for (uint32_t i = 0; i < m_pOutputs.size(); ++i)
 		{
-			if (m_pOutput[i]->GetValueType() == CustomFloatValue::VT_1)
+			if (m_pOutputs[i]->GetValueType() == PutNode::ValueType::VT_1)
 			{
-				OutString += Renderer3D::Float() + " ";
-				Temp = Renderer3D::FloatConst("0");
+				OutString += ShaderStringFactory::Float() + " ";
+
+				Temp = ShaderStringFactory::FloatConst("0");//0
 			}
-			else if (m_pOutput[i]->GetValueType() == PutNode::VT_2)
+			else if (m_pOutputs[i]->GetValueType() == PutNode::ValueType::VT_2)
 			{
 				//Get the Type
-				OutString += Renderer3D::Float2() + (" ");
+				OutString += ShaderStringFactory::Float2() + (" ");
 
-				Temp = Renderer3D::FloatConst2("0", "0");
+				Temp = ShaderStringFactory::FloatConst2("0", "0");//float2(0, 0)
 			}
-			else if (m_pOutput[i]->GetValueType() == PutNode::VT_3)
+			else if (m_pOutputs[i]->GetValueType() == PutNode::ValueType::VT_3)
 			{
-				OutString += Renderer3D::Float3() + (" ");
+				OutString += ShaderStringFactory::Float3() + (" ");
 
-				Temp = Renderer3D::FloatConst3("0", "0", "0");
+				Temp = ShaderStringFactory::FloatConst3("0", "0", "0");//float3(0, 0, 0)
 			}
 			else
 			{
-				OutString += Renderer3D::Float4() + (" ");
+				OutString += ShaderStringFactory::Float4() + (" ");
 
-				Temp = Renderer3D::FloatConst4("0", "0", "0", "1");
+				Temp = ShaderStringFactory::FloatConst4("0", "0", "0", "1");//float4(0, 0, 0, 1)
 			}
 
-			OutString += m_pOutput[i]->GetNodeName() + " = " + Temp + ";\n";
+			OutString += m_pOutputs[i]->GetNodeName() + " = " + Temp + ";\n";//float4 OutputNodeName = float4(0, 0, 0, 1);
 		}
 		return true;
 	}
 
-	//get the node expression, calculate temp input variable value, assign to output variable value
+	//get the node expression, calculate temp input variable value, assign to temp output variable value
 	bool ShaderFunction::GetFunctionString(std::string& OutString) const
 	{
 		return true;
@@ -215,13 +219,13 @@ namespace Pixel {
 		else
 		{
 			m_bIsVisited = true;
-			for (uint32_t i = 0; i < m_pInput.size(); ++i)
+			for (uint32_t i = 0; i < m_pInputs.size(); ++i)
 			{
-				if (m_pInput[i]->GetOutputLink() == nullptr)
+				if (m_pInputs[i]->GetOutputLink() == nullptr)
 					continue;
 				else
 				{
-					(std::static_pointer_cast<ShaderFunction>(m_pInput[i]->GetOutputLink()->GetOwner()))->GetShaderTreeString(OutString);
+					m_pInputs[i]->GetOutputLink()->GetOwner()->GetShaderTreeString(OutString);
 				}
 			}
 
@@ -230,11 +234,14 @@ namespace Pixel {
 			{
 				return false;
 			}
-			
+
+			//get input value declare
 			if (!GetInputValueString(OutString))
 				return false;
+			//get output value declare
 			if (!GetOutputValueString(OutString))
 				return false;
+			//get function string
 			if (!GetFunctionString(OutString))
 				return false;
 
@@ -251,14 +258,14 @@ namespace Pixel {
 		else
 		{
 			m_bIsVisited = false;
-			for (uint32_t i = 0; i < m_pInput.size(); ++i)
+			for (uint32_t i = 0; i < m_pInputs.size(); ++i)
 			{
-				if (m_pInput[i]->GetOutputLink() == nullptr)
+				if (m_pInputs[i]->GetOutputLink() == nullptr)
 					continue;
 				else
 				{
 					//recursive clear
-					(std::static_pointer_cast<ShaderFunction>(m_pInput[i]->GetOutputLink()->GetOwner()))->ClearShaderTreeStringFlag();
+					(std::static_pointer_cast<ShaderFunction>(m_pInputs[i]->GetOutputLink()->GetOwner()))->ClearShaderTreeStringFlag();
 				}
 			}
 		}
@@ -284,40 +291,40 @@ namespace Pixel {
 		OutString = pInputNode->GetNodeName() + " = ";
 
 		std::string Value[4];
-		Renderer3D::ValueElement Mask[4];
-		Mask[0] = Renderer3D::ValueElement::VE_R;
-		Mask[1] = Renderer3D::ValueElement::VE_G;
-		Mask[2] = Renderer3D::ValueElement::VE_B;
-		Mask[3] = Renderer3D::ValueElement::VE_A;
+		ShaderStringFactory::ValueElement Mask[4];
+		Mask[0] = ShaderStringFactory::ValueElement::VE_R;
+		Mask[1] = ShaderStringFactory::ValueElement::VE_G;
+		Mask[2] = ShaderStringFactory::ValueElement::VE_B;
+		Mask[3] = ShaderStringFactory::ValueElement::VE_A;
 
 		for (uint32_t i = 0; i < 4; ++i)
 		{
 			if (i > pOutputNode->GetValueType())
 			{
-				Value[i] = Renderer3D::GetValueElement(pOutputNode, Mask[pOutputNode->GetValueType()]);
+				Value[i] = ShaderStringFactory::GetValueElement(pOutputNode, Mask[pOutputNode->GetValueType()]);
 			}
 			else
 			{
-				Value[i] = Renderer3D::GetValueElement(pOutputNode, Mask[i]);
+				Value[i] = ShaderStringFactory::GetValueElement(pOutputNode, Mask[i]);
 			}
 		}
 
-		//similar to vec4(xx.r, xx.r, xx.r, xx.r);
-		if (pInputNode->GetValueType() == PutNode::VT_1)
+		//similar to float4(xx.r, xx.r, xx.r, xx.r);
+		if (pInputNode->GetValueType() == PutNode::ValueType::VT_1)
 		{
-			OutString += Renderer3D::FloatConst(Value[0]);
+			OutString += ShaderStringFactory::FloatConst(Value[0]);
 		}
-		else if (pInputNode->GetValueType() == PutNode::VT_2)
+		else if (pInputNode->GetValueType() == PutNode::ValueType::VT_2)
 		{
-			OutString += Renderer3D::FloatConst2(Value[0], Value[1]);
+			OutString += ShaderStringFactory::FloatConst2(Value[0], Value[1]);
 		}
-		else if (pInputNode->GetValueType() == PutNode::VT_3)
+		else if (pInputNode->GetValueType() == PutNode::ValueType::VT_3)
 		{
-			OutString += Renderer3D::FloatConst3(Value[0], Value[1], Value[2]);
+			OutString += ShaderStringFactory::FloatConst3(Value[0], Value[1], Value[2]);
 		}
-		else if(pInputNode->GetValueType() == PutNode::VT_4)
+		else if(pInputNode->GetValueType() == PutNode::ValueType::VT_4)
 		{
-			OutString += Renderer3D::FloatConst4(Value[0], Value[1], Value[2], Value[3]);
+			OutString += ShaderStringFactory::FloatConst4(Value[0], Value[1], Value[2], Value[3]);
 		}
 		else
 		{

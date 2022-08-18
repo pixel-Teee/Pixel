@@ -9,7 +9,7 @@ namespace Pixel
 		:ShaderFunction(showName, pMaterial)
 	{
 		m_bIsCustom = bIsCustom;
-		m_functionType = ShaderFunction::ConstFloat4;
+		m_functionType = ShaderFunction::ShaderFunctionType::ConstFloat4;
 	}
 
 	ConstValue::~ConstValue()

@@ -31,6 +31,6 @@ namespace Pixel
 		Ref<OutputNode> GetOutputLink() const;
 
 		//get shader function
-		Ref<ShaderFunction> GetOwner() const
+		Ref<ShaderFunction> GetOwner() const;
 	};
 }

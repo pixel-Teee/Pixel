@@ -3,76 +3,46 @@
 #include "Pixel/Renderer/Shader.h"
 
 namespace Pixel {
+	class PutNode;
 	struct MaterialShaderPara;
 	class ShaderStringFactory
 	{
 	public:
+		//------extract the value element of putnode, ect xxx.x------
+		enum ValueElement
+		{
+			VE_NONE = 0,
+			VE_R = 1,
+			VE_G = BIT(1),
+			VE_B = BIT(2),
+			VE_A = BIT(3),
+			DF_ALL = 0x0F
+		};
+		//------extract the value element of putnode, ect xxx.x------
+
 		//give the temp variable one id, variable name + id
 		static uint32_t m_ShaderValueIndex;
 
-		static uint32_t m_CreateShaderNum;
-
-		//m_Model: world matrix
-		static std::string m_Model;
-		static std::string m_ViewProjection;
-
-		static std::string m_WorldPos;
-		static std::string m_WorldNormal;
-		static std::string m_WorldMatrix;
-
-		static std::string m_PSInputLocalNormal;
-
-		//pixel shader's output color
-		static std::string m_PSOutputColorValue;
-
 		static void Init();
 
-		//------Create Include Shader-------
-		static void GetIncludeShader(std::string& OutString);
-		//------Create Include Shader------
+		static std::string Float();
 
-		//------Create Vertex Shader Input Declare-------
-		//static void CreateInputDeclarePosition();
-		static void CreateVOutputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		static void CreateVInputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		//------Create Vertex Shader Input Declare-------
+		static std::string Float2();
 
-		//------Create Uniform string-------
-		//first and second parameter for dx
-		static void CreateVUserConstant(Ref<Shader> pShader, MaterialShaderPara& para, uint32_t& uiPassType, std::string& OutString);
+		static std::string Float3();
 
-		static void CreateUserConstantModelViewProjectionMatrix(Ref<Shader> pShader, std::string& OutString);
-		//------Create Uniform string-------
+		static std::string Float4();
 
-		//------Create MainFunction------
-		static void CreateVFunction(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		//------Create MainFunction------
+		static std::string Return();
 
-		//Create Shader
-		static bool CreateShaderString(Ref<Shader> shader, MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& filePath);
+		static std::string FloatConst(const std::string& value);
 
-		//-------Create PInclude Type------
-		static void GetPIncludeType(std::string& OutString);
-		//-------Create PInclude Type------
+		static std::string FloatConst2(const std::string& value1, const std::string& value2);
 
-		//------Create Pixel Shader Input Declare------
-		static void CreatePInputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		//------Create Pixel Shader Input Declare------
+		static std::string FloatConst3(const std::string& value1, const std::string& value2, const std::string& value3);
 
-		//------Create Pixel Shader Output Declare------
-		static void CreatePOutputDeclare(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		//------Create Pixel Shader Output Declare------
+		static std::string FloatConst4(const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4);
 
-		//------Create Pixel Function------
-		static void CreatePFunction(MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		//-------Create Pixel Function------
-
-		//------Create PUser Constant------
-		static void CreatePUserConstant(Ref<Shader> pShader, MaterialShaderPara& MSPara, uint32_t uiPassType, std::string& OutString);
-		//------Create PUser Constant------
-
-		//------Local Position To World Position------
-		static void LocalToWorldPos(const std::string& LocalPos, std::string& OutString);
-		//------Local Position To World Position------
+		static std::string GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement);
 	};
 }

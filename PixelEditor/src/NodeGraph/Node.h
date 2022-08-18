@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pixel/Renderer/3D/ShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/ShaderFunction.h"
 
 #include <vector>
 #include "imgui-node-editor/imgui_node_editor.h"

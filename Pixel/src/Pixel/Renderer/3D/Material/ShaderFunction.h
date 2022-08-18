@@ -13,7 +13,8 @@ namespace Pixel {
 	{
 	public:
 		enum class ShaderFunctionType {
-			ConstFloat4
+			ConstFloat4,
+			Mul
 		};
 	protected:
 		//node name
@@ -50,42 +51,49 @@ namespace Pixel {
 		uint32_t GetOutputNodeNum();
 		//------check have input and output node and get the number------//
 
-		//------get node name------
+		//------get node name and set node name------
 		std::string GetShowName();
-		//------get node name------
+
+		void SetShowName(const std::string& showName);
+		//------get node name and set node name------
 
 		ShaderFunctionType GetFunctionType();
 
+		//------get node and set node pos------
 		glm::vec2 GetFunctioNodePos();
-		void SetFunctionNodePos(glm::vec2 pos);
 
-		void SetShowName(const std::string& showName);
+		void SetFunctionNodePos(glm::vec2 pos);
+		//------get node and set node pos------
 
 		//in terms of index get node
 		Ref<InputNode> GetInputNode(uint32_t nodeId) const;
-		//in terms of nodename get node
+
+		//in terms of node name get node
 		Ref<InputNode> GetInputNode(const std::string& NodeName) const;
 
 		Ref<OutputNode> GetOutputNode(uint32_t nodeId) const;
+
 		Ref<OutputNode> GetOutputNode(const std::string& NodeName) const;
 
-	public:
 		virtual bool GetInputValueString(std::string& OutString) const;
-		virtual bool GetOutputValueString(std::string& OutString) const;
-		virtual bool GetFunctionString(std::string& OutString) const;
 
-		//------this function not be used------
-		//------Reset Value Type(Max Value Type transformation)------//
-		virtual bool ResetValueType() const;
-		//------Reset Value Type(Max Value Type transformation)------//
-		bool GetShaderTreeString(std::string& OutString);
-		//------this function not be used------
-		bool ClearShaderTreeStringFlag();
+		virtual bool GetOutputValueString(std::string& OutString) const;
+
+		virtual bool GetFunctionString(std::string& OutString) const;
 
 		std::string GetValueEqualString(const Ref<OutputNode> pOutputNode, const Ref<InputNode> pInputNode) const;
 
+		virtual bool ResetValueType() const;
+
+		//only give the main shader function use
+		bool GetShaderTreeString(std::string& OutString);
+
+		bool ClearShaderTreeStringFlag();
+
 		void AddToMaterialOwner();
+
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
+
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;

@@ -22,29 +22,29 @@ namespace Pixel {
 
 		void CreateNodePin(Ref<GraphNode> graphNode, uint32_t locationId);
 
-		Model m_previewBox;
-
-		//TODO:move to scene class
-		GeometryPass m_materialPass;
-
-		Ref<Model> m_Model;
-		Ref<Camera> m_pCamera;
-		Ref<StaticMesh> m_pStaticMesh;
-		Ref<Material> m_pMaterial;
-		Ref<MaterialInstance> m_pMaterialInstance;
-
-		bool m_isopen;
-		bool m_isFirstFrame;
-
-		//------Graph Editor------
-		int32_t m_uniqueId;
-		ed::EditorContext* g_Context = nullptr;
-		Ref<GraphNode> m_pbrNode;
-		std::vector<Ref<GraphNodeLink>> m_NodeLink;
-		std::vector<Ref<GraphNode>> m_Nodes;
-		//------Graph Editor------
-		glm::vec2 m_MousePos;
-
-		std::string m_filePath;
+		//Model m_previewBox;
+		//
+		////TODO:move to scene class
+		//GeometryPass m_materialPass;
+		//
+		//Ref<Model> m_Model;
+		//Ref<Camera> m_pCamera;
+		//Ref<StaticMesh> m_pStaticMesh;
+		//Ref<Material> m_pMaterial;
+		//Ref<MaterialInstance> m_pMaterialInstance;
+		//
+		//bool m_isopen;
+		//bool m_isFirstFrame;
+		//
+		////------Graph Editor------
+		//int32_t m_uniqueId;
+		//ed::EditorContext* g_Context = nullptr;
+		//Ref<GraphNode> m_pbrNode;
+		//std::vector<Ref<GraphNodeLink>> m_NodeLink;
+		//std::vector<Ref<GraphNode>> m_Nodes;
+		////------Graph Editor------
+		//glm::vec2 m_MousePos;
+		//
+		//std::string m_filePath;
 	};
 }
