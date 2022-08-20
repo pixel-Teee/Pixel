@@ -109,7 +109,7 @@ namespace Pixel
 		Model m_Model;
 		//------test------
 
-		GraphNodeEditor m_GraphNodeEditor;
+		//GraphNodeEditor m_GraphNodeEditor;
 	};
 }
 

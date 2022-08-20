@@ -7,14 +7,19 @@ namespace Pixel {
 
 	class GraphNodeEditor {
 	public:
+
 		GraphNodeEditor();
 
 		~GraphNodeEditor();
 
-		void OnImGuiRender();
+		void OnImGuiRender(bool& OpenGraphNodeEditor);
 
 	private:
 
 		void DrawPbrNode();
+
+		ed::EditorContext* m_Editor = nullptr;
+
+		bool m_FirstOpen;
 	};
 }

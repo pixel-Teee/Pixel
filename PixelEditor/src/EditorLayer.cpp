@@ -418,7 +418,7 @@ namespace Pixel
 		/*---------Environment Panel---------*/
 
 		/*------Graph Node Editor------*/
-		m_GraphNodeEditor.OnImGuiRender();
+		//m_GraphNodeEditor.OnImGuiRender();
 		/*------Graph Node Editor------*/
 
 		/*---------Deferred Shading Viewport---------*/

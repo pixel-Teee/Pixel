@@ -10,6 +10,7 @@
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 #include "Pixel/Renderer/Device/Device.h"
+#include "../GraphNode/GraphNodeEditor.h"
 
 namespace Pixel {
 	extern const std::filesystem::path g_AssetPath;
@@ -27,6 +28,8 @@ namespace Pixel {
 
 		Application::Get().GetRenderer()->SetExposure(m_Exposure);
 		//Application::Get().GetRenderer()->SetSigmma(m_BloomSigmma);
+
+		m_GraphEditor = CreateRef<GraphNodeEditor>();
 	}
 	
 	EnvironmentPanel::~EnvironmentPanel()
@@ -71,6 +74,7 @@ namespace Pixel {
 			//ImGui::PopStyleColor(3);
 			ImGui::TreePop();
 		}
+		
 		/*if(ImGui::TreeNode("Bloom"))
 		{
 			ImGui::Text("Bloom Blur Sigmma");
@@ -78,7 +82,13 @@ namespace Pixel {
 			Application::Get().GetRenderer()->SetSigmma(m_BloomSigmma);
 			ImGui::TreePop();
 		}*/
+		ImGui::Checkbox("GraphNodeEditor", &m_OpenGraphEditor);
 		ImGui::End();
+
+		if (m_OpenGraphEditor)
+		{
+			m_GraphEditor->OnImGuiRender(m_OpenGraphEditor);
+		}
 	}
 
 }
