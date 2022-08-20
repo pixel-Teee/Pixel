@@ -1,11 +1,1 @@
-{
-  "Texture": [
-    { "Texture\\Sphere_DefaultMaterial_BaseColor": "textures\\Sphere\\Sphere_DefaultMaterial_BaseColor.png" },
-    { "Texture\\Sphere_DefaultMaterial_Metallic": "textures\\Sphere\\Sphere_DefaultMaterial_Metallic.png" },
-    { "Texture\\Sphere_DefaultMaterial_Normal": "textures\\Sphere\\Sphere_DefaultMaterial_Normal.png" },
-    { "Texture\\Sphere_DefaultMaterial_Roughness": "textures\\Sphere\\Sphere_DefaultMaterial_Roughness.png" }
-  ],
-  "Scene": [ { "scenes\\Test.pixel": "Scene\\Test" } ],
-  "Model": [ { "Model\\Sphere": "models\\Sphere\\Sphere.gltf" } ],
-  "Material": [ { "Material\\Sphere": "materials\\Sphere.mat" } ]
-}
+{"Texture":[{"Texture\\Sphere_DefaultMaterial_BaseColor":"textures\\Sphere\\Sphere_DefaultMaterial_BaseColor.png"},{"Texture\\Sphere_DefaultMaterial_Metallic":"textures\\Sphere\\Sphere_DefaultMaterial_Metallic.png"},{"Texture\\Sphere_DefaultMaterial_Normal":"textures\\Sphere\\Sphere_DefaultMaterial_Normal.png"},{"Texture\\Sphere_DefaultMaterial_Roughness":"textures\\Sphere\\Sphere_DefaultMaterial_Roughness.png"},{"Texture\\pretville_cinema_1k":"textures\\hdr\\pretville_cinema_1k.hdr"}],"Scene":[{"scenes\\Test.pixel":"Scene\\Test"}],"Model":[{"Model\\Sphere":"models\\Sphere\\Sphere.gltf"}],"Material":[{"Material\\Sphere":"materials\\Sphere.mat"}]}

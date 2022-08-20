@@ -17,8 +17,8 @@ file(GLOB PixelEditorSrc
 "src/*.cpp"
 "src/Panels/*.h"
 "src/Panels/*.cpp"
-"src/NodeGraph/*.h"
-"src/NodeGraph/*.cpp"
+"src/GraphNode/*.h"
+"src/GraphNode/*.cpp"
 )
 
 source_group(TREE ${CMAKE_SOURCE_DIR}/PixelEditor FILES ${PixelEditorSrc})

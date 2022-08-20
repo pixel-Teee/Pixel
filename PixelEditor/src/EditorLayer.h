@@ -4,7 +4,7 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/EnvironmentPanel.h"
-#include "NodeGraph/NodeGraph.h"
+#include "GraphNode/GraphNodeEditor.h"
 #include "Pixel/Renderer/EditorCamera.h"
 
 namespace Pixel
@@ -104,10 +104,12 @@ namespace Pixel
 		Ref<DescriptorHandle> m_FrameBufferHandle;
 
 		Ref<DescriptorHandle> m_UVBufferHandle;
-		//----------test
+		//------test------
 		Ref<Shader> m_testShader;
 		Model m_Model;
-		//----------test
+		//------test------
+
+		GraphNodeEditor m_GraphNodeEditor;
 	};
 }
 

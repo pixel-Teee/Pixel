@@ -417,6 +417,10 @@ namespace Pixel
 		m_environmentPanel.OnImGuiRender();
 		/*---------Environment Panel---------*/
 
+		/*------Graph Node Editor------*/
+		m_GraphNodeEditor.OnImGuiRender();
+		/*------Graph Node Editor------*/
+
 		/*---------Deferred Shading Viewport---------*/
 
 		ImGui::Begin("Debug");

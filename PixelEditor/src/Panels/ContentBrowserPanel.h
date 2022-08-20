@@ -3,7 +3,7 @@
 #include <filesystem>
 
 #include "Pixel/Renderer/Texture.h"
-#include "../NodeGraph/NodeGraph.h"
+#include "../GraphNode/GraphNodeEditor.h"
 
 namespace Pixel {
 	class DescriptorHandle;
