@@ -5,10 +5,14 @@
 namespace Pixel {
 	namespace ed = ax::NodeEditor;
 
+	class Material;
+	class GraphLink;
+	class GraphNode;
+	class GraphPin;
 	class GraphNodeEditor {
 	public:
 
-		GraphNodeEditor();
+		GraphNodeEditor(const std::string& virtualPath, Ref<Material> pMaterial);
 
 		~GraphNodeEditor();
 
@@ -20,6 +24,12 @@ namespace Pixel {
 
 		ed::EditorContext* m_Editor = nullptr;
 
-		bool m_FirstOpen;
+		std::vector<Ref<GraphNode>> m_GraphNodes;
+		std::vector<Ref<GraphPin>> m_GraphPins;
+		std::vector<Ref<GraphLink>> m_GraphLinks;
+
+		Ref<Material> m_pMaterial;
+		
+		uint32_t m_Id;
 	};
 }

@@ -29,7 +29,7 @@ namespace Pixel {
 		Application::Get().GetRenderer()->SetExposure(m_Exposure);
 		//Application::Get().GetRenderer()->SetSigmma(m_BloomSigmma);
 
-		m_GraphEditor = CreateRef<GraphNodeEditor>();
+		//m_GraphEditor = CreateRef<GraphNodeEditor>();
 	}
 	
 	EnvironmentPanel::~EnvironmentPanel()
@@ -82,13 +82,7 @@ namespace Pixel {
 			Application::Get().GetRenderer()->SetSigmma(m_BloomSigmma);
 			ImGui::TreePop();
 		}*/
-		ImGui::Checkbox("GraphNodeEditor", &m_OpenGraphEditor);
 		ImGui::End();
-
-		if (m_OpenGraphEditor)
-		{
-			m_GraphEditor->OnImGuiRender(m_OpenGraphEditor);
-		}
 	}
 
 }

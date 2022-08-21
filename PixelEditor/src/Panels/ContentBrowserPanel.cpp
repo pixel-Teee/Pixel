@@ -12,6 +12,7 @@
 #include "Pixel/Scene/Components/MaterialComponent.h"
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
+#include "Pixel/Renderer/3D/Material/Material.h"
 //------my library------
 
 //------other library------
@@ -39,6 +40,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		m_IsOpen = false;
+		m_IsOpenTestMaterialEditor = false;
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -87,6 +89,17 @@ namespace Pixel {
 				AssetManager::GetSingleton().CreateSubMaterial(AssetManager::GetSingleton().to_string(physicalFilePath), pSubMaterial);
 
 				AssetManager::GetSingleton().AddMaterialToAssetRegistry(physicalFilePath);
+			}
+
+			if (ImGui::MenuItem("Create Test Material"))
+			{
+				std::wstring physicalFilePath = FileDialogs::SaveFile(L"test material(*.tmat)\0*.tmat\0");
+
+				Ref<Material> pMaterial = CreateRef<Material>();
+
+				AssetManager::GetSingleton().CreateTestMaterial(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterial);
+
+				AssetManager::GetSingleton().AddTestMaterialToAssetRegistry(physicalFilePath);
 			}
 			ImGui::EndPopup();
 		}
@@ -224,6 +237,39 @@ namespace Pixel {
 
 						m_IsOpen = true;
 					}
+
+					if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					{
+						const std::string& materialPhysicalPath = g_AssetPath.string() + "\\" + relativePath.string();
+
+						if (m_CurrentTestMaterialPath != materialPhysicalPath)
+						{
+							m_CurrentTestMaterialPath = materialPhysicalPath;
+
+							//read the test material from the material path
+							m_pMaterial = CreateRef<Material>();
+							Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
+
+							rapidjson::Document doc;
+
+							std::ifstream stream(materialPhysicalPath);
+							std::stringstream strStream;
+							strStream << stream.rdbuf();
+							if (!doc.Parse(strStream.str().data()).HasParseError())
+							{
+								//read the sub material
+								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+								{
+									typeDesc->Read(doc[typeDesc->name], m_pMaterial.get(), nullptr);
+								}
+							}
+							stream.close();
+							m_pMaterial->PostLink();
+							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(itemPath, m_pMaterial);					
+						}
+						else if(m_CurrentTestMaterialPath == materialPhysicalPath)
+							m_IsOpenTestMaterialEditor = true;
+					}
 				}
 				ImGui::TextWrapped("%s", filenameString.c_str());
 				ImGui::NextColumn();
@@ -240,6 +286,11 @@ namespace Pixel {
 		if(m_IsOpen)
 		{
 			RenderMaterialAssetPanel();
+		}
+
+		if (m_IsOpenTestMaterialEditor)
+		{
+			m_GraphNodeEditor->OnImGuiRender(m_IsOpenTestMaterialEditor);
 		}
 	}
 

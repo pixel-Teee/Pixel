@@ -28,6 +28,6 @@ namespace Pixel
 		//get shader function
 		Ref<ShaderFunction> GetOwner() const;
 
-		void Connect(Ref<InputNode> inputNode);
+		friend class InputNode;
 	};
 }

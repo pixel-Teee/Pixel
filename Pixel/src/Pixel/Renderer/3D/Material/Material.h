@@ -29,7 +29,13 @@ namespace Pixel {
 
 		std::string& GetMaterialName() { return m_MaterialName; }
 
+		std::map<uint32_t, uint32_t>& GetLinks() { return m_Links; }
+
 		std::string m_MaterialName;//material name
+
+		//------graph node editor path------
+		std::string m_GraphNodeEditorPath;
+		//------graph node editor path------
 
 		//logic node
 		//main light calculate shader
@@ -37,5 +43,11 @@ namespace Pixel {
 
 		//other shader function
 		std::vector<Ref<ShaderFunction>> m_pShaderFunctionArray;
+
+		std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
+
+		void PostLink();
+
+		REFLECT()
 	};
 }

@@ -8,6 +8,7 @@
 namespace Pixel {
 	class DescriptorHandle;
 	struct SubMaterial;
+	class Material;
 	class ContentBrowserPanel
 	{
 	public:
@@ -38,5 +39,12 @@ namespace Pixel {
 		std::string m_CurrentSubMaterialPath;//current open sub material physical path
 		bool m_IsOpen;
 		//------current already open sub material------
+
+		//------current open test material------
+		Ref<Material> m_pMaterial;
+		std::string m_CurrentTestMaterialPath;
+		bool m_IsOpenTestMaterialEditor;
+		Ref<GraphNodeEditor> m_GraphNodeEditor;
+		//------current open test material------
 	};
 }

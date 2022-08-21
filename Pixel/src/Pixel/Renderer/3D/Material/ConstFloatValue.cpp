@@ -206,4 +206,9 @@ namespace Pixel
 		}
 	}
 	//------ConstFloatValue------
+
+	REFLECT_STRUCT_BEGIN(ConstFloatValue)
+	REFLECT_STRUCT_MEMBER(m_Value)
+	REFLECT_STRUCT_MEMBER(m_valueNumber)
+	REFLECT_STRUCT_END()
 }

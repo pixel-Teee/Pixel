@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Pixel {
-	class PutNode {
+	class PutNode : public std::enable_shared_from_this<PutNode> {
 	public:
 		//shader variable type
 		//float float2 float3 float4
@@ -52,5 +52,10 @@ namespace Pixel {
 
 		//node pin name
 		std::string m_NodeName;
+
+		//node pin id
+		uint32_t m_id;
+
+		REFLECT()
 	};
 }

@@ -40,5 +40,7 @@ namespace Pixel {
 			//TODO:in terms of the name?
 			return lhs.ConstValueName == rhs.ConstValueName;
 		}
+
+		REFLECT()
 	};
 }

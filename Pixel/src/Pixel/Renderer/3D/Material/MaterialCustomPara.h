@@ -38,6 +38,8 @@ namespace Pixel {
 			return Para1.ConstValueName == Para2.ConstValueName;
 		}
 		//------in terms of the parameter name to check------
+
+		REFLECT()
 	};
 	//------material's custom parameter------
 }

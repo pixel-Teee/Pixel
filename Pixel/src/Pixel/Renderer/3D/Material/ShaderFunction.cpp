@@ -70,14 +70,14 @@ namespace Pixel {
 		return m_functionType;
 	}
 
-	glm::vec2 ShaderFunction::GetFunctioNodePos()
+	uint32_t ShaderFunction::GetFunctioNodeId()
 	{
-		return m_Pos;
+		return m_NodeId;
 	}
 
-	void ShaderFunction::SetFunctionNodePos(glm::vec2 pos)
+	void ShaderFunction::SetFunctionNodeId(uint32_t nodeId)
 	{
-		m_Pos = pos;
+		m_NodeId = nodeId;
 	}
 
 	void ShaderFunction::SetShowName(const std::string& showName)
@@ -334,4 +334,11 @@ namespace Pixel {
 		return OutString;
 	}
 
+	REFLECT_STRUCT_BEGIN(ShaderFunction)
+	REFLECT_STRUCT_MEMBER(m_ShowName)
+	REFLECT_STRUCT_MEMBER(m_functionType)
+	REFLECT_STRUCT_MEMBER(m_pInputs)
+	REFLECT_STRUCT_MEMBER(m_pOutputs)
+	REFLECT_STRUCT_MEMBER(m_NodeId)
+	REFLECT_STRUCT_END()
 }

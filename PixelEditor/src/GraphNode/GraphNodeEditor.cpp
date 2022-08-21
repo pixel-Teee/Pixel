@@ -2,11 +2,137 @@
 
 #include "GraphNodeEditor.h"
 
+#include "GraphPin.h"
+#include "Pixel/Renderer/3D/Material/Material.h"
+#include "Pixel/Renderer/3D/Material/ShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
+#include "Pixel/Renderer/3D/Material/InputNode.h"
+#include "Pixel/Renderer/3D/Material/OutputNode.h"
+
 namespace Pixel {
 
-	GraphNodeEditor::GraphNodeEditor()
+	GraphNodeEditor::GraphNodeEditor(const std::string& virtualPath, Ref<Material> pMaterial)
 	{
-		m_FirstOpen = true;
+		m_Id = 0;
+
+		//if is first open, then load the settings file
+		ed::Config config;
+
+		std::string GraphNodeEditorConfigPath = "assets\\" + virtualPath + ".json";
+
+		config.SettingsFile = GraphNodeEditorConfigPath.c_str();
+
+		m_Editor = ed::CreateEditor(&config);
+
+		//from the material to construct node¡¢pin¡¢link
+		m_pMaterial = pMaterial;
+
+		for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
+		{
+			Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+			pGraphNode->m_NodeId = m_pMaterial->GetShaderFunction()[i]->GetFunctioNodeId();
+			pGraphNode->p_Owner = m_pMaterial->GetShaderFunction()[i];
+
+			m_Id = std::max(m_Id, (uint32_t)pGraphNode->m_NodeId.Get());
+		}
+
+		//in terms of the links to link the input node and put node
+		for (auto& item : m_pMaterial->GetLinks())
+		{
+			uint32_t inputNodeId = item.first;
+			uint32_t outputNodeId = item.second;
+
+			Ref<GraphPin> inputPin;
+			Ref<GraphPin> outputPin;
+
+			for (size_t i = 0; i < m_GraphPins.size(); ++i)
+			{
+				if (m_GraphPins[i]->m_PinId.Get() == inputNodeId)
+					inputPin = m_GraphPins[i];
+				if (m_GraphPins[i]->m_PinId.Get() == outputNodeId)
+					outputPin = m_GraphPins[i];
+			}
+
+			if (inputPin == nullptr)
+			{
+				inputPin = CreateRef<GraphPin>();
+				inputPin->m_PinId = inputNodeId;
+			}
+
+			if (outputPin == nullptr)
+			{
+				outputPin = CreateRef<GraphPin>();
+				outputPin->m_PinId = outputNodeId;
+			}
+
+			m_Id = std::max(m_Id, inputNodeId);
+			m_Id = std::max(m_Id, outputNodeId);
+		}
+
+		//get the logic pin node
+		std::vector<Ref<InputNode>> inputNodes;
+		std::vector<Ref<OutputNode>> outputNodes;
+		for (uint32_t i = 0; i < m_pMaterial->m_pShaderFunctionArray.size(); ++i)
+		{
+			for (uint32_t j = 0; j < m_pMaterial->m_pShaderFunctionArray[i]->GetInputNodeNum(); ++j)
+				inputNodes.push_back(m_pMaterial->m_pShaderFunctionArray[i]->GetInputNode(j));
+
+			for (uint32_t j = 0; j < m_pMaterial->m_pShaderFunctionArray[i]->GetOutputNodeNum(); ++j)
+				outputNodes.push_back(m_pMaterial->m_pShaderFunctionArray[i]->GetOutputNode(j));
+		}
+
+		for (uint32_t i = 0; i < m_pMaterial->m_pShaderMainFunction->GetInputNodeNum(); ++i)
+		{
+			inputNodes.push_back(m_pMaterial->m_pShaderMainFunction->GetInputNode(i));
+		}
+
+		//link the graph pin and graph node
+		for (auto& item : m_pMaterial->GetLinks())
+		{
+			uint32_t inputNodeId = item.first;
+			uint32_t outputNodeId = item.second;
+
+			Ref<ShaderFunction> pInputNodeOwnerShaderFunction;
+			Ref<ShaderFunction> pOutputNodeOwnerShaderFunction;
+
+			for (size_t i = 0; i < inputNodes.size(); ++i)
+			{
+				if (inputNodes[i]->m_id == inputNodeId)
+					pInputNodeOwnerShaderFunction = inputNodes[i]->GetOwner();
+			}
+
+			for (size_t i = 0; i < outputNodes.size(); ++i)
+			{
+				if (outputNodes[i]->m_id == outputNodeId)
+					pOutputNodeOwnerShaderFunction = outputNodes[i]->GetOwner();
+			}
+
+			Ref<GraphNode> pInputPinOwner;
+			Ref<GraphNode> pOutputPinOwner;
+
+			for (size_t i = 0; i < m_GraphNodes.size(); ++i)
+			{
+				if (m_GraphNodes[i]->m_NodeId.Get() == pInputNodeOwnerShaderFunction->GetFunctioNodeId()) pInputPinOwner = m_GraphNodes[i];
+
+				if (m_GraphNodes[i]->m_NodeId.Get() == pOutputNodeOwnerShaderFunction->GetFunctioNodeId()) pOutputPinOwner = m_GraphNodes[i];
+			}
+
+			Ref<GraphPin> inputPin;
+			Ref<GraphPin> outputPin;
+
+			for (size_t i = 0; i < m_GraphPins.size(); ++i)
+			{
+				if (m_GraphPins[i]->m_PinId.Get() == inputNodeId) inputPin = m_GraphPins[i];
+				if (m_GraphPins[i]->m_PinId.Get() == outputNodeId) outputPin = m_GraphPins[i];
+			}
+
+			pInputPinOwner->m_InputPin.push_back(inputPin);
+			pOutputPinOwner->m_OutputPin.push_back(outputPin);
+			inputPin->m_OwnerNode = pInputPinOwner;
+			outputPin->m_OwnerNode = pOutputPinOwner;
+		}
+
+		//create the graph pin
 	}
 
 	GraphNodeEditor::~GraphNodeEditor()
@@ -19,37 +145,24 @@ namespace Pixel {
 		
 		ImGui::Begin("Graph Node Editor", &OpenGraphNodeEditor);
 
-		if (OpenGraphNodeEditor)
-		{
-			if (m_FirstOpen)
-			{
-				//if is first open, then load the settings file
-				ed::Config config;
+		//render
+		ed::SetCurrentEditor(m_Editor);
+			ed::Begin("Graph Node Editor Canvas");		
+			//draw shader main function
 
-				config.SettingsFile = "assets\\GraphNodeEditorTest.json";
+			//TODO:in the future, will in terms of the shading model to swith this
+			DrawPbrNode();
 
-				m_Editor = ed::CreateEditor(&config);
+			ed::End();
+		ed::SetCurrentEditor(nullptr);
 
-				m_FirstOpen = false;
-			}
-
-			//render
-			ed::SetCurrentEditor(m_Editor);
-				ed::Begin("Graph Node Editor Canvas", ImVec2(0.0f, 0.0f));
-				
-				
-
-				ed::End();
-			ed::SetCurrentEditor(nullptr);
-		}
-		else
-			m_FirstOpen = true;
 
 		ImGui::End();
 	}
 
 	void GraphNodeEditor::DrawPbrNode()
 	{
+		
 	}
 
 }

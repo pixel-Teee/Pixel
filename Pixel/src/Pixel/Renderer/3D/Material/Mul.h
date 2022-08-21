@@ -17,5 +17,7 @@ namespace Pixel {
 		virtual bool ResetValueType() const override;
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
+
+		REFLECT()
 	};
 }

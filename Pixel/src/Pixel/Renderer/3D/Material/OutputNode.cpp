@@ -23,9 +23,4 @@ namespace Pixel
 			return nullptr;
 		return m_pOwner.lock();
 	}
-
-	void OutputNode::Connect(Ref<InputNode> inputNode)
-	{
-		m_pInputLinks.push_back(inputNode);
-	}
 }

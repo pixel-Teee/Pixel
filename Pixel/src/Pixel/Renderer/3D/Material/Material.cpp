@@ -3,13 +3,16 @@
 //------my library------
 #include "Material.h"
 #include "ShaderMainFunction.h"
+#include "InputNode.h"
+#include "OutputNode.h"
 //------my library------
 
 namespace Pixel {
 
 	Material::Material()
 	{
-
+		m_pShaderFunctionArray.clear();
+		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
 	}
 
 	Material::~Material()
@@ -23,7 +26,7 @@ namespace Pixel {
 
 		//------clear the shader function------
 		m_pShaderFunctionArray.clear();
-		m_pShaderMainFunction = nullptr;
+		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
 		//------clear the shader function------
 	}
 
@@ -59,6 +62,58 @@ namespace Pixel {
 	bool Material::GetShaderTreeString(std::string& OutString)
 	{
 		return std::static_pointer_cast<ShaderMainFunction>(m_pShaderMainFunction)->GetShaderTreeString(OutString);
+	}
+
+	REFLECT_STRUCT_BEGIN(Material)
+	REFLECT_STRUCT_MEMBER(m_Links)
+	REFLECT_STRUCT_MEMBER(m_MaterialName)
+	REFLECT_STRUCT_MEMBER(m_GraphNodeEditorPath)
+	REFLECT_STRUCT_MEMBER(m_pShaderMainFunction)
+	REFLECT_STRUCT_MEMBER(m_pShaderFunctionArray)
+	REFLECT_STRUCT_END()
+
+	void Material::PostLink()
+	{
+		std::vector<Ref<InputNode>> m_InputPins;
+		std::vector<Ref<OutputNode>> m_OutputPins;
+		//get the pointer's link
+		for (uint32_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			for (uint32_t j = 0; j < m_pShaderFunctionArray[i]->GetInputNodeNum(); ++j)
+				m_InputPins.push_back(m_pShaderFunctionArray[i]->GetInputNode(j));
+
+			for (uint32_t j = 0; j < m_pShaderFunctionArray[i]->GetOutputNodeNum(); ++j)
+				m_OutputPins.push_back(m_pShaderFunctionArray[i]->GetOutputNode(j));
+		}
+
+		for (uint32_t i = 0; i < m_pShaderMainFunction->GetInputNodeNum(); ++i)
+		{
+			m_InputPins.push_back(m_pShaderMainFunction->GetInputNode(i));
+		}
+
+		//link
+		for (auto& item : m_Links)
+		{
+			uint32_t InputPinId = item.first;
+			uint32_t OutputPinId = item.second;
+
+			Ref<InputNode> InputPin;
+			Ref<OutputNode> OutputPin;
+
+			for (size_t i = 0; i < m_InputPins.size(); ++i)
+			{
+				if (m_InputPins[i]->m_id == InputPinId)
+					InputPin = m_InputPins[i];
+			}
+
+			for (size_t i = 0; i < m_OutputPins.size(); ++i)
+			{
+				if (m_OutputPins[i]->m_id == OutputPinId)
+					OutputPin = m_OutputPins[i];
+			}
+
+			InputPin->Connection(OutputPin);
+		}
 	}
 
 }

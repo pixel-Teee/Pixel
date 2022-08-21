@@ -34,8 +34,8 @@ namespace Pixel {
 		//Owner material
 		std::weak_ptr<Material> m_pOwner;
 
-		//editor:need to fix
-		glm::vec2 m_Pos;
+		//node id
+		uint32_t m_NodeId;
 	public:
 		ShaderFunction() = default;
 
@@ -59,11 +59,11 @@ namespace Pixel {
 
 		ShaderFunctionType GetFunctionType();
 
-		//------get node and set node pos------
-		glm::vec2 GetFunctioNodePos();
+		//------get node and set node id------
+		uint32_t GetFunctioNodeId();
 
-		void SetFunctionNodePos(glm::vec2 pos);
-		//------get node and set node pos------
+		void SetFunctionNodeId(uint32_t nodeId);
+		//------get node and set node id------
 
 		//in terms of index get node
 		Ref<InputNode> GetInputNode(uint32_t nodeId) const;
@@ -97,5 +97,7 @@ namespace Pixel {
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;
+
+		REFLECT()
 	};
 }

@@ -46,6 +46,36 @@ namespace Pixel {
 		}
 		//------int------
 
+		//------int------
+		struct TypeDescriptor_Uint32_t : TypeDescriptor
+		{
+			TypeDescriptor_Uint32_t() : TypeDescriptor("uint32_t", sizeof(uint32_t))
+			{}
+
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			{
+				writer.Key(name);
+				writer.Int(*(static_cast<uint32_t*>(obj)));
+			}
+
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override
+			{
+				if (value.HasMember(name) && value[name].IsInt())
+				{
+					*static_cast<int*>(obj) = value[name].GetInt();
+				}
+			}
+
+		};
+
+		template<>
+		TypeDescriptor* getPrimitiveDescriptor<uint32_t>()
+		{
+			static TypeDescriptor_Uint32_t typeDesc;
+			return &typeDesc;
+		}
+		//------int------
+
 		//------uint64_t------
 		struct TypeDescriptor_Uint64_t : TypeDescriptor
 		{

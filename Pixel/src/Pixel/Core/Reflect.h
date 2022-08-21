@@ -215,6 +215,107 @@ namespace Pixel {
 		};
 		//------std::shared_ptr<>------
 
+		//------std::map<>------
+		struct TypeDescriptor_StdMap : TypeDescriptor
+		{
+			TypeDescriptor* keyType;
+			TypeDescriptor* valueType;
+
+			void* (*getBegin)(const void*);
+			void* (*getEnd)(const void*);
+			bool (*NotEqual)(void*, void*);
+			void* (*getNext)(void*);
+			const void* (*getKey)(void*);
+			void* (*getValue)(void*);
+			
+			template<typename KeyType, typename ValueType>
+			TypeDescriptor_StdMap(KeyType*, ValueType*) :TypeDescriptor("std::map<>", sizeof(std::map<KeyType, ValueType>)),
+				keyType(TypeResolver<KeyType>::get()), valueType(TypeResolver<ValueType>::get())
+			{
+				getBegin = [](const void* mapPtr)->void* {
+					const auto& mp = *(const std::map<KeyType, ValueType>*)mapPtr;
+
+					//get the iterator
+					return &mp.begin();
+				};
+
+				getEnd = [](const void* mapPtr)->void* {
+					const auto& mp = *(const std::map<KeyType, ValueType>*)mapPtr;
+
+					//get the iterator
+					return &mp.end();
+				};
+
+				NotEqual = [](void* iter1, void* iter2)->bool {
+					auto& mpIter1 = *(std::map<KeyType, ValueType>::iterator*)iter1;
+					auto& mpIter2 = *(std::map<KeyType, ValueType>::iterator*)iter2;
+					return mpIter1 != mpIter2;
+				};
+
+				getNext = [](void* iter)->void* {
+					auto& mpIter = *(std::map<KeyType, ValueType>::iterator*)iter;
+					return &(++mpIter);
+				};
+
+				getKey = [](void* iter)->const void* {
+					auto& mpIter = *(std::map<KeyType, ValueType>::iterator*)iter;
+					return &(mpIter->first);
+				};
+
+				getValue = [](void* iter)->void* {
+					auto& mpIter = *(std::map<KeyType, ValueType>::iterator*)iter;
+					return &(mpIter->second);
+				};
+			}
+
+			virtual std::string getFullName() const override
+			{
+				//return std::string("std::map<") + itemType->getFullName() + ">";
+				return std::string("std::map<") + keyType->getFullName() + ", " + valueType->getFullName() + ">";
+			}
+
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			{
+				writer.Key(name);
+				writer.StartArray();
+				
+				void* begin = getBegin(obj);
+				void* end = getEnd(obj);
+				while (NotEqual(begin, end))
+				{
+					writer.StartObject();
+					keyType->Write(writer, const_cast<void*>(getKey(begin)), keyType->name);
+					valueType->Write(writer, getValue(begin), valueType->name);			
+					writer.EndObject();
+					getNext(begin);
+				}
+				//for (size_t i = 0; i < vecSize; ++i)
+				//{
+				//	itemType->Write(writer, const_cast<void*>(getItem(obj, i)), itemType->name);
+				//}
+				
+				writer.EndArray();
+			}
+
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
+			{
+				//
+			}
+
+		};
+
+		//partially specialize TypeResolver<> for std::maps:
+		template<typename Key, typename Value>
+		struct TypeResolver<std::map<Key, Value>>
+		{
+			static TypeDescriptor* get()
+			{
+				static TypeDescriptor_StdMap typeDesc(static_cast<Key*>(nullptr), static_cast<Value*>(nullptr));
+				return &typeDesc;
+			}
+		};
+		//------std::vector<>------
+
 #define REFLECT() \
     friend struct Reflect::DefaultResolver; \
     static Reflect::TypeDescriptor_Struct Reflection; \

@@ -9,6 +9,7 @@ namespace Pixel {
 	class Texture2D;
 	class Model;
 	struct SubMaterial;
+	class Material;
 	class AssetManager : public Singleton<AssetManager>
 	{
 	public:
@@ -27,6 +28,8 @@ namespace Pixel {
 
 		void AddMaterialToAssetRegistry(const std::wstring& physicalPath);
 
+		void AddTestMaterialToAssetRegistry(const std::wstring& physicalPath);
+
 		std::string GetVirtualPath(const std::string& physicalFilePath);
 
 		std::string GetAssetPhysicalPath(const std::string& filePath);
@@ -35,15 +38,21 @@ namespace Pixel {
 
 		bool IsInMaterialAssetRegistry(std::string virtualPath);
 
+		bool IsInTestMaterialAssetRegistry(std::string& virtualPath);
+
 		Ref<Texture2D> GetTexture(const std::string& virtualPath);
 
 		Ref<Model> GetModel(const std::string& modelRegistry);
 
 		Ref<SubMaterial> GetMaterial(const std::string& virtualPath);
 
+		Ref<Material> GetTestMaterial(const std::string& virtualPath);
+
 		void AddModelToAssetRegistry(const std::string& physicalPath);
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
+
+		void CreateTestMaterial(const std::string& physicalPath, Ref<Material> pMaterial);
 
 		void UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);//difference update
 
@@ -52,6 +61,8 @@ namespace Pixel {
 		std::wstring to_wsrting(std::string str);
 
 		std::map<std::string, std::string>& GetMaterialAssetRegistry();
+
+		std::map<std::string, std::string>& GetTestMaterialAssetRegistry();
 	private:
 		std::map<std::string, std::string> m_VirtualPathToPhysicalPathTexture;//asset virtual path <=> asset physical path
 
@@ -78,6 +89,13 @@ namespace Pixel {
 		std::map<std::string, std::string> m_VirtualPathToPhysicalPathMaterial;
 		
 		std::map<std::string, std::string> m_PhysicalPathToVirtualPathMaterial;
+
+		//test material
+		std::map<std::string, std::string> m_VirtualPathToPhysicalPathTestMaterial;
+
+		std::map<std::string, std::string> m_PhysicalPathToVirtualPathTestMaterial;
+
+		std::map<std::string, Ref<Material>> m_TestMaterials;
 
 		//------converter------
 		using convert_t = std::codecvt_utf8<wchar_t>;

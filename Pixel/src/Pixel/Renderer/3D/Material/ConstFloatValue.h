@@ -38,5 +38,7 @@ namespace Pixel
 			OUT_VALUE_w,
 			OUT_MAX
 		};
+
+		REFLECT()
 	};
 }
