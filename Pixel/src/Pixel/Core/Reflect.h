@@ -134,12 +134,12 @@ namespace Pixel {
 				writer.Key(name);
 				writer.StartArray();
 				size_t vecSize = getSize(obj);
-				writer.StartObject();
+				//writer.StartObject();
 				for (size_t i = 0; i < vecSize; ++i)
 				{
 					itemType->Write(writer, const_cast<void*>(getItem(obj, i)), itemType->name);
 				}
-				writer.EndObject();
+				//writer.EndObject();
 				writer.EndArray();
 			}
 

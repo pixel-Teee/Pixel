@@ -2,6 +2,8 @@
 
 #include "MaterialComponent.h"
 
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
+
 namespace Pixel
 {
 	
@@ -23,6 +25,9 @@ namespace Pixel
 
 		for (uint32_t i = 0; i < 5; ++i)
 			nextFrameNeedLoadTexture[i] = false;
+
+		m_pDescriptorHeap = DescriptorHeap::Create(L"Material Descriptor Heap", DescriptorHeapType::CBV_UAV_SRV, 5);
+		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	REFLECT_STRUCT_BEGIN(SubMaterial)
@@ -59,6 +64,9 @@ namespace Pixel
 		//dont decord these physical path
 
 		HaveNormal = haveNormal;
+
+		m_pDescriptorHeap = DescriptorHeap::Create(L"Material Descriptor Heap", DescriptorHeapType::CBV_UAV_SRV, 5);
+		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	void SubMaterial::PostLoad()

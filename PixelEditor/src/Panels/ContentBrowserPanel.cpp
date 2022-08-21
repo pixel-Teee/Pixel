@@ -147,7 +147,7 @@ namespace Pixel {
 					const std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
 
 					//pass the asset virtual path
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
 
 					ImGui::EndDragDropSource();
 				}
@@ -178,7 +178,7 @@ namespace Pixel {
 					const std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
 
 					//pass the asset virtual path
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
 
 					ImGui::EndDragDropSource();
 				}
@@ -265,7 +265,19 @@ namespace Pixel {
 							}
 							stream.close();
 							m_pMaterial->PostLink();
-							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(itemPath, m_pMaterial);					
+
+							int32_t dotPos = itemPath.find_last_of(".");
+							std::string graphNodeEditorPath;
+							if (dotPos != std::string::npos)
+							{
+								graphNodeEditorPath = materialPhysicalPath.substr(0, dotPos);
+							}
+							else
+							{
+								graphNodeEditorPath = materialPhysicalPath;
+							}
+
+							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, m_pMaterial);
 						}
 						else if(m_CurrentTestMaterialPath == materialPhysicalPath)
 							m_IsOpenTestMaterialEditor = true;

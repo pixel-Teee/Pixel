@@ -9,6 +9,6 @@
     "m_pInputs": [ {} ],
     "m_pOutputs": [ {} ],
     "m_NodeId": 0,
-    "m_pShaderFunctionArray": []
+    "m_pShaderFunctionArray": [ {} ]
   }
 }

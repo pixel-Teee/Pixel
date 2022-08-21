@@ -81,10 +81,6 @@ namespace Pixel {
 
 		MeshConstant m_MeshConstant;
 
-		//texture descriptor heap
-		Ref<DescriptorHeap> m_pDescriptorHeap;
-		Ref<DescriptorHandle> m_pTextureFirstHandle;
-
 		MaterialConstant m_MaterialConstant;
 
 		friend class Model;

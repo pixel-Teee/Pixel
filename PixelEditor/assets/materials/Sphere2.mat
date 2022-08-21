@@ -1,0 +1,4 @@
+{
+    "SubMaterial": {"shadingModel":1,"albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":[0.9511784315109253,1.0,0.9034749269485474],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":5.2386907257919585e-11,"gRoughness":5.122630465e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315,"IsTransparent":false
+    }
+}

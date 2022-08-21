@@ -625,14 +625,13 @@ namespace Pixel
 				{
 					if(ImGui::BeginCombo(("Material[" + std::to_string(i) + "]").c_str(), component.m_MaterialPaths[i].c_str()))
 					{
-						for(auto& item : AssetRegistry)
+						for (auto& item : AssetRegistry)
 						{
 							bool isSelected = item.first == component.m_MaterialPaths[i];
 							if(ImGui::Selectable(item.first.c_str(), isSelected))
 							{
 								component.m_MaterialPaths[i] = item.first;//need to load the sub material
 								component.m_Materials[i] = AssetManager::GetSingleton().GetMaterial(component.m_MaterialPaths[i]);
-								component.m_Materials[i]->PostLoad();
 							}
 							if (isSelected)
 								ImGui::SetItemDefaultFocus();

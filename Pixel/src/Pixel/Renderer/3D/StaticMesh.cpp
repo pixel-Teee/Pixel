@@ -26,9 +26,6 @@ namespace Pixel {
 		m_IndexSize = 0;
 		m_AlternationDataBuffer = nullptr;
 		m_AlternationDataBufferSize = 0;
-
-		m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
-		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh::StaticMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices)
@@ -106,9 +103,6 @@ namespace Pixel {
 		}
 
 		PsoIndex = others.PsoIndex;
-
-		m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh Textures", DescriptorHeapType::CBV_UAV_SRV, 5);
-		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh& StaticMesh::operator=(const StaticMesh& rhs)
@@ -182,8 +176,6 @@ namespace Pixel {
 		}
 
 		PsoIndex = rhs.PsoIndex;
-		m_pDescriptorHeap = DescriptorHeap::Create(L"Static Mesh", DescriptorHeapType::CBV_UAV_SRV, 5);
-		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
 	StaticMesh::~StaticMesh()
@@ -308,7 +300,7 @@ namespace Pixel {
 		std::vector<DescriptorHandle> handles;
 		for (uint32_t i = 0; i < 5; ++i)
 		{
-			DescriptorHandle secondHandle = (*m_pTextureFirstHandle) + i * DescriptorSize;
+			DescriptorHandle secondHandle = (*pMaterial->m_pTextureFirstHandle) + i * DescriptorSize;
 			handles.push_back(secondHandle);
 		}	
 		
@@ -317,9 +309,10 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_pDescriptorHeap);
 		//bind texture
-		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_pTextureFirstHandle->GetGpuHandle());
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, pMaterial->m_pTextureFirstHandle->GetGpuHandle());
+
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, pMaterial->m_pDescriptorHeap);
 		
 		m_MaterialConstant.Albedo = pMaterial->gAlbedo;
 		m_MaterialConstant.Ao = pMaterial->gAo;

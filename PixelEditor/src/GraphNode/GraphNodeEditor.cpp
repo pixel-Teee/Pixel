@@ -3,6 +3,8 @@
 #include "GraphNodeEditor.h"
 
 #include "GraphPin.h"
+#include "GraphLink.h"
+#include "GraphNode.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/3D/Material/ShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
@@ -18,9 +20,9 @@ namespace Pixel {
 		//if is first open, then load the settings file
 		ed::Config config;
 
-		std::string GraphNodeEditorConfigPath = "assets\\" + virtualPath + ".json";
+		m_GraphNodeEditorConfigPath = virtualPath + ".json";
 
-		config.SettingsFile = GraphNodeEditorConfigPath.c_str();
+		config.SettingsFile = m_GraphNodeEditorConfigPath.c_str();
 
 		m_Editor = ed::CreateEditor(&config);
 
@@ -132,7 +134,30 @@ namespace Pixel {
 			outputPin->m_OwnerNode = pOutputPinOwner;
 		}
 
-		//create the graph pin
+		//create the graph link
+		for (auto& item : m_pMaterial->GetLinks())
+		{
+			Ref<GraphLink> pGraphLink = CreateRef<GraphLink>();
+			pGraphLink->m_LinkId = ++m_Id;
+			
+			uint32_t inputNodeId = item.first;
+			uint32_t outputNodeId = item.second;
+
+			Ref<GraphPin> inputPin;
+			Ref<GraphPin> outputPin;
+
+			for (size_t i = 0; i < m_GraphPins.size(); ++i)
+			{
+				if (m_GraphPins[i]->m_PinId.Get() == inputNodeId) inputPin = m_GraphPins[i];
+				if (m_GraphPins[i]->m_PinId.Get() == outputNodeId) outputPin = m_GraphPins[i];
+			}
+
+			pGraphLink->m_InputPin = inputPin;
+			pGraphLink->m_OutputPin = outputPin;
+			inputPin->m_NodeLink = pGraphLink;
+			outputPin->m_NodeLink = pGraphLink;
+			m_GraphLinks.push_back(pGraphLink);
+		}
 	}
 
 	GraphNodeEditor::~GraphNodeEditor()

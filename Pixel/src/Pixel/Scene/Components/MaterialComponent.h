@@ -15,6 +15,8 @@ namespace Pixel {
 		SM_MAX = 4
 	};
 
+	class DescriptorHeap;
+	class DescriptorHandle;
 	//------material component is consist of material------
 	struct SubMaterial {
 		ShadingModel shadingModel = ShadingModel::SM_DefaultLit;
@@ -43,6 +45,10 @@ namespace Pixel {
 		bool nextFrameNeedLoadTexture[5];//load in the next frame
 
 		bool IsTransparent = false;//will draw in the transparent pass
+
+				//texture descriptor heap
+		Ref<DescriptorHeap> m_pDescriptorHeap;
+		Ref<DescriptorHandle> m_pTextureFirstHandle;
 
 		SubMaterial();
 
