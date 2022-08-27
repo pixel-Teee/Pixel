@@ -23,6 +23,13 @@ namespace Pixel {
 
 	ShaderFunction::~ShaderFunction()
 	{
+		m_pInputs.clear();
+		m_pOutputs.clear();
+		Ref<Material> pMaterial = m_pOwner.lock();
+		if (pMaterial != nullptr)
+		{
+			pMaterial->DeleteShaderFunction(shared_from_this());
+		}
 	}
 
 	bool ShaderFunction::IsHaveOutput()

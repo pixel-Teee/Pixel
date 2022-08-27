@@ -20,7 +20,7 @@ namespace Pixel {
 
 	private:
 
-		void DrawPbrNode();
+		void DrawMainFunctionNode();
 
 		ed::EditorContext* m_Editor = nullptr;
 

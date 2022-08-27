@@ -13,6 +13,7 @@ namespace Pixel {
 	{
 		m_pShaderFunctionArray.clear();
 		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
 	}
 
 	Material::~Material()
@@ -27,6 +28,7 @@ namespace Pixel {
 		//------clear the shader function------
 		m_pShaderFunctionArray.clear();
 		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
 		//------clear the shader function------
 	}
 
@@ -71,6 +73,11 @@ namespace Pixel {
 	REFLECT_STRUCT_MEMBER(m_pShaderMainFunction)
 	REFLECT_STRUCT_MEMBER(m_pShaderFunctionArray)
 	REFLECT_STRUCT_END()
+
+	void Material::SetMaterialName(const std::string& materialName)
+	{
+		m_MaterialName = materialName;
+	}
 
 	void Material::PostLink()
 	{

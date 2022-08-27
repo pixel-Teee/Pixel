@@ -86,7 +86,7 @@ namespace Pixel {
 		virtual bool ResetValueType() const;
 
 		//only give the main shader function use
-		bool GetShaderTreeString(std::string& OutString);
+		virtual bool GetShaderTreeString(std::string& OutString);
 
 		bool ClearShaderTreeStringFlag();
 

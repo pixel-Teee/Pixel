@@ -13,6 +13,8 @@
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
+#include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
+#include "Pixel/Renderer/3D/Material/InputNode.h"
 //------my library------
 
 //------other library------
@@ -96,10 +98,18 @@ namespace Pixel {
 				std::wstring physicalFilePath = FileDialogs::SaveFile(L"test material(*.tmat)\0*.tmat\0");
 
 				Ref<Material> pMaterial = CreateRef<Material>();
+				pMaterial->GetMainFunction()->ConstructPutNodeAndSetPutNodeOwner();
+				pMaterial->GetMainFunction()->SetFunctionNodeId(1);
+				pMaterial->GetMainFunction()->GetInputNode(0)->SetPutNodeId(2);
+				pMaterial->GetMainFunction()->GetInputNode(1)->SetPutNodeId(3);
+				pMaterial->GetMainFunction()->GetInputNode(2)->SetPutNodeId(4);
+				pMaterial->GetMainFunction()->GetInputNode(3)->SetPutNodeId(5);
+				pMaterial->GetMainFunction()->GetInputNode(4)->SetPutNodeId(6);
+				pMaterial->SetMaterialName(AssetManager::GetSingleton().GetVirtualPath(AssetManager::GetSingleton().to_string(physicalFilePath)));
 
 				AssetManager::GetSingleton().CreateTestMaterial(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterial);
 
-				AssetManager::GetSingleton().AddTestMaterialToAssetRegistry(physicalFilePath);
+				AssetManager::GetSingleton().AddTestMaterialToAssetRegistry(physicalFilePath);				
 			}
 			ImGui::EndPopup();
 		}

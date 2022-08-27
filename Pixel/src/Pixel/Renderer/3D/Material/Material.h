@@ -29,6 +29,8 @@ namespace Pixel {
 
 		std::string& GetMaterialName() { return m_MaterialName; }
 
+		void SetMaterialName(const std::string& materialName);
+
 		std::map<uint32_t, uint32_t>& GetLinks() { return m_Links; }
 
 		std::string m_MaterialName;//material name

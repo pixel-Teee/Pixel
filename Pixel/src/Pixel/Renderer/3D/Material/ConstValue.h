@@ -13,7 +13,7 @@ namespace Pixel
 
 		virtual ~ConstValue();
 
-		//If this is not user provided, then use default value
+		//if this is not user provided, then use default value
 		bool m_bIsCustom;
 	};
 }

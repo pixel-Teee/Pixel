@@ -10,7 +10,7 @@ namespace Pixel
 		ConstFloatValue() = default;
 		ConstFloatValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 
-		virtual void ConstrcutPutNodeAndSetPutNodeOwner();
+		virtual void ConstructPutNodeAndSetPutNodeOwner();
 
 		//set param value
 		void SetValue(uint32_t index, float value);

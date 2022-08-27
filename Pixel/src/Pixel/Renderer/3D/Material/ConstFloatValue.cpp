@@ -16,8 +16,8 @@ namespace Pixel
 		m_bIsCustom = bIsCustom;
 	}
 
-	void ConstFloatValue::ConstrcutPutNodeAndSetPutNodeOwner()
-	{
+	void ConstFloatValue::ConstructPutNodeAndSetPutNodeOwner()
+{
 		//create temp output variable
 		std::string OutputID = std::to_string(++ShaderStringFactory::m_ShaderValueIndex);
 		std::string OutputName = "ConstFloatValue" + OutputID;

@@ -47,6 +47,10 @@ namespace Pixel {
 		}
 		//------about name------
 
+		void SetPutNodeId(uint32_t pinId) { m_id = pinId; }
+
+		uint32_t GetPutNodeId() { return m_id; }
+
 		//node pin value type
 		ValueType m_ValueType;
 
