@@ -523,7 +523,7 @@ namespace Pixel {
 					//read the sub material
 					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 					{
-						typeDesc->Read(doc[typeDesc->name], m_Materials[virtualPath].get(), nullptr);
+						typeDesc->Read(doc[typeDesc->name], m_Materials[virtualPath].get(), nullptr, false);
 					}
 				}
 				stream.close();
@@ -569,7 +569,7 @@ namespace Pixel {
 					//read the sub material
 					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 					{
-						typeDesc->Read(doc[typeDesc->name], m_TestMaterials[virtualPath].get(), nullptr);
+						typeDesc->Read(doc[typeDesc->name], m_TestMaterials[virtualPath].get(), nullptr, false);
 					}
 				}
 				stream.close();
@@ -627,10 +627,7 @@ namespace Pixel {
 
 		writer.StartObject();
 		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>().get();
-		writer.Key(typeDesc->name);
-		writer.StartObject();
-		typeDesc->Write(writer, pSubMaterial.get(), nullptr);//write a new sub material file
-		writer.EndObject();
+		typeDesc->Write(writer, pSubMaterial.get(), typeDesc->name, false);//write a new sub material file
 		writer.EndObject();
 		std::string data = strBuf.GetString();
 		std::ofstream fout(physicalPath);
@@ -647,10 +644,7 @@ namespace Pixel {
 
 		writer.StartObject();
 		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>().get();
-		writer.Key(typeDesc->name);
-		writer.StartObject();
-		typeDesc->Write(writer, pMaterial.get(), nullptr);//write a new test material file
-		writer.EndObject();
+		typeDesc->Write(writer, pMaterial.get(), typeDesc->name, false);//write a new test material file
 		writer.EndObject();
 		std::string data = strBuf.GetString();
 		std::ofstream fout(physicalPath);

@@ -20,8 +20,8 @@ namespace Pixel {
 			virtual ~TypeDescriptor() {}
 			virtual std::string getFullName() const { return name; }
 
-			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) = 0;//write to json
-			virtual void Read(rapidjson::Value& value, void* obj, const char* name) = 0;
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) = 0;//write to json
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name, bool isArrayItem) = 0;
 		};
 		//------finding type descriptors------
 
@@ -89,8 +89,8 @@ namespace Pixel {
 			TypeDescriptor_Struct(const char* name, size_t size, const std::initializer_list<Member>& init) : TypeDescriptor{ nullptr, 0 }, members{ init } {
 			}
 
-			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override;
-			virtual void Read(rapidjson::Value& value, void* obj, const char* name) override;
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) override;
+			virtual void Read(rapidjson::Value& value, void* obj, const char* name, bool isArrayItem) override;
 		};
 
 		//------std::vector<>------
@@ -129,23 +129,35 @@ namespace Pixel {
 				return std::string("std::vector<") + itemType->getFullName() + ">";
 			}
 
-			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) override
 			{
-				writer.Key(name);
+				if(!isArrayItem)
+					writer.Key(name);
 				writer.StartArray();
 				size_t vecSize = getSize(obj);
 				//writer.StartObject();
 				for (size_t i = 0; i < vecSize; ++i)
 				{
-					itemType->Write(writer, const_cast<void*>(getItem(obj, i)), itemType->name);
+					itemType->Write(writer, const_cast<void*>(getItem(obj, i)), itemType->getFullName().c_str(), true);
 				}
 				//writer.EndObject();
 				writer.EndArray();
 			}
 
-			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name, bool isArrayItem) override
 			{
-				if (doc.HasMember(name) && doc[name].IsArray())
+				if (isArrayItem)
+				{
+					rapidjson::Value& array = doc;
+
+					ReSize(obj, array.Size());
+
+					for (rapidjson::SizeType i = 0; i < array.Size(); ++i)
+					{
+						itemType->Read(array[i], const_cast<void*>(getItem(obj, i)), nullptr, true);
+					}
+				}
+				else if (doc.HasMember(name) && doc[name].IsArray())
 				{
 					rapidjson::Value& array = doc[name];
 
@@ -153,7 +165,7 @@ namespace Pixel {
 
 					for (rapidjson::SizeType i = 0; i < array.Size(); ++i)
 					{
-						itemType->Read(array[i], const_cast<void*>(getItem(obj, i)), itemType->name);
+						itemType->Read(array[i], const_cast<void*>(getItem(obj, i)), nullptr, true);
 					}
 				}
 			}
@@ -177,6 +189,7 @@ namespace Pixel {
 		{
 			TypeDescriptor* targetType;
 			const void* (*getTarget)(const void*);
+			void (*alloc)(void*);
 
 			//template constructor
 			template<typename TargetType>
@@ -188,19 +201,26 @@ namespace Pixel {
 					const auto& SharedPtr = *(const std::shared_ptr<TargetType>*)SharedPtrPtr;
 					return SharedPtr.get();
 				};
+
+				alloc = [](void* SharedPtrPtr)->void
+				{
+					auto& SharedPtr = *(std::shared_ptr<TargetType>*)SharedPtrPtr;
+					SharedPtr = CreateRef<TargetType>();
+				};
 			}
 			virtual std::string getFullName() const override
 			{
 				return std::string("std::shared_ptr<") + targetType->getFullName() + ">";
 			}
-			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) override
 			{
-				targetType->Write(writer, const_cast<void*>(getTarget(obj)), name);
+				targetType->Write(writer, const_cast<void*>(getTarget(obj)), name, isArrayItem);
 			}
 
-			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name, bool isArrayItem) override
 			{
-				targetType->Read(doc, const_cast<void*>(getTarget(obj)), name);
+				alloc(obj);
+				targetType->Read(doc, const_cast<void*>(getTarget(obj)), name, isArrayItem);
 			}
 
 		};
@@ -274,9 +294,10 @@ namespace Pixel {
 				return std::string("std::map<") + keyType->getFullName() + ", " + valueType->getFullName() + ">";
 			}
 
-			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name) override
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) override
 			{
-				writer.Key(name);
+				if(!isArrayItem)
+					writer.Key(name);
 				writer.StartArray();
 				
 				void* begin = getBegin(obj);
@@ -284,8 +305,8 @@ namespace Pixel {
 				while (NotEqual(begin, end))
 				{
 					writer.StartObject();
-					keyType->Write(writer, const_cast<void*>(getKey(begin)), keyType->name);
-					valueType->Write(writer, getValue(begin), valueType->name);			
+					keyType->Write(writer, const_cast<void*>(getKey(begin)), keyType->name, false);
+					valueType->Write(writer, getValue(begin), valueType->name, false);			
 					writer.EndObject();
 					getNext(begin);
 				}
@@ -297,7 +318,7 @@ namespace Pixel {
 				writer.EndArray();
 			}
 
-			virtual void Read(rapidjson::Value& doc, void* obj, const char* name) override
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name, bool isArrayItem) override
 			{
 				//
 			}

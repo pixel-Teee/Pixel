@@ -70,7 +70,7 @@ namespace Pixel {
 	REFLECT_STRUCT_MEMBER(m_Links)
 	REFLECT_STRUCT_MEMBER(m_MaterialName)
 	REFLECT_STRUCT_MEMBER(m_GraphNodeEditorPath)
-	REFLECT_STRUCT_MEMBER(m_pShaderMainFunction)
+	//REFLECT_STRUCT_MEMBER(m_pShaderMainFunction)
 	REFLECT_STRUCT_MEMBER(m_pShaderFunctionArray)
 	REFLECT_STRUCT_END()
 
@@ -120,6 +120,14 @@ namespace Pixel {
 			}
 
 			InputPin->Connection(OutputPin);
+		}
+
+		for (size_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			if (m_pShaderFunctionArray[i]->GetFunctioNodeId() == 1)
+			{
+				m_pShaderMainFunction = std::static_pointer_cast<ShaderMainFunction>(m_pShaderFunctionArray[i]);
+			}
 		}
 	}
 

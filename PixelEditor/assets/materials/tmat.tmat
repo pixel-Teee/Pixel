@@ -1,24 +1,43 @@
 {
-  "Material": {
+  "Material": 
+  {
     "m_Links": [],
     "m_MaterialName": "",
     "m_GraphNodeEditorPath": "",
-    "m_ShowName": "",
-    "m_functionType": 0,
-    "m_pInputs": [ "m_id", 2, "m_ValueType", 3, "m_NodeName", "Normal", "m_id", 3, "m_ValueType", 3, "m_NodeName", "Albedo", "m_id", 4, "m_ValueType", 0, "m_NodeName", "Roughness", "m_id", 5, "m_ValueType", 0, "m_NodeName", "Metallic", "m_id", 6, "m_ValueType", 0, "m_NodeName", "Ao" ],
-    "m_pOutputs": [],
-    "m_NodeId": 1,
     "m_pShaderFunctionArray": [
-      "m_ShowName",
-      "",
-      "m_functionType",
-      0,
-      "m_pInputs",
-      [ "m_id", 2, "m_ValueType", 3, "m_NodeName", "Normal", "m_id", 3, "m_ValueType", 3, "m_NodeName", "Albedo", "m_id", 4, "m_ValueType", 0, "m_NodeName", "Roughness", "m_id", 5, "m_ValueType", 0, "m_NodeName", "Metallic", "m_id", 6, "m_ValueType", 0, "m_NodeName", "Ao" ],
-      "m_pOutputs",
-      [],
-      "m_NodeId",
-      1
+      {
+        "m_ShowName": "",
+        "m_functionType": 0,
+        "m_pInputs": [
+          {
+            "m_id": 2,
+            "m_ValueType": 3,
+            "m_NodeName": "Normal"
+          },
+          {
+            "m_id": 3,
+            "m_ValueType": 3,
+            "m_NodeName": "Albedo"
+          },
+          {
+            "m_id": 4,
+            "m_ValueType": 0,
+            "m_NodeName": "Roughness"
+          },
+          {
+            "m_id": 5,
+            "m_ValueType": 0,
+            "m_NodeName": "Metallic"
+          },
+          {
+            "m_id": 6,
+            "m_ValueType": 0,
+            "m_NodeName": "Ao"
+          }
+        ],
+        "m_pOutputs": [],
+        "m_NodeId": 1
+      }
     ]
   }
 }

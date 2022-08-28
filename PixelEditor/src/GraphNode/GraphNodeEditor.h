@@ -22,6 +22,8 @@ namespace Pixel {
 
 		void DrawMainFunctionNode();
 
+		void DrawLinks();
+
 		ed::EditorContext* m_Editor = nullptr;
 
 		std::string m_GraphNodeEditorConfigPath;

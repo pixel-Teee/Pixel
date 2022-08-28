@@ -219,7 +219,7 @@ namespace Pixel {
 								//read the sub material
 								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 								{
-									typeDesc->Read(doc[typeDesc->name], m_pSubMaterial.get(), nullptr);
+									typeDesc->Read(doc, m_pSubMaterial.get(), typeDesc->name, false);
 								}
 							}
 							stream.close();
@@ -267,10 +267,10 @@ namespace Pixel {
 							strStream << stream.rdbuf();
 							if (!doc.Parse(strStream.str().data()).HasParseError())
 							{
-								//read the sub material
+								//read the test material
 								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 								{
-									typeDesc->Read(doc[typeDesc->name], m_pMaterial.get(), nullptr);
+									typeDesc->Read(doc, m_pMaterial.get(), typeDesc->name, false);
 								}
 							}
 							stream.close();

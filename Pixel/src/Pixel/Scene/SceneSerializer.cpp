@@ -15,7 +15,7 @@ namespace Pixel {
 			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<IDComponent>().get();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<IDComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<IDComponent>(), nullptr, false);
 			out.EndObject();
 		}
 		if (entity.HasComponent<TagComponent>())
@@ -25,7 +25,7 @@ namespace Pixel {
 			//TagComponent& tagComponent = entity.GetComponent<TagComponent>();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<TagComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<TagComponent>(), nullptr, false);
 			out.EndObject();
 		}
 		if(entity.HasComponent<TransformComponent>())
@@ -33,7 +33,7 @@ namespace Pixel {
 			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<TransformComponent>().get();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<TransformComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<TransformComponent>(), nullptr, false);
 			out.EndObject();
 		}
 		if(entity.HasComponent<CameraComponent>())
@@ -41,7 +41,7 @@ namespace Pixel {
 			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<CameraComponent>().get();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<CameraComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<CameraComponent>(), nullptr, false);
 			out.EndObject();
 		}
 		if(entity.HasComponent<StaticMeshComponent>())
@@ -49,7 +49,7 @@ namespace Pixel {
 			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<StaticMeshComponent>().get();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<StaticMeshComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<StaticMeshComponent>(), nullptr, false);
 			out.EndObject();
 		}
 		if(entity.HasComponent<MaterialComponent>())
@@ -57,7 +57,7 @@ namespace Pixel {
 			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<MaterialComponent>().get();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<MaterialComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<MaterialComponent>(), nullptr, false);
 			out.EndObject();
 		}
 		if(entity.HasComponent<LightComponent>())
@@ -65,7 +65,7 @@ namespace Pixel {
 			Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<LightComponent>().get();
 			out.Key(typeDesc->name);
 			out.StartObject();
-			typeDesc->Write(out, &entity.GetComponent<LightComponent>(), nullptr);
+			typeDesc->Write(out, &entity.GetComponent<LightComponent>(), nullptr, false);
 			out.EndObject();
 		}
 	}
@@ -130,33 +130,33 @@ namespace Pixel {
 					Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<IDComponent>().get();
 					if(object.HasMember(typeDesc->name))
 					{
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<IDComponent>(), nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<IDComponent>(), nullptr, false);
 					}
 
 					typeDesc = Reflect::TypeResolver<TagComponent>().get();
 					if(object.HasMember(typeDesc->name))
 					{
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<TagComponent>(), nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<TagComponent>(), nullptr, false);
 					}
 
 					typeDesc = Reflect::TypeResolver<TransformComponent>().get();
 					if(object.HasMember(typeDesc->name))
 					{
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<TransformComponent>(), nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &newEntity.GetComponent<TransformComponent>(), nullptr, false);
 					}
 
 					typeDesc = Reflect::TypeResolver<CameraComponent>().get();
 					if(object.HasMember(typeDesc->name))
 					{
 						auto& camera = newEntity.AddComponent<CameraComponent>();
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &camera, nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &camera, nullptr, false);
 					}
 
 					typeDesc = Reflect::TypeResolver<StaticMeshComponent>().get();
 					if (object.HasMember(typeDesc->name))
 					{
 						auto& mesh = newEntity.AddComponent<StaticMeshComponent>();
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &mesh, nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &mesh, nullptr, false);
 						mesh.PostLoad();
 					}
 
@@ -164,7 +164,7 @@ namespace Pixel {
 					if (object.HasMember(typeDesc->name))
 					{
 						auto& material = newEntity.AddComponent<MaterialComponent>();
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &material, nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &material, nullptr, false);
 						material.PostLoad();
 					}
 
@@ -172,7 +172,7 @@ namespace Pixel {
 					if (object.HasMember(typeDesc->name))
 					{
 						auto& light = newEntity.AddComponent<LightComponent>();
-						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &light, nullptr);
+						typeDesc->Read(const_cast<rapidjson::Value&>(object[typeDesc->name]), &light, nullptr, false);
 					}
 				}
 			}

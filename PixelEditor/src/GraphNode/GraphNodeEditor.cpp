@@ -141,4 +141,11 @@ namespace Pixel {
 		ed::EndNode();
 	}
 
+	void GraphNodeEditor::DrawLinks()
+	{
+		//draw links
+		for (auto& linkInfo : m_GraphLinks)
+			ed::Link(linkInfo->m_LinkId, linkInfo->m_InputPin.lock()->m_PinId, linkInfo->m_OutputPin.lock()->m_PinId);
+	}
+
 }
