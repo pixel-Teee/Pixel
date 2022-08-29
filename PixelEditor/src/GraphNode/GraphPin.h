@@ -17,6 +17,9 @@ namespace Pixel {
 		//pin belong's node
 		std::weak_ptr<GraphNode> m_OwnerNode;
 
+		//pin name
+		std::string m_PinName;
+
 		//current link, links the two pins
 		Ref<GraphLink> m_NodeLink;
 

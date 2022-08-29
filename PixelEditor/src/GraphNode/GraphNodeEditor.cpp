@@ -48,6 +48,7 @@ namespace Pixel {
 			{
 				Ref<GraphPin> pGraphPins = CreateRef<GraphPin>();
 				pGraphPins->m_PinId = m_pMaterial->GetShaderFunction()[i]->GetInputNode(j)->GetPutNodeId();
+				pGraphPins->m_PinName = m_pMaterial->GetShaderFunction()[i]->GetInputNode(j)->GetNodeName();
 				pGraphPins->m_OwnerNode = pGraphNode;
 				pGraphNode->m_InputPin.push_back(pGraphPins);
 				m_GraphPins.push_back(pGraphPins);
@@ -59,6 +60,7 @@ namespace Pixel {
 			{
 				Ref<GraphPin> pGraphPins = CreateRef<GraphPin>();
 				pGraphPins->m_PinId = m_pMaterial->GetShaderFunction()[i]->GetOutputNode(j)->GetPutNodeId();
+				pGraphPins->m_PinName = m_pMaterial->GetShaderFunction()[i]->GetOutputNode(j)->GetNodeName();
 				pGraphPins->m_OwnerNode = pGraphNode;
 				pGraphNode->m_OutputPin.push_back(pGraphPins);
 				m_GraphPins.push_back(pGraphPins);
@@ -135,15 +137,14 @@ namespace Pixel {
 		{
 			if (m_GraphNodes[i]->m_NodeId.Get() == 1)
 			{
-				for (size_t j = 0; j < m_GraphNodes[i]->p_Owner->GetInputNodeNum(); ++j)
+				for (size_t j = 0; j < m_GraphNodes[i]->m_InputPin.size(); ++j)
 				{
-					ed::BeginPin(m_GraphNodes[i]->p_Owner->GetInputNode(j)->m_id, ed::PinKind::Input);
-					ImGui::BeginHorizontal(m_GraphNodes[i]->p_Owner->GetInputNode(j)->m_id);
-					DrawPinIcon(ImColor(255.0f, 255.0f, 255.0f, 255.0f), ImColor(32.0f, 32.0f, 32.0f, 255.0f));
-					ImGui::Text(m_GraphNodes[i]->p_Owner->GetInputNode(j)->GetNodeName().c_str());
-					//Draw Pin Icon
-					ImGui::EndHorizontal();
+					ImGui::BeginHorizontal((int32_t)m_GraphNodes[i]->m_InputPin[j]->m_PinId.Get());
+					ed::BeginPin(m_GraphNodes[i]->m_InputPin[j]->m_PinId, ed::PinKind::Input);
+					DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
+					ImGui::Text(m_GraphNodes[i]->m_InputPin[j]->m_PinName.c_str());
 					ed::EndPin();
+					ImGui::EndHorizontal();
 				}
 			}
 		}
