@@ -24,6 +24,8 @@ namespace Pixel {
 
 		void DrawLinks();
 
+		void DrawPinIcon(ImU32 color, ImU32 innerColor);
+
 		ed::EditorContext* m_Editor = nullptr;
 
 		std::string m_GraphNodeEditorConfigPath;
