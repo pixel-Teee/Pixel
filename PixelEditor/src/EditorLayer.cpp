@@ -523,8 +523,11 @@ namespace Pixel
 		&& m_SceneState == SceneState::Edit)
 		{
 			int32_t pixelData = Application::Get().GetRenderer()->GetPickerValue(mouseX, mouseY);
+			if(m_ActiveScene->GetRegistry().valid((entt::entity)pixelData))
+			{
+				m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			}
 			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 	}
 

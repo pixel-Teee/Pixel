@@ -68,6 +68,8 @@ namespace Pixel {
 		//from the material to construct node¡¢pin¡¢link
 		m_pMaterial = pMaterial;
 
+		m_CreateNewNode = false;
+
 		//create the graph node
 		for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
 		{
@@ -155,10 +157,13 @@ namespace Pixel {
 			DrawMainFunctionNode();
 
 			//1.draw node
+			DrawNodes();
 
 			//2.draw link
+			DrawLinks();
 
 			//3.handle create node
+			HandleInteraction();
 
 			ed::End();
 		ed::SetCurrentEditor(nullptr);
@@ -207,7 +212,9 @@ namespace Pixel {
 	{
 		ImGui::BeginChild("TopPanel", ImVec2(0, panelHeight));
 		ImGui::BeginHorizontal("TopPanel");
-		ImGui::Button("Compiler", ImVec2(0, panelHeight));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, panelHeight / 8.0f);
+		ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f)));
+		ImGui::PopStyleVar(1);
 		ImGui::EndHorizontal();
 		ImGui::EndChild();
 	}
@@ -217,6 +224,47 @@ namespace Pixel {
 		//draw links
 		for (auto& linkInfo : m_GraphLinks)
 			ed::Link(linkInfo->m_LinkId, linkInfo->m_InputPin.lock()->m_PinId, linkInfo->m_OutputPin.lock()->m_PinId);
+	}
+
+	void GraphNodeEditor::DrawNodes()
+	{
+		for(auto& node : m_GraphNodes)
+		{
+			//skip the main node
+			if (node->m_NodeId.Get() == 1)
+				continue;
+			m_BlueprintNodeBuilder->Begin(node->m_NodeId);
+
+			//draw header
+			m_BlueprintNodeBuilder->Header(ImColor(255, 255, 255, 255));
+			ImGui::Spring(0);
+			ImGui::TextUnformatted(node->p_Owner->GetShowName().c_str());
+			ImGui::Spring(1);
+			ImGui::Dummy(ImVec2(0, 28));
+			ImGui::Spring(0);
+			m_BlueprintNodeBuilder->EndHeader();
+
+			//draw input pin
+			for(auto& input : node->m_InputPin)
+			{
+				m_BlueprintNodeBuilder->Input(input->m_PinId);
+				DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
+				ImGui::Spring(0);
+				ImGui::TextUnformatted(input->m_PinName.c_str());
+				m_BlueprintNodeBuilder->EndInput();
+			}
+
+			//draw output pin
+			for(auto& output : node->m_OutputPin)
+			{
+				m_BlueprintNodeBuilder->Output(output->m_PinId);
+				DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
+				ImGui::Spring(0);
+				ImGui::TextUnformatted(output->m_PinName.c_str());
+				m_BlueprintNodeBuilder->EndOutput();
+			}
+			m_BlueprintNodeBuilder->End();
+		}
 	}
 
 	void GraphNodeEditor::DrawPinIcon(ImU32 color, ImU32 innerColor)
@@ -271,4 +319,76 @@ namespace Pixel {
 		ImGui::Dummy(ImVec2(PinIconSize, PinIconSize));
 	}
 
+	void GraphNodeEditor::HandleInteraction()
+	{
+		if(!m_CreateNewNode)
+		{
+			if(ed::BeginCreate(ImColor(204, 232, 207, 255), 2.0f))
+			{
+				ed::PinId outputPinId = 0, inputPinId = 0;
+
+				//------create link------
+				if(ed::QueryNewLink(&outputPinId, &inputPinId))
+				{
+					auto outputPin = FindPin(outputPinId);
+					auto inputPin = FindPin(inputPinId);
+
+					bool alreadyLink = false;
+					//check the outputpin and inputpin don't have link
+					for(size_t i = 0; i < m_GraphLinks.size(); ++i)
+					{
+						if (m_GraphLinks[i]->m_InputPin.lock() == inputPin)
+							alreadyLink = true;
+						if (m_GraphLinks[i]->m_OutputPin.lock() == outputPin)
+							alreadyLink = true;
+					}
+					if(!alreadyLink)
+					{
+						ShowLabel("+ Create Link", ImColor(32, 45, 32, 100));
+						if(ed::AcceptNewItem(ImColor(128, 255, 128, 255), 4.0f))
+						{
+							//create new link
+
+							//create logic link
+						}
+					}
+				}
+				//------create link------
+
+				//------create nodes------
+
+				//------create nodes------
+			}
+			ed::EndCreate();
+		}
+	}
+
+	void GraphNodeEditor::ShowLabel(const std::string& label, ImColor color)
+	{
+		ImGui::SetCursorPosX(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
+
+		auto size = ImGui::CalcTextSize(label.c_str());
+
+		auto padding = ImGui::GetStyle().FramePadding;
+		auto spacing = ImGui::GetStyle().ItemSpacing;
+
+		ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(spacing.x, -spacing.y));
+
+		auto rectMin = ImGui::GetCursorScreenPos() - padding;
+		auto rectMax = ImGui::GetCursorScreenPos() + size + padding;
+
+		auto drawList = ImGui::GetWindowDrawList();
+		drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
+		ImGui::TextUnformatted(label.c_str());
+	}
+
+	Ref<GraphPin> GraphNodeEditor::FindPin(ed::PinId pinId)
+	{
+		for (size_t i = 0; i < m_GraphPins.size(); ++i)
+		{
+			if (m_GraphPins[i]->m_PinId == pinId)
+				return m_GraphPins[i];
+		}
+		return nullptr;
+	}
 }

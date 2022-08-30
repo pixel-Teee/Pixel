@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GraphPin.h"
 #include "imgui-node-editor/imgui_node_editor.h"
 
 namespace Pixel {
@@ -29,7 +30,15 @@ namespace Pixel {
 
 		void DrawLinks();
 
+		void DrawNodes();
+
 		void DrawPinIcon(ImU32 color, ImU32 innerColor);
+
+		void HandleInteraction();
+
+		void ShowLabel(const std::string& label, ImColor color);
+
+		Ref<GraphPin> FindPin(ed::PinId pinId);
 
 		ed::EditorContext* m_Editor = nullptr;
 
@@ -51,5 +60,7 @@ namespace Pixel {
 
 		float m_TopPanelHeight;
 		float m_DownPanelHeight;
+
+		bool m_CreateNewNode;
 	};
 }
