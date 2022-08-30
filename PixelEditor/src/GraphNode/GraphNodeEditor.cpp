@@ -16,6 +16,7 @@
 #include "Pixel/Renderer/3D/Material/OutputNode.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
 #include "Pixel/Renderer/3D/Material/Mul.h"
+#include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -216,7 +217,8 @@ namespace Pixel {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, panelHeight / 8.0f);
 		if(ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
-			//call the material's get shader tree string
+			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
+			
 		}
 		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
@@ -266,9 +268,9 @@ namespace Pixel {
 			for(auto& output : node->m_OutputPin)
 			{
 				m_BlueprintNodeBuilder->Output(output->m_PinId);
-				DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
+				ImGui::TextUnformatted(output->m_PinName.c_str());		
 				ImGui::Spring(0);
-				ImGui::TextUnformatted(output->m_PinName.c_str());
+				DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
 				m_BlueprintNodeBuilder->EndOutput();
 			}
 			m_BlueprintNodeBuilder->End();
@@ -437,6 +439,11 @@ namespace Pixel {
 				//create mul node
 				CreateMul();
 			}
+
+			if (ImGui::MenuItem("ConstFloatValue4"))
+			{
+				CreateConstFloatValue4();
+			}
 			ImGui::EndPopup();
 		}
 		ed::Resume();
@@ -477,6 +484,44 @@ namespace Pixel {
 
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pMul);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateConstFloatValue4()
+	{
+		Ref<ShaderFunction> pConstFloatValue4 = CreateRef<ConstFloatValue>("ConstFloatValue4", m_pMaterial, 4, false);
+		pConstFloatValue4->AddToMaterialOwner();
+		pConstFloatValue4->ConstructPutNodeAndSetPutNodeOwner();
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = ++m_Id;
+		pGraphNode->p_Owner = pConstFloatValue4;
+
+		for (size_t i = 0; i < pConstFloatValue4->GetInputNodeNum(); ++i)
+		{
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = ++m_Id;
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pConstFloatValue4->GetInputNode(i)->GetNodeName();
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pConstFloatValue4->GetOutputNodeNum(); ++i)
+		{
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = ++m_Id;
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pConstFloatValue4->GetOutputNode(i)->GetNodeName();
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pConstFloatValue4);
 		//------add to material shader function------
 	}
 

@@ -104,4 +104,8 @@ namespace Pixel {
 
 		return Temp;
 	}
+	bool ShaderStringFactory::CreatePixelShaderString(Ref<Material> pMaterial)
+	{
+		
+	}
 }

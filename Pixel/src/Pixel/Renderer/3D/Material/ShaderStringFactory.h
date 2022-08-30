@@ -5,6 +5,7 @@
 namespace Pixel {
 	class PutNode;
 	struct MaterialShaderPara;
+	class Material;
 	class ShaderStringFactory
 	{
 	public:
@@ -44,5 +45,7 @@ namespace Pixel {
 		static std::string FloatConst4(const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4);
 
 		static std::string GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement);
+
+		static bool CreatePixelShaderString(Ref<Material> pMaterial);
 	};
 }

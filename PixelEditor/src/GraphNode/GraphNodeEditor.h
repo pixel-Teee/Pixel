@@ -42,6 +42,8 @@ namespace Pixel {
 
 		//------create logic nodes------
 		void CreateMul();
+
+		void CreateConstFloatValue4();
 		//------create logic nodes------
 
 		Ref<GraphPin> FindPin(ed::PinId pinId);
