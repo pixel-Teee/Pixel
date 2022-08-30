@@ -110,8 +110,8 @@ namespace Pixel {
 
 		for (auto& item : m_pMaterial->GetLinks())
 		{
-			uint32_t inputPinId = item.first;
-			uint32_t outputPinId = item.second;
+			uint32_t inputPinId = item.x;
+			uint32_t outputPinId = item.y;
 
 			for (size_t i = 0; i < m_GraphPins.size(); ++i)
 			{
@@ -214,7 +214,14 @@ namespace Pixel {
 		ImGui::BeginChild("TopPanel", ImVec2(0, panelHeight));
 		ImGui::BeginHorizontal("TopPanel");
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, panelHeight / 8.0f);
-		ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f)));
+		if(ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
+		{
+			//call the material's get shader tree string
+		}
+		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
+		{
+			//save will also call the compiler	
+		}
 		ImGui::PopStyleVar(1);
 		ImGui::EndHorizontal();
 		ImGui::EndChild();
@@ -352,6 +359,8 @@ namespace Pixel {
 						pGraphLink->m_InputPin = inputPin;
 						pGraphLink->m_OutputPin = outputPin;
 						pGraphLink->m_LinkId = ++m_Id;
+						//add new graph link to m_GraphLinks
+						m_GraphLinks.push_back(pGraphLink);
 						//create logic link
 						uint32_t inputPinLocationIndex = 0, outputPinLocationIndex = 0;
 						if(inputPin->m_OwnerNode.lock())
@@ -381,6 +390,8 @@ namespace Pixel {
 						Ref<OutputNode> outputNode = outputPin->m_OwnerNode.lock()->p_Owner->GetOutputNode(outputPinLocationIndex);
 						inputNode->Connection(outputNode);
 						//------link two nodes------
+
+						m_pMaterial->GetLinks().push_back(glm::vec2(inputPin->m_PinId.Get(), outputPin->m_PinId.Get()));
 					}
 				}
 			}

@@ -101,8 +101,8 @@ namespace Pixel {
 		//link
 		for (auto& item : m_Links)
 		{
-			uint32_t InputPinId = item.first;
-			uint32_t OutputPinId = item.second;
+			uint32_t InputPinId = item.x;
+			uint32_t OutputPinId = item.y;
 
 			Ref<InputNode> InputPin;
 			Ref<OutputNode> OutputPin;

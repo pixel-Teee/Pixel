@@ -294,7 +294,7 @@ namespace Pixel {
 
 		struct TypeDescriptor_GlmVec3 : TypeDescriptor
 		{
-			TypeDescriptor_GlmVec3() : TypeDescriptor("glm::vec3", sizeof(int32_t))
+			TypeDescriptor_GlmVec3() : TypeDescriptor("glm::vec3", sizeof(glm::vec3))
 			{}
 
 			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) override
@@ -333,6 +333,46 @@ namespace Pixel {
 		TypeDescriptor* getPrimitiveDescriptor<glm::vec3>()
 		{
 			static TypeDescriptor_GlmVec3 typeDesc;
+			return &typeDesc;
+		}
+
+		struct TypeDescriptor_GlmVec2 : TypeDescriptor
+		{
+			TypeDescriptor_GlmVec2() : TypeDescriptor("glm::vec2", sizeof(glm::vec2))
+			{}
+
+			virtual void Write(rapidjson::Writer<rapidjson::StringBuffer>& writer, void* obj, const char* name, bool isArrayItem) override
+			{
+				if (!isArrayItem)
+					writer.Key(name);
+				glm::vec2& vec = *static_cast<glm::vec2*>(obj);
+				writer.StartArray();
+				writer.Double(vec.x);
+				writer.Double(vec.y);
+				writer.EndArray();
+			}
+
+			virtual void Read(rapidjson::Value& doc, void* obj, const char* name, bool isArrayItem) override
+			{
+				if (isArrayItem)
+				{
+					glm::vec2& vec = *static_cast<glm::vec2*>(obj);
+					vec.x = doc[0].GetDouble();
+					vec.y = doc[1].GetDouble();
+				}
+				else if (doc.HasMember(name) && doc[name].IsArray())
+				{
+					glm::vec2& vec = *static_cast<glm::vec2*>(obj);
+					vec.x = doc[name][0].GetDouble();
+				}
+			}
+
+		};
+
+		template<>
+		TypeDescriptor* getPrimitiveDescriptor<glm::vec2>()
+		{
+			static TypeDescriptor_GlmVec2 typeDesc;
 			return &typeDesc;
 		}
 	}	

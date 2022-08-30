@@ -31,7 +31,7 @@ namespace Pixel {
 
 		void SetMaterialName(const std::string& materialName);
 
-		std::map<uint32_t, uint32_t>& GetLinks() { return m_Links; }
+		std::vector<glm::vec2>& GetLinks() { return m_Links; }
 
 		std::string m_MaterialName;//material name
 
@@ -46,7 +46,9 @@ namespace Pixel {
 		//other shader function
 		std::vector<Ref<ShaderFunction>> m_pShaderFunctionArray;
 
-		std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
+		//std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
+
+		std::vector<glm::vec2> m_Links;
 
 		void PostLink();
 
