@@ -20,6 +20,6 @@ namespace Pixel {
 		//many output pins
 		std::vector<Ref<GraphPin>> m_OutputPin;
 
-		GraphNode() = default;
+		GraphNode();
 	};
 }

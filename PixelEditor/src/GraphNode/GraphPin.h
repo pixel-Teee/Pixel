@@ -14,6 +14,8 @@ namespace Pixel {
 		//pin id
 		ed::PinId m_PinId;
 
+		ImColor m_Color;
+
 		//pin belong's node
 		std::weak_ptr<GraphNode> m_OwnerNode;
 
@@ -25,7 +27,7 @@ namespace Pixel {
 
 		//pin location index
 
-		GraphPin() = default;
+		GraphPin();
 		friend bool operator==(const GraphPin& lhs, const GraphPin& rhs);
 	};
 }

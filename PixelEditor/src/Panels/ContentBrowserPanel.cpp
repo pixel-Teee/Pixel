@@ -24,7 +24,7 @@
 
 namespace Pixel {
 
-	//Once we have projects, change this
+	//once we have projects hub, change this
 	extern const std::filesystem::path g_AssetPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()

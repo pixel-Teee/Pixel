@@ -5,10 +5,13 @@
 namespace Pixel {
 	namespace ed = ax::NodeEditor;
 
+	class BlueprintNodeBuilder;
 	class Material;
 	class GraphLink;
 	class GraphNode;
 	class GraphPin;
+	class Texture2D;
+	class DescriptorHandle;
 	class GraphNodeEditor {
 	public:
 
@@ -21,6 +24,8 @@ namespace Pixel {
 	private:
 
 		void DrawMainFunctionNode();
+
+		void DrawTopPanel(float panelHeight);
 
 		void DrawLinks();
 
@@ -37,5 +42,14 @@ namespace Pixel {
 		Ref<Material> m_pMaterial;
 		
 		uint32_t m_Id;
+
+		//------header texture------
+		Ref<Texture2D> m_HeaderBackgroundTexture;
+		Ref<DescriptorHandle> m_HeaderBackgroundTextureHandle;
+		//------header texture------
+		Ref<BlueprintNodeBuilder> m_BlueprintNodeBuilder;
+
+		float m_TopPanelHeight;
+		float m_DownPanelHeight;
 	};
 }

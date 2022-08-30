@@ -7,4 +7,8 @@ namespace Pixel {
 	{
 		return false;
 	}
+	GraphPin::GraphPin()
+	{
+		m_Color = ImColor(255, 255, 255, 255);
+	}
 }

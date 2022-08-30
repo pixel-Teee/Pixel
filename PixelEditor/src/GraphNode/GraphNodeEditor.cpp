@@ -5,21 +5,55 @@
 #include "GraphPin.h"
 #include "GraphLink.h"
 #include "GraphNode.h"
+#include "Builder.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/3D/Material/ShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
 #include "Pixel/Renderer/3D/Material/InputNode.h"
 #include "Pixel/Renderer/3D/Material/OutputNode.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui/imgui_internal.h"
+#include "Pixel/Renderer/Texture.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorCpuHandle.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 //------other library------
 
 namespace Pixel {
 
+	//extern const std::filesystem::path g_AssetPath;
+
+	static bool Splitter(bool split_vertically, float thickness, float* size1, float* size2, float min_size1, float min_size2, float splitter_long_axis_size = -1.0f)
+	{
+		using namespace ImGui;
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		ImGuiID id = window->GetID("##Splitter");
+		ImRect bb;
+		bb.Min = window->DC.CursorPos + (split_vertically ? ImVec2(*size1, 0.0f) : ImVec2(0.0f, *size1));
+		//PIXEL_CORE_INFO("{0}, {1}", window->DC.CursorPos.x, window->DC.CursorPos.y);
+		bb.Max = bb.Min + CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f);
+		return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
+	}
+
 	GraphNodeEditor::GraphNodeEditor(const std::string& virtualPath, Ref<Material> pMaterial)
 	{
+		m_TopPanelHeight = 800.0f;
+		m_DownPanelHeight = 400.0f;
+
+		m_HeaderBackgroundTexture = Texture2D::Create("Resources/Icons/BlueprintBackground.png");
+
+		m_HeaderBackgroundTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
+		Device::Get()->CopyDescriptorsSimple(1, m_HeaderBackgroundTextureHandle->GetCpuHandle(), m_HeaderBackgroundTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		m_BlueprintNodeBuilder = CreateRef<BlueprintNodeBuilder>((ImTextureID)(m_HeaderBackgroundTextureHandle->GetGpuHandle()->GetGpuPtr()), m_HeaderBackgroundTexture->GetWidth(), m_HeaderBackgroundTexture->GetHeight());
+
 		m_Id = 0;
 
 		//if it is first open, then load the settings file
@@ -103,8 +137,17 @@ namespace Pixel {
 		
 		ImGui::Begin("Graph Node Editor", &OpenGraphNodeEditor);
 
+		ImVec2 content = ImGui::GetContentRegionAvail();
+		if(m_TopPanelHeight > content.y)
+		{
+			m_TopPanelHeight = content.y / 3.0f;
+			m_DownPanelHeight = content.y - m_TopPanelHeight;
+		}
+		//PIXEL_CORE_INFO("{0}, {1}", content.x, content.y);
 		//render
 		ed::SetCurrentEditor(m_Editor);
+			Splitter(false, 4.0f, &m_TopPanelHeight, &m_DownPanelHeight, 10.0f, 10.0f);
+			DrawTopPanel(m_TopPanelHeight + 4.0f);
 			ed::Begin("Graph Node Editor Canvas");
 			//draw shader main function
 
@@ -126,7 +169,7 @@ namespace Pixel {
 
 	void GraphNodeEditor::DrawMainFunctionNode()
 	{
-		ed::BeginNode(1);
+		//ed::BeginNode(1);
 		//for (size_t i = 0; i < m_pMaterial->GetMainFunction()->GetInputNodeNum(); ++i)
 		//{
 		//	ed::BeginPin(m_pMaterial->GetMainFunction()->GetInputNode(i)->GetPutNodeId(), ed::PinKind::Input);
@@ -135,20 +178,38 @@ namespace Pixel {
 		//}
 		for (size_t i = 0; i < m_GraphNodes.size(); ++i)
 		{
+
 			if (m_GraphNodes[i]->m_NodeId.Get() == 1)
 			{
+				m_BlueprintNodeBuilder->Begin(m_GraphNodes[i]->m_NodeId);
+				m_BlueprintNodeBuilder->Header();
+				ImGui::Spring(0);
+				ImGui::TextUnformatted(m_GraphNodes[i]->p_Owner->GetShowName().c_str());
+				ImGui::Spring(1);
+				ImGui::Dummy(ImVec2(0, 28));
+				m_BlueprintNodeBuilder->EndHeader();
 				for (size_t j = 0; j < m_GraphNodes[i]->m_InputPin.size(); ++j)
 				{
-					ImGui::BeginHorizontal((int32_t)m_GraphNodes[i]->m_InputPin[j]->m_PinId.Get());
-					ed::BeginPin(m_GraphNodes[i]->m_InputPin[j]->m_PinId, ed::PinKind::Input);
-					DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
-					ImGui::Text(m_GraphNodes[i]->m_InputPin[j]->m_PinName.c_str());
-					ed::EndPin();
-					ImGui::EndHorizontal();
+					m_BlueprintNodeBuilder->Input(m_GraphNodes[i]->m_InputPin[j]->m_PinId);
+					DrawPinIcon(m_GraphNodes[i]->m_InputPin[j]->m_Color, ImColor(32, 32, 32, 255));
+					ImGui::Spring(0);
+					ImGui::TextUnformatted(m_GraphNodes[i]->m_InputPin[j]->m_PinName.c_str());
+					ImGui::Spring(0);
+					m_BlueprintNodeBuilder->EndInput();
 				}
+				m_BlueprintNodeBuilder->End();
 			}
 		}
-		ed::EndNode();
+		//ed::EndNode();
+	}
+
+	void GraphNodeEditor::DrawTopPanel(float panelHeight)
+	{
+		ImGui::BeginChild("TopPanel", ImVec2(0, panelHeight));
+		ImGui::BeginHorizontal("TopPanel");
+		ImGui::Button("Compiler", ImVec2(0, panelHeight));
+		ImGui::EndHorizontal();
+		ImGui::EndChild();
 	}
 
 	void GraphNodeEditor::DrawLinks()
