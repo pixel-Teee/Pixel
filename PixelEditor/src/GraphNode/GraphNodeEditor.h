@@ -38,6 +38,12 @@ namespace Pixel {
 
 		void ShowLabel(const std::string& label, ImColor color);
 
+		void CreateNewNodes();
+
+		//------create logic nodes------
+		void CreateMul();
+		//------create logic nodes------
+
 		Ref<GraphPin> FindPin(ed::PinId pinId);
 
 		ed::EditorContext* m_Editor = nullptr;

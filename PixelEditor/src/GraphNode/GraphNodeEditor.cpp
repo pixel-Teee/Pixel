@@ -15,6 +15,7 @@
 #include "Pixel/Renderer/3D/Material/InputNode.h"
 #include "Pixel/Renderer/3D/Material/OutputNode.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
+#include "Pixel/Renderer/3D/Material/Mul.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -321,46 +322,74 @@ namespace Pixel {
 
 	void GraphNodeEditor::HandleInteraction()
 	{
-		if(!m_CreateNewNode)
+
+		if(ed::BeginCreate(ImColor(204, 232, 207, 255), 2.0f))
 		{
-			if(ed::BeginCreate(ImColor(204, 232, 207, 255), 2.0f))
+			ed::PinId outputPinId = 0, inputPinId = 0;
+
+			//------create link------
+			if(ed::QueryNewLink(&outputPinId, &inputPinId))
 			{
-				ed::PinId outputPinId = 0, inputPinId = 0;
+				auto outputPin = FindPin(outputPinId);
+				auto inputPin = FindPin(inputPinId);
 
-				//------create link------
-				if(ed::QueryNewLink(&outputPinId, &inputPinId))
+				bool alreadyLink = false;
+				//check the outputpin and inputpin don't have link
+				for(size_t i = 0; i < m_GraphLinks.size(); ++i)
 				{
-					auto outputPin = FindPin(outputPinId);
-					auto inputPin = FindPin(inputPinId);
-
-					bool alreadyLink = false;
-					//check the outputpin and inputpin don't have link
-					for(size_t i = 0; i < m_GraphLinks.size(); ++i)
+					if (m_GraphLinks[i]->m_InputPin.lock() == inputPin)
+						alreadyLink = true;
+					if (m_GraphLinks[i]->m_OutputPin.lock() == outputPin)
+						alreadyLink = true;
+				}
+				if(!alreadyLink)
+				{
+					ShowLabel("+ Create Link", ImColor(32, 45, 32, 100));
+					if(ed::AcceptNewItem(ImColor(128, 255, 128, 255), 4.0f))
 					{
-						if (m_GraphLinks[i]->m_InputPin.lock() == inputPin)
-							alreadyLink = true;
-						if (m_GraphLinks[i]->m_OutputPin.lock() == outputPin)
-							alreadyLink = true;
-					}
-					if(!alreadyLink)
-					{
-						ShowLabel("+ Create Link", ImColor(32, 45, 32, 100));
-						if(ed::AcceptNewItem(ImColor(128, 255, 128, 255), 4.0f))
+						//create new link
+						Ref<GraphLink> pGraphLink = CreateRef<GraphLink>();
+						pGraphLink->m_InputPin = inputPin;
+						pGraphLink->m_OutputPin = outputPin;
+						pGraphLink->m_LinkId = ++m_Id;
+						//create logic link
+						uint32_t inputPinLocationIndex = 0, outputPinLocationIndex = 0;
+						if(inputPin->m_OwnerNode.lock())
 						{
-							//create new link
-
-							//create logic link
+							for (size_t i = 0; i < inputPin->m_OwnerNode.lock()->m_InputPin.size(); ++i)
+							{
+								if (inputPin->m_OwnerNode.lock()->m_InputPin[i] == inputPin)
+								{
+									inputPinLocationIndex = i;
+									break;
+								}
+							}
 						}
+						if(outputPin->m_OwnerNode.lock())
+						{
+							for(size_t i = 0; i < outputPin->m_OwnerNode.lock()->m_OutputPin.size(); ++i)
+							{
+								if(outputPin->m_OwnerNode.lock()->m_OutputPin[i] == outputPin)
+								{
+									outputPinLocationIndex = i;
+									break;
+								}
+							}
+						}
+						//------link two nodes------
+						Ref<InputNode> inputNode = inputPin->m_OwnerNode.lock()->p_Owner->GetInputNode(inputPinLocationIndex);
+						Ref<OutputNode> outputNode = outputPin->m_OwnerNode.lock()->p_Owner->GetOutputNode(outputPinLocationIndex);
+						inputNode->Connection(outputNode);
+						//------link two nodes------
 					}
 				}
-				//------create link------
-
-				//------create nodes------
-
-				//------create nodes------
 			}
-			ed::EndCreate();
+			//------create link------
 		}
+		ed::EndCreate();
+
+		//create new node
+		CreateNewNodes();
 	}
 
 	void GraphNodeEditor::ShowLabel(const std::string& label, ImColor color)
@@ -380,6 +409,64 @@ namespace Pixel {
 		auto drawList = ImGui::GetWindowDrawList();
 		drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
 		ImGui::TextUnformatted(label.c_str());
+	}
+
+	void GraphNodeEditor::CreateNewNodes()
+	{
+		ed::Suspend();
+		if (ed::ShowBackgroundContextMenu())
+		{
+			ImGui::OpenPopup("Create New Node");
+		}
+
+		if(ImGui::BeginPopup("Create New Node"))
+		{
+			if(ImGui::MenuItem("Mul"))
+			{
+				//create mul node
+				CreateMul();
+			}
+			ImGui::EndPopup();
+		}
+		ed::Resume();
+	}
+
+	void GraphNodeEditor::CreateMul()
+	{
+		Ref<ShaderFunction> pMul = CreateRef<Mul>("Mul", m_pMaterial);
+		pMul->AddToMaterialOwner();
+		pMul->ConstructPutNodeAndSetPutNodeOwner();
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = ++m_Id;
+		pGraphNode->p_Owner = pMul;
+
+		for(size_t i = 0; i < pMul->GetInputNodeNum(); ++i)
+		{
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = ++m_Id;
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pMul->GetInputNode(i)->GetNodeName();
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for(size_t i = 0; i < pMul->GetOutputNodeNum(); ++i)
+		{
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = ++m_Id;
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pMul->GetOutputNode(i)->GetNodeName();
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pMul);
+		//------add to material shader function------
 	}
 
 	Ref<GraphPin> GraphNodeEditor::FindPin(ed::PinId pinId)
