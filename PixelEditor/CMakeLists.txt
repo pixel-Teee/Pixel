@@ -46,6 +46,7 @@ PRIVATE
 "../Pixel/vendor/imgui-node-editor"
 "../Pixel/vendor/lua"
 "../Pixel/vendor/json/include"
+"../Pixel/vendor/rttr/src"
 )
 
 target_compile_definitions(PixelEditor PRIVATE

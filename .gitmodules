@@ -35,3 +35,6 @@
 [submodule "Pixel/vendor/json"]
 	path = Pixel/vendor/json
 	url = https://github.com/pixel-Teee/rapidjson.git
+[submodule "Pixel/vendor/rttr"]
+	path = Pixel/vendor/rttr
+	url = https://github.com/pixel-Teee/rttr.git

@@ -20,7 +20,6 @@
 #include "Pixel/Core/Log.h"
 #include "Pixel/Debug/Instrumentor.h"
 #include "Pixel/Utils/Hash.h"
-#include "Pixel/Core/Reflect.h"
 
 #ifdef PX_PLATFORM_WINDOWS
 	#include <Windows.h>

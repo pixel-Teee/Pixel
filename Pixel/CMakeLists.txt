@@ -59,6 +59,8 @@ file(GLOB_RECURSE PixelSrc
 "vendor/bullet3/src/*.cpp"
 "vendor/json/include/*.h"
 "vendor/json/include/*.cpp"
+"vendor/rttr/src/rttr/type"
+"vendor/rttr/src/rttr/*.h"
 )
 
 set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${CMAKE_GENERATOR_PLATFORM}")
@@ -89,6 +91,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/lua"
 "vendor/bullet3/src"
 "vendor/json/include"
+"vendor/rttr/src"
 )
 
 target_compile_definitions(Pixel
@@ -129,6 +132,7 @@ PUBLIC lua
 PRIVATE "d3d12.lib"
 PRIVATE "dxgi.lib"
 PRIVATE "d3dcompiler.lib"
+PRIVATE rttr_core
 )
 
 
