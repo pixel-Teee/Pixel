@@ -8,6 +8,7 @@ namespace Pixel
 	class ConstValue : public ShaderFunction
 	{
 	public:
+		ConstValue();
 		//if bIsCustom, then will declare as uniform variable
 		ConstValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 

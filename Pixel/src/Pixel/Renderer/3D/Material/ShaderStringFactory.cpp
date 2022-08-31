@@ -7,6 +7,7 @@
 #include <string>
 //------cpp library------
 
+#include "Material.h"
 #include "PutNode.h"
 
 namespace Pixel {
@@ -104,8 +105,13 @@ namespace Pixel {
 
 		return Temp;
 	}
-	bool ShaderStringFactory::CreatePixelShaderString(Ref<Material> pMaterial)
+	std::string ShaderStringFactory::CreateDeferredGeometryShaderString(Ref<Material> pMaterial)
 	{
-		
+		//create deferred geometry shader
+
+		std::string out;
+		pMaterial->GetShaderTreeString(out);
+
+		return out;
 	}
 }

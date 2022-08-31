@@ -86,8 +86,35 @@ namespace Pixel
 
 	bool ShaderMainFunction::GetFunctionString(std::string& OutString) const
 	{
-		//OutString += "pixelOut.gBufferNormal.xyz" 
+        OutString += "PixelOut PS(VertexOut pin)\n{\n";
+        OutString += "PixelOut pixelOut = (PixelOut)(0.0f);\n";
 
+        OutString += "pixelOut.gBufferPosition.xyz = pin.PosW;\n";
+
+		//OutString += "pixelOut.gBufferNormal.xyz" 
+        OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+
+        OutString += "pixelOut.gBufferAlbedo.w = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_ALBEDO], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+
+        OutString += "pixelOut.gVelocity.w = ClearCoat;\n";
+
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.x = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_ROUGHNESS], ShaderStringFactory::VE_R) + ";\n";
+
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.y = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_METALLIC], ShaderStringFactory::VE_G) + ";\n";
+
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.z = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_AO], ShaderStringFactory::VE_G) + ";\n";
+
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.w = ShadingModelID / 255.0f\n";
+
+        OutString += "float2 newPos = ((pin.nowScreenPosition.xy / pin.nowScreenPosition.w) * 0.5f + 0.5f);\n";
+
+        OutString += "float2 prePos = ((pin.preScreenPosition.xy / pin.preScreenPosition.w) * 0.5f + 0.5f);\n";
+
+        OutString += "pixelOut.gVelocity.xy = newPos - prePos;\n";
+
+        OutString += "pixelOut.gVelocity.z = 0.0f;\n";
+
+        OutString += "return pixelOut;\n}\n";
         return true;
 	}
 

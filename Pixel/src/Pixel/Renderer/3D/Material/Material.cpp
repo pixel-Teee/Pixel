@@ -12,8 +12,8 @@ namespace Pixel {
 	Material::Material()
 	{
 		m_pShaderFunctionArray.clear();
-		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
-		m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
+		//m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		//m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
 	}
 
 	Material::~Material()
@@ -27,8 +27,8 @@ namespace Pixel {
 
 		//------clear the shader function------
 		m_pShaderFunctionArray.clear();
-		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
-		m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
+		//m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		//m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
 		//------clear the shader function------
 	}
 
@@ -63,7 +63,7 @@ namespace Pixel {
 
 	bool Material::GetShaderTreeString(std::string& OutString)
 	{
-		return std::static_pointer_cast<ShaderMainFunction>(m_pShaderMainFunction)->GetShaderTreeString(OutString);
+		return m_pShaderMainFunction->GetShaderTreeString(OutString);
 	}
 
 	REFLECT_STRUCT_BEGIN(Material)

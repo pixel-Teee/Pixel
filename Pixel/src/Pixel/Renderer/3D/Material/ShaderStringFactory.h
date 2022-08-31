@@ -46,6 +46,6 @@ namespace Pixel {
 
 		static std::string GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement);
 
-		static bool CreatePixelShaderString(Ref<Material> pMaterial);
+		static std::string CreateDeferredGeometryShaderString(Ref<Material> pMaterial);
 	};
 }

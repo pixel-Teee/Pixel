@@ -10,7 +10,10 @@ namespace Pixel
 		enum PutNodeType
 		{
 			IN_NORMAL = 0,
-			IN_ALBEDO = 1
+			IN_ALBEDO = 1,
+			IN_ROUGHNESS = 2,
+			IN_METALLIC = 3,
+			IN_AO = 4
 		};
 		virtual bool GetShaderTreeString(std::string& OutString) override;
 

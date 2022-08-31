@@ -15,6 +15,8 @@
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
 #include "Pixel/Renderer/3D/Material/InputNode.h"
+#include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
+#include "Pixel/Renderer/3D/Material/Mul.h"
 //------my library------
 
 //------other library------
@@ -265,8 +267,40 @@ namespace Pixel {
 							std::ifstream stream(materialPhysicalPath);
 							std::stringstream strStream;
 							strStream << stream.rdbuf();
+
 							if (!doc.Parse(strStream.str().data()).HasParseError())
 							{
+								//TODO:need to fix, need a perfect reflection scheme
+								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+								{
+									if (doc[typeDesc->name].HasMember("m_pShaderFunctionArray") && doc[typeDesc->name]["m_pShaderFunctionArray"].IsArray())
+									{
+										rapidjson::Value& array = doc[typeDesc->name]["m_pShaderFunctionArray"];
+
+										for (size_t i = 0; i < array.Size(); ++i)
+										{
+											if (array[i].HasMember("m_functionType"))
+											{
+												//get the function type
+												//m_pMaterial->GetShaderFunction().push_back();
+												int32_t functionType = array[i]["m_functionType"].GetInt();
+												switch (functionType)
+												{
+												case (int32_t)ShaderFunction::ShaderFunctionType::Main:
+													m_pMaterial->GetShaderFunction().push_back(CreateRef<ShaderMainFunction>());
+													break;
+												case (int32_t)ShaderFunction::ShaderFunctionType::Mul:
+													m_pMaterial->GetShaderFunction().push_back(CreateRef<Mul>());
+													break;
+												case (int32_t)ShaderFunction::ShaderFunctionType::ConstFloatValue4:
+													m_pMaterial->GetShaderFunction().push_back(CreateRef<ConstFloatValue>());
+													break;
+												}
+											}
+										}
+									}
+								}
+								//TODO:need to fix, need a perfect reflection scheme
 								//read the test material
 								if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
 								{
@@ -276,15 +310,18 @@ namespace Pixel {
 							stream.close();
 							m_pMaterial->PostLink();
 
-							int32_t dotPos = itemPath.find_last_of(".");
+							int32_t slashPos = itemPath.find_last_of('\\');
+							std::string editorPathFileName = itemPath.substr(std::min((unsigned long long)(slashPos + 1), itemPath.size() - 1));
+
+							int32_t dotPos = editorPathFileName.find_last_of(".");
 							std::string graphNodeEditorPath;
 							if (dotPos != std::string::npos)
 							{
-								graphNodeEditorPath = materialPhysicalPath.substr(0, dotPos);
+								graphNodeEditorPath = editorPathFileName.substr(0, dotPos);
 							}
 							else
 							{
-								graphNodeEditorPath = materialPhysicalPath;
+								graphNodeEditorPath = editorPathFileName;
 							}
 
 							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, m_pMaterial);

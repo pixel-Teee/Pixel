@@ -13,8 +13,9 @@ namespace Pixel {
 	{
 	public:
 		enum class ShaderFunctionType {
-			ConstFloat4,
-			Mul
+			ConstFloatValue4 = 0,
+			Mul = 1,
+			Main = 2,
 		};
 	protected:
 		//node name

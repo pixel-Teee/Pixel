@@ -202,6 +202,7 @@ namespace Pixel {
 					return SharedPtr.get();
 				};
 
+				
 				alloc = [](void* SharedPtrPtr)->void
 				{
 					auto& SharedPtr = *(std::shared_ptr<TargetType>*)SharedPtrPtr;
@@ -219,7 +220,7 @@ namespace Pixel {
 
 			virtual void Read(rapidjson::Value& doc, void* obj, const char* name, bool isArrayItem) override
 			{
-				alloc(obj);
+				//alloc(obj);
 				targetType->Read(doc, const_cast<void*>(getTarget(obj)), name, isArrayItem);
 			}
 
