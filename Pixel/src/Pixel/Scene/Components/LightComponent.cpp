@@ -8,17 +8,21 @@
 
 namespace Pixel
 {
-	REFLECT_STRUCT_BEGIN(LightComponent)
-	REFLECT_STRUCT_MEMBER(lightType)
-	REFLECT_STRUCT_MEMBER(color)
-	REFLECT_STRUCT_MEMBER(GenerateShadowMap)
-	REFLECT_STRUCT_MEMBER(DisplayLightVolume)
-	REFLECT_STRUCT_MEMBER(constant)
-	REFLECT_STRUCT_MEMBER(linear)
-	REFLECT_STRUCT_MEMBER(quadratic)
-	REFLECT_STRUCT_MEMBER(CutOff)
-	REFLECT_STRUCT_MEMBER(MaxDistance)
-	REFLECT_STRUCT_MEMBER(Range)
-	REFLECT_STRUCT_MEMBER(DisplayShowdowMapFrustum)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<LightComponent>("LightComponent")
+			.constructor<>()
+			.property("lightType", &LightComponent::lightType)
+			.property("color", &LightComponent::color)
+			.property("GenerateShadowMap", &LightComponent::GenerateShadowMap)
+			.property("DisplayLightVolume", &LightComponent::DisplayLightVolume)
+			.property("constant", &LightComponent::constant)
+			.property("linear", &LightComponent::linear)
+			.property("quadratic", &LightComponent::quadratic)
+			.property("CutOff", &LightComponent::CutOff)
+			.property("MaxDistance", &LightComponent::MaxDistance)
+			.property("Range", &LightComponent::Range)
+			.property("DisplayShowdowMapFrustum", &LightComponent::DisplayShowdowMapFrustum);
+	}
 }

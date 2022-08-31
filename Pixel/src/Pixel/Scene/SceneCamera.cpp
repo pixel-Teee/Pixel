@@ -51,14 +51,18 @@ namespace Pixel {
 		}	
 	}
 
-	REFLECT_STRUCT_BEGIN(SceneCamera)
-	REFLECT_STRUCT_MEMBER(m_ProjectionType)
-	REFLECT_STRUCT_MEMBER(m_OrthographicSize)
-	REFLECT_STRUCT_MEMBER(m_OrthographicNear)
-	REFLECT_STRUCT_MEMBER(m_OrthographicFar)
-	REFLECT_STRUCT_MEMBER(m_PerspectiveFOV)
-	REFLECT_STRUCT_MEMBER(m_PerspectiveNear)
-	REFLECT_STRUCT_MEMBER(m_PerspectiveFar)
-	REFLECT_STRUCT_MEMBER(m_AspectRatio)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<SceneCamera>("SceneCamera")
+			.constructor<>()
+			.property("m_ProjectionType", &SceneCamera::m_ProjectionType)
+			.property("m_OrthographicSize", &SceneCamera::m_OrthographicSize)
+			.property("m_OrthographicNear", &SceneCamera::m_OrthographicNear)
+			.property("m_OrthographicFar", &SceneCamera::m_OrthographicFar)
+			.property("m_PerspectiveFOV", &SceneCamera::m_PerspectiveFOV)
+			.property("m_PerspectiveNear", &SceneCamera::m_PerspectiveNear)
+			.property("m_PerspectiveFar", &SceneCamera::m_PerspectiveFar)
+			.property("m_AspectRatio", &SceneCamera::m_AspectRatio);
+	}
 }

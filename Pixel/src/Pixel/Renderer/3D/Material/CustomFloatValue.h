@@ -41,6 +41,7 @@ namespace Pixel {
 			return lhs.ConstValueName == rhs.ConstValueName;
 		}
 
-		REFLECT()
+		RTTR_ENABLE(MaterialCustomPara)
+		RTTR_REGISTRATION_FRIEND
 	};
 }

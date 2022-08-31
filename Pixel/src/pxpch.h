@@ -20,8 +20,11 @@
 #include "Pixel/Core/Log.h"
 #include "Pixel/Debug/Instrumentor.h"
 #include "Pixel/Utils/Hash.h"
-#include "Pixel/Core/Reflect.h"
 #include <rttr/type>
+#include <rttr/registration>
+#include <rttr/registration_friend.h>
+#include <rttr/detail/constructor/constructor_invoker.h>
+#include <rttr/detail/base/core_prerequisites.h>
 
 #ifdef PX_PLATFORM_WINDOWS
 	#include <Windows.h>

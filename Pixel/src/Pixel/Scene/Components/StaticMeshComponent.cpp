@@ -8,13 +8,17 @@
 
 namespace Pixel
 {
-	REFLECT_STRUCT_BEGIN(StaticMeshComponent)
-	REFLECT_STRUCT_MEMBER(path)
-	REFLECT_STRUCT_END()
 
 	void StaticMeshComponent::PostLoad()
 	{
 		m_Model = AssetManager::GetSingleton().GetModel(path);
 	}
 
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<StaticMeshComponent>("StaticMeshComponent")
+			.constructor<>()
+			.property("path", &StaticMeshComponent::path);
+	}
 }

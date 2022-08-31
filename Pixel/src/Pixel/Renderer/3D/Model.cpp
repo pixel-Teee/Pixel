@@ -5,6 +5,7 @@
 #include "Pixel/Renderer/UniformBuffer.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
+#include "Pixel/Scene/Components/TestMaterialComponent.h"
 
 namespace Pixel {
 
@@ -293,7 +294,11 @@ namespace Pixel {
 		return staticMesh;
 	}
 
-	REFLECT_STRUCT_BEGIN(Model)
-	REFLECT_STRUCT_MEMBER(m_directory)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<Model>("Model")
+			.constructor<const std::string&>()
+			.property("m_directory", &Model::m_directory);
+	}
 }

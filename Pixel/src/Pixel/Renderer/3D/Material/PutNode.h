@@ -60,6 +60,7 @@ namespace Pixel {
 		//node pin id
 		uint32_t m_id;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

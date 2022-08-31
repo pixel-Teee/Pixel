@@ -20,6 +20,7 @@ namespace Pixel {
 		CameraComponent(const CameraComponent&) = default;
 		//CameraComponent(const glm::mat4& projection);
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

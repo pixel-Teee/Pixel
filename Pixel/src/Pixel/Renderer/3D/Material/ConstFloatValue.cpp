@@ -207,8 +207,12 @@ namespace Pixel
 	}
 	//------ConstFloatValue------
 
-	REFLECT_STRUCT_BEGIN(ConstFloatValue)
-	REFLECT_STRUCT_MEMBER(m_Value)
-	REFLECT_STRUCT_MEMBER(m_valueNumber)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<ConstFloatValue>("ConstFloatValue")
+			.constructor<const std::string&, Ref<Material>, uint32_t, bool>()
+			.property("m_Value", &ConstFloatValue::m_Value)
+			.property("m_valueNumber", &ConstFloatValue::m_valueNumber);
+	}
 }

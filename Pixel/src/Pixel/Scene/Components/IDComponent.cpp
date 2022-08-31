@@ -4,7 +4,11 @@
 
 namespace Pixel
 {
-	REFLECT_STRUCT_BEGIN(IDComponent)
-	REFLECT_STRUCT_MEMBER(ID)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<IDComponent>("IDComponent")
+			.constructor<>()
+			.property("ID", &IDComponent::ID);
+	}
 }

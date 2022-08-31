@@ -47,6 +47,7 @@ namespace Pixel {
 
 		friend class BaseRenderer;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

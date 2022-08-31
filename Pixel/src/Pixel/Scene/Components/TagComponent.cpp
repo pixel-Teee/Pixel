@@ -4,7 +4,12 @@
 
 namespace Pixel
 {
-	REFLECT_STRUCT_BEGIN(TagComponent)
-	REFLECT_STRUCT_MEMBER(Tag)
-	REFLECT_STRUCT_END()
+
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<TagComponent>("TagComponent")
+			.constructor<>()
+			.property("Tag", &TagComponent::Tag);
+	}
 }

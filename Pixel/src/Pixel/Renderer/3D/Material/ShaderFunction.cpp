@@ -341,11 +341,15 @@ namespace Pixel {
 		return OutString;
 	}
 
-	REFLECT_STRUCT_BEGIN(ShaderFunction)
-	REFLECT_STRUCT_MEMBER(m_ShowName)
-	REFLECT_STRUCT_MEMBER(m_functionType)
-	REFLECT_STRUCT_MEMBER(m_pInputs)
-	REFLECT_STRUCT_MEMBER(m_pOutputs)
-	REFLECT_STRUCT_MEMBER(m_NodeId)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<ShaderFunction>("ShaderFunction")
+			.constructor<const std::string&, Ref<Material>>()
+			.property("m_ShowName", &ShaderFunction::m_ShowName)
+			.property("m_functionType", &ShaderFunction::m_functionType)
+			.property("m_pInputs", &ShaderFunction::m_pInputs)
+			.property("m_pOutputs", &ShaderFunction::m_pOutputs)
+			.property("m_NodeId", &ShaderFunction::m_NodeId);
+	}
 }

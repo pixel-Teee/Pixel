@@ -18,6 +18,7 @@ namespace Pixel {
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
 
-		REFLECT()
+		RTTR_ENABLE(ShaderFunction)
+		RTTR_REGISTRATION_FRIEND
 	};
 }

@@ -12,6 +12,7 @@ namespace Pixel {
 
 		IDComponent(const IDComponent&) = default;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

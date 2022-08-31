@@ -9,8 +9,11 @@ namespace Pixel {
 
 	}
 
-
-	REFLECT_STRUCT_BEGIN(MaterialCustomPara)
-	REFLECT_STRUCT_MEMBER(ConstValueName)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<MaterialCustomPara>("MaterialCustomPara")
+			.constructor<void>()
+			.property("ConstValueName", &MaterialCustomPara::ConstValueName);
+	}
 }

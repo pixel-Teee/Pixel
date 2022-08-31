@@ -17,6 +17,7 @@ namespace Pixel {
 		std::vector<Ref<CustomFloatValue>> m_PSShaderCustomValue;
 		std::vector<Ref<CustomSamplerState>> m_PSShaderCustomSampler;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

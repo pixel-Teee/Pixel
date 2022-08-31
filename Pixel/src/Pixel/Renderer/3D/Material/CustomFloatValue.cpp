@@ -3,8 +3,13 @@
 #include "CustomFloatValue.h"
 
 namespace Pixel {
-	REFLECT_STRUCT_BEGIN(CustomFloatValue)
-	REFLECT_STRUCT_MEMBER(m_Values)
-	REFLECT_STRUCT_MEMBER(m_ValueType)
-	REFLECT_STRUCT_END()
+
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<CustomFloatValue>("CustomFloatValue")
+			.constructor<void>()
+			.property("m_Values", &CustomFloatValue::m_Values)
+			.property("m_ValueType", &CustomFloatValue::m_ValueType);
+	}
 }

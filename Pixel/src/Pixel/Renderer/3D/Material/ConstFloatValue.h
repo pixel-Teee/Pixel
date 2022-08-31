@@ -39,6 +39,7 @@ namespace Pixel
 			OUT_MAX
 		};
 
-		REFLECT()
+		RTTR_ENABLE(ConstValue)
+		RTTR_REGISTRATION_FRIEND
 	};
 }

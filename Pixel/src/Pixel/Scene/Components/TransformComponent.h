@@ -108,6 +108,7 @@ namespace Pixel {
 			Scale = scale;
 		}
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

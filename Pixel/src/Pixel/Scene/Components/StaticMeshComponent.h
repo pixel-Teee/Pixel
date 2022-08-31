@@ -24,6 +24,7 @@ namespace Pixel {
 
 		void PostLoad();
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

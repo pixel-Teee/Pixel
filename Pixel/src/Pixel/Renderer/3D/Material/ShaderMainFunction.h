@@ -24,5 +24,8 @@ namespace Pixel
 		void GetNormalString(std::string& OutString);
 
 		virtual bool GetFunctionString(std::string& OutString) const override;
+
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

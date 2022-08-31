@@ -70,6 +70,6 @@ namespace Pixel {
 				* glm::scale(glm::mat4(1.0f), transformComponent.Scale * GetSphereLightVolumeRadius());
 		}
 
-		REFLECT()
+		RTTR_ENABLE()
 	};
 }

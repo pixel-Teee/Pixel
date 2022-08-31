@@ -4,9 +4,13 @@
 
 namespace Pixel {
 
-	REFLECT_STRUCT_BEGIN(PutNode)
-	REFLECT_STRUCT_MEMBER(m_id)
-	REFLECT_STRUCT_MEMBER(m_ValueType)
-	REFLECT_STRUCT_MEMBER(m_NodeName)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<PutNode>("PutNode")
+			.constructor<PutNode::ValueType, std::string&>()
+			.property("m_ValueType", &PutNode::m_ValueType)
+			.property("m_NodeName", &PutNode::m_NodeName)
+			.property("m_id", &PutNode::m_id);
+	}
 }

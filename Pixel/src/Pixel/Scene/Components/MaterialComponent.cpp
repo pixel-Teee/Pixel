@@ -30,28 +30,27 @@ namespace Pixel
 		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
-	REFLECT_STRUCT_BEGIN(SubMaterial)
-	REFLECT_STRUCT_MEMBER(shadingModel)
-	//REFLECT_STRUCT_MEMBER(albedoMap)
-	//REFLECT_STRUCT_MEMBER(normalMap)
-	//REFLECT_STRUCT_MEMBER(metallicMap)
-	//REFLECT_STRUCT_MEMBER(roughnessMap)
-	//REFLECT_STRUCT_MEMBER(aoMap)
-	REFLECT_STRUCT_MEMBER(albedoMapPath)
-	REFLECT_STRUCT_MEMBER(normalMapPath)
-	REFLECT_STRUCT_MEMBER(metallicMapPath)
-	REFLECT_STRUCT_MEMBER(roughnessMapPath)
-	REFLECT_STRUCT_MEMBER(aoMapPath)
-	REFLECT_STRUCT_MEMBER(gAlbedo)
-	REFLECT_STRUCT_MEMBER(gNormal)
-	REFLECT_STRUCT_MEMBER(HaveNormal)
-	REFLECT_STRUCT_MEMBER(gMetallic)
-	REFLECT_STRUCT_MEMBER(gRoughness)
-	REFLECT_STRUCT_MEMBER(gAo)
-	REFLECT_STRUCT_MEMBER(ClearCoat)
-	REFLECT_STRUCT_MEMBER(ClearCoatRoughness)
-	REFLECT_STRUCT_MEMBER(IsTransparent)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<SubMaterial>("SubMaterial")
+			.constructor<>()
+			.property("shadingModel", &SubMaterial::shadingModel)
+			.property("albedoMapPath", &SubMaterial::albedoMapPath)
+			.property("normalMapPath", &SubMaterial::normalMapPath)
+			.property("metallicMapPath", &SubMaterial::metallicMapPath)
+			.property("roughnessMapPath", &SubMaterial::roughnessMapPath)
+			.property("aoMapPath", &SubMaterial::aoMapPath)
+			.property("gAlbedo", &SubMaterial::gAlbedo)
+			.property("gNormal", &SubMaterial::gNormal)
+			.property("HaveNormal", &SubMaterial::HaveNormal)
+			.property("gMetallic", &SubMaterial::gMetallic)
+			.property("gRoughness", &SubMaterial::gRoughness)
+			.property("gAo", &SubMaterial::gAo)
+			.property("ClearCoat", &SubMaterial::ClearCoat)
+			.property("ClearCoatRoughness", &SubMaterial::ClearCoatRoughness)
+			.property("IsTransparent", &SubMaterial::IsTransparent);
+	}
 
 	SubMaterial::SubMaterial(const std::string& AlbedoMapPath, const std::string& NormalMapPath, const std::string& MetallicMapPath, const std::string& RoughnessMapPath, const std::string& AoMapPath, bool haveNormal)
 	{
@@ -82,28 +81,4 @@ namespace Pixel
 		if (!aoMapPath.empty())
 			aoMap = AssetManager::GetSingleton().GetTexture(aoMapPath);
 	}
-
-	void MaterialComponent::AddMaterial()
-	{
-		//from the asset manager to get the sub material
-		m_Materials.push_back(nullptr);
-		m_MaterialPaths.push_back(std::string());
-	}
-
-	void MaterialComponent::PostLoad()
-	{
-		//from the m_MaterialPaths to load sub material
-		m_Materials.resize(m_MaterialPaths.size());
-
-		for (size_t i = 0; i < m_Materials.size(); ++i)
-		{
-			m_Materials[i] = AssetManager::GetSingleton().GetMaterial(m_MaterialPaths[i]);
-		}
-	}
-
-	REFLECT_STRUCT_BEGIN(MaterialComponent)
-	//REFLECT_STRUCT_MEMBER(m_Materials)
-	REFLECT_STRUCT_MEMBER(m_MaterialPaths)
-	REFLECT_STRUCT_END()
-
 }

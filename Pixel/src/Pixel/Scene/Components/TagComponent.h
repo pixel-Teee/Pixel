@@ -12,6 +12,7 @@ namespace Pixel {
 		TagComponent(const std::string& tag)
 			:Tag(tag) {}
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

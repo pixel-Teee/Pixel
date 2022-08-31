@@ -49,6 +49,7 @@ namespace Pixel {
 
 		float m_AspectRatio = 0.0f;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

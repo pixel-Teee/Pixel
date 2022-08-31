@@ -52,6 +52,7 @@ namespace Pixel {
 
 		void PostLink();
 
-		REFLECT()
+		RTTR_ENABLE(MaterialBase)
+		RTTR_REGISTRATION_FRIEND
 	};
 }

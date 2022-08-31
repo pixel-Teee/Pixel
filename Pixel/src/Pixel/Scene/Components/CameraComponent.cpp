@@ -4,10 +4,14 @@
 
 namespace Pixel
 {
-	REFLECT_STRUCT_BEGIN(CameraComponent)
-	REFLECT_STRUCT_MEMBER(camera)
-	REFLECT_STRUCT_MEMBER(Primary)
-	REFLECT_STRUCT_MEMBER(FixedAspectRatio)
-	REFLECT_STRUCT_MEMBER(DisplayFurstum)
-	REFLECT_STRUCT_END()
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<CameraComponent>("CameraComponent")
+			.constructor<>()
+			.property("camera", &CameraComponent::camera)
+			.property("Primary", &CameraComponent::Primary)
+			.property("FixedAspectRatio", &CameraComponent::FixedAspectRatio)
+			.property("DisplayFurstum", &CameraComponent::DisplayFurstum);
+	}
 }

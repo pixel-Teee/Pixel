@@ -16,5 +16,8 @@ namespace Pixel
 
 		//if this is not user provided, then use default value
 		bool m_bIsCustom;
+
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

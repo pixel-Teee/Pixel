@@ -39,7 +39,8 @@ namespace Pixel {
 		}
 		//------in terms of the parameter name to check------
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 	//------material's custom parameter------
 }

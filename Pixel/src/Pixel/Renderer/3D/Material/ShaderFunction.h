@@ -99,6 +99,7 @@ namespace Pixel {
 		//dfs check flag
 		bool m_bIsVisited;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }

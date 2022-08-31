@@ -3,8 +3,12 @@
 #include "MaterialBase.h"
 
 namespace Pixel {
-	REFLECT_STRUCT_BEGIN(MaterialBase)
-	REFLECT_STRUCT_MEMBER(m_PSShaderCustomValue)
-	//REFLECT_STRUCT_MEMBER(m_PSShaderCustomSampler)
-	REFLECT_STRUCT_END()
+
+	RTTR_REGISTRATION
+	{
+		using namespace rttr;
+		registration::class_<MaterialBase>("MaterialBase")
+			.constructor<>()
+			.property("m_PSShaderCustomValue", &MaterialBase::m_PSShaderCustomValue);
+	}
 }
