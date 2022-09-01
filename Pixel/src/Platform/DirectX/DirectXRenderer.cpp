@@ -40,6 +40,7 @@
 //-----others------
 #include "Pixel/Renderer/EditorCamera.h"
 #include "Pixel/Math/Math.h"
+#include "Pixel/Scene/Components/TestMaterialComponent.h"
 //-----others------
 
 //------descriptor related------

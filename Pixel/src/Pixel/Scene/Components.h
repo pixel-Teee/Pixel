@@ -28,6 +28,7 @@
 #include "Pixel/Scene/Components/LightComponent.h"
 #include "Pixel/Scene/Components/RigidBody3DComponent.h"
 #include "Pixel/Scene/Components/MaterialTreeComponent.h"
+#include "Pixel/Scene/Components/TestMaterialComponent.h"
 //------my library------
 
 namespace Pixel {

@@ -8,21 +8,26 @@
 
 namespace Pixel
 {
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<LightComponent>("LightComponent")
-			.constructor<>()
-			.property("lightType", &LightComponent::lightType)
-			.property("color", &LightComponent::color)
-			.property("GenerateShadowMap", &LightComponent::GenerateShadowMap)
-			.property("DisplayLightVolume", &LightComponent::DisplayLightVolume)
-			.property("constant", &LightComponent::constant)
-			.property("linear", &LightComponent::linear)
-			.property("quadratic", &LightComponent::quadratic)
-			.property("CutOff", &LightComponent::CutOff)
-			.property("MaxDistance", &LightComponent::MaxDistance)
-			.property("Range", &LightComponent::Range)
-			.property("DisplayShowdowMapFrustum", &LightComponent::DisplayShowdowMapFrustum);
-	}
+
+}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::LightComponent>("LightComponent")
+		.constructor<>()
+		.property("lightType", &Pixel::LightComponent::lightType)
+		.property("color", &Pixel::LightComponent::color)
+		.property("GenerateShadowMap", &Pixel::LightComponent::GenerateShadowMap)
+		.property("DisplayLightVolume", &Pixel::LightComponent::DisplayLightVolume)
+		.property("constant", &Pixel::LightComponent::constant)
+		.property("linear", &Pixel::LightComponent::linear)
+		.property("quadratic", &Pixel::LightComponent::quadratic)
+		.property("CutOff", &Pixel::LightComponent::CutOff)
+		.property("MaxDistance", &Pixel::LightComponent::MaxDistance)
+		.property("Range", &Pixel::LightComponent::Range)
+		.property("DisplayShowdowMapFrustum", &Pixel::LightComponent::DisplayShowdowMapFrustum);
+
+	//PIXEL_CORE_INFO("register successfully!");
+	std::cout << "register light component successfully!" << std::endl;
 }

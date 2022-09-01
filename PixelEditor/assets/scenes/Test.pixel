@@ -1,18 +1,16 @@
 {
     "Entities": [
       {
-        "IDComponent": { "m_UUID": 9674272566537205905 },
-        "TagComponent": { "Tag": "Sphere" }
-        ,
+        "IDComponent": {},
+        "TagComponent": {},
         "TransformComponent": {
-          "m_UUID": 0,
-          "childrensUUID": [ {} ],
-          "Translation": [ 0.0, 0.0, 0.0 ],
-          "Rotation": [ 0.0, 0.0, 0.0 ],
-          "Scale": [ 1.0, 1.0, 1.0 ]
+          "parentUUID": "",
+          "childrensUUID": [],
+          "Translation": "",
+          "Rotation": "",
+          "Scale": ""
         },
-        "StaticMeshComponent": { "path": "Model\\Sphere" },
-        "MaterialComponent": { "m_MaterialPaths": [ { "string": "Material\\Sphere" } ] }
+        "LightComponent": {}
       }
     ]
 }

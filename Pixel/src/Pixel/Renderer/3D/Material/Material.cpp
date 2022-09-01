@@ -66,17 +66,6 @@ namespace Pixel {
 		return m_pShaderMainFunction->GetShaderTreeString(OutString);
 	}
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<Material>("Material")
-			.constructor<const std::string&>()
-			.property("m_Links", &Material::m_Links)
-			.property("m_MaterialName", &Material::m_MaterialName)
-			.property("m_GraphNodeEditorPath", &Material::m_GraphNodeEditorPath)
-			.property("m_pShaderFunctionArray", &Material::m_pShaderFunctionArray);
-	}
-
 	void Material::SetMaterialName(const std::string& materialName)
 	{
 		m_MaterialName = materialName;
@@ -134,4 +123,15 @@ namespace Pixel {
 		}
 	}
 
+}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::Material>("Material")
+		.constructor<const std::string&>()
+		.property("m_Links", &Pixel::Material::m_Links)
+		.property("m_MaterialName", &Pixel::Material::m_MaterialName)
+		.property("m_GraphNodeEditorPath", &Pixel::Material::m_GraphNodeEditorPath)
+		.property("m_pShaderFunctionArray", &Pixel::Material::m_pShaderFunctionArray);
 }

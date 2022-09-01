@@ -10,6 +10,8 @@ namespace Pixel {
 
 		IDComponent() = default;
 
+		IDComponent(UUID id) { ID = id; }
+
 		IDComponent(const IDComponent&) = default;
 
 		RTTR_ENABLE()

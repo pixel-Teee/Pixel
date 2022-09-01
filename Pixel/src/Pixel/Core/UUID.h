@@ -19,7 +19,8 @@ namespace Pixel {
 	private:
 		uint64_t m_UUID;
 
-		REFLECT()
+		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 	};
 }
 

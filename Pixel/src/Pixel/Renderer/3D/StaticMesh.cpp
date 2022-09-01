@@ -10,6 +10,7 @@
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Scene/Components/MaterialComponent.h"
 
 #include <glm/gtc/type_ptr.hpp>
 

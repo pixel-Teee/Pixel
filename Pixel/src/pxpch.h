@@ -22,7 +22,7 @@
 #include "Pixel/Utils/Hash.h"
 #include <rttr/type>
 #include <rttr/registration>
-#include <rttr/registration_friend.h>
+#include <rttr/registration_friend>
 #include <rttr/detail/constructor/constructor_invoker.h>
 #include <rttr/detail/base/core_prerequisites.h>
 

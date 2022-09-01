@@ -9,11 +9,13 @@ namespace Pixel {
 
 	}
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<MaterialCustomPara>("MaterialCustomPara")
-			.constructor<void>()
-			.property("ConstValueName", &MaterialCustomPara::ConstValueName);
-	}
+}
+
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::MaterialCustomPara>("MaterialCustomPara")
+		.constructor<>()
+		.property("ConstValueName", &Pixel::MaterialCustomPara::ConstValueName);
 }

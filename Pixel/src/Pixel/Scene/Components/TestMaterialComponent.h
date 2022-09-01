@@ -15,6 +15,6 @@ namespace Pixel {
 		void PostLoad();//load mutiple materials
 
 		RTTR_ENABLE()
-			RTTR_REGISTRATION_FRIEND
+		RTTR_REGISTRATION_FRIEND
 	};
 }

@@ -4,6 +4,7 @@
 
 namespace Pixel
 {
+	class Material;
 	class ConstFloatValue : public ConstValue
 	{
 	public:

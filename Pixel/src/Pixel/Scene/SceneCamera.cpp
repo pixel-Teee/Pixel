@@ -50,19 +50,19 @@ namespace Pixel {
 			m_Projection = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, m_OrthographicNear, m_OrthographicFar);
 		}	
 	}
+}
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<SceneCamera>("SceneCamera")
-			.constructor<>()
-			.property("m_ProjectionType", &SceneCamera::m_ProjectionType)
-			.property("m_OrthographicSize", &SceneCamera::m_OrthographicSize)
-			.property("m_OrthographicNear", &SceneCamera::m_OrthographicNear)
-			.property("m_OrthographicFar", &SceneCamera::m_OrthographicFar)
-			.property("m_PerspectiveFOV", &SceneCamera::m_PerspectiveFOV)
-			.property("m_PerspectiveNear", &SceneCamera::m_PerspectiveNear)
-			.property("m_PerspectiveFar", &SceneCamera::m_PerspectiveFar)
-			.property("m_AspectRatio", &SceneCamera::m_AspectRatio);
-	}
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::SceneCamera>("SceneCamera")
+		.constructor<>()
+		.property("m_ProjectionType", &Pixel::SceneCamera::m_ProjectionType)
+		.property("m_OrthographicSize", &Pixel::SceneCamera::m_OrthographicSize)
+		.property("m_OrthographicNear", &Pixel::SceneCamera::m_OrthographicNear)
+		.property("m_OrthographicFar", &Pixel::SceneCamera::m_OrthographicFar)
+		.property("m_PerspectiveFOV", &Pixel::SceneCamera::m_PerspectiveFOV)
+		.property("m_PerspectiveNear", &Pixel::SceneCamera::m_PerspectiveNear)
+		.property("m_PerspectiveFar", &Pixel::SceneCamera::m_PerspectiveFar)
+		.property("m_AspectRatio", &Pixel::SceneCamera::m_AspectRatio);
 }

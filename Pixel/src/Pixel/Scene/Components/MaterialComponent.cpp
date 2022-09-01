@@ -30,28 +30,6 @@ namespace Pixel
 		m_pTextureFirstHandle = m_pDescriptorHeap->Alloc(5);
 	}
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<SubMaterial>("SubMaterial")
-			.constructor<>()
-			.property("shadingModel", &SubMaterial::shadingModel)
-			.property("albedoMapPath", &SubMaterial::albedoMapPath)
-			.property("normalMapPath", &SubMaterial::normalMapPath)
-			.property("metallicMapPath", &SubMaterial::metallicMapPath)
-			.property("roughnessMapPath", &SubMaterial::roughnessMapPath)
-			.property("aoMapPath", &SubMaterial::aoMapPath)
-			.property("gAlbedo", &SubMaterial::gAlbedo)
-			.property("gNormal", &SubMaterial::gNormal)
-			.property("HaveNormal", &SubMaterial::HaveNormal)
-			.property("gMetallic", &SubMaterial::gMetallic)
-			.property("gRoughness", &SubMaterial::gRoughness)
-			.property("gAo", &SubMaterial::gAo)
-			.property("ClearCoat", &SubMaterial::ClearCoat)
-			.property("ClearCoatRoughness", &SubMaterial::ClearCoatRoughness)
-			.property("IsTransparent", &SubMaterial::IsTransparent);
-	}
-
 	SubMaterial::SubMaterial(const std::string& AlbedoMapPath, const std::string& NormalMapPath, const std::string& MetallicMapPath, const std::string& RoughnessMapPath, const std::string& AoMapPath, bool haveNormal)
 	{
 		albedoMap = Texture2D::Create(AlbedoMapPath);//directly use physical path
@@ -81,4 +59,28 @@ namespace Pixel
 		if (!aoMapPath.empty())
 			aoMap = AssetManager::GetSingleton().GetTexture(aoMapPath);
 	}
+}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::SubMaterial>("SubMaterial")
+		.constructor<>()
+		.property("shadingModel", &Pixel::SubMaterial::shadingModel)
+		.property("albedoMapPath", &Pixel::SubMaterial::albedoMapPath)
+		.property("normalMapPath", &Pixel::SubMaterial::normalMapPath)
+		.property("metallicMapPath", &Pixel::SubMaterial::metallicMapPath)
+		.property("roughnessMapPath", &Pixel::SubMaterial::roughnessMapPath)
+		.property("aoMapPath", &Pixel::SubMaterial::aoMapPath)
+		.property("gAlbedo", &Pixel::SubMaterial::gAlbedo)
+		.property("gNormal", &Pixel::SubMaterial::gNormal)
+		.property("HaveNormal", &Pixel::SubMaterial::HaveNormal)
+		.property("gMetallic", &Pixel::SubMaterial::gMetallic)
+		.property("gRoughness", &Pixel::SubMaterial::gRoughness)
+		.property("gAo", &Pixel::SubMaterial::gAo)
+		.property("ClearCoat", &Pixel::SubMaterial::ClearCoat)
+		.property("ClearCoatRoughness", &Pixel::SubMaterial::ClearCoatRoughness)
+		.property("IsTransparent", &Pixel::SubMaterial::IsTransparent);
+
+	std::cout << "register sub material successfully!" << std::endl;
 }

@@ -1,6 +1,7 @@
 #include "pxpch.h"
 
 //------my library------
+#include "Material.h"
 #include "ShaderMainFunction.h"
 #include "ShaderStringFactory.h"
 #include "InputNode.h"

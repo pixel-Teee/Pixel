@@ -663,7 +663,7 @@ namespace Pixel
 	void EditorLayer::SerializerScene(Ref<Scene> scene, const std::filesystem::path& path)
 	{
 		SceneSerializer serializer(scene);
-		serializer.Writer(path.string());
+		serializer.Serializer(path.string());
 	}
 
 	void EditorLayer::OpenSceneAs()
@@ -683,7 +683,7 @@ namespace Pixel
 		//newScene->SetSkyBox(Renderer3D::GetSkyBox());
 		SceneSerializer serializer(newScene);
 
-		if (serializer.Read(filepath.string()))
+		if (serializer.Serializer(filepath.string()))
 		{
 			m_EditorScene = newScene;
 			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);

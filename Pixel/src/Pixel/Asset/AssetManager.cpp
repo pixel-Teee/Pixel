@@ -510,23 +510,23 @@ namespace Pixel {
 				//load sub material
 				m_Materials[virtualPath] = CreateRef<SubMaterial>();
 
-				Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
+				//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
 
-				rapidjson::Document doc;
+				//rapidjson::Document doc;
 
 				//from the physical asset path to load the material and post load
-				std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
-				std::stringstream strStream;
-				strStream << stream.rdbuf();
-				if (!doc.Parse(strStream.str().data()).HasParseError())
-				{
-					//read the sub material
-					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
-					{
-						typeDesc->Read(doc[typeDesc->name], m_Materials[virtualPath].get(), nullptr, false);
-					}
-				}
-				stream.close();
+				//std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
+				//std::stringstream strStream;
+				//strStream << stream.rdbuf();
+				//if (!doc.Parse(strStream.str().data()).HasParseError())
+				//{
+				//	//read the sub material
+				//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+				//	{
+				//		typeDesc->Read(doc[typeDesc->name], m_Materials[virtualPath].get(), nullptr, false);
+				//	}
+				//}
+				//stream.close();
 
 				//post load the sub material
 				m_Materials[virtualPath]->PostLoad();
@@ -556,23 +556,23 @@ namespace Pixel {
 				//load test material
 				m_TestMaterials[virtualPath] = CreateRef<Material>();
 
-				Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
-
-				rapidjson::Document doc;
-
-				//from the physical asset path to load the material and post load
-				std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
-				std::stringstream strStream;
-				strStream << stream.rdbuf();
-				if (!doc.Parse(strStream.str().data()).HasParseError())
-				{
-					//read the sub material
-					if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
-					{
-						typeDesc->Read(doc[typeDesc->name], m_TestMaterials[virtualPath].get(), nullptr, false);
-					}
-				}
-				stream.close();
+				//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
+				//
+				//rapidjson::Document doc;
+				//
+				////from the physical asset path to load the material and post load
+				//std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
+				//std::stringstream strStream;
+				//strStream << stream.rdbuf();
+				//if (!doc.Parse(strStream.str().data()).HasParseError())
+				//{
+				//	//read the sub material
+				//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+				//	{
+				//		typeDesc->Read(doc[typeDesc->name], m_TestMaterials[virtualPath].get(), nullptr, false);
+				//	}
+				//}
+				//stream.close();
 
 				//post load the sub material
 				m_TestMaterials[virtualPath]->PostLink();
@@ -622,34 +622,34 @@ namespace Pixel {
 	{
 		//create a temporary default sub material and write to file
 
-		rapidjson::StringBuffer strBuf;
-		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
-
-		writer.StartObject();
-		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>().get();
-		typeDesc->Write(writer, pSubMaterial.get(), typeDesc->name, false);//write a new sub material file
-		writer.EndObject();
-		std::string data = strBuf.GetString();
-		std::ofstream fout(physicalPath);
-		fout << data.c_str();
-		fout.close();
+		//rapidjson::StringBuffer strBuf;
+		//rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+		//
+		//writer.StartObject();
+		//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>().get();
+		//typeDesc->Write(writer, pSubMaterial.get(), typeDesc->name, false);//write a new sub material file
+		//writer.EndObject();
+		//std::string data = strBuf.GetString();
+		//std::ofstream fout(physicalPath);
+		//fout << data.c_str();
+		//fout.close();
 	}
 
 	void AssetManager::CreateTestMaterial(const std::string& physicalPath, Ref<Material> pMaterial)
 	{
 		//create a temporary default test material and write to file
 
-		rapidjson::StringBuffer strBuf;
-		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
-
-		writer.StartObject();
-		Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>().get();
-		typeDesc->Write(writer, pMaterial.get(), typeDesc->name, false);//write a new test material file
-		writer.EndObject();
-		std::string data = strBuf.GetString();
-		std::ofstream fout(physicalPath);
-		fout << data.c_str();
-		fout.close();
+		//rapidjson::StringBuffer strBuf;
+		//rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+		//
+		//writer.StartObject();
+		//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>().get();
+		//typeDesc->Write(writer, pMaterial.get(), typeDesc->name, false);//write a new test material file
+		//writer.EndObject();
+		//std::string data = strBuf.GetString();
+		//std::ofstream fout(physicalPath);
+		//fout << data.c_str();
+		//fout.close();
 	}
 
 	void AssetManager::UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial)

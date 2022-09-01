@@ -132,7 +132,7 @@ PUBLIC lua
 PRIVATE "d3d12.lib"
 PRIVATE "dxgi.lib"
 PRIVATE "d3dcompiler.lib"
-PRIVATE RTTR::Core_Lib
+PUBLIC RTTR::Core_Lib
 )
 
 

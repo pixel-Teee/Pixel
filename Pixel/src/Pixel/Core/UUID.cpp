@@ -24,8 +24,14 @@ namespace Pixel {
 
 	}
 
-	REFLECT_STRUCT_BEGIN(UUID)
-	REFLECT_STRUCT_MEMBER(m_UUID)
-	REFLECT_STRUCT_END()
+}
 
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::UUID>("UUID")
+		.constructor<>()
+		.property("m_UUID", &Pixel::UUID::m_UUID);
+
+	std::cout << "register uuid successfully!" << std::endl;
 }

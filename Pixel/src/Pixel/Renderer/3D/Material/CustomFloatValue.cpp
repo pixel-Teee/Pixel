@@ -4,12 +4,14 @@
 
 namespace Pixel {
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<CustomFloatValue>("CustomFloatValue")
-			.constructor<void>()
-			.property("m_Values", &CustomFloatValue::m_Values)
-			.property("m_ValueType", &CustomFloatValue::m_ValueType);
-	}
+
+}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::CustomFloatValue>("CustomFloatValue")
+		.constructor<>()
+		.property("m_Values", &Pixel::CustomFloatValue::m_Values)
+		.property("m_ValueType", &Pixel::CustomFloatValue::m_ValueType);
 }

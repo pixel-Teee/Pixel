@@ -94,12 +94,13 @@ namespace Pixel {
 		void AddToMaterialOwner();
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
-
+		
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;
 
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
+			
 	};
 }

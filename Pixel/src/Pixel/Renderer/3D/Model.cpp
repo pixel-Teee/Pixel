@@ -293,12 +293,12 @@ namespace Pixel {
 
 		return staticMesh;
 	}
+}
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<Model>("Model")
-			.constructor<const std::string&>()
-			.property("m_directory", &Model::m_directory);
-	}
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::Model>("Model")
+		.constructor<const std::string&>()
+		.property("m_directory", &Pixel::Model::m_directory);
 }

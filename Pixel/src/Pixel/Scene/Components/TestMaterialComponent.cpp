@@ -23,12 +23,13 @@ namespace Pixel {
 			m_Materials[i] = AssetManager::GetSingleton().GetMaterial(m_MaterialPaths[i]);
 		}
 	}
+}
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<MaterialComponent>("MaterialComponent")
-			.constructor<>()
-			.property("m_MaterialPaths", &MaterialComponent::m_MaterialPaths);
-	}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::MaterialComponent>("MaterialComponent")
+		.constructor<>()
+		.property("m_MaterialPaths", &Pixel::MaterialComponent::m_MaterialPaths);
 }

@@ -4,14 +4,18 @@
 
 namespace Pixel
 {
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<CameraComponent>("CameraComponent")
-			.constructor<>()
-			.property("camera", &CameraComponent::camera)
-			.property("Primary", &CameraComponent::Primary)
-			.property("FixedAspectRatio", &CameraComponent::FixedAspectRatio)
-			.property("DisplayFurstum", &CameraComponent::DisplayFurstum);
-	}
+	
+}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::CameraComponent>("CameraComponent")
+		.constructor<>()
+		.property("camera", &Pixel::CameraComponent::camera)
+		.property("Primary", &Pixel::CameraComponent::Primary)
+		.property("FixedAspectRatio", &Pixel::CameraComponent::FixedAspectRatio)
+		.property("DisplayFurstum", &Pixel::CameraComponent::DisplayFurstum);
+
+	std::cout << "register camera component successfully!" << std::endl;
 }

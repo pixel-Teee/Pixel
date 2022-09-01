@@ -4,6 +4,7 @@
 #include "ConstFloatValue.h"
 #include "OutputNode.h"
 #include "ShaderStringFactory.h"
+#include "Material.h"
 //------my library------
 
 namespace Pixel
@@ -207,12 +208,13 @@ namespace Pixel
 	}
 	//------ConstFloatValue------
 
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<ConstFloatValue>("ConstFloatValue")
-			.constructor<const std::string&, Ref<Material>, uint32_t, bool>()
-			.property("m_Value", &ConstFloatValue::m_Value)
-			.property("m_valueNumber", &ConstFloatValue::m_valueNumber);
-	}
+}
+
+RTTR_REGISTRATION
+{
+	using namespace rttr;
+	registration::class_<Pixel::ConstFloatValue>("ConstFloatValue")
+		.constructor<const std::string&, Pixel::Ref<Pixel::Material>, uint32_t, bool>()
+		.property("m_Value", &Pixel::ConstFloatValue::m_Value)
+		.property("m_valueNumber", &Pixel::ConstFloatValue::m_valueNumber);
 }
