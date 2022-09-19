@@ -16,6 +16,7 @@ add_subdirectory(Pixel)
 add_subdirectory(SandBox)
 add_subdirectory(PixelEditor)
 add_subdirectory(PixelGame)
+add_subdirectory(MetaParser)
 
 target_compile_definitions(Pixel
     PRIVATE _CRT_SECURE_NO_WARNINGS
