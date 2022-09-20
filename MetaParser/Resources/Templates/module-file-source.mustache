@@ -1,0 +1,47 @@
+#include "{{precompiledHeader}}"//pch
+
+#include "{{moduleFileHeader}}"
+#include "{{moduleFileSourceHeader}}"//need parsed header file
+#include "rttr/registration.h"
+
+static void rttr_auto_register_reflection_function_()
+{
+    //------register------
+    using namespace rttr;
+    {{#class}}
+    registration::class_<{{qualifiedName}}>("{{qualifiedName}}")
+    {{#constructor}}
+    .constructor<{{&argumentList}}>()
+    {{/constructor}}
+    {{#field}}
+    .property("{{&name}}", &{{&parentQualifiedName}}::{{&name}})
+    {{#metaPropertyHaveBrackets}}
+    (
+    {{/metaPropertyHaveBrackets}}
+    {{#metaProperty}}
+        metadata("{{&type}}", {{&type}}({{&arguments}})){{^isLast}},{{/isLast}}
+    {{/metaProperty}}
+    {{#metaPropertyHaveBrackets}}
+    )
+    {{/metaPropertyHaveBrackets}}
+    {{/field}}
+    {{#method}}
+    .method("{{&name}}", {{#isOverloadAndConst}}select_const{{/isOverloadAndConst}}{{#isOverload}}select_overload<{{&returnType}}({{&argumentList}})>{{/isOverload}}{{#hasBracket}}({{/hasBracket}}&{{&parentQualifiedName}}::{{&name}}{{#hasBracket}}){{/hasBracket}})
+    {{#metaPropertyHaveBrackets}}
+    (
+    {{/metaPropertyHaveBrackets}}
+    {{#metaProperty}}
+        metadata("{{&type}}", {{&type}}({{&arguments}})){{^isLast}},{{/isLast}}
+    {{/metaProperty}}
+    {{#metaPropertyHaveBrackets}}
+    )
+    {{/metaPropertyHaveBrackets}}
+    {{/method}}
+    {{/class}};
+    //------register------
+}
+
+void AllocateModuleFile{{targetName}}{{moduleFileName}}()
+{
+    rttr_auto_register_reflection_function_();
+}

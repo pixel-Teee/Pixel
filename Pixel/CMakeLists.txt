@@ -2,6 +2,43 @@
 cmake_minimum_required(VERSION 3.5)
 project(Pixel)
 
+#append cmake module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+message("${CMAKE_SOURCE_DIR}/cmake")
+
+#include the meta parser cmake script
+include(MetaParser)
+
+#------reflection module------
+set(META_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}") # source root
+set(META_GENERATED_DIR "${CMAKE_CURRENT_BINARRY_DIR}/Generated") # generated dirctory
+
+set(META_GENERATED_HEADERS "")
+set(META_GENERATED_SOURCES "")
+
+set(REFLECTION_HEADER "")
+set(MODULE_HEADER "")
+set(MODULE_TARGET "ReflectionModule")
+
+set(REFLECTION_HEADERS)
+
+set(REFLECTION_INCLUDES "")
+
+# generate file name
+meta_parser_prebuild(
+    TARGET ${MODULE_TARGET} # module target
+    GENERATED_DIR ${META_GENERATED_DIR} # generated directory
+    SOURCE_ROOT ${META_SOURCE_ROOT} # source root
+    HEADER_FILES ${REFLECTION_HEADERS} # need parsed header
+    MODULE_HEADER ${MODULE_HEADER} # module header
+    OUT_MODULE_SOURCE META_MODULE_SOURCE # meta module source
+    OUT_GENERATED_FILES META_GENERATED_FILES # meta module files
+    OUT_INC META_GENERATED_HEADERS # out reference variable
+    OUT_SRC META_GENERATED_SOURCES # out reference variable
+)
+#------reflection module------
+
 file(GLOB_RECURSE PixelSrc
 "src/*.h"
 "src/*.cpp"

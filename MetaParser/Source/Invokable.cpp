@@ -11,7 +11,7 @@ Invokable::Invokable(const Cursor& cursor)
 
 	m_Signature.clear();
 
-	for (size_t i = 0; i < count; ++i)
+	for (uint32_t i = 0; i < count; ++i)
 	{
 		auto argument = type.GetArgument(i);
 

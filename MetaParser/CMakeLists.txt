@@ -31,3 +31,10 @@ target_precompile_headers(MetaParser PRIVATE "PreCompiled.h")
 target_compile_features(MetaParser
 PUBLIC cxx_std_17
 )
+
+# copy template mustache resources on post build
+add_custom_command(TARGET MetaParser POST_BUILD
+	# mustache templates directory
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${CMAKE_CURRENT_LIST_DIR}/Resources"
+		$<TARGET_FILE_DIR:MetaParser>)

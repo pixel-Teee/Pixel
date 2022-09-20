@@ -1,0 +1,13 @@
+#include "{{moduleHeaderFile}}"
+
+{{#moduleFile}}
+#include "{{& header}}"
+{{/moduleFile}}
+
+void AllocateModule()
+{
+{{#moduleFile}}
+    AllocateModuleFile{{targetName}}{{&name}}();
+{{/moduleFile}}
+}
+
