@@ -8,6 +8,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
 //------other library------
 
 //------my library------
@@ -633,6 +634,20 @@ namespace Pixel {
 		//std::ofstream fout(physicalPath);
 		//fout << data.c_str();
 		//fout.close();
+		rapidjson::StringBuffer strBuf;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+		writer.StartObject();
+		rttr::type subMaterialType = rttr::type::get<SubMaterial>();
+		writer.Key(subMaterialType.get_name().to_string().c_str());
+
+		//write sub material to file
+
+
+		writer.EndObject();
+		std::string data = strBuf.GetString();
+		std::ofstream fout(physicalPath);
+		fout << data.c_str();
+		fout.close();
 	}
 
 	void AssetManager::CreateTestMaterial(const std::string& physicalPath, Ref<Material> pMaterial)

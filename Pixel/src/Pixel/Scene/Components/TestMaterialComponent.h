@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MaterialComponent.h"
+
 namespace Pixel {
 	struct SubMaterial;
 	struct Meta(Enable) MaterialComponent

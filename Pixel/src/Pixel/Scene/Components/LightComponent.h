@@ -14,8 +14,8 @@
 
 
 namespace Pixel {
-	enum class LightType
-	{
+	enum class Meta(Enable) LightType
+	{	
 		PointLight = 0,
 		DirectLight = 1,
 		SpotLight = 2
@@ -27,7 +27,6 @@ namespace Pixel {
 		LightType lightType;
 
 		//LightColor
-		Meta()
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		Meta()

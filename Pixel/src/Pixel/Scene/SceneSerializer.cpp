@@ -73,33 +73,25 @@ namespace Pixel {
 		{
 			rttr::instance obj = entity.GetComponent<CameraComponent>();
 			out.Key("CameraComponent");
-			out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
 		}
 		if (entity.HasComponent<StaticMeshComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<StaticMeshComponent>();
 			out.Key("StaticMeshComponent");
-			out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
 		}
 		if(entity.HasComponent<MaterialComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<MaterialComponent>();
 			out.Key("MaterialComponent");
-			out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
 		}
 		if (entity.HasComponent<LightComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<LightComponent>();
 			out.Key("LightComponent");
-			out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
 		}
 	}
 
@@ -439,12 +431,14 @@ namespace Pixel {
 			newEntity.AddComponent<StaticMeshComponent>();
 			rttr::instance obj = newEntity.GetComponent<StaticMeshComponent>();
 			FromJsonRecursive(obj, object["StaticMeshComponent"]);
+			newEntity.GetComponent<StaticMeshComponent>().PostLoad();
 		}
 		if (object.HasMember("MaterialComponent"))
 		{
 			newEntity.AddComponent<MaterialComponent>();
 			rttr::instance obj = newEntity.GetComponent<MaterialComponent>();
 			FromJsonRecursive(obj, object["MaterialComponent"]);
+			newEntity.GetComponent<MaterialComponent>().PostLoad();
 		}
 		if(object.HasMember("LightComponent"))
 		{
@@ -459,14 +453,19 @@ namespace Pixel {
 		rttr::instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 		const auto propList = obj.get_derived_type().get_properties();
 
+		for (rapidjson::Value::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); ++it)
+		{
+			//std::cout << it->name.GetString() << std::endl;
+		}
+
 		for(auto prop : propList)
 		{
-			std::cout << prop.get_name().to_string().c_str() << std::endl;
+			//std::cout << prop.get_name().to_string().c_str() << " " << prop.get_name().to_string().size() << std::endl;
 			//variable name
 			rapidjson::Value::MemberIterator ret = value.FindMember(prop.get_name().to_string().c_str());
 
-			if (value.HasMember(prop.get_name().to_string().c_str()))
-				std::cout << "have member" << std::endl;
+			//if (value.HasMember(prop.get_name().to_string().c_str()))
+			//	std::cout << "have member" << std::endl;
 
 			if (ret == value.MemberEnd())
 				continue;
@@ -496,7 +495,7 @@ namespace Pixel {
 				case rapidjson::kObjectType:
 				{
 					rttr::variant var = prop.get_value(obj);
-					FromJsonRecursive(var, value);
+					FromJsonRecursive(var, jsonValue);
 					prop.set_value(obj, var);
 					break;
 				}
@@ -505,16 +504,7 @@ namespace Pixel {
 					rttr::variant extractedValue = ExtractBasicTypes(jsonValue);
 					//std::cout << extractedValue << std::endl;
 					if (extractedValue.convert(valueT))
-					{
-						if (prop.set_value(obj, extractedValue))
-						{
-							PIXEL_CORE_INFO("设置成功");
-						}
-						else
-						{
-							PIXEL_CORE_INFO("设置失败");
-						}
-					}
+						prop.set_value(obj, extractedValue);
 				}
 			}
 		}

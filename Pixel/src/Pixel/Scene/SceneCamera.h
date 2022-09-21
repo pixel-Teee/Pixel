@@ -4,10 +4,16 @@
 
 namespace Pixel {
 
-	class SceneCamera : public Camera
+	enum class Meta(Enable) ProjectionType
+	{
+		Perspective = 0,
+		Orthographic = 1 
+	};
+
+	class Meta(Enable) SceneCamera : public Camera
 	{
 	public:
-		enum class ProjectionType { Perspective = 0, Orthographic = 1};
+		
 	public:
 		SceneCamera();
 		virtual ~SceneCamera() = default;
@@ -38,15 +44,24 @@ namespace Pixel {
 	private:
 		void RecalculateProjection();
 	private:
+		Meta()
 		ProjectionType m_ProjectionType = ProjectionType::Orthographic;
 
+		Meta()
 		float m_OrthographicSize = 10.0f;
-		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
+		Meta()
+		float m_OrthographicNear = -1.0f;
+		Meta()
+		float m_OrthographicFar = 1.0f;
 
 		/*---Perspective Camera Properties*/
+		Meta()
 		float m_PerspectiveFOV = glm::radians(45.0f);
-		float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 1000.0f;
-
+		Meta()
+		float m_PerspectiveNear = 0.01f;
+		Meta()
+		float m_PerspectiveFar = 1000.0f;
+		Meta()
 		float m_AspectRatio = 0.0f;
 
 		RTTR_ENABLE()

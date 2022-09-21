@@ -6,7 +6,7 @@
 //------my library------
 
 namespace Pixel {
-	enum class ShadingModel
+	enum class Meta(Enable) ShadingModel
 	{
 		SM_Unlit = 0,
 		SM_DefaultLit = 1,
@@ -18,7 +18,8 @@ namespace Pixel {
 	class DescriptorHeap;
 	class DescriptorHandle;
 	//------material component is consist of material------
-	struct SubMaterial {
+	struct Meta(Enable) SubMaterial {
+		Meta()
 		ShadingModel shadingModel = ShadingModel::SM_DefaultLit;
 		Ref<Texture2D> albedoMap;
 		Ref<Texture2D> normalMap;
@@ -26,24 +27,38 @@ namespace Pixel {
 		Ref<Texture2D> roughnessMap;
 		Ref<Texture2D> aoMap;
 
+		Meta()
 		std::string albedoMapPath;
+		Meta()
 		std::string normalMapPath;
+		Meta()
 		std::string metallicMapPath;
+		Meta()
 		std::string roughnessMapPath;
+		Meta()
 		std::string aoMapPath;
 
 		//constant
+		Meta()
 		glm::vec3 gAlbedo = { 1.0f, 1.0f, 1.0f };
+		Meta()
 		glm::vec3 gNormal = { 1.0f, 1.0f, 1.0f };
+		Meta()
 		bool HaveNormal = false;
+		Meta()
 		float gMetallic = 1.0f;
+		Meta()
 		float gRoughness = 1.0f;
+		Meta()
 		float gAo = 0.0f;
+		Meta()
 		float ClearCoat = 1.0f;
+		Meta()
 		float ClearCoatRoughness = 1.0f;
 
 		bool nextFrameNeedLoadTexture[5];//load in the next frame
 
+		Meta()
 		bool IsTransparent = false;//will draw in the transparent pass
 
 				//texture descriptor heap

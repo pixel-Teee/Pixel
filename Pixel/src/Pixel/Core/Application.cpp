@@ -41,8 +41,6 @@ namespace Pixel {
 		//------create asset manager------
 		//......
 		//------create asset manager------
-
-		rttr::type::get<TagComponent>();
 	}
 
 	Application::~Application()

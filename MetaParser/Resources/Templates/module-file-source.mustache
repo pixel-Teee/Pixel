@@ -39,6 +39,17 @@ static void rttr_auto_register_reflection_function_()
     {{/method}}
     {{/class}};
     //------register------
+
+    //------register enumeration------
+    {{#enum}}
+    registration::enumeration<{{&qualifiedName}}>("{{&qualifiedName}}")
+    (
+        {{#member}}
+        value("{{&key}}", {{&value}}){{^isLast}},{{/isLast}}
+        {{/member}}
+    );
+    {{/enum}}
+    //------register enumeration------
 }
 
 void AllocateModuleFile{{targetName}}{{moduleFileName}}()

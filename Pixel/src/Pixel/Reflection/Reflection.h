@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "Pixel/Core/Core.h"
+
 #include <rttr/type>
 #include <rttr/registration_friend>
 
@@ -12,5 +14,10 @@
 #include "Pixel/Scene/Components/TagComponent.h"
 #include "Pixel/Scene/Components/IDComponent.h"
 #include "Pixel/Scene/Components/LightComponent.h"
+#include "Pixel/Scene/Components/CameraComponent.h"
+#include "Pixel/Scene/Components/StaticMeshComponent.h"
+#include "Pixel/Scene/Components/MaterialComponent.h"
+#include "Pixel/Scene/Components/TestMaterialComponent.h"
 
 #include "Pixel/Core/UUID.h"
+#include "Pixel/Scene/SceneCamera.h"

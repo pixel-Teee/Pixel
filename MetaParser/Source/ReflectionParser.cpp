@@ -145,6 +145,7 @@ void ReflectionParser::GenerateModuleFile(const std::filesystem::path& fileHeade
 		SourceData["moduleFileHeader"] = fileHeader.string();//generated reflection header file
 		
 		COMPILE_TYPE_TEMPLATES(SourceData, "class", file.classes);
+		COMPILE_TYPE_TEMPLATES(SourceData, "enum", file.enums);
 		
 		std::filesystem::create_directory(fileSource.parent_path());
 
@@ -220,6 +221,10 @@ void ReflectionParser::Parse()
 
 	//std::cout << "module file size:" << std::endl;
 	//std::cout << m_ModuleFiles.size() << std::endl;
+
+	tempNamespace.clear();
+
+	BuildEnums(cursor, tempNamespace);
 
 	tempNamespace.clear();
 }

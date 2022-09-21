@@ -73,7 +73,9 @@ int main(int argc, char* argv[])
 		}
 		//------from the includes file to get the -I parameter------
 
+		//TODO:move to cmake
 		options.Arguments.emplace_back("-D__REFLECTION_PARSER__");
+		options.Arguments.emplace_back("-DPX_PLATFORM_WINDOWS");
 	}
 
 	try

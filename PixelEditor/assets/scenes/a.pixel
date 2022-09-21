@@ -1,6 +1,12 @@
 {
     "Entities": [
-        {"IDComponent":{"ID":{"m_UUID":11149390889285108247}},"TagComponent":{"Tag":"Empty Entity"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":18.0,"y":0.0,"z":0.0},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}}
+        {"IDComponent":{"ID":{"m_UUID":6118773395783396763}},"TagComponent":{"Tag":"Light(0)"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":-4.914402008056641,"y":4.043247222900391,"z":11.330087661743164},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}},"LightComponent":{"GenerateShadowMap":false,"DisplayLightVolume":true,"constant":1.0,"linear":0.09000000357627869,"quadratic":0.8840000033378601,"CutOff":45.0,"MaxDistance":500.0,"Range":20.0,"DisplayShowdowMapFrustum":false}
+        },
+        {"IDComponent":{"ID":{"m_UUID":12341798190139766824}},"TagComponent":{"Tag":"Light"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":0.13855671882629395,"y":4.043247222900391,"z":21.89954376220703},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}},"LightComponent":{"GenerateShadowMap":false,"DisplayLightVolume":true,"constant":1.0,"linear":0.09000000357627869,"quadratic":0.8840000033378601,"CutOff":45.0,"MaxDistance":500.0,"Range":20.0,"DisplayShowdowMapFrustum":false}
+        },
+        {"IDComponent":{"ID":{"m_UUID":18319537477933843200}},"TagComponent":{"Tag":"Mesh"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":0.0,"y":0.0,"z":16.613189697265625},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}},"StaticMeshComponent":{"path":"Model\\Cube"},"MaterialComponent":{"m_Materials":[{}],"m_MaterialPaths":["Material\\Sphere"]}
+        },
+        {"IDComponent":{"ID":{"m_UUID":2653736938461317352}},"TagComponent":{"Tag":"Camera"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":0.0,"y":0.0,"z":-3.725290298461914e-9},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}},"CameraComponent":{"camera":{"m_ProjectionType":"Perspective","m_OrthographicSize":10.0,"m_OrthographicNear":-1.0,"m_OrthographicFar":1.0,"m_PerspectiveFOV":0.7853981852531433,"m_PerspectiveNear":0.009999999776482582,"m_PerspectiveFar":25.0,"m_AspectRatio":1.4953917264938354},"Primary":true,"FixedAspectRatio":false,"DisplayFurstum":true}
         }
     ]
 }

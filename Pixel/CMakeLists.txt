@@ -26,6 +26,7 @@ set(MODULE_TARGET "ReflectionModule") # module target
 file(GLOB_RECURSE Headers
 "src/Pixel/Scene/Components/*.h"
 "src/Pixel/Core/UUID.h"
+"src/Pixel/Scene/SceneCamera.h"
 )
 
 set(HEADERS ${Headers}) 

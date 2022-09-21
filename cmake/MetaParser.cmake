@@ -15,6 +15,7 @@ function(meta_parser_prebuild)
 
     set(MULTI_VALUE_ARGS
         HEADER_FILES
+        DEFINES
     )
 
     #parser function argument, and then add prefiex PREBUILD_META to argument values
@@ -138,7 +139,7 @@ function(meta_parser_build)
     if("${DEFINES_TRIMMED}" STREQUAL "")
         set(DEFINES_SWITCH )
     else()
-        set(DEFINES_SWITCH --defines "${DEFINES}")
+        set(DEFINES_SWITCH "${DEFINES}")
     endif()
 
     # pch

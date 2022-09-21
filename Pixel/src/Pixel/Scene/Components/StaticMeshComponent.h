@@ -2,9 +2,9 @@
 
 namespace Pixel {
 	class Model;
+
 	struct Meta(Enable) StaticMeshComponent
 	{
-		Meta()
 		Ref<Model> m_Model;
 		//std::string path;
 

@@ -445,7 +445,7 @@ namespace Pixel
 						if (ImGui::Selectable(projectionTypeStrings[i], isSelected))
 						{
 							currentProjectionTypeString = projectionTypeStrings[i];
-							camera.SetProjectionType((SceneCamera::ProjectionType)i);
+							camera.SetProjectionType((ProjectionType)i);
 						}
 
 						if (isSelected)
@@ -453,7 +453,7 @@ namespace Pixel
 					}
 					ImGui::EndCombo();
 				}
-				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+				if (camera.GetProjectionType() == ProjectionType::Perspective)
 				{
 					float fov = glm::degrees(camera.GetPerspectiveVerticalFOV());
 					if (ImGui::DragFloat("fov", &fov))
@@ -474,7 +474,7 @@ namespace Pixel
 					}
 				}
 
-				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+				if (camera.GetProjectionType() == ProjectionType::Orthographic)
 				{
 					float orthoSize = camera.GetOrthographicSize();
 					if (ImGui::DragFloat("Size", &orthoSize))
