@@ -13,12 +13,4 @@ namespace Pixel
 	{
 		m_Model = AssetManager::GetSingleton().GetModel(path);
 	}
-
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<StaticMeshComponent>("StaticMeshComponent")
-			.constructor<>()
-			.property("path", &StaticMeshComponent::path);
-	}
 }

@@ -24,12 +24,3 @@ namespace Pixel {
 		}
 	}
 }
-
-
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-	registration::class_<Pixel::MaterialComponent>("MaterialComponent")
-		.constructor<>()
-		.property("m_MaterialPaths", &Pixel::MaterialComponent::m_MaterialPaths);
-}

@@ -2,6 +2,9 @@
 
 #include "Scene.h"
 
+#include <rapidjson/writer.h>
+#include <rapidjson/document.h>
+
 namespace Pixel {
 
 	class SceneSerializer

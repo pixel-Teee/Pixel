@@ -60,27 +60,3 @@ namespace Pixel
 			aoMap = AssetManager::GetSingleton().GetTexture(aoMapPath);
 	}
 }
-
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-	registration::class_<Pixel::SubMaterial>("SubMaterial")
-		.constructor<>()
-		.property("shadingModel", &Pixel::SubMaterial::shadingModel)
-		.property("albedoMapPath", &Pixel::SubMaterial::albedoMapPath)
-		.property("normalMapPath", &Pixel::SubMaterial::normalMapPath)
-		.property("metallicMapPath", &Pixel::SubMaterial::metallicMapPath)
-		.property("roughnessMapPath", &Pixel::SubMaterial::roughnessMapPath)
-		.property("aoMapPath", &Pixel::SubMaterial::aoMapPath)
-		.property("gAlbedo", &Pixel::SubMaterial::gAlbedo)
-		.property("gNormal", &Pixel::SubMaterial::gNormal)
-		.property("HaveNormal", &Pixel::SubMaterial::HaveNormal)
-		.property("gMetallic", &Pixel::SubMaterial::gMetallic)
-		.property("gRoughness", &Pixel::SubMaterial::gRoughness)
-		.property("gAo", &Pixel::SubMaterial::gAo)
-		.property("ClearCoat", &Pixel::SubMaterial::ClearCoat)
-		.property("ClearCoatRoughness", &Pixel::SubMaterial::ClearCoatRoughness)
-		.property("IsTransparent", &Pixel::SubMaterial::IsTransparent);
-
-	std::cout << "register sub material successfully!" << std::endl;
-}

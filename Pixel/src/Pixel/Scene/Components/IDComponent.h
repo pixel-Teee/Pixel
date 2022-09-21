@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Pixel/Core/UUID.h"
-#include "Pixel/Core/Reflect.h"
 
 namespace Pixel {
-	struct IDComponent
+	struct Meta(Enable) IDComponent
 	{
+		Meta()
 		UUID ID;
 
 		IDComponent() = default;

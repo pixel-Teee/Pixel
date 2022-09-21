@@ -19,15 +19,22 @@
 //------my library------
 
 namespace Pixel {
-	struct TransformComponent
+	struct Meta(Enable) TransformComponent
 	{
+		Meta()
 		UUID parentUUID = 0;//parent uuid
+
+		Meta()
 		std::vector<UUID> childrensUUID;//children uuid
 		//------local transform------
+		Meta()
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+		Meta()
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+		Meta()
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 		//------local transform------
+		Meta()
 		glm::mat4 globalTransform = glm::mat4(1.0f);
 
 		TransformComponent() = default;
@@ -56,7 +63,7 @@ namespace Pixel {
 				//parent entity
 				entt::entity parentEntity;
 				//find uuid's owner
-				auto& UUIDs = scene.view<IDComponent>();
+				auto UUIDs = scene.view<IDComponent>();
 				for (auto entity : UUIDs)
 				{
 					const IDComponent& id = scene.get<IDComponent>(entity);
@@ -83,7 +90,7 @@ namespace Pixel {
 				//parent entity
 				entt::entity parentEntity;
 				//find uuid's owner
-				auto& UUIDs = scene.view<IDComponent>();
+				auto UUIDs = scene.view<IDComponent>();
 				for (auto entity : UUIDs)
 				{
 					const IDComponent& id = scene.get<IDComponent>(entity);

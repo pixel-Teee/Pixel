@@ -10,3 +10,5 @@
 #endif
 
 #include "Pixel/Scene/Components/TagComponent.h"
+#include "Pixel/Scene/Components/IDComponent.h"
+#include "Pixel/Scene/Components/LightComponent.h"

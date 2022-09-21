@@ -2,8 +2,6 @@
 
 #include <xhash>
 
-#include "Pixel/Core/Reflect.h"
-
 namespace Pixel {
 
 	class UUID

@@ -23,7 +23,11 @@ set(REFLECTION_HEADER "src/Pixel/Reflection/Reflection.h") # need parsed header,
 set(MODULE_HEADER "src/Pixel/Reflection/ReflectionModule.h") # module header
 set(MODULE_TARGET "ReflectionModule") # module target
 
-set(HEADERS "src/Pixel/Scene/Components/TagComponent.h") 
+file(GLOB_RECURSE Headers
+"src/Pixel/Scene/Components/*.h"
+)
+
+set(HEADERS ${Headers}) 
 
 set(REFLECTION_INCLUDES "")
 
@@ -45,8 +49,23 @@ add_library(${MODULE_TARGET} ${META_GENERATED_FILES} ${META_MODULE_SOURCE} "src/
 
 target_precompile_headers(${MODULE_TARGET} PRIVATE "${META_GENERATED_DIR}/pxpch.h")
 
-target_include_directories(${MODULE_TARGET} PRIVATE "${META_GENERATED_DIR}" "vendor/rttr/src" "src/Pixel/Core/*.h" "src/Pixel/Debug/*.h" "src/Pixel/Utils/*.h"
-"src" "vendor/spdlog/include")
+target_include_directories(${MODULE_TARGET} PRIVATE "${META_GENERATED_DIR}" "src"
+"vendor/spdlog/include"
+"vendor/GLFW/include"
+"vendor/Glad/include"
+"vendor/imgui"
+"vendor/glm"
+"vendor/stb_image"
+"vendor/entt/include"
+"vendor/yaml-cpp/include"
+"vendor/imguizmo"
+"vendor/Box2D/include"
+"vendor/assimp/include"
+"vendor/imgui-node-editor"
+"vendor/lua"
+"vendor/bullet3/src"
+"vendor/json/include"
+"vendor/rttr/src")
 
 target_link_libraries(${MODULE_TARGET} PUBLIC RTTR::Core_Lib)
 
@@ -62,6 +81,9 @@ target_compile_definitions(${MODULE_TARGET}
     PRIVATE B3_USE_CLEW
     PRIVATE GLM_FORCE_LEFT_HANDED
 )
+
+target_compile_features(${MODULE_TARGET}
+PUBLIC cxx_std_17)
 
 #------reflection module------
 

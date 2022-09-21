@@ -4,16 +4,20 @@
 
 namespace Pixel {
 
-	struct CameraComponent
+	struct Meta(Enable) CameraComponent
 	{
+		Meta()
 		SceneCamera camera;
 		//think about move to scene
+		Meta()
 		bool Primary = true;
+		Meta()
 		//when OnResize, whether is SetViewport
 		bool FixedAspectRatio = false;
 
 		//draw frustum
 		//editor only
+		Meta()
 		bool DisplayFurstum = false;
 
 		CameraComponent() = default;

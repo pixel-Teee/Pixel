@@ -2,9 +2,12 @@
 
 namespace Pixel {
 	struct SubMaterial;
-	struct MaterialComponent
+	struct Meta(Enable) MaterialComponent
 	{
+		Meta()
 		std::vector<Ref<SubMaterial>> m_Materials;
+
+		Meta()
 		std::vector<std::string> m_MaterialPaths;//material's virtual path
 
 		MaterialComponent() {}

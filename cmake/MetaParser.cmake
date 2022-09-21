@@ -38,7 +38,7 @@ function(meta_parser_prebuild)
        
     #iterator over the header files
     foreach(HEADER ${PREBUILD_META_HEADER_FILES})
-        #message(${HEADER})
+        # message(${HEADER})
         get_filename_component(DIRECTORY_NAME ${HEADER} DIRECTORY)
         get_filename_component(BASE_NAME ${HEADER} NAME_WE)
         get_filename_component(EXTENSION ${HEADER} EXT)

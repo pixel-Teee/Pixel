@@ -5,6 +5,9 @@
 
 #include <fstream>
 
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+
 namespace Pixel {
 
 	bool SceneSerializer::Serializer(const std::string& filePath)

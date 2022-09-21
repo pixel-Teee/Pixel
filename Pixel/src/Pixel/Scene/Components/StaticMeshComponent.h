@@ -2,12 +2,14 @@
 
 namespace Pixel {
 	class Model;
-	struct StaticMeshComponent
+	struct Meta(Enable) StaticMeshComponent
 	{
+		Meta()
 		Ref<Model> m_Model;
 		//std::string path;
 
 		//char path[256];
+		Meta()
 		std::string path;
 
 		//Editor's Attribute

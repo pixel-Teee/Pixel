@@ -15,16 +15,4 @@ namespace Pixel
 		Scale = others.Scale;
 		globalTransform = others.globalTransform;
 	}
-
-	RTTR_REGISTRATION
-	{
-		using namespace rttr;
-		registration::class_<TransformComponent>("TransformComponent")
-			.constructor<>()
-			.property("parentUUID", &TransformComponent::parentUUID)
-			.property("childrensUUID", &TransformComponent::childrensUUID)
-			.property("Translation", &TransformComponent::Translation)
-			.property("Rotation", &TransformComponent::Rotation)
-			.property("Scale", &TransformComponent::Scale);
-	}
 }

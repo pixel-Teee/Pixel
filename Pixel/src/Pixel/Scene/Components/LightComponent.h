@@ -10,7 +10,6 @@
 
 //------my library------
 #include "Pixel/Scene/Components/TransformComponent.h"
-#include "Pixel/Core/Reflect.h"
 //------my library------
 
 
@@ -23,27 +22,39 @@ namespace Pixel {
 	};
 
 	//TODO£ºtemporary there only have a point light
-	struct LightComponent
+	struct Meta(Enable) LightComponent
 	{
 		LightType lightType;
+
 		//LightColor
+		Meta()
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
+		Meta()
 		bool GenerateShadowMap = false;//temporarily for direct light
+
+		Meta()
 		bool DisplayLightVolume = false;//temporarily for point light
 		//------for point light's volume radius------
+		Meta()
 		float constant = 1.0f;
+		Meta()
 		float linear = 0.09f;
+		Meta()
 		float quadratic = 0.032f;
 		//------for point light's volume radius------
 
 		//------for spot light------
+		Meta()
 		float CutOff = 45.0f;
 		//------for spot light------
 
 		//------for direct light------
+		Meta()
 		float MaxDistance = 500.0f;
+		Meta()
 		float Range = 20.0f;
+		Meta()
 		bool DisplayShowdowMapFrustum = false;
 		//------for direct light------
 
