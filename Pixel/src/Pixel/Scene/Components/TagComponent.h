@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Pixel/Core/Reflect.h"
-
 namespace Pixel {
-	struct TagComponent
+	struct Meta(Enable) TagComponent
 	{
+		Meta()
 		std::string Tag;
 
 		TagComponent() = default;
@@ -12,7 +11,8 @@ namespace Pixel {
 		TagComponent(const std::string& tag)
 			:Tag(tag) {}
 
-		RTTR_ENABLE()
+
 		RTTR_REGISTRATION_FRIEND
+		RTTR_ENABLE()
 	};
 }

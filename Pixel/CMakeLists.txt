@@ -7,21 +7,23 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 message("${CMAKE_SOURCE_DIR}/cmake")
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/MetaParser MetaParser)
+
 #include the meta parser cmake script
 include(MetaParser)
 
 #------reflection module------
 set(META_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}") # source root
-set(META_GENERATED_DIR "${CMAKE_CURRENT_BINARRY_DIR}/Generated") # generated dirctory
+set(META_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/Generated") # generated directory
 
-set(META_GENERATED_HEADERS "")
-set(META_GENERATED_SOURCES "")
+set(META_GENERATED_HEADERS "") # generated headers
+set(META_GENERATED_SOURCES "") # generated sources
 
-set(REFLECTION_HEADER "")
-set(MODULE_HEADER "")
-set(MODULE_TARGET "ReflectionModule")
+set(REFLECTION_HEADER "src/Pixel/Reflection/Reflection.h") # need parsed header, a set of headers
+set(MODULE_HEADER "src/Pixel/Reflection/ReflectionModule.h") # module header
+set(MODULE_TARGET "ReflectionModule") # module target
 
-set(REFLECTION_HEADERS)
+set(HEADERS "src/Pixel/Scene/Components/TagComponent.h") 
 
 set(REFLECTION_INCLUDES "")
 
@@ -30,13 +32,37 @@ meta_parser_prebuild(
     TARGET ${MODULE_TARGET} # module target
     GENERATED_DIR ${META_GENERATED_DIR} # generated directory
     SOURCE_ROOT ${META_SOURCE_ROOT} # source root
-    HEADER_FILES ${REFLECTION_HEADERS} # need parsed header
+    HEADER_FILES ${HEADERS} # need parsed header
     MODULE_HEADER ${MODULE_HEADER} # module header
     OUT_MODULE_SOURCE META_MODULE_SOURCE # meta module source
     OUT_GENERATED_FILES META_GENERATED_FILES # meta module files
     OUT_INC META_GENERATED_HEADERS # out reference variable
     OUT_SRC META_GENERATED_SOURCES # out reference variable
 )
+
+# get a reflection module target
+add_library(${MODULE_TARGET} ${META_GENERATED_FILES} ${META_MODULE_SOURCE} "src/Pixel/Reflection/ReflectionModule.h")
+
+target_precompile_headers(${MODULE_TARGET} PRIVATE "${META_GENERATED_DIR}/pxpch.h")
+
+target_include_directories(${MODULE_TARGET} PRIVATE "${META_GENERATED_DIR}" "vendor/rttr/src" "src/Pixel/Core/*.h" "src/Pixel/Debug/*.h" "src/Pixel/Utils/*.h"
+"src" "vendor/spdlog/include")
+
+target_link_libraries(${MODULE_TARGET} PUBLIC RTTR::Core_Lib)
+
+target_compile_definitions(${MODULE_TARGET}
+    PRIVATE PX_PLATFORM_WINDOWS
+    PRIVATE PX_BUILD_DLL
+    PRIVATE GLFW_INCLUDE_NONE
+    PRIVATE IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+    PRIVATE PX_DEBUG
+    PRIVATE YAML_CPP_STATIC_DEFINE
+    PRIVATE PIXEL_3D
+    PRIVATE __BT_DISABLE_SSE__
+    PRIVATE B3_USE_CLEW
+    PRIVATE GLM_FORCE_LEFT_HANDED
+)
+
 #------reflection module------
 
 file(GLOB_RECURSE PixelSrc
@@ -52,6 +78,7 @@ file(GLOB_RECURSE PixelSrc
 "src/Pixel/Utils/*.h"
 "src/Pixel/Math/*.h"
 "src/Pixel/Physics/*.h"
+"src/Pixel/Reflection/*.h"
 "src/Pixel/Core/*.cpp"
 "src/Pixel/Events/*.cpp"
 "src/Pixel/ImGui/*.cpp"
@@ -129,6 +156,7 @@ target_include_directories(Pixel PRIVATE
 "vendor/bullet3/src"
 "vendor/json/include"
 "vendor/rttr/src"
+"${META_GENERATED_HEADERS}"
 )
 
 target_compile_definitions(Pixel
@@ -170,6 +198,21 @@ PRIVATE "d3d12.lib"
 PRIVATE "dxgi.lib"
 PRIVATE "d3dcompiler.lib"
 PUBLIC RTTR::Core_Lib
+PUBLIC ${MODULE_TARGET} # link the reflection module target
+)
+
+meta_parser_build(
+    TARGET ${MODULE_TARGET} # target name
+    SOURCE_ROOT ${META_SOURCE_ROOT} # source root
+    GENERATED_DIR ${META_GENERATED_DIR} # generated directory
+    GENERATED_FILES ${META_GENERATED_FILES} # generated files
+    SOURCE_FILE ${REFLECTION_HEADER} # reflection header
+    MODULE_HEADER ${MODULE_HEADER} # module header
+    MODULE_SOURCE_FILE ${META_MODULE_SOURCE} # module source
+    HEADER_FILES ${HEADERS} # depend header files
+    INCLUDES ${REFLECTION_INCLUDES} # -I parameter
+    PCH_NAME "pxpch"
+    PARSER_EXECUTABLE "$<TARGET_FILE:MetaParser>"
 )
 
 
