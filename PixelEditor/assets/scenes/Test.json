@@ -1,0 +1,7 @@
+{
+    "Entities": [
+      {
+        "IDComponent": { "ID": { "m_UUID": 5960043397784546530 } },"TagComponent":{"Tag":"Light"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":"","Rotation":"","Scale":"","globalTransform":""}
+      }
+    ]
+}

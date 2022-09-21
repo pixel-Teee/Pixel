@@ -1,0 +1,6 @@
+{
+    "Entities": [
+        {"IDComponent":{"ID":{"m_UUID":11149390889285108247}},"TagComponent":{"Tag":"Empty Entity"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":18.0,"y":0.0,"z":0.0},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}}
+        }
+    ]
+}

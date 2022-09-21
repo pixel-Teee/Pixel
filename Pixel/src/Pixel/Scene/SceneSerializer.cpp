@@ -47,28 +47,27 @@ namespace Pixel {
 		if (entity.HasComponent<IDComponent>())
 		{
 			//forward the entity's component reference to instance
-			IDComponent test = entity.GetComponent<IDComponent>();
-			rttr::instance obj = test;
+			IDComponent obj = entity.GetComponent<IDComponent>();
 			out.Key("IDComponent");
-			out.StartObject();
+			//out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
+			//out.EndObject();
 		}
 		if(entity.HasComponent<TagComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<TagComponent>();
 			out.Key("TagComponent");
-			out.StartObject();
+			//out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
+			//out.EndObject();
 		}
 		if (entity.HasComponent<TransformComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<TransformComponent>();
 			out.Key("TransformComponent");
-			out.StartObject();
+			//out.StartObject();
 			ToJsonRecursive(obj, out);
-			out.EndObject();
+			//out.EndObject();
 		}
 		if (entity.HasComponent<CameraComponent>())
 		{
@@ -106,6 +105,7 @@ namespace Pixel {
 
 	void SceneSerializer::ToJsonRecursive(const rttr::instance& obj2, rapidjson::Writer<rapidjson::StringBuffer>& out)
 	{
+		out.StartObject();
 		//dealing with wrapped objects
 		rttr::instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 
@@ -118,6 +118,9 @@ namespace Pixel {
 				continue;
 
 			rttr::variant propValue = prop.get_value(obj);
+
+			//PIXEL_CORE_INFO("{0}", propValue.get_type().get_name());
+
 			if (!propValue)
 				continue;//cannot serialize, because we cannot retrieve the value
 
@@ -128,6 +131,7 @@ namespace Pixel {
 				PIXEL_CORE_INFO("cannot serialize property, {0}", name);
 			}
 		}
+		out.EndObject();
 	}
 
 	bool SceneSerializer::writeVariant(rttr::variant& var, rapidjson::Writer<rapidjson::StringBuffer>& out)
@@ -375,7 +379,7 @@ namespace Pixel {
 	}
 	*/
 
-	void SceneSerializer::Deserializer(const std::string& filePath)
+	bool SceneSerializer::Deserializer(const std::string& filePath)
 	{
 		rapidjson::Document doc;
 
@@ -387,13 +391,13 @@ namespace Pixel {
 		{
 			if (doc.HasMember("Entities") && doc["Entities"].IsArray())
 			{
-				const rapidjson::Value& entityArray = doc["Entities"];
+				rapidjson::Value& entityArray = doc["Entities"];
 
 				rapidjson::SizeType len = entityArray.Size();
 
 				for (rapidjson::SizeType i = 0; i < len; ++i)
 				{
-					const rapidjson::Value& object = entityArray[i];
+					rapidjson::Value& object = entityArray[i];
 
 					Entity& newEntity = m_Scene->CreateEntityWithUUID(UUID(), "");
 
@@ -403,9 +407,11 @@ namespace Pixel {
 		}
 
 		stream.close();
+
+		return true;
 	}
 
-	void SceneSerializer::ReadEntity(Entity& newEntity, const rapidjson::Value& object)
+	void SceneSerializer::ReadEntity(Entity& newEntity, rapidjson::Value& object)
 	{
 		if (object.HasMember("IDComponent"))
 		{
@@ -448,15 +454,19 @@ namespace Pixel {
 		}
 	}
 
-	void SceneSerializer::FromJsonRecursive(rttr::instance obj2, const rapidjson::Value& value)
+	void SceneSerializer::FromJsonRecursive(rttr::instance obj2, rapidjson::Value& value)
 	{
 		rttr::instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 		const auto propList = obj.get_derived_type().get_properties();
 
 		for(auto prop : propList)
 		{
+			std::cout << prop.get_name().to_string().c_str() << std::endl;
 			//variable name
-			rapidjson::Value::ConstMemberIterator ret = value.FindMember(prop.get_name().to_string().c_str());
+			rapidjson::Value::MemberIterator ret = value.FindMember(prop.get_name().to_string().c_str());
+
+			if (value.HasMember(prop.get_name().to_string().c_str()))
+				std::cout << "have member" << std::endl;
 
 			if (ret == value.MemberEnd())
 				continue;
@@ -477,6 +487,7 @@ namespace Pixel {
 						var = prop.get_value(obj);
 						auto view = var.create_sequential_view();
 						//read
+						ReadArrayRecursively(view, jsonValue);
 					}
 
 					prop.set_value(obj, var);
@@ -492,8 +503,18 @@ namespace Pixel {
 				default:
 				{
 					rttr::variant extractedValue = ExtractBasicTypes(jsonValue);
+					//std::cout << extractedValue << std::endl;
 					if (extractedValue.convert(valueT))
-						prop.set_value(obj, extractedValue);
+					{
+						if (prop.set_value(obj, extractedValue))
+						{
+							PIXEL_CORE_INFO("设置成功");
+						}
+						else
+						{
+							PIXEL_CORE_INFO("设置失败");
+						}
+					}
 				}
 			}
 		}
@@ -535,9 +556,11 @@ namespace Pixel {
 		return rttr::variant();
 	}
 
-	void SceneSerializer::ReadArrayRecursively(rttr::variant_sequential_view& view, const rapidjson::Value& value)
+	void SceneSerializer::ReadArrayRecursively(rttr::variant_sequential_view& view, rapidjson::Value& value)
 	{
 		view.set_size(value.Size());
+		const rttr::type arrayValueType = view.get_rank_type(1);
+
 		for (rapidjson::SizeType i = 0; i < value.Size(); ++i)
 		{
 			auto& jsonIndexValue = value[i];
@@ -556,7 +579,9 @@ namespace Pixel {
 			}
 			else
 			{
-				//associate container
+				rttr::variant extractedValue = ExtractBasicTypes(jsonIndexValue);
+				if (extractedValue.convert(arrayValueType))
+					view.set_value(i, extractedValue);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pixel/Reflection/ReflectionModule.h"
+#include "Pixel/Reflection/ThirdPartyRegister.h"
 
 #ifdef PX_PLATFORM_WINDOWS
 
@@ -11,6 +12,7 @@ int main()
 	Pixel::Log::Init();
 
 	AllocateModule();
+	Pixel::RegisterThirdPartyType();
 
 	//PX_PROFILE_BEGIN_SESSION("Startup", "PixelProfile-Startup.json");
 	auto app = Pixel::CreateApplication();

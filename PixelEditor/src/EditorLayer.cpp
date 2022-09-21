@@ -236,7 +236,7 @@ namespace Pixel
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
-					//OpenScene();
+					OpenScene();
 				}
 
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
@@ -683,7 +683,7 @@ namespace Pixel
 		//newScene->SetSkyBox(Renderer3D::GetSkyBox());
 		SceneSerializer serializer(newScene);
 
-		if (serializer.Serializer(filepath.string()))
+		if (serializer.Deserializer(filepath.string()))
 		{
 			m_EditorScene = newScene;
 			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);

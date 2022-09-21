@@ -25,13 +25,3 @@ namespace Pixel {
 	}
 
 }
-
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-	registration::class_<Pixel::UUID>("UUID")
-		.constructor<>()
-		.property("m_UUID", &Pixel::UUID::m_UUID);
-
-	std::cout << "register uuid successfully!" << std::endl;
-}

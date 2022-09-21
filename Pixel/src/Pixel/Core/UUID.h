@@ -4,7 +4,7 @@
 
 namespace Pixel {
 
-	class UUID
+	class Meta(Enable) UUID
 	{
 	public:
 		//UUID id
@@ -15,6 +15,7 @@ namespace Pixel {
 
 		operator uint64_t() const { return m_UUID; }
 	private:
+		Meta()
 		uint64_t m_UUID;
 
 		RTTR_ENABLE()

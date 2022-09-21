@@ -31,13 +31,14 @@ namespace Pixel {
 		//------serializer------
 
 		//------deserializer------
-		void Deserializer(const std::string& filePath);
 
-		void ReadEntity(Entity& newEntity, const rapidjson::Value& object);
+		bool Deserializer(const std::string& filePath);
 
-		void FromJsonRecursive(rttr::instance obj2, const rapidjson::Value& value);
+		void ReadEntity(Entity& newEntity, rapidjson::Value& object);
 
-		void ReadArrayRecursively(rttr::variant_sequential_view& view, const rapidjson::Value& value);
+		void FromJsonRecursive(rttr::instance obj2, rapidjson::Value& value);
+
+		void ReadArrayRecursively(rttr::variant_sequential_view& view, rapidjson::Value& value);
 
 		rttr::variant ExtractBasicTypes(const rapidjson::Value& jsonValue);
 		//------deserializer------

@@ -34,7 +34,7 @@ namespace Pixel {
 		Meta()
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 		//------local transform------
-		Meta()
+		//Meta()
 		glm::mat4 globalTransform = glm::mat4(1.0f);
 
 		TransformComponent() = default;
