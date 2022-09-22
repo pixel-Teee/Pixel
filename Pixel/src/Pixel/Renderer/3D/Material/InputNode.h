@@ -8,7 +8,7 @@ namespace Pixel
 
 	class OutputNode;
 
-	class InputNode : public PutNode
+	class Meta(Enable) InputNode : public PutNode
 	{
 	public:
 		//shader function
@@ -17,6 +17,7 @@ namespace Pixel
 		//input node connect to out put node
 		std::weak_ptr<OutputNode> m_pOutLink;
 
+		Meta()
 		InputNode() = default;
 
 		InputNode(ValueType valueType, std::string& nodeName, Ref<ShaderFunction> pShaderFunction) : PutNode(valueType, nodeName)
@@ -32,5 +33,8 @@ namespace Pixel
 
 		//get shader function
 		Ref<ShaderFunction> GetOwner() const;
+
+		RTTR_ENABLE(PutNode)
+		RTTR_REGISTRATION_FRIEND
 	};
 }

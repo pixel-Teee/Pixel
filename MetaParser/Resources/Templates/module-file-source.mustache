@@ -54,6 +54,10 @@ static void rttr_auto_register_reflection_function_()
     );
     {{/enum}}
     //------register enumeration------
+
+    {{#class}}
+    type::register_wrapper_converter_for_base_classes<std::shared_ptr<{{&qualifiedName}}>>();
+    {{/class}}
 }
 
 void AllocateModuleFile{{targetName}}{{moduleFileName}}()

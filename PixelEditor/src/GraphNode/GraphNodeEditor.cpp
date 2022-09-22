@@ -218,6 +218,7 @@ namespace Pixel {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, panelHeight / 8.0f);
 		if(ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
+			m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
 			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
 			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial);
 			PIXEL_CORE_INFO(out);

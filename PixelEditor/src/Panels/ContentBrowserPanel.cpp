@@ -298,11 +298,11 @@ namespace Pixel {
 								}
 							}
 							
-							for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
-							{
-								m_pMaterial->GetShaderFunction()[i]->ConstructPutNodeAndSetPutNodeOwner();
-								//m_pMaterial->GetShaderFunction()[i]->m_pOwner = 
-							}
+							//for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
+							//{
+							//	//m_pMaterial->GetShaderFunction()[i]->ConstructPutNodeAndSetPutNodeOwner();
+							//	//m_pMaterial->GetShaderFunction()[i]->m_pOwner = 
+							//}
 
 							m_pMaterial->PostLink();
 

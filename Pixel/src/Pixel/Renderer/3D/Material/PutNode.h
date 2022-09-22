@@ -14,6 +14,7 @@ namespace Pixel {
 			VT_MAX
 		};
 
+		Meta()
 		PutNode() = default;
 
 		PutNode(ValueType valueType, std::string& nodeName)

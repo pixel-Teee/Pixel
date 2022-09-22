@@ -30,6 +30,12 @@ file(GLOB_RECURSE Headers
 "src/Pixel/Renderer/3D/Material/Material.h"
 "src/Pixel/Renderer/3D/Material/ShaderFunction.h"
 "src/Pixel/Renderer/3D/Material/ShaderMainFunction.h"
+"src/Pixel/Renderer/3D/Material/InputNode.h"
+"src/Pixel/Renderer/3D/Material/OutputNode.h"
+"src/Pixel/Renderer/3D/Material/PutNode.h"
+"src/Pixel/Renderer/3D/Material/Mul.h"
+"src/Pixel/Renderer/3D/Material/ConstFloatValue.h"
+"src/Pixel/Renderer/3D/Material/ConstValue.h"
 )
 
 set(HEADERS ${Headers}) 
