@@ -757,6 +757,9 @@ namespace Pixel
 		if(SelectedEntity)
 			OutLineEntity = m_Registry.try_get<TransformComponent, StaticMeshComponent>(SelectedEntity);
 
+		//important
+		Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
+
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys, std::get<1>(OutLineEntity), std::get<0>(OutLineEntity), shared_from_this());
 

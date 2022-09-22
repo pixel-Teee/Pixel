@@ -96,6 +96,16 @@ namespace Pixel {
 		virtual void SetExposure(float exposure) override;
 
 		virtual void SetSigmma(float sigmma) override;
+
+		virtual Ref<DescriptorHeap> GetDescriptorHeap() override;
+
+		virtual void ResetDescriptorHeapOffset() override;
+
+		virtual uint32_t GetDescriptorHeapOffset() override;
+
+		virtual void SetDescriptorHeapOffset(uint32_t offset) override;
+		
+		virtual Ref<DescriptorHandle> GetDescriptorHeapFirstHandle() override;
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -335,6 +345,12 @@ namespace Pixel {
 		std::vector<StaticMeshContext> m_OpaqueItems;
 
 		std::vector<StaticMeshContext> m_TransParentItems;
+
+		//------total bind texture descriptor heap------
+		Ref<DescriptorHeap> m_TotalBindTextureDescriptorHeap;
+		Ref<DescriptorHandle> m_TotalBindTextureDescriptorHeapFirstHandle;
+		uint32_t m_Offset;//offset item
+		//------total bind texture descriptor heap------
 	};
 }
  

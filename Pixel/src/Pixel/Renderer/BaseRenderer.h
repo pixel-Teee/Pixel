@@ -12,6 +12,7 @@ namespace Pixel {
 	class PSO;
 	class GpuResource;
 	class Scene;
+	class DescriptorHeap;
 
 	//renderer interface
 	class BaseRenderer
@@ -67,6 +68,16 @@ namespace Pixel {
 		virtual void SetExposure(float exposure) = 0;
 
 		virtual void SetSigmma(float sigmma) = 0;
+
+		virtual Ref<DescriptorHeap> GetDescriptorHeap() = 0;
+
+		virtual void ResetDescriptorHeapOffset() = 0;
+
+		virtual uint32_t GetDescriptorHeapOffset() = 0;
+
+		virtual void SetDescriptorHeapOffset(uint32_t offset) = 0;
+
+		virtual Ref<DescriptorHandle> GetDescriptorHeapFirstHandle() = 0;
 
 		static Ref<BaseRenderer> Create();
 	};

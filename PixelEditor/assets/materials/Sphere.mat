@@ -1,4 +1,3 @@
 {
-    "SubMaterial": {"shadingModel":1,"albedoMapPath":"Texture\\Sphere_DefaultMaterial_BaseColor","normalMapPath":"Texture\\Sphere_DefaultMaterial_Normal","metallicMapPath":"Texture\\Sphere_DefaultMaterial_Metallic","roughnessMapPath":"Texture\\Sphere_DefaultMaterial_Roughness","aoMapPath":"","gAlbedo":[1.0,0.9999899864196777,0.9999899864196777],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":0.007812501848093234,"gRoughness":5.263544247e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315,"IsTransparent":false
-    }
+    "Pixel::SubMaterial":{"shadingModel":"SM_DefaultLit","albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":{"x":0.7412434816360474,"y":1.0,"z":0.46332043409347534},"gNormal":{"x":1.0,"y":1.0,"z":1.0},"HaveNormal":true,"gMetallic":1.0,"gRoughness":0.800000011920929,"gAo":0.0,"ClearCoat":1.0,"ClearCoatRoughness":1.0,"IsTransparent":false}
 }

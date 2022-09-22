@@ -1,4 +1,3 @@
 {
-    "SubMaterial": {"shadingModel":1,"albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":[0.9511784315109253,1.0,0.9034749269485474],"gNormal":[1.0,1.0,1.0],"HaveNormal":true,"gMetallic":5.2386907257919585e-11,"gRoughness":5.122630465e-315,"gAo":0.0078125,"ClearCoat":0.007812501848093234,"ClearCoatRoughness":5.263544247e-315,"IsTransparent":false
-    }
+    "Pixel::SubMaterial":{"shadingModel":"SM_DefaultLit","albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":{"x":0.9884169697761536,"y":0.3396490812301636,"z":0.3396490812301636},"gNormal":{"x":1.0,"y":1.0,"z":1.0},"HaveNormal":false,"gMetallic":1.0,"gRoughness":1.0,"gAo":0.0,"ClearCoat":1.0,"ClearCoatRoughness":1.0,"IsTransparent":false}
 }

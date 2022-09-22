@@ -335,6 +335,11 @@ namespace Pixel {
 		m_AdditiveBlendingDescriptorHandle = m_AdditiveBlendingDescriptorHeap->Alloc(1);
 		m_AdditiveBlendingDescriptorHandle2 = m_AdditiveBlendingDescriptorHeap->Alloc(1);
 		//------create additive blending pipeline------
+
+		//------create total texture descriptor heap------
+		m_TotalBindTextureDescriptorHeap = DescriptorHeap::Create(L"TotalBindTextureDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 1024);
+		m_TotalBindTextureDescriptorHeapFirstHandle = m_TotalBindTextureDescriptorHeap->Alloc(1024);
+		//------create total texture descriptor heap------
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -2402,6 +2407,31 @@ namespace Pixel {
 	void DirectXRenderer::SetSigmma(float sigmma)
 	{
 		m_sigmma = sigmma;
+	}
+
+	Ref<DescriptorHeap> DirectXRenderer::GetDescriptorHeap()
+	{
+		return m_TotalBindTextureDescriptorHeap;
+	}
+
+	void DirectXRenderer::ResetDescriptorHeapOffset()
+	{
+		m_Offset = 0;//reset offset
+	}
+
+	uint32_t DirectXRenderer::GetDescriptorHeapOffset()
+	{
+		return m_Offset;
+	}
+
+	void DirectXRenderer::SetDescriptorHeapOffset(uint32_t offset)
+	{
+		m_Offset = offset;
+	}
+
+	Ref<DescriptorHandle> DirectXRenderer::GetDescriptorHeapFirstHandle()
+	{
+		return m_TotalBindTextureDescriptorHeapFirstHandle;
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()

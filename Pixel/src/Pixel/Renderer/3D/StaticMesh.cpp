@@ -298,10 +298,13 @@ namespace Pixel {
 		//get descriptor size
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 
+		Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+		uint32_t offsetItem = Application::Get().GetRenderer()->GetDescriptorHeapOffset();
+
 		std::vector<DescriptorHandle> handles;
 		for (uint32_t i = 0; i < 5; ++i)
 		{
-			DescriptorHandle secondHandle = (*pMaterial->m_pTextureFirstHandle) + i * DescriptorSize;
+			DescriptorHandle secondHandle = (*totalTextureDescriptorHeapFirstHandle) + (i + offsetItem) * DescriptorSize;
 			handles.push_back(secondHandle);
 		}	
 		
@@ -309,11 +312,15 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		//bind texture
-		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, pMaterial->m_pTextureFirstHandle->GetGpuHandle());
+		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);	
 
-		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, pMaterial->m_pDescriptorHeap);
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());
+		//bind texture
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, handles[0].GetGpuHandle());
+
+		Application::Get().GetRenderer()->SetDescriptorHeapOffset(offsetItem + 5);
+
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, pMaterial->m_pDescriptorHeap);
 		
 		m_MaterialConstant.Albedo = pMaterial->gAlbedo;
 		m_MaterialConstant.Ao = pMaterial->gAo;
@@ -331,8 +338,8 @@ namespace Pixel {
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
 
 		//unbind descriptor heap
-		Ref<DescriptorHeap> nullHeap = DescriptorHeap::Create();
-		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
+		//Ref<DescriptorHeap> nullHeap = DescriptorHeap::Create();
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
 
 		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}

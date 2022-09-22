@@ -61,7 +61,7 @@ namespace Pixel {
 		Meta()
 		bool IsTransparent = false;//will draw in the transparent pass
 
-				//texture descriptor heap
+		//texture descriptor heap
 		Ref<DescriptorHeap> m_pDescriptorHeap;
 		Ref<DescriptorHandle> m_pTextureFirstHandle;
 

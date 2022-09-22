@@ -16,6 +16,7 @@
 #include "Pixel/Renderer/3D/Model.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Scene/Components/MaterialComponent.h"
+#include "Pixel/Scene/SceneSerializer.h"
 //------my library------
 
 namespace Pixel {
@@ -511,26 +512,26 @@ namespace Pixel {
 				//load sub material
 				m_Materials[virtualPath] = CreateRef<SubMaterial>();
 
-				//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
+				rapidjson::Document doc;
 
-				//rapidjson::Document doc;
+				rttr::type subMaterialType = rttr::type::get<SubMaterial>();
 
 				//from the physical asset path to load the material and post load
-				//std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
-				//std::stringstream strStream;
-				//strStream << stream.rdbuf();
-				//if (!doc.Parse(strStream.str().data()).HasParseError())
-				//{
-				//	//read the sub material
-				//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
-				//	{
-				//		typeDesc->Read(doc[typeDesc->name], m_Materials[virtualPath].get(), nullptr, false);
-				//	}
-				//}
-				//stream.close();
+				std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
+				std::stringstream strStream;
+				strStream << stream.rdbuf();
+				if (!doc.Parse(strStream.str().data()).HasParseError())
+				{
+					//read the sub material
+					if (doc.HasMember(subMaterialType.get_name().to_string().c_str()) && doc[subMaterialType.get_name().to_string().c_str()].IsObject())
+					{
+						SceneSerializer::FromJsonRecursive(*m_Materials[virtualPath], doc[subMaterialType.get_name().to_string().c_str()]);
+					}
+				}
+				stream.close();
 
 				//post load the sub material
-				m_Materials[virtualPath]->PostLoad();
+				//m_Materials[virtualPath]->PostLoad();
 			}
 			else
 			{
@@ -641,7 +642,7 @@ namespace Pixel {
 		writer.Key(subMaterialType.get_name().to_string().c_str());
 
 		//write sub material to file
-
+		SceneSerializer::ToJsonRecursive(*pSubMaterial, writer);
 
 		writer.EndObject();
 		std::string data = strBuf.GetString();
