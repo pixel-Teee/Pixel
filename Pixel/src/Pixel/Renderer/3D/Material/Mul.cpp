@@ -12,12 +12,12 @@ namespace Pixel {
 
 	Mul::Mul()
 	{
-		m_functionType = ShaderFunction::ShaderFunctionType::Mul;
+		m_functionType = ShaderFunctionType::Mul;
 	}
 
 	Mul::Mul(const std::string& showName, Ref<Material> pMaterial) : ShaderFunction(showName, pMaterial)
 	{
-		m_functionType = ShaderFunction::ShaderFunctionType::Mul;
+		m_functionType = ShaderFunctionType::Mul;
 	}
 
 	Mul::~Mul()

@@ -8,33 +8,39 @@ namespace Pixel {
 	class InputNode;
 
 	class OutputNode;
+	enum class Meta(Enable) ShaderFunctionType {
+		ConstFloatValue4 = 0,
+		Mul = 1,
+		Main = 2,
+	};
 	//node logic
-	class ShaderFunction : public std::enable_shared_from_this<ShaderFunction>
+	class Meta(Enable) ShaderFunction : public std::enable_shared_from_this<ShaderFunction>
 	{
 	public:
-		enum class ShaderFunctionType {
-			ConstFloatValue4 = 0,
-			Mul = 1,
-			Main = 2,
-		};
+		
 	protected:
+		Meta()
 		//node name
 		std::string m_ShowName;
 
+		Meta()
 		//function type
 		ShaderFunctionType m_functionType;
 
-		ShaderFunction(const std::string& ShowName, Ref<Material> pMaterial);
+		ShaderFunction(const std::string& ShowName, Pixel::Ref<Material> pMaterial);
 
+		Meta()
 		//Input
 		std::vector<Ref<InputNode>> m_pInputs;
 
+		Meta()
 		//Output
 		std::vector<Ref<OutputNode>> m_pOutputs;
 
 		//Owner material
 		std::weak_ptr<Material> m_pOwner;
 
+		Meta()
 		//node id
 		uint32_t m_NodeId;
 	public:

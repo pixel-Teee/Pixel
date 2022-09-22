@@ -27,6 +27,8 @@ file(GLOB_RECURSE Headers
 "src/Pixel/Scene/Components/*.h"
 "src/Pixel/Core/UUID.h"
 "src/Pixel/Scene/SceneCamera.h"
+"src/Pixel/Renderer/3D/Material/Material.h"
+"src/Pixel/Renderer/3D/Material/ShaderFunction.h"
 )
 
 set(HEADERS ${Headers}) 

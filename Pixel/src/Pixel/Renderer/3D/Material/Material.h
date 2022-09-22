@@ -2,12 +2,15 @@
 
 #include "MaterialBase.h"
 
+//TODO:reflection module need this header file
+#include "ShaderFunction.h"
+
 namespace Pixel {
 	//------forward declare------
 	class ShaderMainFunction;
 	class ShaderFunction;
 	//------forward declare------
-	class Material : public MaterialBase
+	class Meta(Enable) Material : public MaterialBase
 	{
 	public:
 
@@ -15,6 +18,7 @@ namespace Pixel {
 
 		virtual ~Material();
 
+		Meta()
 		Material(const std::string& materialName);
 
 		Ref<ShaderMainFunction> GetMainFunction();
@@ -33,9 +37,11 @@ namespace Pixel {
 
 		std::vector<glm::vec2>& GetLinks() { return m_Links; }
 
+		Meta()
 		std::string m_MaterialName;//material name
 
 		//------graph node editor path------
+		Meta()
 		std::string m_GraphNodeEditorPath;
 		//------graph node editor path------
 
@@ -44,10 +50,11 @@ namespace Pixel {
 		Ref<ShaderMainFunction> m_pShaderMainFunction;
 
 		//other shader function
+		Meta()
 		std::vector<Ref<ShaderFunction>> m_pShaderFunctionArray;
 
 		//std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
-
+		Meta()
 		std::vector<glm::vec2> m_Links;
 
 		void PostLink();

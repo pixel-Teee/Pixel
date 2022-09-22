@@ -150,8 +150,7 @@ PixelOut PS(VertexOut pin)
 		pixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;//[-1, 1]->[0, 1]
 	else
 		pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;//[-1, 1]->[0, 1]
-	float3 tempColor = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz;
-	pixelOut.gBufferAlbedo.xyz = tempColor * gAlbedo;
+	pixelOut.gBufferAlbedo.xyz = gAlbedoMap.Sample(gsamPointWrap, pin.TexCoord).xyz * gAlbedo;
 	pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
 	pixelOut.gVelocity.w = ClearCoat;
 	pixelOut.gBufferRoughnessMetallicAo.x = gRoughnessMap.Sample(gsamPointWrap, pin.TexCoord).x * gRoughness;

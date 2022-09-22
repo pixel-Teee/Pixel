@@ -12,8 +12,8 @@ namespace Pixel {
 	Material::Material()
 	{
 		m_pShaderFunctionArray.clear();
-		//m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
-		//m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
+		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
 	}
 
 	Material::~Material()
@@ -27,8 +27,8 @@ namespace Pixel {
 
 		//------clear the shader function------
 		m_pShaderFunctionArray.clear();
-		//m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
-		//m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
+		m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		m_pShaderFunctionArray.push_back(m_pShaderMainFunction);
 		//------clear the shader function------
 	}
 
@@ -123,15 +123,4 @@ namespace Pixel {
 		}
 	}
 
-}
-
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-	registration::class_<Pixel::Material>("Material")
-		.constructor<const std::string&>()
-		.property("m_Links", &Pixel::Material::m_Links)
-		.property("m_MaterialName", &Pixel::Material::m_MaterialName)
-		.property("m_GraphNodeEditorPath", &Pixel::Material::m_GraphNodeEditorPath)
-		.property("m_pShaderFunctionArray", &Pixel::Material::m_pShaderFunctionArray);
 }

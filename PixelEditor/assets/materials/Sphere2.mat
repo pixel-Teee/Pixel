@@ -1,3 +1,3 @@
 {
-    "Pixel::SubMaterial":{"shadingModel":"SM_DefaultLit","albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":{"x":0.3899613618850708,"y":1.0,"z":0.4008548855781555},"gNormal":{"x":1.0,"y":1.0,"z":1.0},"HaveNormal":true,"gMetallic":1.0,"gRoughness":1.0,"gAo":0.0,"ClearCoat":1.0,"ClearCoatRoughness":1.0,"IsTransparent":false}
+    "Pixel::SubMaterial":{"shadingModel":"SM_DefaultLit","albedoMapPath":"","normalMapPath":"","metallicMapPath":"","roughnessMapPath":"","aoMapPath":"","gAlbedo":{"x":0.9034749269485474,"y":0.7523458003997803,"z":0.1046496108174324},"gNormal":{"x":1.0,"y":1.0,"z":1.0},"HaveNormal":true,"gMetallic":0.800000011920929,"gRoughness":0.25,"gAo":0.0,"ClearCoat":1.0,"ClearCoatRoughness":1.0,"IsTransparent":false}
 }

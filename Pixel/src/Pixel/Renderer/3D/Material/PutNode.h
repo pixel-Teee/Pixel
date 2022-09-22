@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Pixel {
-	class PutNode : public std::enable_shared_from_this<PutNode> {
+	class Meta(Enable) PutNode : public std::enable_shared_from_this<PutNode> {
 	public:
 		//shader variable type
 		//float float2 float3 float4
@@ -51,12 +51,13 @@ namespace Pixel {
 
 		uint32_t GetPutNodeId() { return m_id; }
 
+		Meta()
 		//node pin value type
 		ValueType m_ValueType;
-
+		Meta()
 		//node pin name
 		std::string m_NodeName;
-
+		Meta()
 		//node pin id
 		uint32_t m_id;
 

@@ -72,7 +72,7 @@ namespace Pixel {
 		return m_ShowName;
 	}
 
-	ShaderFunction::ShaderFunctionType ShaderFunction::GetFunctionType()
+	ShaderFunctionType ShaderFunction::GetFunctionType()
 	{
 		return m_functionType;
 	}
@@ -344,15 +344,3 @@ namespace Pixel {
 
 }
 
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-
-	registration::class_<Pixel::ShaderFunction>("ShaderFunction")
-		.constructor<const std::string&, Pixel::Ref<Pixel::Material>>()
-		.property("m_ShowName", &Pixel::ShaderFunction::m_ShowName)
-		.property("m_functionType", &Pixel::ShaderFunction::m_functionType)
-		.property("m_pInputs", &Pixel::ShaderFunction::m_pInputs)
-		.property("m_pOutputs", &Pixel::ShaderFunction::m_pOutputs)
-		.property("m_NodeId", &Pixel::ShaderFunction::m_NodeId);
-}

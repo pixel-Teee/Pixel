@@ -19,7 +19,7 @@ namespace Pixel
 		//m_functionType = ShaderFunction::ShaderFunctionType::ConstFloat4;
 		if(valueNumber == 4)
 		{
-			m_functionType = ShaderFunction::ShaderFunctionType::ConstFloatValue4;
+			m_functionType = ShaderFunctionType::ConstFloatValue4;
 		}
 	}
 

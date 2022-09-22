@@ -655,17 +655,17 @@ namespace Pixel {
 	{
 		//create a temporary default test material and write to file
 
-		//rapidjson::StringBuffer strBuf;
-		//rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
-		//
-		//writer.StartObject();
-		//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>().get();
-		//typeDesc->Write(writer, pMaterial.get(), typeDesc->name, false);//write a new test material file
-		//writer.EndObject();
-		//std::string data = strBuf.GetString();
-		//std::ofstream fout(physicalPath);
-		//fout << data.c_str();
-		//fout.close();
+		rapidjson::StringBuffer strBuf;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+		writer.StartObject();
+		rttr::type materialType = rttr::type::get<Material>();
+		writer.Key(materialType.get_name().to_string().c_str());
+		SceneSerializer::ToJsonRecursive(*pMaterial, writer);
+		writer.EndObject();
+		std::string data = strBuf.GetString();
+		std::ofstream fout(physicalPath);
+		fout << data.c_str();
+		fout.close();
 	}
 
 	void AssetManager::UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial)

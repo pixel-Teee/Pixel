@@ -17,10 +17,13 @@
 #include "Pixel/Renderer/3D/Material/InputNode.h"
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 #include "Pixel/Renderer/3D/Material/Mul.h"
+#include "Pixel/Scene/SceneSerializer.h"
 //------my library------
 
 //------other library------
 #include <imgui/imgui.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/document.h>
 #include "glm/gtc/type_ptr.hpp"
 //------other library------
 
@@ -211,20 +214,22 @@ namespace Pixel {
 							m_pSubMaterial = CreateRef<SubMaterial>();
 							//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<SubMaterial>::get();
 
-							//rapidjson::Document doc;
+							rttr::type subMaterialType = rttr::type::get<SubMaterial>();
 
-							//std::ifstream stream(materialPhysicalPath);
-							//std::stringstream strStream;
-							//strStream << stream.rdbuf();
-							//if (!doc.Parse(strStream.str().data()).HasParseError())
-							//{
-							//	//read the sub material
-							//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
-							//	{
-							//		typeDesc->Read(doc, m_pSubMaterial.get(), typeDesc->name, false);
-							//	}
-							//}
-							//stream.close();
+							rapidjson::Document doc;
+
+							std::ifstream stream(materialPhysicalPath);
+							std::stringstream strStream;
+							strStream << stream.rdbuf();
+							if (!doc.Parse(strStream.str().data()).HasParseError())
+							{
+								//read the sub material
+								if (doc.HasMember(subMaterialType.get_name().to_string().c_str()) && doc[subMaterialType.get_name().to_string().c_str()].IsObject())
+								{
+									SceneSerializer::FromJsonRecursive(*m_pSubMaterial, doc[subMaterialType.get_name().to_string().c_str()]);
+								}
+							}
+							stream.close();
 
 							//post load the sub material
 							m_pSubMaterial->PostLoad();
@@ -262,52 +267,23 @@ namespace Pixel {
 							m_pMaterial = CreateRef<Material>();
 							//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
 							//
-							//rapidjson::Document doc;
+							rapidjson::Document doc;
 
-							//std::ifstream stream(materialPhysicalPath);
-							//std::stringstream strStream;
-							//strStream << stream.rdbuf();
-							//
-							//if (!doc.Parse(strStream.str().data()).HasParseError())
-							//{
-							//	//TODO:need to fix, need a perfect reflection scheme
-							//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
-							//	{
-							//		if (doc[typeDesc->name].HasMember("m_pShaderFunctionArray") && doc[typeDesc->name]["m_pShaderFunctionArray"].IsArray())
-							//		{
-							//			rapidjson::Value& array = doc[typeDesc->name]["m_pShaderFunctionArray"];
-							//
-							//			for (size_t i = 0; i < array.Size(); ++i)
-							//			{
-							//				if (array[i].HasMember("m_functionType"))
-							//				{
-							//					//get the function type
-							//					//m_pMaterial->GetShaderFunction().push_back();
-							//					int32_t functionType = array[i]["m_functionType"].GetInt();
-							//					switch (functionType)
-							//					{
-							//					case (int32_t)ShaderFunction::ShaderFunctionType::Main:
-							//						m_pMaterial->GetShaderFunction().push_back(CreateRef<ShaderMainFunction>());
-							//						break;
-							//					case (int32_t)ShaderFunction::ShaderFunctionType::Mul:
-							//						m_pMaterial->GetShaderFunction().push_back(CreateRef<Mul>());
-							//						break;
-							//					case (int32_t)ShaderFunction::ShaderFunctionType::ConstFloatValue4:
-							//						m_pMaterial->GetShaderFunction().push_back(CreateRef<ConstFloatValue>());
-							//						break;
-							//					}
-							//				}
-							//			}
-							//		}
-							//	}
-							//	//TODO:need to fix, need a perfect reflection scheme
-							//	//read the test material
-							//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
-							//	{
-							//		typeDesc->Read(doc, m_pMaterial.get(), typeDesc->name, false);
-							//	}
-							//}
-							//stream.close();
+							std::ifstream stream(materialPhysicalPath);
+							std::stringstream strStream;
+							strStream << stream.rdbuf();
+
+							rttr::type materialType = rttr::type::get<SubMaterial>();
+							
+							if (!doc.Parse(strStream.str().data()).HasParseError())
+							{
+								//TODO:need to fix, need a perfect reflection scheme
+								if (doc.HasMember(materialType.get_name().to_string().c_str()) && doc[materialType.get_name().to_string().c_str()].IsObject())
+								{
+									SceneSerializer::FromJsonRecursive(*m_pSubMaterial, doc[materialType.get_name().to_string().c_str()]);
+								}
+							}
+							stream.close();
 							m_pMaterial->PostLink();
 
 							int32_t slashPos = itemPath.find_last_of('\\');
