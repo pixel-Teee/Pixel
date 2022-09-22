@@ -8,6 +8,8 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 
+#include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
+
 namespace Pixel {
 
 	bool SceneSerializer::Serializer(const std::string& filePath)
@@ -50,7 +52,7 @@ namespace Pixel {
 			IDComponent obj = entity.GetComponent<IDComponent>();
 			out.Key("IDComponent");
 			//out.StartObject();
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 			//out.EndObject();
 		}
 		if(entity.HasComponent<TagComponent>())
@@ -58,7 +60,7 @@ namespace Pixel {
 			rttr::instance obj = entity.GetComponent<TagComponent>();
 			out.Key("TagComponent");
 			//out.StartObject();
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 			//out.EndObject();
 		}
 		if (entity.HasComponent<TransformComponent>())
@@ -66,42 +68,48 @@ namespace Pixel {
 			rttr::instance obj = entity.GetComponent<TransformComponent>();
 			out.Key("TransformComponent");
 			//out.StartObject();
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 			//out.EndObject();
 		}
 		if (entity.HasComponent<CameraComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<CameraComponent>();
 			out.Key("CameraComponent");
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 		}
 		if (entity.HasComponent<StaticMeshComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<StaticMeshComponent>();
 			out.Key("StaticMeshComponent");
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 		}
 		if(entity.HasComponent<MaterialComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<MaterialComponent>();
 			out.Key("MaterialComponent");
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 		}
 		if (entity.HasComponent<LightComponent>())
 		{
 			rttr::instance obj = entity.GetComponent<LightComponent>();
 			out.Key("LightComponent");
-			ToJsonRecursive(obj, out);
+			ToJsonRecursive(obj, out, false);
 		}
 	}
 
-	void SceneSerializer::ToJsonRecursive(const rttr::instance& obj2, rapidjson::Writer<rapidjson::StringBuffer>& out)
+	void SceneSerializer::ToJsonRecursive(const rttr::instance& obj2, rapidjson::Writer<rapidjson::StringBuffer>& out, bool withType)
 	{
 		out.StartObject();
 		//dealing with wrapped objects
 		rttr::instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 
-		auto propList = obj2.get_derived_type().get_properties();
+		auto propList = obj.get_derived_type().get_properties();
+
+		if (withType)
+		{
+			out.Key("type");
+			out.String(obj.get_derived_type().get_raw_type().get_name().to_string().c_str());
+		}
 
 		//iterate over the property list, then write property
 		for (auto prop : propList)
@@ -118,7 +126,7 @@ namespace Pixel {
 
 			const auto name = prop.get_name();
 			out.Key(name.to_string().c_str());
-			if (!writeVariant(propValue, out))
+			if (!writeVariant(propValue, out, withType))
 			{
 				PIXEL_CORE_INFO("cannot serialize property, {0}", name);
 			}
@@ -126,7 +134,7 @@ namespace Pixel {
 		out.EndObject();
 	}
 
-	bool SceneSerializer::writeVariant(rttr::variant& var, rapidjson::Writer<rapidjson::StringBuffer>& out)
+	bool SceneSerializer::writeVariant(rttr::variant& var, rapidjson::Writer<rapidjson::StringBuffer>& out, bool withType)
 	{
 		auto valueType = var.get_type();
 		auto wrappedType = valueType.is_wrapper() ? valueType.get_wrapped_type() : valueType;
@@ -139,14 +147,14 @@ namespace Pixel {
 		}
 		else if (var.is_sequential_container())
 		{
-			WriteArray(var.create_sequential_view(), out);
+			WriteArray(var.create_sequential_view(), out, withType);
 		}
 		else
 		{
 			auto childProps = isWrapper ? wrappedType.get_properties() : valueType.get_properties();
 			if (!childProps.empty())
 			{
-				ToJsonRecursive(var, out);
+				ToJsonRecursive(var, out, withType);
 			}
 			else
 			{
@@ -165,7 +173,7 @@ namespace Pixel {
 		return true;
 	}
 
-	void SceneSerializer::WriteArray(const rttr::variant_sequential_view& view, rapidjson::Writer<rapidjson::StringBuffer>& out)
+	void SceneSerializer::WriteArray(const rttr::variant_sequential_view& view, rapidjson::Writer<rapidjson::StringBuffer>& out, bool withType)
 	{
 		out.StartArray();
 
@@ -173,7 +181,7 @@ namespace Pixel {
 		{
 			if(item.is_sequential_container())
 			{
-				WriteArray(item.create_sequential_view(), out);
+				WriteArray(item.create_sequential_view(), out, withType);
 			}
 			else
 			{
@@ -185,7 +193,7 @@ namespace Pixel {
 				}
 				else//object
 				{
-					ToJsonRecursive(wrappedVar, out);
+					ToJsonRecursive(wrappedVar, out, withType);
 				}
 			}
 		}
@@ -408,56 +416,51 @@ namespace Pixel {
 		if (object.HasMember("IDComponent"))
 		{
 			rttr::instance obj = newEntity.GetComponent<IDComponent>();
-			FromJsonRecursive(obj, object["IDComponent"]);
+			FromJsonRecursive(obj, object["IDComponent"], false);
 		}
 		if(object.HasMember("TagComponent"))
 		{
 			rttr::instance obj = newEntity.GetComponent<TagComponent>();
-			FromJsonRecursive(obj, object["TagComponent"]);
+			FromJsonRecursive(obj, object["TagComponent"], false);
 		}
 		if(object.HasMember("TransformComponent"))
 		{
 			rttr::instance obj = newEntity.GetComponent<TransformComponent>();
-			FromJsonRecursive(obj, object["TransformComponent"]);
+			FromJsonRecursive(obj, object["TransformComponent"], false);
 		}
 		if(object.HasMember("CameraComponent"))
 		{
 			newEntity.AddComponent<CameraComponent>();
 			rttr::instance obj = newEntity.GetComponent<CameraComponent>();
-			FromJsonRecursive(obj, object["CameraComponent"]);
+			FromJsonRecursive(obj, object["CameraComponent"], false);
 		}
 		if(object.HasMember("StaticMeshComponent"))
 		{
 			newEntity.AddComponent<StaticMeshComponent>();
 			rttr::instance obj = newEntity.GetComponent<StaticMeshComponent>();
-			FromJsonRecursive(obj, object["StaticMeshComponent"]);
+			FromJsonRecursive(obj, object["StaticMeshComponent"], false);
 			newEntity.GetComponent<StaticMeshComponent>().PostLoad();
 		}
 		if (object.HasMember("MaterialComponent"))
 		{
 			newEntity.AddComponent<MaterialComponent>();
 			rttr::instance obj = newEntity.GetComponent<MaterialComponent>();
-			FromJsonRecursive(obj, object["MaterialComponent"]);
+			FromJsonRecursive(obj, object["MaterialComponent"], false);
 			newEntity.GetComponent<MaterialComponent>().PostLoad();
 		}
 		if(object.HasMember("LightComponent"))
 		{
 			newEntity.AddComponent<LightComponent>();
 			rttr::instance obj = newEntity.GetComponent<LightComponent>();
-			FromJsonRecursive(obj, object["LightComponent"]);
+			FromJsonRecursive(obj, object["LightComponent"], false);
 		}
 	}
 
-	void SceneSerializer::FromJsonRecursive(rttr::instance obj2, rapidjson::Value& value)
+	void SceneSerializer::FromJsonRecursive(rttr::instance obj2, rapidjson::Value& value, bool withType)
 	{
 		rttr::instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 		const auto propList = obj.get_derived_type().get_properties();
-
-		for (rapidjson::Value::MemberIterator it = value.MemberBegin(); it != value.MemberEnd(); ++it)
-		{
-			//std::cout << it->name.GetString() << std::endl;
-		}
-
+		
 		for(auto prop : propList)
 		{
 			//std::cout << prop.get_name().to_string().c_str() << " " << prop.get_name().to_string().size() << std::endl;
@@ -481,23 +484,37 @@ namespace Pixel {
 				case rapidjson::kArrayType:
 				{
 					rttr::variant var;
-					if(valueT.is_sequential_container())
+					if (valueT.is_sequential_container())
 					{
 						var = prop.get_value(obj);
 						auto view = var.create_sequential_view();
 						//read
-						ReadArrayRecursively(view, jsonValue);
+						ReadArrayRecursively(view, jsonValue, withType);
 					}
-
+					//if (prop.set_value(obj, var))
+					//{
+					//	std::cout << "create array!" << std::endl;
+					//}
 					prop.set_value(obj, var);
 					break;
 				}
 				case rapidjson::kObjectType:
 				{
-					rttr::variant var = prop.get_value(obj);
-					FromJsonRecursive(var, jsonValue);
-					prop.set_value(obj, var);
-					break;
+					if (withType)
+					{
+						rttr::type objType = rttr::type::get_by_name(jsonValue.FindMember("type")->value.GetString());
+						rttr::constructor ctor = objType.get_constructor();
+						rttr::variant var = ctor.invoke();
+						FromJsonRecursive(var, jsonValue);
+						prop.set_value(obj, var);
+					}
+					else
+					{
+						rttr::variant var = prop.get_value(obj);
+						FromJsonRecursive(var, jsonValue);
+						prop.set_value(obj, var);
+						break;
+					}				
 				}
 				default:
 				{
@@ -546,7 +563,7 @@ namespace Pixel {
 		return rttr::variant();
 	}
 
-	void SceneSerializer::ReadArrayRecursively(rttr::variant_sequential_view& view, rapidjson::Value& value)
+	void SceneSerializer::ReadArrayRecursively(rttr::variant_sequential_view& view, rapidjson::Value& value, bool withType)
 	{
 		view.set_size(value.Size());
 		const rttr::type arrayValueType = view.get_rank_type(1);
@@ -561,11 +578,43 @@ namespace Pixel {
 			}
 			else if (jsonIndexValue.IsObject())
 			{
-				rttr::variant varTmp = view.get_value(i);
-				rttr::variant wrappedVar = varTmp.extract_wrapped_value();
-				//ReadArrayRecursively(wrappedVar, jsonIndexValue);
-				FromJsonRecursive(wrappedVar, jsonIndexValue);
-				view.set_value(i, wrappedVar);
+				if (withType)
+				{
+					rttr::type objType = rttr::type::get_by_name(jsonIndexValue.FindMember("type")->value.GetString());
+					rttr::constructor ctor = objType.get_constructor();
+					rttr::variant var = ctor.invoke();//shared_ptr<ShaderMainFunction>
+					//rttr::variant var2 = var.convert(arrayValueType);
+					/*
+					if (var.can_convert<Ref<ShaderMainFunction>>())
+					{
+						std::cout << "ShaderMainFunction" << std::endl;
+					}
+					*/
+
+					//std::cout << wrappedVar.get_type().get_name() << std::endl;
+
+					FromJsonRecursive(var, jsonIndexValue, true);
+					
+					//std::cout << var.get_type().get_name() << std::endl;
+
+					//std::cout << view.get_rank_type(1).get_name() << std::endl;
+
+					//std::cout << arrayValueType.get_name().to_string().c_str() << std::endl;
+					//std::cout << var.get_type().get_name().to_string().c_str() << std::endl;
+					//std::cout << var.can_convert(arrayValueType);
+
+					var.convert(arrayValueType);
+
+					view.set_value(i, var);
+				}
+				else
+				{
+					rttr::variant varTmp = view.get_value(i);
+					rttr::variant wrappedVar = varTmp.extract_wrapped_value();
+					//ReadArrayRecursively(wrappedVar, jsonIndexValue);
+					FromJsonRecursive(wrappedVar, jsonIndexValue, false);
+					view.set_value(i, wrappedVar);
+				}				
 			}
 			else
 			{

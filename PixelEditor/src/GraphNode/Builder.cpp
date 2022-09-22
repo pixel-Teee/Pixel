@@ -267,7 +267,7 @@ namespace Pixel {
 			m_ContentMax = ImGui::GetItemRectMax();
 
 			//ImGui::Spring(0);
-			ImGui::EndVertical();
+			ImGui::EndVertical();//TODO:this happens error!
 			m_NodeMin = ImGui::GetItemRectMin();
 			m_NodeMax = ImGui::GetItemRectMax();
 			break;

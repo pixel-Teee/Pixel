@@ -4,7 +4,8 @@
 
 namespace Pixel
 {
-	class ShaderMainFunction : public ShaderFunction
+
+	class Meta(Enable) ShaderMainFunction : public ShaderFunction
 	{
 	public:
 		enum PutNodeType
@@ -15,6 +16,10 @@ namespace Pixel
 			IN_METALLIC = 3,
 			IN_AO = 4
 		};
+
+		Meta()
+		ShaderMainFunction();
+
 		virtual bool GetShaderTreeString(std::string& OutString) override;
 
 		virtual Ref<InputNode> GetNormalNode();
@@ -25,7 +30,7 @@ namespace Pixel
 
 		virtual bool GetFunctionString(std::string& OutString) const override;
 
-		RTTR_ENABLE()
+		RTTR_ENABLE(ShaderFunction)
 		RTTR_REGISTRATION_FRIEND
 	};
 }

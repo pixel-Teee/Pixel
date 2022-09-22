@@ -10,6 +10,10 @@
 
 namespace Pixel
 {
+    ShaderMainFunction::ShaderMainFunction()
+    {
+    }
+
     bool ShaderMainFunction::GetShaderTreeString(std::string& OutString)
     {
         if (m_bIsVisited)

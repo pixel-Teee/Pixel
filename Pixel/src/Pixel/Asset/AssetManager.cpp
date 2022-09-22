@@ -525,7 +525,7 @@ namespace Pixel {
 					//read the sub material
 					if (doc.HasMember(subMaterialType.get_name().to_string().c_str()) && doc[subMaterialType.get_name().to_string().c_str()].IsObject())
 					{
-						SceneSerializer::FromJsonRecursive(*m_Materials[virtualPath], doc[subMaterialType.get_name().to_string().c_str()]);
+						SceneSerializer::FromJsonRecursive(*m_Materials[virtualPath], doc[subMaterialType.get_name().to_string().c_str()], false);
 					}
 				}
 				stream.close();
@@ -660,7 +660,7 @@ namespace Pixel {
 		writer.StartObject();
 		rttr::type materialType = rttr::type::get<Material>();
 		writer.Key(materialType.get_name().to_string().c_str());
-		SceneSerializer::ToJsonRecursive(*pMaterial, writer);
+		SceneSerializer::ToJsonRecursive(*pMaterial, writer, true);
 		writer.EndObject();
 		std::string data = strBuf.GetString();
 		std::ofstream fout(physicalPath);

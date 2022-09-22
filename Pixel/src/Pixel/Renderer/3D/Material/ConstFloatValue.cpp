@@ -209,12 +209,3 @@ namespace Pixel
 	//------ConstFloatValue------
 
 }
-
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-	registration::class_<Pixel::ConstFloatValue>("ConstFloatValue")
-		.constructor<const std::string&, Pixel::Ref<Pixel::Material>, uint32_t, bool>()
-		.property("m_Value", &Pixel::ConstFloatValue::m_Value)
-		.property("m_valueNumber", &Pixel::ConstFloatValue::m_valueNumber);
-}

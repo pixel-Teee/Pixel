@@ -5,7 +5,7 @@
 namespace Pixel
 {
 	class Material;
-	class ConstFloatValue : public ConstValue
+	class Meta(Enable) ConstFloatValue : public ConstValue
 	{
 	public:
 		ConstFloatValue() = default;
@@ -25,8 +25,10 @@ namespace Pixel
 		//before compile shader, will call this function reset temp variable name
 		virtual void ResetInShaderName();
 
+		Meta()
 		std::vector<float> m_Value;
 
+		Meta()
 		//value number 
 		uint32_t m_valueNumber;
 

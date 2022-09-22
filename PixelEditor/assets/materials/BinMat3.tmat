@@ -1,0 +1,3 @@
+{
+    "Pixel::Material":{"type":"Pixel::Material","m_MaterialName":"","m_GraphNodeEditorPath":"","m_pShaderFunctionArray":[{"type":"Pixel::ShaderMainFunction","m_ShowName":"","m_functionType":null,"m_NodeId":1}],"m_Links":[]}
+}

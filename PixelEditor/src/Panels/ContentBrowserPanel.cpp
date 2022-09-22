@@ -103,7 +103,10 @@ namespace Pixel {
 				std::wstring physicalFilePath = FileDialogs::SaveFile(L"test material(*.tmat)\0*.tmat\0");
 
 				Ref<Material> pMaterial = CreateRef<Material>();
+				//pMaterial->GetMainFunction()->ConstructPutNodeAndSetPutNodeOwner();
+				pMaterial->m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
 				pMaterial->GetMainFunction()->ConstructPutNodeAndSetPutNodeOwner();
+				pMaterial->AddShaderFunction(pMaterial->m_pShaderMainFunction);
 				pMaterial->GetMainFunction()->SetFunctionNodeId(1);
 				pMaterial->GetMainFunction()->GetInputNode(0)->SetPutNodeId(2);
 				pMaterial->GetMainFunction()->GetInputNode(1)->SetPutNodeId(3);
@@ -226,7 +229,7 @@ namespace Pixel {
 								//read the sub material
 								if (doc.HasMember(subMaterialType.get_name().to_string().c_str()) && doc[subMaterialType.get_name().to_string().c_str()].IsObject())
 								{
-									SceneSerializer::FromJsonRecursive(*m_pSubMaterial, doc[subMaterialType.get_name().to_string().c_str()]);
+									SceneSerializer::FromJsonRecursive(*m_pSubMaterial, doc[subMaterialType.get_name().to_string().c_str()], false);
 								}
 							}
 							stream.close();
@@ -273,17 +276,34 @@ namespace Pixel {
 							std::stringstream strStream;
 							strStream << stream.rdbuf();
 
-							rttr::type materialType = rttr::type::get<SubMaterial>();
+							rttr::type materialType = rttr::type::get<Material>();
 							
 							if (!doc.Parse(strStream.str().data()).HasParseError())
 							{
 								//TODO:need to fix, need a perfect reflection scheme
 								if (doc.HasMember(materialType.get_name().to_string().c_str()) && doc[materialType.get_name().to_string().c_str()].IsObject())
 								{
-									SceneSerializer::FromJsonRecursive(*m_pSubMaterial, doc[materialType.get_name().to_string().c_str()]);
+									SceneSerializer::FromJsonRecursive(*m_pMaterial, doc[materialType.get_name().to_string().c_str()], true);
 								}
 							}
 							stream.close();
+
+							for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
+							{
+								//if(m_pMaterial->GetShaderFunction(i))
+
+								if (m_pMaterial->GetShaderFunction()[i]->GetFunctioNodeId() == 1)
+								{
+									m_pMaterial->m_pShaderMainFunction = std::static_pointer_cast<ShaderMainFunction>(m_pMaterial->GetShaderFunction()[i]);
+								}
+							}
+							
+							for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
+							{
+								m_pMaterial->GetShaderFunction()[i]->ConstructPutNodeAndSetPutNodeOwner();
+								//m_pMaterial->GetShaderFunction()[i]->m_pOwner = 
+							}
+
 							m_pMaterial->PostLink();
 
 							int32_t slashPos = itemPath.find_last_of('\\');

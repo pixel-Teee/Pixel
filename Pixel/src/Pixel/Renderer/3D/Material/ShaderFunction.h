@@ -29,11 +29,9 @@ namespace Pixel {
 
 		ShaderFunction(const std::string& ShowName, Pixel::Ref<Material> pMaterial);
 
-		Meta()
 		//Input
 		std::vector<Ref<InputNode>> m_pInputs;
 
-		Meta()
 		//Output
 		std::vector<Ref<OutputNode>> m_pOutputs;
 
@@ -44,6 +42,7 @@ namespace Pixel {
 		//node id
 		uint32_t m_NodeId;
 	public:
+		Meta()
 		ShaderFunction() = default;
 
 		virtual ~ShaderFunction();

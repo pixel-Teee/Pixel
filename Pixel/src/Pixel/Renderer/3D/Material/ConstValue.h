@@ -5,7 +5,7 @@
 namespace Pixel
 {
 	//user provdied, will link to a UserConstant(just to assignment to real shader value) class
-	class ConstValue : public ShaderFunction
+	class Meta(Enable) ConstValue : public ShaderFunction
 	{
 	public:
 		ConstValue();
@@ -17,7 +17,7 @@ namespace Pixel
 		//if this is not user provided, then use default value
 		bool m_bIsCustom;
 
-		RTTR_ENABLE()
+		RTTR_ENABLE(ShaderFunction)
 		RTTR_REGISTRATION_FRIEND
 	};
 }

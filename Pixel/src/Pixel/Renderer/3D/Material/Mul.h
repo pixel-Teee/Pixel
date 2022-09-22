@@ -3,7 +3,7 @@
 #include "ShaderFunction.h"
 
 namespace Pixel {
-	class Mul : public ShaderFunction
+	class Meta(Enable) Mul : public ShaderFunction
 	{
 	public:
 		Mul();
