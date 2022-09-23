@@ -7,6 +7,7 @@
 #include "Pixel/Scene/Components/StaticMeshComponent.h"
 #include "Pixel/Scene/Components/MaterialComponent.h"
 #include "Pixel/Scene/Components/TestMaterialComponent.h"
+#include "Pixel/Scene/Components/TestMaterialComponent.h"
 #include "Pixel/Scene/Components/LightComponent.h"
 #include "Pixel/Scene/Components/CameraComponent.h"
 #include "Pixel/Renderer/Context/Context.h"
@@ -20,7 +21,20 @@ namespace Pixel {
 	SimpleScene::SimpleScene()
 	{
 		//put a cube and a direct light to scene?
+		m_EntityHandle = m_Registry.create();
+		m_pModel = CreateRef<Model>("Resources/models/cube/Cube.fbx");
+		m_pSubMaterial = CreateRef<SubMaterial>();//add to material component
 
+		m_Registry.emplace<TransformComponent>(m_EntityHandle);
+		m_Registry.emplace<StaticMeshComponent>(m_EntityHandle);
+		m_Registry.get<StaticMeshComponent>(m_EntityHandle).m_Model = m_pModel;
+		m_Registry.emplace<MaterialComponent>(m_EntityHandle);
+		m_Registry.get<MaterialComponent>(m_EntityHandle).m_Materials.push_back(m_pSubMaterial);
+
+		m_LightEntityHandle = m_Registry.create();
+		m_Registry.emplace<LightComponent>(m_LightEntityHandle);
+		m_Registry.emplace<TransformComponent>(m_LightEntityHandle);
+		m_Registry.get<LightComponent>(m_LightEntityHandle);
 	}
 
 	void SimpleScene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer)
@@ -86,9 +100,9 @@ namespace Pixel {
 		}
 		pComputeContext->Finish(true);
 
-		Ref<Context> pPickerComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
-		Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pGeoFrameBuffer);
-		pPickerComputeContext->Finish(true);
+		//Ref<Context> pPickerComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
+		//Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pGeoFrameBuffer);
+		//pPickerComputeContext->Finish(true);
 
 		Ref<Context> pFinalColorContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		Application::Get().GetRenderer()->RenderingFinalColorBuffer(pFinalColorContext, pLightFrameBuffer, pFinalFrameBuffer);

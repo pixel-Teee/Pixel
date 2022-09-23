@@ -6,6 +6,11 @@
 #include "Pixel/Renderer/Framebuffer.h"
 
 namespace Pixel {
+	class Model;
+	struct TransformComponent;
+	struct StaticMeshComponent;
+	struct SubMaterial;
+	struct MaterialComponent;
 	//just for graph node editor's preview
 	class SimpleScene
 	{
@@ -16,5 +21,21 @@ namespace Pixel {
 
 	private:
 		entt::registry m_Registry;
+
+		//preview model
+		Ref<Model> m_pModel;
+
+		//Ref<TransformComponent> m_pTransformComponent;
+
+		//Ref<StaticMeshComponent> m_pMeshComponent;
+
+		Ref<SubMaterial> m_pSubMaterial;
+		//preview material component
+		//Ref<MaterialComponent> m_pMaterialComponent;
+
+		//preview entity
+		entt::entity m_EntityHandle{ entt::null };
+
+		entt::entity m_LightEntityHandle{ entt::null };
 	};
 }
