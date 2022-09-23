@@ -1,18 +1,20 @@
 #pragma once
 
 namespace Pixel {
+	enum class Meta(Enable) ValueType
+	{
+		VT_1,
+		VT_2,
+		VT_3,
+		VT_4,
+		VT_MAX
+	};
+
 	class Meta(Enable) PutNode : public std::enable_shared_from_this<PutNode> {
 	public:
 		//shader variable type
 		//float float2 float3 float4
-		enum ValueType
-		{
-			VT_1,
-			VT_2,
-			VT_3,
-			VT_4,
-			VT_MAX
-		};
+
 
 		Meta()
 		PutNode() = default;

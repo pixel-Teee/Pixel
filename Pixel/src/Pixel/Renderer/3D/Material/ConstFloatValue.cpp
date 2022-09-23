@@ -24,7 +24,7 @@ namespace Pixel
 		std::string OutputName = "ConstFloatValue" + OutputID;
 
 		Ref<OutputNode> pOutputNode;
-		pOutputNode = CreateRef<OutputNode>((PutNode::ValueType)(m_valueNumber - 1), OutputName, shared_from_this());
+		pOutputNode = CreateRef<OutputNode>((ValueType)(m_valueNumber - 1), OutputName, shared_from_this());
 		m_pOutputs.push_back(pOutputNode);
 
 		//create temp variable
@@ -40,7 +40,7 @@ namespace Pixel
 		{
 			std::string OutputNameR = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_R);//PutNode name just ConstFloatValueID.x
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameR, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameR, shared_from_this());
 			m_pOutputs.push_back(pOutputNode);
 		}
 
@@ -48,7 +48,7 @@ namespace Pixel
 		{
 			std::string OutputNameG = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_G);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameG, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameG, shared_from_this());
 			m_pOutputs.push_back(pOutputNode);
 		}
 
@@ -56,7 +56,7 @@ namespace Pixel
 		{
 			std::string OutputNameB = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_B);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameB, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameB, shared_from_this());
 			m_pOutputs.push_back(pOutputNode);
 		}
 
@@ -64,7 +64,7 @@ namespace Pixel
 		{
 			std::string OutputNameA = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_A);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameA, shared_from_this());
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameA, shared_from_this());
 			m_pOutputs.push_back(pOutputNode);
 		}
 		m_Value.clear();
@@ -86,19 +86,19 @@ namespace Pixel
 	{
 		if (m_bIsCustom)
 			return true;
-		if (m_pOutputs[0]->GetValueType() == PutNode::ValueType::VT_1)
+		if (m_pOutputs[0]->GetValueType() == ValueType::VT_1)
 		{
 			OutString += ShaderStringFactory::Float() + " ";
 		}
-		else if (m_pOutputs[0]->GetValueType() == PutNode::ValueType::VT_2)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_2)
 		{
 			OutString += ShaderStringFactory::Float2() + " ";
 		}
-		else if (m_pOutputs[0]->GetValueType() == PutNode::ValueType::VT_3)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_3)
 		{
 			OutString += ShaderStringFactory::Float3() += " ";
 		}
-		else if (m_pOutputs[0]->GetValueType() == PutNode::ValueType::VT_4)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_4)
 		{
 			OutString += ShaderStringFactory::Float4() += " ";
 		}
@@ -118,19 +118,19 @@ namespace Pixel
 			Value[i] = std::to_string(m_Value[i]);
 		}
 		OutString += m_pOutputs[0]->GetNodeName() + " = ";
-		if (m_pOutputs[0]->GetValueType() == PutNode::VT_1)
+		if (m_pOutputs[0]->GetValueType() == ValueType::VT_1)
 		{
 			OutString += ShaderStringFactory::FloatConst(Value[0]);
 		}
-		else if (m_pOutputs[0]->GetValueType() == PutNode::VT_2)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_2)
 		{
 			OutString += ShaderStringFactory::FloatConst2(Value[0], Value[1]);
 		}
-		else if (m_pOutputs[0]->GetValueType() == PutNode::VT_3)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_3)
 		{
 			OutString += ShaderStringFactory::FloatConst3(Value[0], Value[1], Value[2]);
 		}
-		else if (m_pOutputs[0]->GetValueType() == PutNode::VT_4)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_4)
 		{
 			OutString += ShaderStringFactory::FloatConst4(Value[0], Value[1], Value[2], Value[3]);
 		}
@@ -144,19 +144,19 @@ namespace Pixel
 		//could in material provide, then declare in header top, uniform
 		if (!m_bIsCustom)
 			return true;
-		if (m_pOutputs[0]->GetValueType() == PutNode::VT_1)
+		if (m_pOutputs[0]->GetValueType() == ValueType::VT_1)
 		{
 			OutString += ShaderStringFactory::Float() + " ";
 		}
-		else if (m_pOutputs[1]->GetValueType() == PutNode::VT_2)
+		else if (m_pOutputs[1]->GetValueType() == ValueType::VT_2)
 		{
 			OutString += ShaderStringFactory::Float2() + " ";
 		}
-		else if (m_pOutputs[2]->GetValueType() == PutNode::VT_3)
+		else if (m_pOutputs[2]->GetValueType() == ValueType::VT_3)
 		{
 			OutString += ShaderStringFactory::Float3() + " ";
 		}
-		else if (m_pOutputs[3]->GetValueType() == PutNode::VT_4)
+		else if (m_pOutputs[3]->GetValueType() == ValueType::VT_4)
 		{
 			OutString += ShaderStringFactory::Float4() += " ";
 		}
@@ -179,31 +179,31 @@ namespace Pixel
 		{
 			std::string OutputNameR = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_R);
 			Ref<OutputNode> pOutputNode;
-			m_pOutputs[0]->SetNodeName(OutputNameR);
+			m_pOutputs[1]->SetNodeName(OutputNameR);
 		}
 
 		if (m_Value.size() >= 2)
 		{
 			std::string OutputNameG = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_G);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameG, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutputs[0]->SetNodeName(OutputNameG);
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameG, std::shared_ptr<ShaderFunction>(shared_from_this()));
+			m_pOutputs[2]->SetNodeName(OutputNameG);
 		}
 
 		if (m_Value.size() >= 3)
 		{
 			std::string OutputNameB = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_B);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameB, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutputs[0]->SetNodeName(OutputNameB);
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameB, std::shared_ptr<ShaderFunction>(shared_from_this()));
+			m_pOutputs[3]->SetNodeName(OutputNameB);
 		}
 
 		if (m_Value.size() >= 4)
 		{
 			std::string OutputNameA = ShaderStringFactory::GetValueElement(GetOutputNode(OUT_VALUE), ShaderStringFactory::VE_A);
 			Ref<OutputNode> pOutputNode;
-			pOutputNode = CreateRef<OutputNode>(PutNode::ValueType::VT_1, OutputNameA, std::shared_ptr<ShaderFunction>(shared_from_this()));
-			m_pOutputs[0]->SetNodeName(OutputNameA);
+			pOutputNode = CreateRef<OutputNode>(ValueType::VT_1, OutputNameA, std::shared_ptr<ShaderFunction>(shared_from_this()));
+			m_pOutputs[4]->SetNodeName(OutputNameA);
 		}
 	}
 	//------ConstFloatValue------

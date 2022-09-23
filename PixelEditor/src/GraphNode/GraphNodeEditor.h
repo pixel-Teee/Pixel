@@ -16,7 +16,7 @@ namespace Pixel {
 	class GraphNodeEditor {
 	public:
 
-		GraphNodeEditor(const std::string& virtualPath, Ref<Material> pMaterial);
+		GraphNodeEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial);
 
 		~GraphNodeEditor();
 
@@ -52,13 +52,15 @@ namespace Pixel {
 
 		std::string m_GraphNodeEditorConfigPath;
 
+		std::string m_MaterialPhysicalPath;
+
 		std::vector<Ref<GraphNode>> m_GraphNodes;
 		std::vector<Ref<GraphPin>> m_GraphPins;
 		std::vector<Ref<GraphLink>> m_GraphLinks;
 
 		Ref<Material> m_pMaterial;
 		
-		uint32_t m_Id;
+		//uint32_t m_Id;
 
 		//------header texture------
 		Ref<Texture2D> m_HeaderBackgroundTexture;

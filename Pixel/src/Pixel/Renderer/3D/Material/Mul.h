@@ -6,6 +6,7 @@ namespace Pixel {
 	class Meta(Enable) Mul : public ShaderFunction
 	{
 	public:
+		Meta()
 		Mul();
 
 		Mul(const std::string& showName, Ref<Material> pMaterial);

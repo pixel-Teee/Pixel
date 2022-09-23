@@ -5,9 +5,11 @@
 namespace Pixel
 {
 	class Material;
+
 	class Meta(Enable) ConstFloatValue : public ConstValue
 	{
 	public:
+		Meta()
 		ConstFloatValue() = default;
 		ConstFloatValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 

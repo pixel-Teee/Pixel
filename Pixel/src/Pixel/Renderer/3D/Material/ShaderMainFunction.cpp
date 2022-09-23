@@ -61,23 +61,23 @@ namespace Pixel
 	{
         std::string InputName = "Normal";
         Ref<InputNode> pInputNode;
-        pInputNode = CreateRef<InputNode>(PutNode::ValueType::VT_4, InputName, shared_from_this());
+        pInputNode = CreateRef<InputNode>(ValueType::VT_4, InputName, shared_from_this());
         m_pInputs.push_back(pInputNode);
 
         InputName = "Albedo";
-        pInputNode = CreateRef<InputNode>(PutNode::ValueType::VT_4, InputName, shared_from_this());
+        pInputNode = CreateRef<InputNode>(ValueType::VT_4, InputName, shared_from_this());
         m_pInputs.push_back(pInputNode);
 
         InputName = "Roughness";
-        pInputNode = CreateRef<InputNode>(PutNode::ValueType::VT_1, InputName, shared_from_this());
+        pInputNode = CreateRef<InputNode>(ValueType::VT_1, InputName, shared_from_this());
         m_pInputs.push_back(pInputNode);
 
         InputName = "Metallic";
-        pInputNode = CreateRef<InputNode>(PutNode::ValueType::VT_1, InputName, shared_from_this());
+        pInputNode = CreateRef<InputNode>(ValueType::VT_1, InputName, shared_from_this());
         m_pInputs.push_back(pInputNode);
 
         InputName = "Ao";
-        pInputNode = CreateRef<InputNode>(PutNode::ValueType::VT_1, InputName, shared_from_this());
+        pInputNode = CreateRef<InputNode>(ValueType::VT_1, InputName, shared_from_this());
         m_pInputs.push_back(pInputNode);
 	}
 
@@ -91,7 +91,7 @@ namespace Pixel
 
 	bool ShaderMainFunction::GetFunctionString(std::string& OutString) const
 	{
-        OutString += "PixelOut PS(VertexOut pin)\n{\n";
+        //OutString += "PixelOut PS(VertexOut pin)\n{\n";
         OutString += "PixelOut pixelOut = (PixelOut)(0.0f);\n";
 
         OutString += "pixelOut.gBufferPosition.xyz = pin.PosW;\n";
@@ -119,7 +119,7 @@ namespace Pixel
 
         OutString += "pixelOut.gVelocity.z = 0.0f;\n";
 
-        OutString += "return pixelOut;\n}\n";
+        //OutString += "return pixelOut;\n}\n";
         return true;
 	}
 

@@ -500,18 +500,19 @@ namespace Pixel {
 				}
 				case rapidjson::kObjectType:
 				{
-					if (withType)
+					if (withType && valueT.get_wrapped_type().is_pointer())
 					{
 						rttr::type objType = rttr::type::get_by_name(jsonValue.FindMember("type")->value.GetString());
+						//std::cout << objType.get_name().to_string().c_str() << std::endl;
 						rttr::constructor ctor = objType.get_constructor();
 						rttr::variant var = ctor.invoke();
-						FromJsonRecursive(var, jsonValue);
+						FromJsonRecursive(var, jsonValue, withType);
 						prop.set_value(obj, var);
 					}
 					else
 					{
 						rttr::variant var = prop.get_value(obj);
-						FromJsonRecursive(var, jsonValue);
+						FromJsonRecursive(var, jsonValue, withType);
 						prop.set_value(obj, var);
 						break;
 					}				
@@ -578,7 +579,7 @@ namespace Pixel {
 			}
 			else if (jsonIndexValue.IsObject())
 			{
-				if (withType)
+				if (withType && arrayValueType.get_wrapped_type().is_pointer())
 				{
 					rttr::type objType = rttr::type::get_by_name(jsonIndexValue.FindMember("type")->value.GetString());
 					rttr::constructor ctor = objType.get_constructor();
@@ -593,7 +594,7 @@ namespace Pixel {
 
 					//std::cout << wrappedVar.get_type().get_name() << std::endl;
 
-					FromJsonRecursive(var, jsonIndexValue, true);
+					FromJsonRecursive(var, jsonIndexValue, withType);
 					
 					//std::cout << var.get_type().get_name() << std::endl;
 
@@ -612,7 +613,7 @@ namespace Pixel {
 					rttr::variant varTmp = view.get_value(i);
 					rttr::variant wrappedVar = varTmp.extract_wrapped_value();
 					//ReadArrayRecursively(wrappedVar, jsonIndexValue);
-					FromJsonRecursive(wrappedVar, jsonIndexValue, false);
+					FromJsonRecursive(wrappedVar, jsonIndexValue, withType);
 					view.set_value(i, wrappedVar);
 				}				
 			}

@@ -72,7 +72,7 @@ namespace Pixel {
 
 		if(valueElement > ValueElement::VE_NONE)
 		{
-			if(pPutNode->GetValueType() == PutNode::ValueType::VT_1 && (valueElement & ValueElement::VE_R))
+			if(pPutNode->GetValueType() == ValueType::VT_1 && (valueElement & ValueElement::VE_R))
 			{
 				return Temp;
 			}
@@ -94,7 +94,7 @@ namespace Pixel {
 		//value element: need to extracted element
 		for (uint32_t i = 0; i < 4; ++i)
 		{
-			if (i < pPutNode->GetValueType())
+			if (i <= (uint32_t)pPutNode->GetValueType())
 			{
 				if (valueElement & Mask[i])
 				{

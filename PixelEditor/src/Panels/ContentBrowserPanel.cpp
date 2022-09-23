@@ -320,7 +320,7 @@ namespace Pixel {
 								graphNodeEditorPath = editorPathFileName;
 							}
 
-							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, m_pMaterial);
+							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial);
 						}
 						else if(m_CurrentTestMaterialPath == materialPhysicalPath)
 							m_IsOpenTestMaterialEditor = true;

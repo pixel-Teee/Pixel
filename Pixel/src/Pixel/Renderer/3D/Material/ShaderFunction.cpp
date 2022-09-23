@@ -131,7 +131,7 @@ namespace Pixel {
 		for (uint32_t i = 0; i < m_pInputs.size(); ++i)
 		{
 			//check type
-			if (m_pInputs[i]->GetValueType() == PutNode::ValueType::VT_1)
+			if (m_pInputs[i]->GetValueType() == ValueType::VT_1)
 			{
 				//get the type
 				OutString += ShaderStringFactory::Float() + (" ");
@@ -139,14 +139,14 @@ namespace Pixel {
 				//get the default value
 				Temp = ShaderStringFactory::FloatConst("0");
 			}
-			else if (m_pInputs[i]->GetValueType() == PutNode::ValueType::VT_2)
+			else if (m_pInputs[i]->GetValueType() == ValueType::VT_2)
 			{
 				//get the Type
 				OutString += ShaderStringFactory::Float2() + (" ");
 
 				Temp = ShaderStringFactory::FloatConst2("0", "0");
 			}
-			else if (m_pInputs[i]->GetValueType() == PutNode::ValueType::VT_3)
+			else if (m_pInputs[i]->GetValueType() == ValueType::VT_3)
 			{
 				OutString += ShaderStringFactory::Float3() + (" ");
 
@@ -177,20 +177,20 @@ namespace Pixel {
 		std::string Temp;
 		for (uint32_t i = 0; i < m_pOutputs.size(); ++i)
 		{
-			if (m_pOutputs[i]->GetValueType() == PutNode::ValueType::VT_1)
+			if (m_pOutputs[i]->GetValueType() == ValueType::VT_1)
 			{
 				OutString += ShaderStringFactory::Float() + " ";
 
 				Temp = ShaderStringFactory::FloatConst("0");//0
 			}
-			else if (m_pOutputs[i]->GetValueType() == PutNode::ValueType::VT_2)
+			else if (m_pOutputs[i]->GetValueType() == ValueType::VT_2)
 			{
 				//Get the Type
 				OutString += ShaderStringFactory::Float2() + (" ");
 
 				Temp = ShaderStringFactory::FloatConst2("0", "0");//float2(0, 0)
 			}
-			else if (m_pOutputs[i]->GetValueType() == PutNode::ValueType::VT_3)
+			else if (m_pOutputs[i]->GetValueType() == ValueType::VT_3)
 			{
 				OutString += ShaderStringFactory::Float3() + (" ");
 
@@ -286,7 +286,7 @@ namespace Pixel {
 			return "";
 
 		//get the input type
-		PutNode::ValueType maxElement = pInputNode->GetValueType();
+		ValueType maxElement = pInputNode->GetValueType();
 
 		//if input type equal to the output type, then input equal to output
 		if (maxElement == pOutputNode->GetValueType())
@@ -306,9 +306,9 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < 4; ++i)
 		{
-			if (i > pOutputNode->GetValueType())
+			if (i > (uint32_t)pOutputNode->GetValueType())
 			{
-				Value[i] = ShaderStringFactory::GetValueElement(pOutputNode, Mask[pOutputNode->GetValueType()]);
+				Value[i] = ShaderStringFactory::GetValueElement(pOutputNode, Mask[(uint32_t)pOutputNode->GetValueType()]);
 			}
 			else
 			{
@@ -317,19 +317,19 @@ namespace Pixel {
 		}
 
 		//similar to float4(xx.r, xx.r, xx.r, xx.r);
-		if (pInputNode->GetValueType() == PutNode::ValueType::VT_1)
+		if (pInputNode->GetValueType() == ValueType::VT_1)
 		{
 			OutString += ShaderStringFactory::FloatConst(Value[0]);
 		}
-		else if (pInputNode->GetValueType() == PutNode::ValueType::VT_2)
+		else if (pInputNode->GetValueType() == ValueType::VT_2)
 		{
 			OutString += ShaderStringFactory::FloatConst2(Value[0], Value[1]);
 		}
-		else if (pInputNode->GetValueType() == PutNode::ValueType::VT_3)
+		else if (pInputNode->GetValueType() == ValueType::VT_3)
 		{
 			OutString += ShaderStringFactory::FloatConst3(Value[0], Value[1], Value[2]);
 		}
-		else if(pInputNode->GetValueType() == PutNode::ValueType::VT_4)
+		else if(pInputNode->GetValueType() == ValueType::VT_4)
 		{
 			OutString += ShaderStringFactory::FloatConst4(Value[0], Value[1], Value[2], Value[3]);
 		}

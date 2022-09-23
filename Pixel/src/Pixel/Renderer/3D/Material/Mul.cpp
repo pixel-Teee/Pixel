@@ -37,25 +37,25 @@ namespace Pixel {
 
 	bool Mul::ResetValueType() const
 	{
-		uint32_t MaxType = PutNode::ValueType::VT_1;
+		uint32_t MaxType = (uint32_t)ValueType::VT_1;
 
 		for (uint32_t i = 0; i < m_pInputs.size(); ++i)
 		{
 			if (m_pInputs[i]->GetOutputLink())
 			{
-				if (MaxType < m_pInputs[i]->GetOutputLink()->GetValueType())
+				if (MaxType < (uint32_t)m_pInputs[i]->GetOutputLink()->GetValueType())
 				{
-					MaxType = m_pInputs[i]->GetOutputLink()->GetValueType();
+					MaxType = (uint32_t)m_pInputs[i]->GetOutputLink()->GetValueType();
 				}
 			}
 		}
 
 		for (uint32_t i = 0; i < m_pInputs.size(); ++i)
 		{
-			m_pInputs[i]->SetValueType(static_cast<PutNode::ValueType>(MaxType));
+			m_pInputs[i]->SetValueType(static_cast<ValueType>(MaxType));
 		}
 
-		m_pOutputs[0]->SetValueType(static_cast<PutNode::ValueType>(MaxType));
+		m_pOutputs[0]->SetValueType(static_cast<ValueType>(MaxType));
 
 		return true;
 	}
@@ -68,19 +68,19 @@ namespace Pixel {
 		std::string InputId = std::to_string(++ShaderStringFactory::m_ShaderValueIndex);
 		std::string InputName = "MulInputA" + InputId;
 		Ref<InputNode> pInputNode = nullptr;
-		pInputNode = CreateRef<InputNode>(PutNode::VT_4, InputName, shared_from_this());
+		pInputNode = CreateRef<InputNode>(ValueType::VT_4, InputName, shared_from_this());
 		m_pInputs.push_back(pInputNode);
 
 		InputId = std::to_string(++ShaderStringFactory::m_ShaderValueIndex);
 		InputName = "MulInputB" + InputId;
 		pInputNode = nullptr;
-		pInputNode = CreateRef<InputNode>(PutNode::VT_4, InputName, shared_from_this());
+		pInputNode = CreateRef<InputNode>(ValueType::VT_4, InputName, shared_from_this());
 		m_pInputs.push_back(pInputNode);
 
 		std::string OutputId = std::to_string(ShaderStringFactory::m_ShaderValueIndex);
 		std::string OutputName = "MulOutput" + OutputId;
 		Ref<OutputNode> pOutputNode = nullptr;
-		pOutputNode = CreateRef<OutputNode>(PutNode::VT_4, OutputName, shared_from_this());
+		pOutputNode = CreateRef<OutputNode>(ValueType::VT_4, OutputName, shared_from_this());
 		m_pOutputs.push_back(pOutputNode);
 	}
 

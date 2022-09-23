@@ -18,6 +18,7 @@
 #include "Pixel/Renderer/3D/Material/Mul.h"
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
+#include "Pixel/Scene/SceneSerializer.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -25,6 +26,7 @@
 #include "Pixel/Renderer/Texture.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorCpuHandle.h"
 #include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
+#include "rapidjson/prettywriter.h"
 //------other library------
 
 namespace Pixel {
@@ -44,7 +46,7 @@ namespace Pixel {
 		return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
 	}
 
-	GraphNodeEditor::GraphNodeEditor(const std::string& virtualPath, Ref<Material> pMaterial)
+	GraphNodeEditor::GraphNodeEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)
 	{
 		m_TopPanelHeight = 800.0f;
 		m_DownPanelHeight = 400.0f;
@@ -57,12 +59,14 @@ namespace Pixel {
 
 		m_BlueprintNodeBuilder = CreateRef<BlueprintNodeBuilder>((ImTextureID)(m_HeaderBackgroundTextureHandle->GetGpuHandle()->GetGpuPtr()), m_HeaderBackgroundTexture->GetWidth(), m_HeaderBackgroundTexture->GetHeight());
 
-		m_Id = 0;
+		ShaderStringFactory::m_ShaderValueIndex = 0;
 
 		//if it is first open, then load the settings file
 		ed::Config config;
 
 		m_GraphNodeEditorConfigPath = virtualPath + ".json";
+
+		m_MaterialPhysicalPath = physicalPath;
 
 		config.SettingsFile = m_GraphNodeEditorConfigPath.c_str();
 
@@ -81,7 +85,7 @@ namespace Pixel {
 			pGraphNode->m_NodeId = m_pMaterial->GetShaderFunction()[i]->GetFunctioNodeId();
 			pGraphNode->p_Owner = m_pMaterial->GetShaderFunction()[i];
 
-			m_Id = std::max(m_Id, (uint32_t)pGraphNode->m_NodeId.Get());
+			ShaderStringFactory::m_ShaderValueIndex = std::max(ShaderStringFactory::m_ShaderValueIndex, (uint32_t)pGraphNode->m_NodeId.Get());
 
 			for (size_t j = 0; j < m_pMaterial->GetShaderFunction()[i]->GetInputNodeNum(); ++j)
 			{
@@ -92,7 +96,7 @@ namespace Pixel {
 				pGraphNode->m_InputPin.push_back(pGraphPins);
 				m_GraphPins.push_back(pGraphPins);
 
-				m_Id = std::max(m_Id, (uint32_t)pGraphPins->m_PinId.Get());
+				ShaderStringFactory::m_ShaderValueIndex = std::max(ShaderStringFactory::m_ShaderValueIndex, (uint32_t)pGraphPins->m_PinId.Get());
 			}
 
 			for (size_t j = 0; j < m_pMaterial->GetShaderFunction()[i]->GetOutputNodeNum(); ++j)
@@ -104,7 +108,7 @@ namespace Pixel {
 				pGraphNode->m_OutputPin.push_back(pGraphPins);
 				m_GraphPins.push_back(pGraphPins);
 
-				m_Id = std::max(m_Id, (uint32_t)pGraphPins->m_PinId.Get());
+				ShaderStringFactory::m_ShaderValueIndex = std::max(ShaderStringFactory::m_ShaderValueIndex, (uint32_t)pGraphPins->m_PinId.Get());
 			}
 
 			m_GraphNodes.push_back(pGraphNode);
@@ -115,9 +119,9 @@ namespace Pixel {
 			uint32_t inputPinId = item.x;
 			uint32_t outputPinId = item.y;
 
+			Ref<GraphLink> pGraphLinks = CreateRef<GraphLink>();
 			for (size_t i = 0; i < m_GraphPins.size(); ++i)
-			{
-				Ref<GraphLink> pGraphLinks = CreateRef<GraphLink>();
+			{		
 				if (m_GraphPins[i]->m_PinId.Get() == inputPinId)
 				{
 					pGraphLinks->m_InputPin = m_GraphPins[i];
@@ -126,9 +130,10 @@ namespace Pixel {
 				{
 					pGraphLinks->m_OutputPin = m_GraphPins[i];
 				}
-				++m_Id;
-				pGraphLinks->m_LinkId = m_Id;
 			}
+			++ShaderStringFactory::m_ShaderValueIndex;
+			pGraphLinks->m_LinkId = ShaderStringFactory::m_ShaderValueIndex;
+			m_GraphLinks.push_back(pGraphLinks);
 		}
 	}
 
@@ -218,6 +223,8 @@ namespace Pixel {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, panelHeight / 8.0f);
 		if(ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
+			//generate and compiler
+
 			m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
 			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
 			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial);
@@ -225,7 +232,20 @@ namespace Pixel {
 		}
 		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
-			//save will also call the compiler	
+			//save will also call the compiler
+
+			//save the material
+			rapidjson::StringBuffer strBuf;
+			rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+			writer.StartObject();
+			rttr::type materialType = rttr::type::get<Material>();
+			writer.Key(materialType.get_name().to_string().c_str());
+			SceneSerializer::ToJsonRecursive(*m_pMaterial, writer, true);
+			writer.EndObject();
+			std::string data = strBuf.GetString();
+			std::ofstream fout(m_MaterialPhysicalPath);
+			fout << data.c_str();
+			fout.close();
 		}
 		ImGui::PopStyleVar(1);
 		ImGui::EndHorizontal();
@@ -363,7 +383,7 @@ namespace Pixel {
 						Ref<GraphLink> pGraphLink = CreateRef<GraphLink>();
 						pGraphLink->m_InputPin = inputPin;
 						pGraphLink->m_OutputPin = outputPin;
-						pGraphLink->m_LinkId = ++m_Id;
+						pGraphLink->m_LinkId = ++ShaderStringFactory::m_ShaderValueIndex;
 						//add new graph link to m_GraphLinks
 						m_GraphLinks.push_back(pGraphLink);
 						//create logic link
@@ -457,16 +477,18 @@ namespace Pixel {
 		Ref<ShaderFunction> pMul = CreateRef<Mul>("Mul", m_pMaterial);
 		pMul->AddToMaterialOwner();
 		pMul->ConstructPutNodeAndSetPutNodeOwner();
+		pMul->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
 
 		//in terms the logic node to create graph node and push to graph node's vector
 		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
-		pGraphNode->m_NodeId = ++m_Id;
+		pGraphNode->m_NodeId = pMul->GetFunctioNodeId();
 		pGraphNode->p_Owner = pMul;
 
 		for(size_t i = 0; i < pMul->GetInputNodeNum(); ++i)
 		{
+			pMul->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
 			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
-			inputPin->m_PinId = ++m_Id;
+			inputPin->m_PinId = pMul->GetInputNode(i)->GetPutNodeId();
 			inputPin->m_OwnerNode = pGraphNode;
 			inputPin->m_PinName = pMul->GetInputNode(i)->GetNodeName();
 			pGraphNode->m_InputPin.push_back(inputPin);
@@ -475,8 +497,9 @@ namespace Pixel {
 
 		for(size_t i = 0; i < pMul->GetOutputNodeNum(); ++i)
 		{
+			pMul->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
 			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
-			outputPin->m_PinId = ++m_Id;
+			outputPin->m_PinId = pMul->GetOutputNode(i)->GetPutNodeId();
 			outputPin->m_OwnerNode = pGraphNode;
 			outputPin->m_PinName = pMul->GetOutputNode(i)->GetNodeName();
 			pGraphNode->m_OutputPin.push_back(outputPin);
@@ -495,16 +518,18 @@ namespace Pixel {
 		Ref<ShaderFunction> pConstFloatValue4 = CreateRef<ConstFloatValue>("ConstFloatValue4", m_pMaterial, 4, false);
 		pConstFloatValue4->AddToMaterialOwner();
 		pConstFloatValue4->ConstructPutNodeAndSetPutNodeOwner();
+		pConstFloatValue4->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
 
 		//in terms the logic node to create graph node and push to graph node's vector
 		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
-		pGraphNode->m_NodeId = ++m_Id;
+		pGraphNode->m_NodeId = pConstFloatValue4->GetFunctioNodeId();
 		pGraphNode->p_Owner = pConstFloatValue4;
 
 		for (size_t i = 0; i < pConstFloatValue4->GetInputNodeNum(); ++i)
 		{
+			pConstFloatValue4->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
 			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
-			inputPin->m_PinId = ++m_Id;
+			inputPin->m_PinId = pConstFloatValue4->GetInputNode(i)->GetPutNodeId();
 			inputPin->m_OwnerNode = pGraphNode;
 			inputPin->m_PinName = pConstFloatValue4->GetInputNode(i)->GetNodeName();
 			pGraphNode->m_InputPin.push_back(inputPin);
@@ -513,8 +538,9 @@ namespace Pixel {
 
 		for (size_t i = 0; i < pConstFloatValue4->GetOutputNodeNum(); ++i)
 		{
+			pConstFloatValue4->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
 			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
-			outputPin->m_PinId = ++m_Id;
+			outputPin->m_PinId = pConstFloatValue4->GetOutputNode(i)->GetPutNodeId();
 			outputPin->m_OwnerNode = pGraphNode;
 			outputPin->m_PinName = pConstFloatValue4->GetOutputNode(i)->GetNodeName();
 			pGraphNode->m_OutputPin.push_back(outputPin);

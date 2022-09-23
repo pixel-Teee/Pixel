@@ -79,10 +79,16 @@ namespace Pixel {
 		for (uint32_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
 		{
 			for (uint32_t j = 0; j < m_pShaderFunctionArray[i]->GetInputNodeNum(); ++j)
+			{
 				m_InputPins.push_back(m_pShaderFunctionArray[i]->GetInputNode(j));
+				m_pShaderFunctionArray[i]->GetInputNode(j)->m_pOwner = m_pShaderFunctionArray[i];
+			}
 
 			for (uint32_t j = 0; j < m_pShaderFunctionArray[i]->GetOutputNodeNum(); ++j)
+			{
 				m_OutputPins.push_back(m_pShaderFunctionArray[i]->GetOutputNode(j));
+				m_pShaderFunctionArray[i]->GetOutputNode(j)->m_pOwner = m_pShaderFunctionArray[i];
+			}
 		}
 
 		for (uint32_t i = 0; i < m_pShaderMainFunction->GetInputNodeNum(); ++i)
