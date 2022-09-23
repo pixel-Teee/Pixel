@@ -105,11 +105,11 @@ namespace Pixel
 
         OutString += "pixelOut.gBufferRoughnessMetallicAo.x = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_ROUGHNESS], ShaderStringFactory::VE_R) + ";\n";
 
-        OutString += "pixelOut.gBufferRoughnessMetallicAo.y = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_METALLIC], ShaderStringFactory::VE_G) + ";\n";
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.y = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_METALLIC], ShaderStringFactory::VE_R) + ";\n";
 
-        OutString += "pixelOut.gBufferRoughnessMetallicAo.z = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_AO], ShaderStringFactory::VE_G) + ";\n";
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.z = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_AO], ShaderStringFactory::VE_R) + ";\n";
 
-        OutString += "pixelOut.gBufferRoughnessMetallicAo.w = ShadingModelID / 255.0f\n";
+        OutString += "pixelOut.gBufferRoughnessMetallicAo.w = ShadingModelID / 255.0f;\n";
 
         OutString += "float2 newPos = ((pin.nowScreenPosition.xy / pin.nowScreenPosition.w) * 0.5f + 0.5f);\n";
 

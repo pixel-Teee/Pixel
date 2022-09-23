@@ -108,9 +108,21 @@ namespace Pixel {
 	std::string ShaderStringFactory::CreateDeferredGeometryShaderString(Ref<Material> pMaterial)
 	{
 		//create deferred geometry shader
-
-		std::string out;
+		std::ifstream geometryPassIncludes("assets/shaders/Common/GeomertyPass1.hlsl");
+		std::stringstream buffer;
+		buffer << geometryPassIncludes.rdbuf();
+		std::string out = buffer.str();
+		geometryPassIncludes.close();
 		pMaterial->GetShaderTreeString(out);
+		out += "return pixelOut;\n}\n";
+
+		//write to cache
+		std::ofstream cache("assets/shaders/Cache/test.hlsl");
+		cache << out;
+		cache.close();
+
+		Ref<Shader> testCompilerVertex = Shader::Create("assets/shaders/Cache/test.hlsl", "VS", "vs_5_0");
+		Ref<Shader> testCompilerFrag = Shader::Create("assets/shaders/Cache/test.hlsl", "PS", "ps_5_0");
 
 		return out;
 	}
