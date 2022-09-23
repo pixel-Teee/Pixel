@@ -508,6 +508,9 @@ namespace Pixel
 			}
 		}
 
+		//call other panel's update
+		m_ContentBrowserPanel.OnUpdate();
+
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;

@@ -13,6 +13,7 @@ namespace Pixel {
 	class GraphPin;
 	class Texture2D;
 	class DescriptorHandle;
+	class SimpleScene;
 	class GraphNodeEditor {
 	public:
 
@@ -21,6 +22,8 @@ namespace Pixel {
 		~GraphNodeEditor();
 
 		void OnImGuiRender(bool& OpenGraphNodeEditor);
+
+		void OnUpdate();
 
 	private:
 
@@ -59,6 +62,8 @@ namespace Pixel {
 		std::vector<Ref<GraphLink>> m_GraphLinks;
 
 		Ref<Material> m_pMaterial;
+
+		Ref<SimpleScene> m_pPreviewScene;
 		
 		//uint32_t m_Id;
 

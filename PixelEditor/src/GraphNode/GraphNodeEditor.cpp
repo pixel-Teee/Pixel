@@ -19,6 +19,7 @@
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 #include "Pixel/Scene/SceneSerializer.h"
+#include "Pixel/Scene/SimpleScene.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -135,6 +136,10 @@ namespace Pixel {
 			pGraphLinks->m_LinkId = ShaderStringFactory::m_ShaderValueIndex;
 			m_GraphLinks.push_back(pGraphLinks);
 		}
+
+		//------create simple scene------
+		m_pPreviewScene = CreateRef<SimpleScene>();
+		//------create simple scene------
 	}
 
 	GraphNodeEditor::~GraphNodeEditor()
@@ -178,6 +183,12 @@ namespace Pixel {
 
 
 		ImGui::End();
+	}
+
+	void GraphNodeEditor::OnUpdate()
+	{
+		//draw preview mesh
+
 	}
 
 	void GraphNodeEditor::DrawMainFunctionNode()

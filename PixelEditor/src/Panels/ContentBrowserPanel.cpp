@@ -50,6 +50,15 @@ namespace Pixel {
 		m_IsOpenTestMaterialEditor = false;
 	}
 
+	void ContentBrowserPanel::OnUpdate()
+	{
+		//call the graph node editor's update
+		if (m_GraphNodeEditor != nullptr)
+		{
+			m_GraphNodeEditor->OnUpdate();
+		}
+	}
+
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		//list all the files in the assets directory
@@ -195,8 +204,10 @@ namespace Pixel {
 					//query the asset virtual path
 					const std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
 
+					PIXEL_CORE_INFO("{0}", strlen(virtualPath.c_str()) * sizeof(char));
+
 					//pass the asset virtual path
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), strlen(virtualPath.c_str()) * sizeof(char), ImGuiCond_Once);
+					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);
 
 					ImGui::EndDragDropSource();
 				}

@@ -14,6 +14,8 @@ namespace Pixel {
 	public:
 		ContentBrowserPanel();
 
+		void OnUpdate();
+
 		void OnImGuiRender();
 
 		void CreateMaterialAsset(std::string filePath);
