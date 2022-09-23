@@ -6,6 +6,7 @@
 #include "GraphLink.h"
 #include "GraphNode.h"
 #include "Builder.h"
+#include "Pixel/Core/Timestep.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
@@ -47,7 +48,7 @@ namespace Pixel {
 		return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
 	}
 
-	GraphNodeEditor::GraphNodeEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)
+	GraphNodeEditor::GraphNodeEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial, Ref<Framebuffer> pFinalColorFrameBuffer)
 	{
 		m_TopPanelHeight = 800.0f;
 		m_DownPanelHeight = 400.0f;
@@ -56,7 +57,12 @@ namespace Pixel {
 
 		m_HeaderBackgroundTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 
+		m_PreviewSceneTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
 		Device::Get()->CopyDescriptorsSimple(1, m_HeaderBackgroundTextureHandle->GetCpuHandle(), m_HeaderBackgroundTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		//copy descriptor
+		Device::Get()->CopyDescriptorsSimple(1, m_PreviewSceneTextureHandle->GetCpuHandle(), pFinalColorFrameBuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
 
 		m_BlueprintNodeBuilder = CreateRef<BlueprintNodeBuilder>((ImTextureID)(m_HeaderBackgroundTextureHandle->GetGpuHandle()->GetGpuPtr()), m_HeaderBackgroundTexture->GetWidth(), m_HeaderBackgroundTexture->GetHeight());
 
@@ -178,6 +184,9 @@ namespace Pixel {
 			//3.handle create node
 			HandleInteraction();
 
+			//4.draw preview scene
+			ImGui::Image((ImTextureID)m_PreviewSceneTextureHandle->GetGpuHandle()->GetGpuPtr(), ImVec2(256, 256));
+
 			ed::End();
 		ed::SetCurrentEditor(nullptr);
 
@@ -185,10 +194,10 @@ namespace Pixel {
 		ImGui::End();
 	}
 
-	void GraphNodeEditor::OnUpdate()
+	void GraphNodeEditor::OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer)
 	{
 		//draw preview mesh
-
+		m_pPreviewScene->OnUpdateEditorDeferred(ts, editorCamera, pGeoFrameBuffer, pLightFrameBuffer, pFinalFrameBuffer);
 	}
 
 	void GraphNodeEditor::DrawMainFunctionNode()

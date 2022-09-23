@@ -110,6 +110,13 @@ namespace Pixel
 		//------test------
 
 		//GraphNodeEditor m_GraphNodeEditor;
+
+		//------simple scene------
+		EditorCamera m_SimpleSceneCamera;
+		Ref<Framebuffer> m_SimpleSceneGeometryFrameBuffer;
+		Ref<Framebuffer> m_SimpleSceneLightFrameBuffer;
+		Ref<Framebuffer> m_SimpleSceneFinalColorFrameBuffer;
+		//------simple scene------
 	};
 }
 

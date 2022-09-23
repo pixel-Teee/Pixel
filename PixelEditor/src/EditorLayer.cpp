@@ -74,8 +74,6 @@ namespace Pixel
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
-			
-		/*------Create Framebuffer------*/
 
 		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
 		fbSpec.Width = 1280;
@@ -83,11 +81,34 @@ namespace Pixel
 		m_FinalFrameBuffer = Framebuffer::Create(fbSpec);
 
 		Device::Get()->CopyDescriptorsSimple(1, m_FrameBufferHandle->GetCpuHandle(), m_FinalFrameBuffer->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+			
+		/*------Create Framebuffer------*/
+
+		/*------Create Simple Scene Framebuffer------*/
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F,
+		FramebufferTextureFormat::RGBA16F,FramebufferTextureFormat::RGBA8,
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 256;
+		fbSpec.Height = 256;
+		m_SimpleSceneGeometryFrameBuffer = Framebuffer::Create(fbSpec);
+
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 256;
+		fbSpec.Height = 256;
+		m_SimpleSceneLightFrameBuffer = Framebuffer::Create(fbSpec);
+
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+		fbSpec.Width = 256;
+		fbSpec.Height = 256;
+		m_SimpleSceneFinalColorFrameBuffer = Framebuffer::Create(fbSpec);
+		/*------Create Simple Scene Framebuffer------*/
 
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
 
 		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
+
+		m_SimpleSceneCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
 #if 0	
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
@@ -138,6 +159,8 @@ namespace Pixel
 		m_CameraEntity2.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 #endif
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		m_ContentBrowserPanel.SetGraphNodeEditorPreviewSceneFrameBuffer(m_SimpleSceneFinalColorFrameBuffer);
 
 		//Set Sky Box
 		//ownership is belgon to Renderer3D
@@ -508,8 +531,10 @@ namespace Pixel
 			}
 		}
 
+		m_SimpleSceneCamera.OnUpdate(ts);
+
 		//call other panel's update
-		m_ContentBrowserPanel.OnUpdate();
+		m_ContentBrowserPanel.OnUpdate(ts, m_SimpleSceneCamera, m_SimpleSceneGeometryFrameBuffer, m_SimpleSceneLightFrameBuffer, m_SimpleSceneFinalColorFrameBuffer);
 
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();

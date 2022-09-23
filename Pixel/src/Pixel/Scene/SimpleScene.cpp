@@ -2,6 +2,7 @@
 
 #include "SimpleScene.h"
 
+#include "Pixel/Core/Timestep.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Scene/Components/TransformComponent.h"
 #include "Pixel/Scene/Components/StaticMeshComponent.h"
@@ -88,17 +89,17 @@ namespace Pixel {
 		//Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRenderingForSimpleScene(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds);
+		Application::Get().GetRenderer()->DeferredRenderingForSimpleScene(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this());
 
 		pContext->Finish(true);
 
-		Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
+		//Ref<Context> pComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
 		//Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
-		for (uint32_t i = 0; i < 4; ++i)
-		{
-			Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
-		}
-		pComputeContext->Finish(true);
+		//for (uint32_t i = 0; i < 4; ++i)
+		//{
+		//	Application::Get().GetRenderer()->RenderBlurTexture(pComputeContext, pLightFrameBuffer);
+		//}
+		//pComputeContext->Finish(true);
 
 		//Ref<Context> pPickerComputeContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Compute);
 		//Application::Get().GetRenderer()->RenderPickerBuffer(pComputeContext, pGeoFrameBuffer);

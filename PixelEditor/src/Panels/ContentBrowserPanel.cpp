@@ -50,12 +50,12 @@ namespace Pixel {
 		m_IsOpenTestMaterialEditor = false;
 	}
 
-	void ContentBrowserPanel::OnUpdate()
+	void ContentBrowserPanel::OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer)
 	{
 		//call the graph node editor's update
 		if (m_GraphNodeEditor != nullptr)
 		{
-			m_GraphNodeEditor->OnUpdate();
+			m_GraphNodeEditor->OnUpdate(ts, editorCamera, pGeoFrameBuffer, pLightFrameBuffer, pFinalFrameBuffer);
 		}
 	}
 
@@ -331,7 +331,7 @@ namespace Pixel {
 								graphNodeEditorPath = editorPathFileName;
 							}
 
-							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial);
+							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial, m_pFramebuffer);
 						}
 						else if(m_CurrentTestMaterialPath == materialPhysicalPath)
 							m_IsOpenTestMaterialEditor = true;
@@ -358,6 +358,11 @@ namespace Pixel {
 		{
 			m_GraphNodeEditor->OnImGuiRender(m_IsOpenTestMaterialEditor);
 		}
+	}
+
+	void ContentBrowserPanel::SetGraphNodeEditorPreviewSceneFrameBuffer(Ref<Framebuffer> pFinalFrameBuffer)
+	{
+		m_pFramebuffer = pFinalFrameBuffer;
 	}
 
 	void ContentBrowserPanel::RenderMaterialAssetPanel()

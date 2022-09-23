@@ -12,13 +12,14 @@ namespace Pixel {
 	struct SubMaterial;
 	struct MaterialComponent;
 	//just for graph node editor's preview
-	class SimpleScene
+	class SimpleScene : public std::enable_shared_from_this<SimpleScene>
 	{
 	public:
 		SimpleScene();
 		
 		void OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer);
 
+		entt::registry& GetRegistry() { return m_Registry; }
 	private:
 		entt::registry m_Registry;
 

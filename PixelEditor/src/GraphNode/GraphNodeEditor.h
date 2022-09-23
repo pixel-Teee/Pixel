@@ -14,16 +14,19 @@ namespace Pixel {
 	class Texture2D;
 	class DescriptorHandle;
 	class SimpleScene;
+	class Timestep;
+	class EditorCamera;
+	class Framebuffer;
 	class GraphNodeEditor {
 	public:
 
-		GraphNodeEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial);
+		GraphNodeEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial, Ref<Framebuffer> pFinalColorFrameBuffer);
 
 		~GraphNodeEditor();
 
 		void OnImGuiRender(bool& OpenGraphNodeEditor);
 
-		void OnUpdate();
+		void OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer);
 
 	private:
 
@@ -73,6 +76,9 @@ namespace Pixel {
 		//------header texture------
 		Ref<BlueprintNodeBuilder> m_BlueprintNodeBuilder;
 
+		//------preview scene texture------
+		Ref<DescriptorHandle> m_PreviewSceneTextureHandle;
+		//------preview scene texture------
 		float m_TopPanelHeight;
 		float m_DownPanelHeight;
 
