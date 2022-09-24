@@ -96,10 +96,16 @@ namespace Pixel
 
         OutString += "pixelOut.gBufferPosition.xyz = pin.PosW;\n";
 
-		//OutString += "pixelOut.gBufferNormal.xyz" 
-        OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+        OutString += "if (HaveNormal)\npixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;\n";
 
-        OutString += "pixelOut.gBufferAlbedo.w = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_ALBEDO], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+        OutString += "else\npixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;\n";
+
+		//OutString += "pixelOut.gBufferNormal.xyz" 
+        //OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+
+        OutString += "pixelOut.gBufferAlbedo.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_ALBEDO], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+
+        OutString += "pixelOut.gBufferAlbedo.w = ClearCoatRoughness;\n";
 
         OutString += "pixelOut.gVelocity.w = ClearCoat;\n";
 

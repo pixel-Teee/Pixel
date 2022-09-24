@@ -138,6 +138,3 @@ float3 DecodeNormalMap(float2 uv, float3 worldPos, float3 normal)
 	//let the texture map's normal to world's normal
 	return normalize(mul(TangentNormal, TBN));
 }
-
-PixelOut PS(VertexOut pin)
-{

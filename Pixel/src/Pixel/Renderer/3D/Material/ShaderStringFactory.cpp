@@ -9,6 +9,8 @@
 
 #include "Material.h"
 #include "PutNode.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/BaseRenderer.h"
 
 namespace Pixel {
 	uint32_t ShaderStringFactory::m_ShaderValueIndex;
@@ -113,8 +115,9 @@ namespace Pixel {
 		buffer << geometryPassIncludes.rdbuf();
 		std::string out = buffer.str();
 		geometryPassIncludes.close();
+		out += "PixelOut PS(VertexOut pin){\n";
 		pMaterial->GetShaderTreeString(out);
-		out += "return pixelOut;\n}\n";
+		out += "return pixelOut;\n}";
 
 		//write to cache
 		std::ofstream cache("assets/shaders/Cache/test.hlsl");
@@ -122,8 +125,10 @@ namespace Pixel {
 		cache.close();
 
 		//TODO:in the future, will in there to compile shader
-		//Ref<Shader> testCompilerVertex = Shader::Create("assets/shaders/Cache/test.hlsl", "VS", "vs_5_0");
-		//Ref<Shader> testCompilerFrag = Shader::Create("assets/shaders/Cache/test.hlsl", "PS", "ps_5_0");
+		Ref<Shader> testCompilerVertex = Shader::Create("assets/shaders/Cache/test.hlsl", "VS", "vs_5_0");
+		Ref<Shader> testCompilerFrag = Shader::Create("assets/shaders/Cache/test.hlsl", "PS", "ps_5_0");
+
+		pMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(testCompilerVertex, testCompilerFrag);
 
 		return out;
 	}

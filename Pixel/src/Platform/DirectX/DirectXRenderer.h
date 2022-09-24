@@ -65,7 +65,7 @@ namespace Pixel {
 
 		virtual void DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene);
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial);
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer);
 
@@ -111,6 +111,10 @@ namespace Pixel {
 		virtual void SetDescriptorHeapOffset(uint32_t offset) override;
 		
 		virtual Ref<DescriptorHandle> GetDescriptorHeapFirstHandle() override;
+
+		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader) override;
+
+		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) override;
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -356,6 +360,12 @@ namespace Pixel {
 		Ref<DescriptorHandle> m_TotalBindTextureDescriptorHeapFirstHandle;
 		uint32_t m_Offset;//offset item
 		//------total bind texture descriptor heap------
+
+		//------all material's uninitialized pso, will in terms of the vertex input layout to create complete pso------
+		std::vector<Ref<PSO>> m_MaterialPso;
+		Ref<Shader> m_TestVertexShader;
+		Ref<Shader> m_TestFragShader;
+		//------all material's uninitialized pso, will in terms of the vertex input layout to create complete pso------
 	};
 }
  

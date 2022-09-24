@@ -34,6 +34,8 @@ namespace Pixel {
 
 		void DrawTopPanel(float panelHeight);
 
+		void DrawLeftPreViewScenePanel(float panelWidth);
+
 		void DrawLinks();
 
 		void DrawNodes();
@@ -82,6 +84,13 @@ namespace Pixel {
 		float m_TopPanelHeight;
 		float m_DownPanelHeight;
 
+		float m_LeftPaneWidth;
+		float m_RightPanelWidth;
+
 		bool m_CreateNewNode;
+
+		//------current selected graph node------
+		Ref<GraphNode> m_CurrentSelectedGraphNode;
+		//------current selected graph node------
 	};
 }

@@ -7,6 +7,7 @@
 
 namespace Pixel {
 	class Model;
+	class Material;
 	struct TransformComponent;
 	struct StaticMeshComponent;
 	struct SubMaterial;
@@ -17,7 +18,7 @@ namespace Pixel {
 	public:
 		SimpleScene();
 		
-		void OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer);
+		void OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Ref<Material> pTestMaterial);
 
 		entt::registry& GetRegistry() { return m_Registry; }
 	private:

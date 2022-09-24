@@ -11,6 +11,7 @@
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Scene/Components/MaterialComponent.h"
+#include "Pixel/Renderer/3D/Material/Material.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -270,6 +271,84 @@ namespace Pixel {
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+	}
+
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial)
+	{
+		if (pMaterial->IsTransparent)
+			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(TransParentPsoIndex, pMaterial->IsTransparent)));
+		else
+		{
+			//in terms of the pTestMaterial to create complete pso
+			if (!m_IsFirstCreateMaterialPso && pTestMaterial->m_PsoIndex != -1)
+			{
+				m_IsFirstCreateMaterialPso = true;
+				BufferLayout layout = m_VertexBuffer->GetLayout();
+				PsoIndex = Application::Get().GetRenderer()->CreateCompleteMaterialPso(pTestMaterial->m_PsoIndex, layout);
+			}
+
+			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex, pMaterial->IsTransparent)));
+					
+		}
+
+		m_MeshConstant.world = glm::transpose(transform);
+		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
+		if (isFirst)
+		{
+			isFirst = false;
+			m_MeshConstant.previousWorld = glm::transpose(transform);
+		}
+		m_MeshConstant.editor = entityId;
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+
+		//get descriptor size
+		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+
+		Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+		uint32_t offsetItem = Application::Get().GetRenderer()->GetDescriptorHeapOffset();
+
+		std::vector<DescriptorHandle> handles;
+		for (uint32_t i = 0; i < 5; ++i)
+		{
+			DescriptorHandle secondHandle = (*totalTextureDescriptorHeapFirstHandle) + (i + offsetItem) * DescriptorSize;
+			handles.push_back(secondHandle);
+		}
+
+		Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());
+		//bind texture
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, handles[0].GetGpuHandle());
+
+		Application::Get().GetRenderer()->SetDescriptorHeapOffset(offsetItem + 5);
+
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, pMaterial->m_pDescriptorHeap);
+
+		m_MaterialConstant.Albedo = pMaterial->gAlbedo;
+		m_MaterialConstant.Ao = pMaterial->gAo;
+		m_MaterialConstant.Metallic = pMaterial->gMetallic;
+		m_MaterialConstant.Roughness = pMaterial->gRoughness;
+		m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
+		m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
+		m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
+		m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
+
+		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_IndexBuffer->GetCount());
+
+		//unbind descriptor heap
+		//Ref<DescriptorHeap> nullHeap = DescriptorHeap::Create();
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
+
+		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
 
 	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial)

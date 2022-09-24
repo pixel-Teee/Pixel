@@ -26,6 +26,8 @@ namespace Pixel {
 		m_pModel = CreateRef<Model>("Resources/models/cube/Cube.fbx");
 		m_pSubMaterial = CreateRef<SubMaterial>();//add to material component
 
+		m_pSubMaterial->HaveNormal = true;
+
 		m_Registry.emplace<TransformComponent>(m_EntityHandle);
 		m_Registry.emplace<StaticMeshComponent>(m_EntityHandle);
 		m_Registry.get<StaticMeshComponent>(m_EntityHandle).m_Model = m_pModel;
@@ -38,7 +40,7 @@ namespace Pixel {
 		m_Registry.get<LightComponent>(m_LightEntityHandle);
 	}
 
-	void SimpleScene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer)
+	void SimpleScene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Ref<Material> pTestMaterial)
 	{
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
 
@@ -89,7 +91,7 @@ namespace Pixel {
 		//Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRenderingForSimpleScene(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this());
+		Application::Get().GetRenderer()->DeferredRenderingForSimpleScene(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this(), pTestMaterial);
 
 		pContext->Finish(true);
 

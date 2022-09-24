@@ -101,6 +101,8 @@ namespace Pixel {
 		void AddToMaterialOwner();
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
+
+		ShaderFunctionType GetShaderFunctionType() { return m_functionType; }
 		
 	protected:
 		//dfs check flag

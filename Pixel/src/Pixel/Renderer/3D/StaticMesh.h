@@ -24,6 +24,7 @@ namespace Pixel {
 	struct MaterialComponent;
 	class DescriptorHeap;
 	struct SubMaterial;
+	class Material;
 	class StaticMesh
 	{
 	public:
@@ -43,6 +44,9 @@ namespace Pixel {
 
 		//TODO:Test
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
+
+		//TODO:test for material tree
+		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial);
 
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial);
 
@@ -71,6 +75,8 @@ namespace Pixel {
 
 		uint32_t PsoIndex;//pipeline state object index, one for opaque, one for transparent
 		uint32_t TransParentPsoIndex;
+
+		bool m_IsFirstCreateMaterialPso = false;
 
 		int EntityID = -1;
 

@@ -1072,7 +1072,7 @@ namespace Pixel {
 		//------use for TAA------
 	}
 
-	void DirectXRenderer::DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene)
+	void DirectXRenderer::DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
@@ -1220,7 +1220,7 @@ namespace Pixel {
 		//draw opaque render item
 		for (size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, pTestMaterial);
 		}
 		
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
@@ -2710,6 +2710,89 @@ namespace Pixel {
 	Ref<DescriptorHandle> DirectXRenderer::GetDescriptorHeapFirstHandle()
 	{
 		return m_TotalBindTextureDescriptorHeapFirstHandle;
+	}
+
+	uint32_t DirectXRenderer::CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
+	{
+		//create uninitialized pso, will in terms of the model's vertex input layout to create complete pso
+
+		//------Create Deferred Geometry Rendere------
+		Ref<PSO> pPso = PSO::CreateGraphicsPso(L"MaterialPso");
+
+		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
+
+		//-----Create Blend State------
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		//-----Create Blend State------
+
+		//------Create Raster State------
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//------Create Raster State------
+
+		//------Create Depth State------
+		Ref<DepthState> pDepthState = DepthState::Create();
+		//------Create Depth State------
+
+		pPso->SetBlendState(pBlendState);
+		pPso->SetRasterizerState(pRasterState);
+		pPso->SetDepthState(pDepthState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R16G16B16A16_FLOAT, ImageFormat::PX_FORMAT_R8G8B8A8_UNORM,
+		ImageFormat::PX_FORMAT_R8G8B8A8_UNORM, ImageFormat::PX_FORMAT_R32_SINT };
+		pPso->SetRenderTargetFormats(6, imageFormats.data(), ImageFormat::PX_FORMAT_D24_UNORM_S8_UINT);
+		pPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);	
+	
+		m_TestVertexShader = pVertexShader;
+		m_TestFragShader = pPixelShader;
+
+		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_TestVertexShader)->GetShaderBinary();
+		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(m_TestFragShader)->GetShaderBinary();
+		pPso->SetVertexShader(VsBinary, VsBinarySize);
+		pPso->SetPixelShader(PsBinary, PsBinarySize);
+
+		pPso->SetRootSignature(m_pDeferredShadingRootSignature);
+		
+		m_MaterialPso.push_back(pPso);
+
+		return m_MaterialPso.size() - 1;
+	}
+
+	uint32_t DirectXRenderer::CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout)
+	{
+		//get uninitialized material pso, in terms of vertex input layout to create complete pso
+		Ref<PSO> uninitializedPso = m_MaterialPso[uninitializedPsoIndex];
+
+		//may be release
+		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : layout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			ElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			ElementArray[i].SemanticIndex = 0;
+			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			ElementArray[i].InputSlot = 0;
+			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			ElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		//copy constructor
+		std::static_pointer_cast<GraphicsPSO>(uninitializedPso)->SetInputLayout(layout.GetElements().size(), ElementArray);
+		//initialize the pipeline state object
+		uninitializedPso->Finalize();
+		m_PsoArray.push_back(uninitializedPso);
+
+		//return pso index
+		return m_PsoArray.size();
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()

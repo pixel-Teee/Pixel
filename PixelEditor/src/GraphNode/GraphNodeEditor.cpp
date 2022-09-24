@@ -53,6 +53,9 @@ namespace Pixel {
 		m_TopPanelHeight = 800.0f;
 		m_DownPanelHeight = 400.0f;
 
+		m_LeftPaneWidth = 200.0f;
+		m_RightPanelWidth = 600.0f;
+
 		m_HeaderBackgroundTexture = Texture2D::Create("Resources/Icons/BlueprintBackground.png");
 
 		m_HeaderBackgroundTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
@@ -161,7 +164,7 @@ namespace Pixel {
 		ImVec2 content = ImGui::GetContentRegionAvail();
 		if(m_TopPanelHeight > content.y)
 		{
-			m_TopPanelHeight = content.y / 3.0f;
+			m_TopPanelHeight = content.y / 4.0f;
 			m_DownPanelHeight = content.y - m_TopPanelHeight;
 		}
 		//PIXEL_CORE_INFO("{0}, {1}", content.x, content.y);
@@ -169,7 +172,21 @@ namespace Pixel {
 		ed::SetCurrentEditor(m_Editor);
 			Splitter(false, 4.0f, &m_TopPanelHeight, &m_DownPanelHeight, 10.0f, 10.0f);
 			DrawTopPanel(m_TopPanelHeight + 4.0f);
+			Splitter(true, 4.0f, &m_LeftPaneWidth, &m_RightPanelWidth, 10.0f, 10.0f);
+			DrawLeftPreViewScenePanel(m_LeftPaneWidth);
+			ImGui::SameLine(0.0f, 10.0f);
+			//ImGui::BeginHorizontal("BeginHorizontal##");
+			//ImGui::BeginChild("PreviewScene", ImVec2(m_LeftPaneWidth, 0.0f));
+			////draw preview scene
+			//ImGui::Image((ImTextureID)m_PreviewSceneTextureHandle->GetGpuHandle()->GetGpuPtr(), ImVec2(256, 256));
+			//ImGui::EndChild();
+			//ImGui::EndHorizontal();
+			//ImGui::BeginHorizontal("graph editor##");
 			ed::Begin("Graph Node Editor Canvas");
+			
+			//ImVec2 content2 = ImGui::GetContentRegionAvail();
+			//PIXEL_CORE_INFO("{0}, {1}", content2.x, content2.y);
+
 			//draw shader main function
 
 			//TODO:in the future, will in terms of the shading model to switch this
@@ -182,12 +199,9 @@ namespace Pixel {
 			DrawLinks();
 
 			//3.handle create node
-			HandleInteraction();
-
-			//4.draw preview scene
-			ImGui::Image((ImTextureID)m_PreviewSceneTextureHandle->GetGpuHandle()->GetGpuPtr(), ImVec2(256, 256));
-
+			HandleInteraction();		
 			ed::End();
+			//ImGui::EndHorizontal();
 		ed::SetCurrentEditor(nullptr);
 
 
@@ -197,7 +211,7 @@ namespace Pixel {
 	void GraphNodeEditor::OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer)
 	{
 		//draw preview mesh
-		m_pPreviewScene->OnUpdateEditorDeferred(ts, editorCamera, pGeoFrameBuffer, pLightFrameBuffer, pFinalFrameBuffer);
+		m_pPreviewScene->OnUpdateEditorDeferred(ts, editorCamera, pGeoFrameBuffer, pLightFrameBuffer, pFinalFrameBuffer, m_pMaterial);
 	}
 
 	void GraphNodeEditor::DrawMainFunctionNode()
@@ -269,6 +283,41 @@ namespace Pixel {
 		}
 		ImGui::PopStyleVar(1);
 		ImGui::EndHorizontal();
+		ImGui::EndChild();
+	}
+
+	void GraphNodeEditor::DrawLeftPreViewScenePanel(float panelWidth)
+	{
+		ImGui::BeginChild("PreviewScenePanel", ImVec2(panelWidth, 0.0f));
+		ImGui::Image((ImTextureID)m_PreviewSceneTextureHandle->GetGpuHandle()->GetGpuPtr(), ImVec2(256, 256));
+
+		std::vector<ed::NodeId> selectedNodes;
+		selectedNodes.resize(ed::GetSelectedObjectCount());
+		int32_t nodeCount = ed::GetSelectedNodes(selectedNodes.data(), static_cast<int32_t>(selectedNodes.size()));
+		selectedNodes.resize(nodeCount);
+
+		//iterator over the all nodes, then get the selected node
+		for (auto& node : m_GraphNodes)
+		{
+			bool IsSelected = std::find(selectedNodes.begin(), selectedNodes.end(), node->m_NodeId) != selectedNodes.end();
+			if (IsSelected)
+			{
+				m_CurrentSelectedGraphNode = node;
+			}
+		}
+
+		if (m_CurrentSelectedGraphNode != nullptr)
+		{
+			//show details
+			Ref<ShaderFunction> pShaderFunction = m_CurrentSelectedGraphNode->p_Owner;
+
+			if (pShaderFunction->GetShaderFunctionType() == ShaderFunctionType::ConstFloatValue4)
+			{
+				Ref<ConstFloatValue> pConstFloatValue4ShaderFuntion = std::static_pointer_cast<ConstFloatValue>(pShaderFunction);
+				ImGui::ColorEdit4("const value 4", pConstFloatValue4ShaderFuntion->m_Value.data());
+			}
+		}
+
 		ImGui::EndChild();
 	}
 
