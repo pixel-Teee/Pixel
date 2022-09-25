@@ -36,6 +36,7 @@ file(GLOB_RECURSE Headers
 "src/Pixel/Renderer/3D/Material/Mul.h"
 "src/Pixel/Renderer/3D/Material/ConstFloatValue.h"
 "src/Pixel/Renderer/3D/Material/ConstValue.h"
+"src/Pixel/Animation/*.h"
 )
 
 set(HEADERS ${Headers}) 

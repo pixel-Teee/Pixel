@@ -3,6 +3,7 @@
 #include "Pixel/Core/Core.h"
 #include "Pixel/Renderer/Shader.h"
 #include "StaticMesh.h"
+#include "Pixel/Animation/BoneInfo.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -40,12 +41,19 @@ namespace Pixel {
 		std::vector<Ref<StaticMesh>> m_Meshes;
 		std::string m_directory;
 
+		std::map<std::string, BoneInfo> m_BoneInfoMap;
+		int32_t m_BoneCounter = 0;
+
+		auto& GetBoneInfoMap() { return m_BoneInfoMap; }
+		int32_t GetBoneCount() { return m_BoneCounter; }
+
 		//load model and populate vertex information
 		void LoadModel(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		Ref<StaticMesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
 
 		friend class BaseRenderer;
+		friend class Animation;
 
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
