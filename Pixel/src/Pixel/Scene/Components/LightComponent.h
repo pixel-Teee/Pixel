@@ -24,6 +24,7 @@ namespace Pixel {
 	//TODO£ºtemporary there only have a point light
 	struct Meta(Enable) LightComponent
 	{
+		Meta()
 		LightType lightType;
 
 		//LightColor

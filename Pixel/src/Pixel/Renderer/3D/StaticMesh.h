@@ -57,8 +57,8 @@ namespace Pixel {
 		Ref<VertexBuffer> GetVertexBuffer();
 
 		unsigned char* GetIndexBuffer() { return m_Index; }
-		unsigned char* GetDataBuffer(Semantics channel) { return m_DataBuffer[(uint64_t)Semantics::POSITION]; }
-		uint32_t GetDataBufferSize(Semantics channel) { return m_DataBufferSize[(uint64_t)Semantics::POSITION]; }
+		unsigned char* GetDataBuffer(Semantics channel) { return m_DataBuffer[(uint64_t)channel]; }
+		uint32_t GetDataBufferSize(Semantics channel) { return m_DataBufferSize[(uint64_t)channel]; }
 		uint32_t GetIndexBufferSize() { return m_IndexSize;  }
 	private:
 		/*------Data------*/

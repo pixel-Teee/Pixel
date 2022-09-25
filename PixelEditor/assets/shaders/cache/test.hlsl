@@ -139,16 +139,20 @@ float3 DecodeNormalMap(float2 uv, float3 worldPos, float3 normal)
 	return normalize(mul(TangentNormal, TBN));
 }
 PixelOut PS(VertexOut pin){
-float4  ConstFloatValue25;
-ConstFloatValue25 = float4(0.776471, 1.000000, 0.301961, 1.000000);
 float4  ConstFloatValue15;
-ConstFloatValue15 = float4(0.435294, 0.000000, 0.000000, 0.000000);
+ConstFloatValue15 = float4(0.932766, 0.996139, 0.438455, 0.000000);
 float4  ConstFloatValue7;
-ConstFloatValue7 = float4(0.705882, 0.000000, 0.000000, 0.000000);
+ConstFloatValue7 = float4(1.000000, 0.150579, 0.150579, 0.000000);
+float4  MulInputA23 = ConstFloatValue15;
+float4  MulInputB24 = ConstFloatValue7;
+float4  MulOutput24 = float4(0, 0, 0, 1);
+MulOutput24 = MulInputA23 * MulInputB24;
+float4  ConstFloatValue32;
+ConstFloatValue32 = float4(1.000000, 0.999990, 0.999990, 0.000000);
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = ConstFloatValue25;
-float  Roughness = ConstFloatValue15.x;
-float  Metallic = ConstFloatValue7.x;
+float4  Albedo = MulOutput24;
+float  Roughness = ConstFloatValue32.x;
+float  Metallic = 0;
 float  Ao = 0;
 PixelOut pixelOut = (PixelOut)(0.0f);
 pixelOut.gBufferPosition.xyz = pin.PosW;
