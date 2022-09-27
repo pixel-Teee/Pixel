@@ -2712,7 +2712,7 @@ namespace Pixel {
 		return m_TotalBindTextureDescriptorHeapFirstHandle;
 	}
 
-	uint32_t DirectXRenderer::CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
+	uint32_t DirectXRenderer::CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex)
 	{
 		//create uninitialized pso, will in terms of the model's vertex input layout to create complete pso
 
@@ -2752,9 +2752,16 @@ namespace Pixel {
 
 		pPso->SetRootSignature(m_pDeferredShadingRootSignature);
 		
-		m_MaterialPso.push_back(pPso);
-
-		return m_MaterialPso.size() - 1;
+		if (originalPsoIndex != -1)
+		{
+			m_MaterialPso[originalPsoIndex] = pPso;//replace the original pso
+			return originalPsoIndex;
+		}
+		else
+		{
+			m_MaterialPso.push_back(pPso);
+			return m_MaterialPso.size() - 1;
+		}
 	}
 
 	uint32_t DirectXRenderer::CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout)

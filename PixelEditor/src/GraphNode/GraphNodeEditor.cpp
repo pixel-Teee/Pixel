@@ -314,7 +314,8 @@ namespace Pixel {
 			if (pShaderFunction->GetShaderFunctionType() == ShaderFunctionType::ConstFloatValue4)
 			{
 				Ref<ConstFloatValue> pConstFloatValue4ShaderFuntion = std::static_pointer_cast<ConstFloatValue>(pShaderFunction);
-				ImGui::ColorEdit4("const value 4", pConstFloatValue4ShaderFuntion->m_Value.data());
+				
+				ImGui::ColorEdit4("const float value 4", pConstFloatValue4ShaderFuntion->m_Value.data());
 			}
 		}
 

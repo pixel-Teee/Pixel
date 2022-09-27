@@ -280,11 +280,13 @@ namespace Pixel {
 		else
 		{
 			//in terms of the pTestMaterial to create complete pso
-			if (!m_IsFirstCreateMaterialPso && pTestMaterial->m_PsoIndex != -1)
+			if (!m_IsFirstCreateMaterialPso && pTestMaterial->m_PsoIndex != -1 || pTestMaterial->dirty)
 			{
+				//TODO:need to erase already initialized pso
 				m_IsFirstCreateMaterialPso = true;
 				BufferLayout layout = m_VertexBuffer->GetLayout();
 				PsoIndex = Application::Get().GetRenderer()->CreateCompleteMaterialPso(pTestMaterial->m_PsoIndex, layout);
+				pTestMaterial->dirty = false;
 			}
 
 			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex, pMaterial->IsTransparent)));

@@ -139,12 +139,12 @@ float3 DecodeNormalMap(float2 uv, float3 worldPos, float3 normal)
 	return normalize(mul(TangentNormal, TBN));
 }
 PixelOut PS(VertexOut pin){
-float4  ConstFloatValue15;
-ConstFloatValue15 = float4(0.932766, 0.996139, 0.438455, 0.000000);
 float4  ConstFloatValue7;
-ConstFloatValue7 = float4(1.000000, 0.150579, 0.150579, 0.000000);
-float4  MulInputA23 = ConstFloatValue15;
-float4  MulInputB24 = ConstFloatValue7;
+ConstFloatValue7 = float4(0.648485, 1.000000, 0.305019, 0.000000);
+float4  ConstFloatValue15;
+ConstFloatValue15 = float4(0.999996, 1.000000, 0.999990, 0.000000);
+float4  MulInputA23 = ConstFloatValue7;
+float4  MulInputB24 = ConstFloatValue15;
 float4  MulOutput24 = float4(0, 0, 0, 1);
 MulOutput24 = MulInputA23 * MulInputB24;
 float4  ConstFloatValue32;

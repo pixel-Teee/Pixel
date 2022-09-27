@@ -73,7 +73,7 @@ namespace Pixel {
 		Ref<VertexBuffer> m_VertexBuffer;
 		Ref<IndexBuffer> m_IndexBuffer;
 
-		uint32_t PsoIndex;//pipeline state object index, one for opaque, one for transparent
+		int32_t PsoIndex = -1;//pipeline state object index, one for opaque, one for transparent
 		uint32_t TransParentPsoIndex;
 
 		bool m_IsFirstCreateMaterialPso = false;

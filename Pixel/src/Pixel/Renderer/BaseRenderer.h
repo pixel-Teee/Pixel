@@ -29,7 +29,7 @@ namespace Pixel {
 
 		virtual uint32_t CreateDeferredLightPso(BufferLayout& layout) = 0;
 
-		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader) = 0;
+		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex) = 0;
 
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) = 0;
 

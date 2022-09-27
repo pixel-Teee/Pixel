@@ -43,7 +43,10 @@ namespace Pixel {
 
 		//------material's uninitialized pso index, will in terms of the model's vertex input layout to create complete pso------
 		Meta()
-		uint32_t m_PsoIndex = -1;
+		bool dirty = false;
+
+		Meta()
+		int32_t m_PsoIndex = -1;
 		//------material's uninitialized pso index, will in terms of the model's vertex input layout to create complete pso------
 
 		//logic node

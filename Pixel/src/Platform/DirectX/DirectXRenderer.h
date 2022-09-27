@@ -112,7 +112,7 @@ namespace Pixel {
 		
 		virtual Ref<DescriptorHandle> GetDescriptorHeapFirstHandle() override;
 
-		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader) override;
+		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex) override;
 
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) override;
 	private:
