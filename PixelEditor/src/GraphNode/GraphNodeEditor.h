@@ -28,6 +28,8 @@ namespace Pixel {
 
 		void OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer);
 
+		bool IsPreviewSceneEventBlocked();
+
 	private:
 
 		void DrawMainFunctionNode();
@@ -92,5 +94,7 @@ namespace Pixel {
 		//------current selected graph node------
 		Ref<GraphNode> m_CurrentSelectedGraphNode;
 		//------current selected graph node------
+
+		bool m_IsPreviewEventBlocked;
 	};
 }

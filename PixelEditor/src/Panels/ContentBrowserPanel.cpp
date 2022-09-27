@@ -50,15 +50,6 @@ namespace Pixel {
 		m_IsOpenTestMaterialEditor = false;
 	}
 
-	void ContentBrowserPanel::OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer)
-	{
-		//call the graph node editor's update
-		if (m_GraphNodeEditor != nullptr)
-		{
-			m_GraphNodeEditor->OnUpdate(ts, editorCamera, pGeoFrameBuffer, pLightFrameBuffer, pFinalFrameBuffer);
-		}
-	}
-
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		//list all the files in the assets directory
@@ -331,10 +322,15 @@ namespace Pixel {
 								graphNodeEditorPath = editorPathFileName;
 							}
 
-							m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial, m_pFramebuffer);
+							//notify editor layer to open graph editor
+							m_OpenGraphEditor(graphNodeEditorPath, materialPhysicalPath, m_pMaterial);
+							m_IsGraphEditorAlive(true);
+							//m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial, m_pFramebuffer);
 						}
-						else if(m_CurrentTestMaterialPath == materialPhysicalPath)
-							m_IsOpenTestMaterialEditor = true;
+						else if (m_CurrentTestMaterialPath == materialPhysicalPath)
+						{
+							m_IsGraphEditorAlive(true);
+						}
 					}
 				}
 				ImGui::TextWrapped("%s", filenameString.c_str());
@@ -360,9 +356,15 @@ namespace Pixel {
 		}
 	}
 
-	void ContentBrowserPanel::SetGraphNodeEditorPreviewSceneFrameBuffer(Ref<Framebuffer> pFinalFrameBuffer)
+	void ContentBrowserPanel::RegisterOpenGraphEditorCallBack(std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> func)
 	{
-		m_pFramebuffer = pFinalFrameBuffer;
+		//register, TODO:need to remove register on destory?
+		m_OpenGraphEditor = func;
+	}
+
+	void ContentBrowserPanel::RegisterIsGraphEditorAliveCallBack(std::function<void(bool)> func)
+	{
+		m_IsGraphEditorAlive = func;
 	}
 
 	void ContentBrowserPanel::RenderMaterialAssetPanel()

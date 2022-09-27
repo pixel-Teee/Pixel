@@ -87,6 +87,8 @@ namespace Pixel {
 
 		m_CreateNewNode = false;
 
+		m_IsPreviewEventBlocked = false;
+
 		//create the graph node
 		for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
 		{
@@ -214,6 +216,11 @@ namespace Pixel {
 		m_pPreviewScene->OnUpdateEditorDeferred(ts, editorCamera, pGeoFrameBuffer, pLightFrameBuffer, pFinalFrameBuffer, m_pMaterial);
 	}
 
+	bool GraphNodeEditor::IsPreviewSceneEventBlocked()
+	{
+		return m_IsPreviewEventBlocked;
+	}
+
 	void GraphNodeEditor::DrawMainFunctionNode()
 	{
 		//ed::BeginNode(1);
@@ -288,8 +295,13 @@ namespace Pixel {
 
 	void GraphNodeEditor::DrawLeftPreViewScenePanel(float panelWidth)
 	{
-		ImGui::BeginChild("PreviewScenePanel", ImVec2(panelWidth, 0.0f));
+		ImGui::BeginChild("AttributeAndPreviewScenePanel", ImVec2(panelWidth, 0.0f));		
+		ImGui::BeginChild("PreviewScenePanel", ImVec2(256, 256));
 		ImGui::Image((ImTextureID)m_PreviewSceneTextureHandle->GetGpuHandle()->GetGpuPtr(), ImVec2(256, 256));
+		auto itemHovered = ImGui::IsItemHovered();
+		auto itemFocused = ImGui::IsItemFocused();
+		m_IsPreviewEventBlocked = itemHovered || itemFocused;
+		ImGui::EndChild();
 
 		std::vector<ed::NodeId> selectedNodes;
 		selectedNodes.resize(ed::GetSelectedObjectCount());

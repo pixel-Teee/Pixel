@@ -39,6 +39,12 @@ namespace Pixel
 
 		//UI Panels
 		void UI_Toobar();
+
+		void OpenGraphEditor();
+
+		void CreateGraphEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial);
+		
+		void SetGraphEditorAlive(bool alive);
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -117,6 +123,9 @@ namespace Pixel
 		Ref<Framebuffer> m_SimpleSceneLightFrameBuffer;
 		Ref<Framebuffer> m_SimpleSceneFinalColorFrameBuffer;
 		//------simple scene------
+
+		Ref<GraphNodeEditor> m_CurrentGraphNodeEditor;
+		bool m_IsCurrentGraphNodeEditorAlive;
 	};
 }
 

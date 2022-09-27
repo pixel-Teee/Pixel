@@ -109,6 +109,8 @@ namespace Pixel
 		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
 
 		m_SimpleSceneCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
+
+		m_IsCurrentGraphNodeEditorAlive = false;
 #if 0	
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
@@ -160,7 +162,14 @@ namespace Pixel
 #endif
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
-		m_ContentBrowserPanel.SetGraphNodeEditorPreviewSceneFrameBuffer(m_SimpleSceneFinalColorFrameBuffer);
+		//m_ContentBrowserPanel.SetGraphNodeEditorPreviewSceneFrameBuffer(m_SimpleSceneFinalColorFrameBuffer);
+
+		//auto func = std::bind(&EditorLayer::CreateGraphEditor, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
+		//register call back
+		m_ContentBrowserPanel.RegisterOpenGraphEditorCallBack(std::bind(&EditorLayer::CreateGraphEditor, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+		m_ContentBrowserPanel.RegisterIsGraphEditorAliveCallBack(std::bind(&EditorLayer::SetGraphEditorAlive, this, std::placeholders::_1));
 
 		//Set Sky Box
 		//ownership is belgon to Renderer3D
@@ -485,6 +494,13 @@ namespace Pixel
 		/*---------Play Button And Pause Button----------*/
 		ImGui::End();
 		/*----------Dock Space----------*/
+
+		/*------Graph Node Editor------*/
+		if (m_CurrentGraphNodeEditor != nullptr)
+		{
+			m_CurrentGraphNodeEditor->OnImGuiRender(m_IsCurrentGraphNodeEditorAlive);
+		}
+		/*------Graph Node Editor------*/
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -531,10 +547,16 @@ namespace Pixel
 			}
 		}
 
-		m_SimpleSceneCamera.OnUpdate(ts);
+		if(m_CurrentGraphNodeEditor != nullptr && m_CurrentGraphNodeEditor->IsPreviewSceneEventBlocked())
+		{
+			//TODO:move graph editor's update to editor layer
+			m_SimpleSceneCamera.OnUpdate(ts);
+		}
 
-		//call other panel's update
-		m_ContentBrowserPanel.OnUpdate(ts, m_SimpleSceneCamera, m_SimpleSceneGeometryFrameBuffer, m_SimpleSceneLightFrameBuffer, m_SimpleSceneFinalColorFrameBuffer);
+		if (m_CurrentGraphNodeEditor != nullptr)
+		{
+			m_CurrentGraphNodeEditor->OnUpdate(ts, m_SimpleSceneCamera, m_SimpleSceneGeometryFrameBuffer, m_SimpleSceneLightFrameBuffer, m_SimpleSceneFinalColorFrameBuffer);
+		}
 
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
@@ -791,6 +813,17 @@ namespace Pixel
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor(3);
 		ImGui::End();
+	}
+
+	void EditorLayer::CreateGraphEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material>pMaterial)
+	{
+		//open a graph node editor
+		m_CurrentGraphNodeEditor = CreateRef<GraphNodeEditor>(virtualPath, physicalPath, pMaterial, m_SimpleSceneFinalColorFrameBuffer);
+	}
+
+	void EditorLayer::SetGraphEditorAlive(bool alive)
+	{
+		m_IsCurrentGraphNodeEditorAlive = alive;
 	}
 
 }

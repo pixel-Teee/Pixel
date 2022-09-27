@@ -14,14 +14,15 @@ namespace Pixel {
 	public:
 		ContentBrowserPanel();
 
-		void OnUpdate(Timestep& ts, EditorCamera& editorCamera, Ref<Framebuffer> pGeoFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, Ref<Framebuffer> pFinalFrameBuffer);
-
 		void OnImGuiRender();
 
 		void CreateMaterialAsset(std::string filePath);
 
-		void SetGraphNodeEditorPreviewSceneFrameBuffer(Ref<Framebuffer> pFinalFrameBuffer);
+		//void SetGraphNodeEditorPreviewSceneFrameBuffer(Ref<Framebuffer> pFinalFrameBuffer);
 
+		void RegisterOpenGraphEditorCallBack(std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> func);
+
+		void RegisterIsGraphEditorAliveCallBack(std::function<void(bool)> func);
 	private:
 		void RenderMaterialAssetPanel();
 
@@ -52,5 +53,9 @@ namespace Pixel {
 		//------current open test material------
 
 		Ref<Framebuffer> m_pFramebuffer;
+
+		std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> m_OpenGraphEditor;
+
+		std::function<void(bool)> m_IsGraphEditorAlive;
 	};
 }
