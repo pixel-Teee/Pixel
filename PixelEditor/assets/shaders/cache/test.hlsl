@@ -120,38 +120,19 @@ Texture2D gAoMap : register(t4);
 //------material samplers------
 SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
-
-float3 DecodeNormalMap(float2 uv, float3 worldPos, float3 normal)
-{
-	float3 TangentNormal = gNormalMap.Sample(gsamPointWrap, uv).xyz * 2.0f - 1.0f;
-
-	float3 Q1 = ddx(worldPos);
-	float3 Q2 = ddy(worldPos);
-	float2 st1 = ddx(uv);
-	float2 st2 = ddy(uv);
-
-	float3 N = normalize(normal);
-	float3 T = normalize(Q1 * st2.y - Q2 * st1.y);
-	float3 B = -normalize(cross(N, T));
-	float3x3 TBN = float3x3(T, B, N);
-
-	//let the texture map's normal to world's normal
-	return normalize(mul(TangentNormal, TBN));
-}
+#include "../Common/Common.hlsl"
 PixelOut PS(VertexOut pin){
 float4  ConstFloatValue7;
-ConstFloatValue7 = float4(0.648485, 1.000000, 0.305019, 0.000000);
+ConstFloatValue7 = float4(0.166023, 1.000000, 0.932380, 0.000000);
 float4  ConstFloatValue15;
-ConstFloatValue15 = float4(0.999996, 1.000000, 0.999990, 0.000000);
+ConstFloatValue15 = float4(0.123552, 1.000000, 0.402422, 0.000000);
 float4  MulInputA23 = ConstFloatValue7;
 float4  MulInputB24 = ConstFloatValue15;
 float4  MulOutput24 = float4(0, 0, 0, 1);
 MulOutput24 = MulInputA23 * MulInputB24;
-float4  ConstFloatValue32;
-ConstFloatValue32 = float4(1.000000, 0.999990, 0.999990, 0.000000);
 float4  Normal = float4(0, 0, 0, 1);
 float4  Albedo = MulOutput24;
-float  Roughness = ConstFloatValue32.x;
+float  Roughness = 0;
 float  Metallic = 0;
 float  Ao = 0;
 PixelOut pixelOut = (PixelOut)(0.0f);

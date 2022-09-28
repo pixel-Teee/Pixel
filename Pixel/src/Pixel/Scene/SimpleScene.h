@@ -21,6 +21,8 @@ namespace Pixel {
 		void OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Ref<Material> pTestMaterial);
 
 		entt::registry& GetRegistry() { return m_Registry; }
+
+		StaticMeshComponent& GetPreviewModel();
 	private:
 		entt::registry m_Registry;
 

@@ -111,4 +111,9 @@ namespace Pixel {
 		Application::Get().GetRenderer()->RenderingFinalColorBuffer(pFinalColorContext, pLightFrameBuffer, pFinalFrameBuffer);
 		pFinalColorContext->Finish(true);
 	}
+
+	StaticMeshComponent& SimpleScene::GetPreviewModel()
+	{
+		return m_Registry.get<StaticMeshComponent>(m_EntityHandle);
+	}
 }

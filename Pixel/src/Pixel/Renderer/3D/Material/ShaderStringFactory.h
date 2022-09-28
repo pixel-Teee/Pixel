@@ -6,6 +6,7 @@ namespace Pixel {
 	class PutNode;
 	struct MaterialShaderPara;
 	class Material;
+	class StaticMesh;
 	class ShaderStringFactory
 	{
 	public:
@@ -46,6 +47,8 @@ namespace Pixel {
 
 		static std::string GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement);
 
-		static std::string CreateDeferredGeometryShaderString(Ref<Material> pMaterial);
+		static std::string CreateDeferredGeometryShaderString(Ref<Material> pMaterial, Ref<StaticMesh> pStaticMesh);
+
+		static void GetIncludeShader(std::string& Out);
 	};
 }

@@ -48,7 +48,7 @@ namespace Pixel {
 		//------current open test material------
 		Ref<Material> m_pMaterial;
 		std::string m_CurrentTestMaterialPath;
-		bool m_IsOpenTestMaterialEditor;
+		//bool m_IsOpenTestMaterialEditor;
 		Ref<GraphNodeEditor> m_GraphNodeEditor;
 		//------current open test material------
 

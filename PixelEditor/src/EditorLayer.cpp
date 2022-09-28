@@ -496,7 +496,7 @@ namespace Pixel
 		/*----------Dock Space----------*/
 
 		/*------Graph Node Editor------*/
-		if (m_CurrentGraphNodeEditor != nullptr)
+		if (m_CurrentGraphNodeEditor != nullptr && m_IsCurrentGraphNodeEditorAlive)
 		{
 			m_CurrentGraphNodeEditor->OnImGuiRender(m_IsCurrentGraphNodeEditorAlive);
 		}

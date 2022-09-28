@@ -47,7 +47,7 @@ namespace Pixel {
 		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		m_IsOpen = false;
-		m_IsOpenTestMaterialEditor = false;
+		//m_IsOpenTestMaterialEditor = false;
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -350,10 +350,10 @@ namespace Pixel {
 			RenderMaterialAssetPanel();
 		}
 
-		if (m_IsOpenTestMaterialEditor)
-		{
-			m_GraphNodeEditor->OnImGuiRender(m_IsOpenTestMaterialEditor);
-		}
+		//if (m_IsOpenTestMaterialEditor)
+		//{
+		//	m_GraphNodeEditor->OnImGuiRender(m_IsOpenTestMaterialEditor);
+		//}
 	}
 
 	void ContentBrowserPanel::RegisterOpenGraphEditorCallBack(std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> func)

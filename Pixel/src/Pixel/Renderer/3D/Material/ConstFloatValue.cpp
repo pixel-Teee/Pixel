@@ -163,7 +163,6 @@ namespace Pixel
 		else
 			return false;
 
-		//uniform vec4 xx;
 		OutString += m_pOutputs[0]->GetNodeName() + (";\n");
 		return true;
 	}

@@ -21,6 +21,8 @@
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 #include "Pixel/Scene/SceneSerializer.h"
 #include "Pixel/Scene/SimpleScene.h"
+#include "Pixel/Scene/Components/StaticMeshComponent.h"
+#include "Pixel/Renderer/3D/Model.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -74,7 +76,7 @@ namespace Pixel {
 		//if it is first open, then load the settings file
 		ed::Config config;
 
-		m_GraphNodeEditorConfigPath = virtualPath + ".json";
+		m_GraphNodeEditorConfigPath = "assets/materials/GraphNodeEditor/" + virtualPath + ".json";
 
 		m_MaterialPhysicalPath = physicalPath;
 
@@ -268,7 +270,7 @@ namespace Pixel {
 
 			m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
 			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
-			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial);
+			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
 			PIXEL_CORE_INFO(out);
 		}
 		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
