@@ -2802,6 +2802,23 @@ namespace Pixel {
 		return m_PsoArray.size();
 	}
 
+	Ref<RootSignature> DirectXRenderer::CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
+	{
+		//return Ref<RootSignature>();
+		Ref<RootSignature> pRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+
+		Ref<DirectXShader> pDirectXVertexShader = std::static_pointer_cast<DirectXShader>(pVertexShader);
+		Ref<DirectXShader> pDirectXPixelShader = std::static_pointer_cast<DirectXShader>(pPixelShader);
+
+		//TODO:need to fix?
+		Ref<SamplerDesc> defaultSample = SamplerDesc::Create();
+		pRootSignature->InitStaticSampler(0, defaultSample, ShaderVisibility::Pixel);
+		
+		//in terms of shader to create root signature
+		
+		return nullptr;
+	}
+
 	void DirectXRenderer::CreateDefaultForwardRendererPso()
 	{
 		//------Create Default Forward Renderer Pso------
@@ -3232,6 +3249,10 @@ namespace Pixel {
 
 		m_GeometryVertexShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "VS", "vs_5_0");
 		m_GeometryPixelShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "PS", "ps_5_0");
+
+		//------in terms of shader's information to create root signature------
+		//CreateRootSignature()
+		//------in terms of shader's information to create root signature------
 
 		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_GeometryVertexShader)->GetShaderBinary();
 		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(m_GeometryPixelShader)->GetShaderBinary();

@@ -68,5 +68,7 @@ namespace Pixel {
 
 		ShaderType m_ShaderType;
 		//uint32_t m_AlignedCbvSize;
+
+		friend class DirectXRenderer;
 	};
 }

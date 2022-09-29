@@ -115,6 +115,9 @@ namespace Pixel {
 		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex) override;
 
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) override;
+
+		//TODO:need to modify this to virtual function
+		Ref<RootSignature> CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader);
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
