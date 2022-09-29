@@ -7,10 +7,20 @@
 #include "Platform/DirectX/d3dx12.h"
 
 namespace Pixel {
+	class DirectXCbvShaderParameter;
+	class DirectXSrvShaderParameter;
+	class DirectXRootSignature;
+
+	enum class ShaderType
+	{
+		VertexShader,
+		PixelShader
+	};
+
 	class DirectXShader : public Shader
 	{
 	public:
-		DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target);
+		DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated = false);
 		virtual ~DirectXShader();
 		//------garbage------
 		virtual void Bind() const override;
@@ -35,10 +45,28 @@ namespace Pixel {
 		//------garbage------
 
 		std::pair<void*, uint64_t> GetShaderBinary();
+
+		ShaderType GetShaderType();
 	private:
+
 		Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::wstring& filename,
 		const D3D_SHADER_MACRO* defines, const std::string& entryPoint, const std::string& target);
 
+		//TODO:in the future, will be to desgin a cache scheme
 		Microsoft::WRL::ComPtr<ID3DBlob> m_pBlobShader;
+
+		//will add sampler state?
+		std::vector<Ref<DirectXCbvShaderParameter>> m_CbvShaderParameter;
+		std::vector<Ref<DirectXSrvShaderParameter>> m_SrvShaderParameter;
+		uint32_t m_MaxBindPointIndex;//max bind point
+
+		std::vector<uint32_t> m_AlignedCbvSize;
+
+		bool m_IsGenerated;
+
+		Ref<DirectXRootSignature> m_pRootSignature;
+
+		ShaderType m_ShaderType;
+		//uint32_t m_AlignedCbvSize;
 	};
 }
