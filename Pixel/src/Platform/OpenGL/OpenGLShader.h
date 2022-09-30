@@ -31,6 +31,12 @@ namespace Pixel {
 
 		virtual void SubmitData(Ref<Context> pContext, const std::string& cbvName) override;
 
+		virtual void ResetTextureDescriptor() override;
+
+		virtual void SetTextureDescriptor(const std::string& name, Ref<DescriptorHandle> pDescriptorHandle) override;
+
+		virtual void SubmitTextureDescriptor(Ref<Context> pContext, Ref<DescriptorHandle> pDescriptorHeapHandle) override;
+
 		virtual const std::string& GetName() const override { return m_Name; }
 
 		void UploadUniformInt(const std::string& name, int value);

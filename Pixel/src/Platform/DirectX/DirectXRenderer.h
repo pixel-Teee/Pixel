@@ -113,6 +113,8 @@ namespace Pixel {
 		
 		virtual Ref<DescriptorHandle> GetDescriptorHeapFirstHandle() override;
 
+		virtual Ref<DescriptorHandle> GetNullDescriptorHandle() override;
+
 		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex) override;
 
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) override;
@@ -362,6 +364,7 @@ namespace Pixel {
 		//------total bind texture descriptor heap------
 		Ref<DescriptorHeap> m_TotalBindTextureDescriptorHeap;
 		Ref<DescriptorHandle> m_TotalBindTextureDescriptorHeapFirstHandle;
+		Ref<DescriptorHandle> m_NullDescriptor;
 		uint32_t m_Offset;//offset item
 		//------total bind texture descriptor heap------
 

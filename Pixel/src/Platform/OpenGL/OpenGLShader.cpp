@@ -168,6 +168,18 @@ namespace Pixel {
 		}
 	}
 
+	void OpenGLShader::ResetTextureDescriptor()
+	{
+	}
+
+	void OpenGLShader::SetTextureDescriptor(const std::string& name, Ref<DescriptorHandle> pDescriptorHandle)
+	{
+	}
+
+	void OpenGLShader::SubmitTextureDescriptor(Ref<Context> pContext, Ref<DescriptorHandle> pDescriptorHeapHandle)
+	{
+	}
+
 	void OpenGLShader::SubmitData(Ref<Context> pContext)
 	{
 	}

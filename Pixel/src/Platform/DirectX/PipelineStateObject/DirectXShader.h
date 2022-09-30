@@ -10,6 +10,8 @@ namespace Pixel {
 	class DirectXCbvShaderParameter;
 	class DirectXSrvShaderParameter;
 	class DirectXRootSignature;
+	class DescriptorHandle;
+	class DescriptorHeap;
 
 	class DirectXShader : public Shader
 	{
@@ -44,6 +46,12 @@ namespace Pixel {
 
 		virtual void SubmitData(Ref<Context> pContext, const std::string& cbvName) override;
 
+		virtual void ResetTextureDescriptor() override;
+
+		virtual void SetTextureDescriptor(const std::string& name, Ref<DescriptorHandle> pDescriptorHandle) override;
+
+		virtual void SubmitTextureDescriptor(Ref<Context> pContext, Ref<DescriptorHandle> pDescriptorHeapHandle) override;
+
 		std::pair<void*, uint64_t> GetShaderBinary();
 
 		ShaderType GetShaderType();
@@ -70,6 +78,8 @@ namespace Pixel {
 		//uint32_t m_AlignedCbvSize;
 
 		char** m_DataCache;
+
+		std::vector<Ref<DescriptorHandle>> m_SrvDescriptorHandleCache;//reference texture descriptor handle
 
 		friend class DirectXRenderer;
 	};

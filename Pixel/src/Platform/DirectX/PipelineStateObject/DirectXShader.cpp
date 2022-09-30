@@ -12,6 +12,10 @@
 #include "DirectXRootSignature.h"
 #include "Pixel/Renderer/Sampler/Sampler.h"
 #include "Platform/DirectX/Context/GraphicsContext.h"
+#include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/BaseRenderer.h"
 
 namespace Pixel {
 
@@ -115,6 +119,14 @@ namespace Pixel {
 				m_DataCache[i] = new char[m_CbvShaderParameter[i]->m_Size];
 			}
 			//------create cache------
+
+			//------create descriptor texture------
+			m_SrvDescriptorHandleCache.resize(m_SrvShaderParameter.size());
+			for (size_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
+			{
+				m_SrvDescriptorHandleCache[i] = nullptr;//TODO:to fix, use null descriptor to populate
+			}
+			//------create descriptor texture------
 		}
 
 	}
@@ -275,6 +287,54 @@ namespace Pixel {
 		PX_CORE_ASSERT(rootIndex != -1, "const buffer view name could't find!");
 
 		pGraphicsContext->SetDynamicConstantBufferView(m_CbvShaderParameter[rootIndex]->m_RootIndex, m_CbvShaderParameter[rootIndex]->m_Size, m_DataCache[rootIndex]);
+	}
+
+	void DirectXShader::ResetTextureDescriptor()
+	{
+		//a null descriptor is a descriptor, pointer to null resource
+		for (size_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
+		{
+			m_SrvDescriptorHandleCache[i] = Application::Get().GetRenderer()->GetNullDescriptorHandle();
+		}
+	}
+
+	void DirectXShader::SetTextureDescriptor(const std::string& name, Ref<DescriptorHandle> pDescriptorHandle)
+	{
+		//Ref<DirectXSrvShaderParameter> pSrvShaderParameter;
+
+		uint32_t index = -1;
+		for (size_t i = 0; i < m_SrvShaderParameter.size(); ++i)
+		{
+			if (m_SrvShaderParameter[i]->m_Name == name)
+			{
+				index = i;
+				break;
+			}
+		}
+
+		PX_CORE_ASSERT(index != -1, "texture srv name could't find!");
+
+		m_SrvDescriptorHandleCache[index] = pDescriptorHandle;
+	}
+
+	void DirectXShader::SubmitTextureDescriptor(Ref<Context> pContext, Ref<DescriptorHandle> pDescriptorHeapHandle)
+	{
+		//copy descriptor handle cache to descriptor heap from descriptor heap offset
+		std::vector<DescriptorHandle> descriptorHandles;
+		for (uint32_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
+		{
+			DescriptorHandle secondHandle = (*pDescriptorHeapHandle) + i;
+			descriptorHandles.push_back(secondHandle);
+		}
+
+		for (uint32_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
+		{
+			Device::Get()->CopyDescriptorsSimple(1, descriptorHandles[i].GetCpuHandle(), m_SrvDescriptorHandleCache[i]->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		}
+
+		PX_CORE_ASSERT(m_SrvShaderParameter.size() > 0, "srv shader parameter is nullptr!");
+
+		pContext->SetDescriptorTable(m_SrvShaderParameter[0]->m_RootIndex, pDescriptorHeapHandle->GetGpuHandle());
 	}
 
 	std::pair<void*, uint64_t> DirectXShader::GetShaderBinary()

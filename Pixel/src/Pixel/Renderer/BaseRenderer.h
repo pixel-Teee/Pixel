@@ -88,6 +88,8 @@ namespace Pixel {
 
 		virtual Ref<DescriptorHandle> GetDescriptorHeapFirstHandle() = 0;
 
+		virtual Ref<DescriptorHandle> GetNullDescriptorHandle() = 0;
+
 		static Ref<BaseRenderer> Create();
 	};
 }

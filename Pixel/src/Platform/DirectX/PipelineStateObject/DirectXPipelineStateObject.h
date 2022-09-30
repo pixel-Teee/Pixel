@@ -21,7 +21,7 @@ namespace Pixel {
 		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
 		virtual void SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType) = 0;
 
-		Ref<RootSignature> GetRootSignature() const;
+		virtual Ref<RootSignature> GetRootSignature() const override;
 
 		//get pipeline state
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPipelineStateObject() const { return m_pPSO; }

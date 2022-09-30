@@ -10,6 +10,7 @@ namespace Pixel {
 	};
 
 	class Context;
+	class DescriptorHandle;
 
 	class Shader
 	{
@@ -34,6 +35,12 @@ namespace Pixel {
 		virtual void SubmitData(Ref<Context> pContext) = 0;
 
 		virtual void SubmitData(Ref<Context> pContext, const std::string& cbvName) = 0;
+
+		virtual void ResetTextureDescriptor() = 0;
+
+		virtual void SetTextureDescriptor(const std::string& name, Ref<DescriptorHandle> pDescriptorHandle) = 0;
+
+		virtual void SubmitTextureDescriptor(Ref<Context> pContext, Ref<DescriptorHandle> pDescriptorHeapHandle) = 0;
 
 		static Ref<Shader> Create(const std::string& filepath);
 		//static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);

@@ -47,6 +47,7 @@
 //------descriptor related------
 #include "Pixel/Renderer/Descriptor/DescriptorHeap.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
+#include "Platform/DirectX/DescriptorHandle/DirectXDescriptorCpuHandle.h"
 //------descriptor related------
 
 //------shader parameter------
@@ -344,7 +345,13 @@ namespace Pixel {
 
 		//------create total texture descriptor heap------
 		m_TotalBindTextureDescriptorHeap = DescriptorHeap::Create(L"TotalBindTextureDescriptorHeap", DescriptorHeapType::CBV_UAV_SRV, 1024);
-		m_TotalBindTextureDescriptorHeapFirstHandle = m_TotalBindTextureDescriptorHeap->Alloc(1024);
+		m_NullDescriptor = m_TotalBindTextureDescriptorHeap->Alloc(1);
+
+		//D3D12_SHADER_RESOURCE_VIEW_DESC resourceViewDesc = {};
+
+		//create null descriptor
+		//std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateShaderResourceView(nullptr, &resourceViewDesc, std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_NullDescriptor->GetCpuHandle())->GetCpuHandle());
+		m_TotalBindTextureDescriptorHeapFirstHandle = m_TotalBindTextureDescriptorHeap->Alloc(1023);
 		//------create total texture descriptor heap------
 	}
 
@@ -687,7 +694,7 @@ namespace Pixel {
 		TransformComponent* mainDirectLightComponent = nullptr;
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
-			if (lights[i]->GenerateShadowMap)
+			if (lights[i]->GenerateShadowMap && lights[i]->lightType == LightType::DirectLight)
 			{
 				mainDirectLight = lights[i];
 				mainDirectLightComponent = lightTrans[i];
@@ -1091,7 +1098,7 @@ namespace Pixel {
 		TransformComponent* mainDirectLightComponent = nullptr;
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
-			if (lights[i]->GenerateShadowMap)
+			if (lights[i]->GenerateShadowMap && lights[i]->lightType == LightType::DirectLight)
 			{
 				mainDirectLight = lights[i];
 				mainDirectLightComponent = lightTrans[i];
@@ -1396,7 +1403,7 @@ namespace Pixel {
 		TransformComponent* mainDirectLightComponent = nullptr;
 		for (uint32_t i = 0; i < lights.size(); ++i)
 		{
-			if (lights[i]->GenerateShadowMap)
+			if (lights[i]->GenerateShadowMap && lights[i]->lightType == LightType::DirectLight)
 			{
 				mainDirectLight = lights[i];
 				mainDirectLightComponent = lightTrans[i];
@@ -2127,7 +2134,7 @@ namespace Pixel {
 		Ref<BlenderState> pBlendState = BlenderState::Create();
 		Ref<RasterState> pRasterState = RasterState::Create();
 
-		//samplerDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		samplerDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		samplerDesc->SetTextureAddressMode(AddressMode::BORDER);
 
 		std::vector<Ref<SamplerDesc>> samplerDescs;
@@ -2709,7 +2716,8 @@ namespace Pixel {
 
 	void DirectXRenderer::ResetDescriptorHeapOffset()
 	{
-		m_Offset = 0;//reset offset
+		//0 is null descriptor, pointer to null resource
+		m_Offset = 1;//reset offset
 	}
 
 	uint32_t DirectXRenderer::GetDescriptorHeapOffset()
@@ -2725,6 +2733,11 @@ namespace Pixel {
 	Ref<DescriptorHandle> DirectXRenderer::GetDescriptorHeapFirstHandle()
 	{
 		return m_TotalBindTextureDescriptorHeapFirstHandle;
+	}
+
+	Ref<DescriptorHandle> DirectXRenderer::GetNullDescriptorHandle()
+	{
+		return m_NullDescriptor;
 	}
 
 	uint32_t DirectXRenderer::CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex)
