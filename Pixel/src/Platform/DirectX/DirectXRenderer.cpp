@@ -49,6 +49,11 @@
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 //------descriptor related------
 
+//------shader parameter------
+#include "Platform/DirectX/PipelineStateObject/DirectXCbvShaderParameter.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXSrvShaderParameter.h"
+//------shader parameter------
+
 #include "stb_image.h"
 
 #include "Pixel/Scene/Scene.h"
@@ -2805,18 +2810,59 @@ namespace Pixel {
 	Ref<RootSignature> DirectXRenderer::CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
 	{
 		//return Ref<RootSignature>();
-		Ref<RootSignature> pRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
-
 		Ref<DirectXShader> pDirectXVertexShader = std::static_pointer_cast<DirectXShader>(pVertexShader);
 		Ref<DirectXShader> pDirectXPixelShader = std::static_pointer_cast<DirectXShader>(pPixelShader);
+
+		uint32_t totalRootBindings = pDirectXVertexShader->m_CbvShaderParameter.size() + pDirectXVertexShader->m_SrvShaderParameter.size() + pDirectXPixelShader->m_CbvShaderParameter.size() + pDirectXPixelShader->m_SrvShaderParameter.size();
+
+		Ref<RootSignature> pRootSignature = RootSignature::Create(totalRootBindings, 1);
 
 		//TODO:need to fix?
 		Ref<SamplerDesc> defaultSample = SamplerDesc::Create();
 		pRootSignature->InitStaticSampler(0, defaultSample, ShaderVisibility::Pixel);
 		
 		//in terms of shader to create root signature
-		
-		return nullptr;
+		PX_CORE_ASSERT(pDirectXVertexShader->m_ShaderType == ShaderType::VertexShader, "shader type is error!");
+		PX_CORE_ASSERT(pDirectXPixelShader->m_ShaderType == ShaderType::PixelShader, "shader type is error!");
+
+		uint32_t totalOffset = 0;
+		for (size_t i = 0; i < pDirectXVertexShader->m_CbvShaderParameter.size(); ++i)
+		{
+			//(*pRootSignature)[i]
+			(*pRootSignature)[totalOffset + i].InitAsConstantBuffer(totalOffset + i, ShaderVisibility::Vertex);
+			pDirectXVertexShader->m_CbvShaderParameter[i]->m_RootIndex = totalOffset + i;
+		}
+
+		totalOffset += pDirectXVertexShader->m_CbvShaderParameter.size();
+
+		//for (size_t i = 0; i < pDirectXPixelShader->m_SrvShaderParameter.size(); ++i)
+		//{
+		//	//(*pRootSignature)[totalOffset + i].InitAsDescriptorRange()
+		//}
+		//TODO:need to fix, is there have SkinMatrices, then use buffer srv
+		(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXVertexShader->m_SrvShaderParameter.size(), ShaderVisibility::Vertex);
+		for (size_t i = 0; i < pDirectXVertexShader->m_SrvShaderParameter.size(); ++i)
+		{
+			pDirectXVertexShader->m_SrvShaderParameter[i]->m_RootIndex = totalOffset;
+			pDirectXVertexShader->m_SrvShaderParameter[i]->m_Offset = i;
+		}
+
+		++totalOffset;
+
+		for (size_t i = 0; i < pDirectXPixelShader->m_CbvShaderParameter.size(); ++i)
+		{
+			(*pRootSignature)[totalOffset + i].InitAsConstantBuffer(totalOffset + i, ShaderVisibility::Pixel);
+			pDirectXPixelShader->m_CbvShaderParameter[i]->m_RootIndex = totalOffset + i;
+		}
+
+		(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXVertexShader->m_SrvShaderParameter.size(), ShaderVisibility::Vertex);
+		for (size_t i = 0; i < pDirectXPixelShader->m_SrvShaderParameter.size(); ++i)
+		{
+			pDirectXPixelShader->m_SrvShaderParameter[i]->m_RootIndex = totalOffset;
+			pDirectXPixelShader->m_SrvShaderParameter[i]->m_Offset = i;
+		}
+	
+		return pRootSignature;
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()
