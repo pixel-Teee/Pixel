@@ -16,6 +16,8 @@
 
 namespace Pixel
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f)
 	{
@@ -24,23 +26,39 @@ namespace Pixel
 
 	void EditorLayer::OnAttach()
 	{
-		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_CupTexture = Texture2D::Create("assets/textures/test.jpg");
-		m_SpriteSheets = Texture2D::Create("assets/game/textures/tilemap_packed.png");
-
-		m_TextureStairs = SubTexture2D::CreateFromCoords(m_SpriteSheets, { 14, 0 }, { 16, 16 }, { 1, 3 });
+		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
+		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
+		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
 
 		m_CameraController.SetZoomLevel(5.5f);
+		/*------Create Geometry Framebuffer------*/
 
+		/*------------------------------------
+		R			G			B			A 
+		position.r	position.g	position.b	x
+		normal.r	normal.g	normal.b	x
+		albedo.r	albedo.g	albedo.b	x
+		roughness	metallic	emissive	x
+		--------------------------------------*/
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA8,
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 1280;
+		fbSpec.Height = 720;
+		m_GeoFramebuffer = Framebuffer::Create(fbSpec);
+		/*------Create Geometry Framebuffer------*/
+
+		/*------Create Framebuffer------*/	
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+		/*------Create Framebuffer------*/
 
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 
-		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.1f, 1000.0f);
+		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
 #if 0	
 		//entity
 		m_square = m_ActiveScene->CreateEntity("Square");
@@ -92,9 +110,15 @@ namespace Pixel
 #endif
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
-		SceneSerializer serializer(m_ActiveScene);
+		//Set Sky Box
+		//ownership is belgon to Renderer3D
+		m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
+		m_EditorScene->SetSkyBox(Renderer3D::GetSkyBox());
+		m_environmentPanel.SetSkyBox(Renderer3D::GetSkyBox());
+
+		//SceneSerializer serializer(m_ActiveScene);
 		//serializer.Serialize("assets/scenes/Example.pixel");
-		serializer.Deserialize("assets/scenes/Example.pixel");
+		//serializer.Deserialize("assets/scenes/Example.pixel");
 	}
 
 	void EditorLayer::OnDetach()
@@ -200,6 +224,10 @@ namespace Pixel
 			ImGui::EndMenuBar();
 		}
 
+		//------Main Window Pos------//
+		ImVec2 mainWindowPos = ImGui::GetWindowPos();
+		//------Main Window Pos------//
+
 		/*----------Render Panel----------*/
 		m_SceneHierarchyPanel.OnImGuiRender();
 		/*----------Render Panel----------*/
@@ -209,7 +237,7 @@ namespace Pixel
 		/*----------Render Content Browser----------*/
 
 		/*----------Render Stats----------*/
-		ImGui::Begin("Render Stats");
+		/*ImGui::Begin("Render Stats");
 
 		std::string name = "None";
 		if(m_HoveredEntity)
@@ -222,7 +250,7 @@ namespace Pixel
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::End();
+		ImGui::End();*/
 		/*----------Render Stats----------*/
 
 		/*----------View Port----------*/
@@ -234,6 +262,17 @@ namespace Pixel
 		m_ViewportBounds[0] = {viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y};
 		m_ViewportBounds[1] = {viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y};
 
+		//PIXEL_CORE_INFO("{0}, {1}", viewportMinRegion.x, viewportMinRegion.y);
+
+		//need to fix this:don't dependent this
+		glm::vec2 ViewPortMidPoint = (m_ViewportBounds[0] + m_ViewportBounds[1]);
+		ViewPortMidPoint.x /= 2;
+		ViewPortMidPoint.y /= 2;
+
+		Application::Get().GetWindow().SetViewPortCenterPoint(ViewPortMidPoint.x, ViewPortMidPoint.y);
+
+		//PIXEL_CORE_INFO("{0}, {1}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
@@ -244,6 +283,19 @@ namespace Pixel
 		ImGui::Image(reinterpret_cast<void*>(textureId), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2(0, 1), ImVec2(1, 0));	
 
 		//PIXEL_CORE_INFO("{0}, {1}", minBound.x, minBound.y);
+
+		/*----------Drag Dop---------*/
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				OpenScene(std::filesystem::path(g_AssetPath) / path);
+			}
+			
+			ImGui::EndDragDropTarget();
+		}
+		/*----------Drag Dop---------*/
 
 		/*----------Gizmos----------*/
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -301,7 +353,57 @@ namespace Pixel
 		ImGui::End();
 		ImGui::PopStyleVar();
 		/*----------Gizmos----------*/
+
+		if (ImGui::IsKeyPressed(KeyCodes::PX_KEY_ESCAPE))
+		{
+			Application::Get().GetWindow().SetCursorNormal();
+		}
+
 		/*----------View port----------*/
+
+		/*---------Environment Panel---------*/
+		bool IsDirty = Renderer3D::GetSkyBox()->IsDirty();
+		if (IsDirty)
+		{	
+			Renderer3D::GetSkyBox()->SetDirty(false);
+			std::vector<std::string>& paths = Renderer3D::GetSkyBox()->GetPaths();
+
+			for (uint32_t i = 0; i < 6; ++i)
+			{
+				if (paths[i] != m_environmentPanel.GetPath((FaceTarget)i))
+				{
+					m_environmentPanel.SetVisualizeFacesTexture((FaceTarget)i, paths[i]);
+				}
+			}
+		}
+		
+		m_environmentPanel.OnImGuiRender();
+		/*---------Environment Panel---------*/
+
+		/*---------Deferred Shading Viewport---------*/
+		
+		ImGui::Begin("Deferred Shading Viewport");
+
+		ImVec2 DeferredViewPortSize = ImVec2(m_ViewportSize.x / 4.0f, m_ViewportSize.y / 4.0f);
+
+		ImGui::Text("position");
+		uint32_t deferredTextureID = m_GeoFramebuffer->GetColorAttachmentRendererID(0);
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("normal");
+		deferredTextureID = m_GeoFramebuffer->GetColorAttachmentRendererID(1);
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("albedo");
+		deferredTextureID = m_GeoFramebuffer->GetColorAttachmentRendererID(2);
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("depth");
+		deferredTextureID = m_GeoFramebuffer->GetDepthAttachmentRendererID();
+		ImGui::Image(reinterpret_cast<void*>(deferredTextureID), ImVec2{ DeferredViewPortSize.x, DeferredViewPortSize.y }, ImVec2(0, 1), ImVec2(1, 0));	
+		ImGui::End();
+		/*---------Deferred Shading Viewport---------*/
+
+		/*---------Play Button And Pause Button---------*/
+		UI_Toobar();
+		/*---------Play Button And Pause Button----------*/
 		ImGui::End();
 		/*----------Dock Space----------*/
 	}
@@ -316,29 +418,34 @@ namespace Pixel
 		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_GeoFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-		if(m_ViewportFocused)
-		{
-			m_CameraController.OnUpdate(ts);
-			m_EditorCamera.OnUpdate(ts);
-		}
 	
 		//Render
-		Renderer2D::ResetStats();
-		//PX_PROFILE_SCOPE("Renderer Prep");
-		m_Framebuffer->Bind();
-		
-		RenderCommand::SetClearColor({ 0.1f, 0.2f, 0.3f, 1.0f });
-		RenderCommand::Clear();
+		//Renderer2D::ResetStats();
 
-		//Clear our entity ID attachment to -1
-		m_Framebuffer->ClearAttachment(1, -1);
-		
-		//Update scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+		switch (m_SceneState)
+		{
+			case EditorLayer::SceneState::Edit:
+			{
+				if (m_ViewportFocused)
+				{
+					m_CameraController.OnUpdate(ts);
+					m_EditorCamera.OnUpdate(ts);
+				}
+				//Update scene
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, m_GeoFramebuffer, m_Framebuffer);
+				break;
+			}
+			case EditorLayer::SceneState::Play:
+			{
+				m_ActiveScene->OnUpdateRuntime(ts, m_GeoFramebuffer, m_Framebuffer);
+				break;
+			}
+		}
 
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
@@ -351,13 +458,14 @@ namespace Pixel
 		int mouseY = (int)my;
 		//PIXEL_CORE_INFO("Mouse Pox = {0}, {1}", mouseX, mouseY);
 
+		m_GeoFramebuffer->Bind();
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			int pixelData = m_GeoFramebuffer->ReadPixel(4, mouseX, mouseY);
 			//PIXEL_CORE_INFO("PixelData = {0}", pixelData);
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
-		m_Framebuffer->UnBind();
+		m_GeoFramebuffer->UnBind();
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -394,8 +502,21 @@ namespace Pixel
 			}
 			case PX_KEY_S:
 			{
-				if (control && shift)
-					SaveSceneAs();
+				if (control)
+				{
+					if(shift)
+						SaveSceneAs();
+					else
+						SaveScene();
+				}
+					
+				break;
+			}
+
+			case PX_KEY_D:
+			{
+				if(control)
+					OnDuplicateEntity();
 				break;
 			}
 
@@ -427,35 +548,126 @@ namespace Pixel
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene->SetSkyBox(Renderer3D::GetDefaultSkyBox());
+		m_ActiveScene = m_EditorScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_CurrentScenePath = std::filesystem::path();
 	}
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filepath = FileDialogs::OpenFile("Pixel Scene (*.pixel)\0*.pixel\0");
-		if (!filepath.empty())
-		{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		std::wstring filepath = FileDialogs::OpenFile(L"Pixel Scene (*.pixel)\0*.pixel\0");
+		OpenScene(filepath);
+	}
 
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(filepath);
+	void EditorLayer::OpenScene(const std::filesystem::path filepath)
+	{
+		if(m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
+		Ref<Scene> newScene = CreateRef<Scene>();
+		glm::vec2 viewPortSize = m_EditorScene->GetViewPortSize();
+		newScene->SetViewPortSize(viewPortSize.x, viewPortSize.y);
+		newScene->SetSkyBox(Renderer3D::GetSkyBox());
+		SceneSerializer serializer(newScene);
+
+		if (serializer.Deserialize(filepath.string()))
+		{
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+			m_ActiveScene = m_EditorScene;
+			m_CurrentScenePath = filepath;
 		}
 	}
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filepath = FileDialogs::SaveFile("Pixel Scene (*.pixel)\0*.pixel\0");
+		std::wstring filepath = FileDialogs::SaveFile(L"Pixel Scene (*.pixel)\0*.pixel\0");
 
-		SceneSerializer serializer(m_ActiveScene);
 		if (!filepath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath);
+			SerializerScene(m_ActiveScene, filepath);
+
+			m_CurrentScenePath = filepath;
 		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!m_CurrentScenePath.empty())
+			SerializerScene(m_ActiveScene, m_CurrentScenePath);
+		else
+			SaveSceneAs();
+	}
+
+	void EditorLayer::SerializerScene(Ref<Scene> scene, const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path.string());
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		//ImGui::CaptureMouseFromApp(true);
+		m_SceneState = SceneState::Play;
+
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		m_ActiveScene->OnRuntimeStart();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
+		m_ActiveScene->OnRuntimeStop();
+		m_ActiveScene = m_EditorScene;
+		//m_Editor->model entity's is dirty
+		m_ActiveScene->MarkMeshEntityIDDirty();
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if(m_SceneState != SceneState::Edit)
+			return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if(selectedEntity)
+			m_EditorScene->DuplicateEntity(selectedEntity);
+	}
+
+	void EditorLayer::UI_Toobar()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		auto& colors = ImGui::GetStyle().Colors;
+		const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0));
+
+		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		float size = ImGui::GetWindowHeight() - 4.0f;
+		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+		ImGui::SameLine(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		{
+		if(m_SceneState == SceneState::Edit)
+			OnScenePlay();
+		else if(m_SceneState == SceneState::Play)
+			OnSceneStop();
+		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(3);
+		ImGui::End();
 	}
 
 }

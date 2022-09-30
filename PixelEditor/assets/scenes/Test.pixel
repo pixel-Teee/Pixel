@@ -1,0 +1,81 @@
+Scene: Untitled
+Entities:
+  - Entity: 1349258619458824453
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    ScriptComponent:
+      Path: assets/scripts/Test3.lua
+  - Entity: 17119414094491560520
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [-0.549268425, 0.0133677684, 3.32182431]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+    ScriptComponent:
+      Path: assets/scripts/Test.lua
+  - Entity: 12733836004122912316
+    TagComponent:
+      Tag: Light2
+    TransformComponent:
+      Translation: [0, 1.92746401, -0.121566594]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 4690808275507574258
+    TagComponent:
+      Tag: Light
+    TransformComponent:
+      Translation: [-0.36022827, 0.075532496, 2.7821126]
+      Rotation: [0, 0, 0]
+      Scale: [33.1465149, 33.1465149, 33.1465149]
+    LightComponent:
+      Color: [0, 0.764478743, 0.489974767]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+    ScriptComponent:
+      Path: assets/scripts/Test2.lua
+  - Entity: 36861197019364546
+    TagComponent:
+      Tag: Ball
+    TransformComponent:
+      Translation: [0.232058346, -0.0303932428, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\BasketBall.gltf
+    MaterialComponent:
+      albedoPath: assets\textures\initialShadingGroup_baseColor.jpeg
+      normalMapPath: assets\textures\initialShadingGroup_normal.png
+      roughnessPath: assets\textures\initialShadingGroup_metallicRoughness.png
+      emissivePath: ""
+      metallicPath: ""
+Environment:
+  - EnvironmentType: SkyBox
+    SkyBox:
+      Right: assets\textures\skybox\posx.jpg
+      Left: assets\textures\skybox\negx.jpg
+      Top: assets\textures\skybox\posy.jpg
+      Bottom: assets\textures\skybox\negy.jpg
+      Front: assets\textures\skybox\posz.jpg
+      Back: assets\textures\skybox\negz.jpg

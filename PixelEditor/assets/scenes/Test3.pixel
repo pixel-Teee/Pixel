@@ -1,0 +1,72 @@
+Scene: Untitled
+Entities:
+  - Entity: 13298316678602476842
+    TagComponent:
+      Tag: Light
+    TransformComponent:
+      Translation: [-0.36022827, 0.075532496, 2.7821126]
+      Rotation: [0, 0, 0]
+      Scale: [33.1465149, 33.1465149, 33.1465149]
+    LightComponent:
+      Color: [0.750825107, 0.764478743, 0]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+    ScriptComponent:
+      Path: assets/scripts/Test2.lua
+  - Entity: 14391529850869748221
+    TagComponent:
+      Tag: Box
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      Path: assets\models\Box.fbx
+    MaterialComponent:
+      albedoPath: ""
+      normalMapPath: ""
+      roughnessPath: ""
+      emissivePath: ""
+      metallicPath: ""
+  - Entity: 7125659785422220952
+    TagComponent:
+      Tag: Light2
+    TransformComponent:
+      Translation: [0, 1.92746401, -0.121566594]
+      Rotation: [0, 0, 0]
+      Scale: [38.2261543, 38.2261543, 38.2261543]
+    LightComponent:
+      Color: [1, 1, 1]
+      Constant: 1
+      Linear: 0.0900000036
+      Quadratic: 0.0320000015
+  - Entity: 7841747525827694830
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [-0.558467865, 0.013367773, 3.32182431]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+    ScriptComponent:
+      Path: assets/scripts/Test.lua
+Environment:
+  - EnvironmentType: SkyBox
+    SkyBox:
+      Right: assets\textures\skybox\posx.jpg
+      Left: assets\textures\skybox\negx.jpg
+      Top: assets\textures\skybox\posy.jpg
+      Bottom: assets\textures\skybox\negy.jpg
+      Front: assets\textures\skybox\posz.jpg
+      Back: assets\textures\skybox\negz.jpg

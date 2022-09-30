@@ -2,6 +2,7 @@
 #include "OpenGLShader.h"
 
 #include <fstream>
+#include <filesystem>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -159,6 +160,14 @@ namespace Pixel {
 			glDetachShader(program, id);
 	}
 
+	void OpenGLShader::CompileOrGetBinary(const std::unordered_map<GLenum, std::string>& shaderSources)
+	{
+		for (auto& [shaderType, shaderSource] : shaderSources)
+		{
+					
+		}
+	}
+
 	void OpenGLShader::Bind() const
 	{
 		glUseProgram(m_RendererID);
@@ -182,6 +191,11 @@ namespace Pixel {
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
 		UploadUniformFloat(name, value);
+	}
+
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	{
+		UploadUniformFloat2(name, value);
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)

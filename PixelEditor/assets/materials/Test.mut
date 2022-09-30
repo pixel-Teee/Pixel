@@ -1,0 +1,60 @@
+Type: Material
+ShowName: Material
+ShaderFunction:
+  - ShowName: ConstColor4
+    FunctionType: 1
+    Custom: false
+    Value:
+      - 0
+      - 0
+      - 0
+      - 0
+    ValueNumber: 4
+    Pos: [-68, 41]
+    InputNode:
+      []
+    OutputNode:
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+  - ShowName: ConstColor4
+    FunctionType: 1
+    Custom: false
+    Value:
+      - 0
+      - 0
+      - 0
+      - 0
+    ValueNumber: 4
+    Pos: [-68, 209]
+    InputNode:
+      []
+    OutputNode:
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+      - OwnerShowName: nullptr
+        PinLocation: -1
+  - ShowName: Mul
+    FunctionType: 2
+    Pos: [126, 131]
+    InputNode:
+      - OwnerShowName: ConstColor4
+        PinLocation: 0
+      - OwnerShowName: ConstColor4
+        PinLocation: 0
+    OutputNode:
+      - OwnerShowName: nullptr
+        PinLocation: -1

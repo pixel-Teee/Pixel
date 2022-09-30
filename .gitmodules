@@ -17,3 +17,18 @@
 [submodule "Pixel/vendor/imguizmo"]
 	path = Pixel/vendor/imguizmo
 	url = https://github.com/pixel-Teee/ImGuizmo.git
+[submodule "Pixel/vendor/Box2D"]
+	path = Pixel/vendor/Box2D
+	url = https://github.com/pixel-Teee/box2d.git
+[submodule "Pixel/vendor/assimp"]
+	path = Pixel/vendor/assimp
+	url = https://github.com/pixel-Teee/assimp.git
+[submodule "Pixel/vendor/spir-v"]
+	path = Pixel/vendor/spir-v
+	url = https://github.com/KhronosGroup/SPIRV-Cross.git
+[submodule "Pixel/vendor/imgui-node-editor"]
+	path = Pixel/vendor/imgui-node-editor
+	url = https://github.com/pixel-Teee/imgui-node-editor.git
+[submodule "Pixel/vendor/bullet3"]
+	path = Pixel/vendor/bullet3
+	url = https://github.com/bulletphysics/bullet3.git

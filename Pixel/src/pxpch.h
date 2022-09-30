@@ -10,8 +10,12 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <map>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <thread>
 
 #include "Pixel/Core/Log.h"
 #include "Pixel/Debug/Instrumentor.h"

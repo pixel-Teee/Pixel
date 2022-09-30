@@ -9,8 +9,11 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
+#include <filesystem>
+
 namespace Pixel
 {
+	extern const std::filesystem::path g_AssetPath;
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
@@ -27,34 +30,37 @@ namespace Pixel
 	{
 		ImGui::Begin("Scene Hierarchy");
 
-		m_Context->m_Registry.each([&](auto entityID)
+		if (m_Context)
+		{
+			m_Context->m_Registry.each([&](auto entityID)
+				{
+					Entity entity{ entityID, m_Context.get() };
+					DrawEntityNode(entity);
+				}
+			);
+
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			{
-				Entity entity{ entityID, m_Context.get()};
-				DrawEntityNode(entity);
+				m_SelectionContext = {};
 			}
-		);
 
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-		{
-			m_SelectionContext = {};
+			//Right Click on Black Space
+			if (ImGui::BeginPopupContextWindow(0, 1, false))
+			{
+				if (ImGui::MenuItem("Create Empty Entity"))
+					m_Context->CreateEntity("Empty Entity");
+
+				ImGui::EndPopup();
+			}			
 		}
-
-		//Right Click on Black Space
-		if (ImGui::BeginPopupContextWindow(0, 1, false))
-		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				m_Context->CreateEntity("Empty Entity");
-
-			ImGui::EndPopup();
-		}
-
-		ImGui::End();	
+		ImGui::End();
 
 		ImGui::Begin("Properties");
 		if (m_SelectionContext)
 		{
 			DrawComponents(m_SelectionContext);
 		}
+		
 		ImGui::End();
 	}
 
@@ -249,6 +255,48 @@ namespace Pixel
 				ImGui::CloseCurrentPopup();
 			}
 
+			if (ImGui::MenuItem("Rigidbody 2D"))
+			{
+				m_SelectionContext.AddComponent<Rigidbody2DComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("BoxCollider 2D"))
+			{
+				m_SelectionContext.AddComponent<BoxCollider2DComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Static Mesh Renderer"))
+			{
+				m_SelectionContext.AddComponent<StaticMeshComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Material"))
+			{
+				m_SelectionContext.AddComponent<MaterialComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Light"))
+			{
+				m_SelectionContext.AddComponent<LightComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Script"))
+			{
+				m_SelectionContext.AddComponent<NativeScriptComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Rigid3D"))
+			{
+				m_SelectionContext.AddComponent<RigidBody3DComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 		/*----------Add Component----------*/
@@ -336,8 +384,238 @@ namespace Pixel
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+
+				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Texture = Texture2D::Create(texturePath.string());
+						
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				/*
+				if (component.Texture)
+				{
+					ImGui::ImageButton((ImTextureID)component.Texture->GetRendererID(), ImVec2(16.0f, 16.0f));
+				}
+				*/
+
+				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
+			}
+		);
+
+		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](auto& component)
+			{
+				const char* bodyTypeStrings[] = {"Static", "Dynamic", "Kinematic"};
+				const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
+				if (ImGui::BeginCombo("Body Type", currentBodyTypeString))
+				{
+					for (int i = 0; i < 2; ++i)
+					{
+						bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
+						if (ImGui::Selectable(bodyTypeStrings[i], isSelected))
+						{
+							currentBodyTypeString = bodyTypeStrings[i];
+							component.Type = (Rigidbody2DComponent::BodyType)i;
+						}
+						if(isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+				ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
+			}
+		);
+
+		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](auto& component)
+			{
+				ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+				ImGui::DragFloat2("Size", glm::value_ptr(component.Size));
+				ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("RestitutionThreshold", &component.RestitutionThreshold, 0.01f, 0.0f, 1.0f);
+			}
+		);
+
+		DrawComponent<StaticMeshComponent>("Static Mesh Renderer", entity, [](auto& component)
+			{
+				//ImGui::Combo("Mesh", &component.currentItem, component.path);
+				
+				ImGui::Text("Mesh:");
+				ImGui::SameLine();
+				ImGui::Button(component.path.c_str(), ImVec2(100.0f, 0.0f));
+				//ImGui::Text
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path meshPath = std::filesystem::path(g_AssetPath) / path;
+						component.mesh = Model(meshPath.string());
+
+						/*
+						std::string filepath = meshPath.string();
+						auto lastSlash = filepath.find_last_of("/\\");
+						lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+						auto lastDot = filepath.rfind('.');
+						auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+						std::string Name = filepath.substr(lastSlash, count);
+						*/
+						//memcpy(component.path, meshPath.string().c_str(), meshPath.string().size());
+						component.path = meshPath.string();
+						//memcpy(const_cast<char*>(component.path), const_cast<char*>(meshPath.string().c_str()), sizeof(char) * const_cast<char*>(meshPath.string().c_str()));
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+			}
+		);
+		
+		DrawComponent<MaterialComponent>("Material Component", entity, [](auto& component)
+			{
+				ImGui::Text("Albedo");
+				ImGui::Image((ImTextureID)component.Albedo->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Albedo = Texture2D::Create(texturePath.string());
+						component.albedoPath = texturePath.string();
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("NormalMap");
+				ImGui::Image((ImTextureID)component.NormalMap->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.NormalMap = Texture2D::Create(texturePath.string());
+						component.normalMapPath = texturePath.string();
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("Roughness");
+				ImGui::Image((ImTextureID)component.Roughness->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Roughness = Texture2D::Create(texturePath.string());
+						component.roughnessPath = texturePath.string();
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("Metallic");
+				ImGui::Image((ImTextureID)component.Metallic->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Metallic = Texture2D::Create(texturePath.string());
+						component.metallicPath = texturePath.string();
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::Text("Emissive");
+				ImGui::Image((ImTextureID)component.Emissive->GetRendererID(), ImVec2(128.0f, 128.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						component.Emissive = Texture2D::Create(texturePath.string());
+						component.emissivePath = texturePath.string();
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				//ImGui::DragFloat("Shininess", &component.shininess, 2.0f, 2.0f, 64.0f);
+			}
+		);
+		
+		DrawComponent<LightComponent>("Light Component", entity, [](auto& component) 
+			{
+				ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
+				//ImGui::DragFloat("Light diffuse", &component.diffuse, 10.0f, 1.0f, 1000.0f);
+				ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
+				ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
+				ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
+			}
+		);
+
+		DrawComponent<NativeScriptComponent>("Script Component", entity, [](auto& component)
+			{
+				char buf[256];
+				memcpy(buf, component.m_path.c_str(), component.m_path.size());
+				buf[component.m_path.size()] = '\0';
+				if (ImGui::InputText("Script Path:", buf, 256))
+				{
+					component.m_path = buf;
+				}
+			}
+		);
+
+		DrawComponent<RigidBody3DComponent>("RigiBody3DComponent", entity, [](auto& component)
+			{
+				const char* ShapeTypeString[] = {"BoxShape", "SphereShape", "ConvexHull"};
+				const char* currentShapeTypeString = ShapeTypeString[(int)component.m_shapeType];
+				if (ImGui::BeginCombo("Shape Type", currentShapeTypeString))
+				{
+					for (int i = 0; i < 3; ++i)
+					{
+						bool isSelected = currentShapeTypeString == ShapeTypeString[i];
+						if (ImGui::Selectable(ShapeTypeString[i], isSelected))
+						{
+							currentShapeTypeString = ShapeTypeString[i];
+							component.m_shapeType = (RigidBody3DComponent::ShapeType)i;
+						}
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::DragFloat("Mass", &component.m_bodyMass);
+				ImGui::DragFloat3("BodyInertia", glm::value_ptr(component.m_bodyInertia));
+				ImGui::DragFloat("Restitution", &component.m_restitution);
+				ImGui::DragFloat("Friction", &component.m_friction);
+
+				if (component.m_shapeType == RigidBody3DComponent::ShapeType::BoxShape)
+				{
+					ImGui::DragFloat("HalfLength", &component.m_HalfLength);
+				}
+				else if (component.m_shapeType == RigidBody3DComponent::ShapeType::SphereShape)
+				{
+					ImGui::DragFloat("Radius", &component.m_Radius);
+				}
 			}
 		);
 	}
-
 }

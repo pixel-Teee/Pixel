@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Pixel/Core/Window.h"
-#include "Pixel/Renderer/GraphicsContext.h"
+#include "Pixel/Renderer/Context.h"
 
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+
 namespace Pixel {
+	class OpenGLContext;
 	class WindowsWindow : public Window
 	{
 	public:
@@ -23,12 +26,25 @@ namespace Pixel {
 		bool IsVSync()const override;
 
 		inline void* GetNativeWindow() const{ return m_Window; }
+
+		virtual void SetCursorPos(int32_t x, int32_t y) override;
+		virtual void SetCursorViewPortCenter() override;
+
+		virtual void SetViewPortCenterPoint(int32_t x, int32_t y) override;
+		virtual void SetCursorDisabled() override;
+		virtual void SetCursorNormal() override;
+
 	private:
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
-		GraphicsContext* m_Context;
+		Ref<OpenGLContext> m_Context;
+
+		//test:directx context
+		//Context* m_DirectXContext;
+
+		glm::vec2 m_ViewPortCenterPoint;
 
 		struct WindowData
 		{

@@ -8,7 +8,7 @@ namespace Pixel {
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path):m_path(path)
 	{
 		int width, height, channels;
-		stbi_set_flip_vertically_on_load(1);
+		//stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		PX_CORE_ASSERT(data, "Failed to load image!");
 		m_Width = width;
@@ -24,6 +24,11 @@ namespace Pixel {
 		{
 			internalFormat = GL_RGB8;
 			dataFormat = GL_RGB;
+		}
+		else if (channels == 1)
+		{
+			internalFormat = GL_R8;
+			dataFormat = GL_RED;
 		}
 
 		m_InternalFormat = internalFormat;
@@ -46,10 +51,23 @@ namespace Pixel {
 		stbi_image_free(data);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height):m_Width(width), m_Height(height)
+	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, TextureFormat textureFormat):m_Width(width), m_Height(height)
 	{
-		m_InternalFormat = GL_RGBA8;
-		m_DataFormat = GL_RGBA;
+		if (textureFormat == TextureFormat::RGBA)
+		{
+			m_InternalFormat = GL_RGBA8;
+			m_DataFormat = GL_RGBA;
+		}
+		else if (textureFormat == TextureFormat::RGB)
+		{
+			m_InternalFormat = GL_RGB8;
+			m_DataFormat = GL_RGB;
+		}
+		else if (textureFormat == TextureFormat::RED)
+		{
+			m_InternalFormat = GL_R8;
+			m_DataFormat = GL_RED;
+		}
 
 		//PX_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
@@ -66,7 +84,16 @@ namespace Pixel {
 
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
-		uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3; 
+		uint32_t bpp; 
+		if (m_DataFormat == GL_RGB)
+		{
+			bpp = 3;
+		}
+		else if (m_DataFormat == GL_RGBA)
+		{
+			bpp = 4;
+		}
+		else bpp = 1;
 		PX_CORE_ASSERT(size == m_Width * m_Height * bpp, "Data must be entire texture");
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
@@ -76,6 +103,12 @@ namespace Pixel {
 		//glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTextureUnit(slot, m_RendererID);
 		//glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	}
+
+	std::string& OpenGLTexture2D::GetPath()
+	{
+		//throw std::logic_error("The method or operation is not implemented.");
+		return m_path;
 	}
 
 }

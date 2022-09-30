@@ -1,5 +1,10 @@
 #pragma once
 
+#define _CRTDBG_MAP_ALLOC
+#ifdef PX_DEBUG
+#include <crtdbg.h>
+#endif
+
 #ifdef PX_PLATFORM_WINDOWS
 
 extern Pixel::Application* Pixel::CreateApplication();

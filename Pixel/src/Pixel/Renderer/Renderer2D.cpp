@@ -59,14 +59,18 @@ namespace Pixel {
 		//VertexBuffer
 
 		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" },
-			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float, "a_TexIndex"},
-			{ ShaderDataType::Float, "a_TilingFactor"},
-			{ ShaderDataType::Int, "a_EntityID"}
-			});
+
+		BufferLayout layout
+		{
+			{ ShaderDataType::Float3, "a_Position", Semantics::POSITION},
+			{ ShaderDataType::Float4, "a_Color", Semantics::COLOR},
+			{ ShaderDataType::Float2, "a_TexCoord", Semantics::TEXCOORD},
+			{ ShaderDataType::Float, "a_TexIndex", Semantics::FLOAT},
+			{ ShaderDataType::Float, "a_TilingFactor", Semantics::FLOAT},
+			{ ShaderDataType::Int, "a_EntityID", Semantics::Editor}
+		};
+
+		s_Data.QuadVertexBuffer->SetLayout(layout);
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
@@ -93,7 +97,7 @@ namespace Pixel {
 		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
 		delete[] quadIndices;
 
-		s_Data.WhiteTexture = Texture2D::Create(1, 1);
+		s_Data.WhiteTexture = Texture2D::Create(1, 1, TextureFormat::RGBA);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
@@ -182,7 +186,7 @@ namespace Pixel {
 		{
 			s_Data.TextureSlots[i]->Bind(i);
 		}
-		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+		RenderCommand::DrawIndexed(Primitive::TRIANGLE, s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 		s_Data.Stats.DrawCalls++;
 	}
 
@@ -685,7 +689,10 @@ namespace Pixel {
 
 	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
 	{
-		DrawQuad(transform, src.Color, entityID);
+		if(src.Texture)
+			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
+		else
+			DrawQuad(transform, src.Color, entityID);
 	}
 
 	void Renderer2D::ResetStats()

@@ -34,6 +34,12 @@ namespace Pixel {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
+		virtual void SetCursorNormal() = 0;
+		virtual void SetCursorDisabled() = 0;
+		virtual void SetCursorPos(int32_t x, int32_t y) = 0;
+		virtual void SetCursorViewPortCenter() = 0;
+		virtual void SetViewPortCenterPoint(int32_t x, int32_t y) = 0;
+
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;

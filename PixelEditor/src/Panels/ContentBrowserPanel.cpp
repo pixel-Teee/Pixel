@@ -1,25 +1,48 @@
 #include "pxpch.h"
 #include "ContentBrowserPanel.h"
 
+#include "Pixel/Scene/SerializerMaterial.h"
+
 #include <imgui/imgui.h>
 
 namespace Pixel {
 
 	//Once we have projects, change this
-	static const std::filesystem::path s_AssetPath = "assets";
+	extern const std::filesystem::path g_AssetPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
-	:m_CurrentDirectory(s_AssetPath)
+	:m_CurrentDirectory(g_AssetPath)
 	{
-		
+		m_Directory = Texture2D::Create(g_AssetPath.string() + "/icons/directory.png");
+		m_File = Texture2D::Create(g_AssetPath.string() + "/icons/file.png");
+	}
+
+	void ContentBrowserPanel::OpenAssetEditor(const std::string& filename)
+	{
+		Ref<Material> pMaterial;
+		Ref<MaterialInstance> pMaterialInstance;
+		SerializerMaterial seralizer;
+		seralizer.DeserializerMaterialAssetAndCreateMaterial(filename, pMaterial, pMaterialInstance);
+
+		if (pMaterial != nullptr)
+		{
+			m_bIsOpen = true;
+			//Open The Node Graph
+			m_NodeGraph = CreateRef<NodeGraph>(pMaterial, pMaterialInstance, filename);
+		}
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
+		if (m_NodeGraph != nullptr && m_bIsOpen)
+		{
+			m_NodeGraph->OnImGuiRender();
+		}
+
 		//list all the files in the assets directory
 		ImGui::Begin("Content Browser");
 		
-		if (m_CurrentDirectory != std::filesystem::path(s_AssetPath))
+		if (m_CurrentDirectory != std::filesystem::path(g_AssetPath))
 		{
 			if (ImGui::Button("<-"))
 			{
@@ -27,33 +50,91 @@ namespace Pixel {
 			}
 		}
 
-		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
+		if (ImGui::IsMouseClicked(1) && ImGui::IsWindowFocused())
+			ImGui::OpenPopup("Create Asset");
+
+		if (ImGui::BeginPopup("Create Asset"))
 		{
+			if (ImGui::MenuItem("Create Material Asset"))
+			{
+				CreateMaterialAsset(m_CurrentDirectory.string());
+			}
+			ImGui::EndPopup();
+		}
+
+		float ContentWidth = ImGui::GetContentRegionAvailWidth();
+
+		static float Padding = 16.0f;
+		static float ThumbnailSize = 128.0f;
+
+		int CellNumber = ContentWidth / (Padding + ThumbnailSize);
+
+		if(CellNumber < 1)
+			CellNumber = 1;
+
+		ImGui::Columns(CellNumber, 0, false);
+
+		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
+		{		
 			const auto& path = directoryEntry.path();
 			//ImGui::Text("%s", path.string().c_str());
-			auto relativePath = std::filesystem::relative(path, s_AssetPath);
+			auto relativePath = std::filesystem::relative(path, g_AssetPath);
 			//ImGui::Text("%s", relativePath.string().c_str());
 			std::string filenameString = relativePath.filename().string();
 
-			//ImGui::Text("%s", filenameString.c_str());
-			if (directoryEntry.is_directory())
+			ImGui::PushID(filenameString.c_str());
+			//Check this whether is directory or file?
+			Ref<Texture2D> icon = directoryEntry.is_directory() ? m_Directory : m_File; 
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), {ThumbnailSize, ThumbnailSize}, {0, 1}, {1, 0});
+			ImGui::PopStyleColor();
+
+			if (ImGui::BeginDragDropSource())
 			{
-				if (ImGui::Button(filenameString.c_str()))
+				const wchar_t* itemPath = relativePath.c_str();
+				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t), ImGuiCond_Once);
+				ImGui::EndDragDropSource();
+			}
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+			{
+				if (directoryEntry.is_directory())
 				{
 					m_CurrentDirectory /= path.filename();
-
-				}				
-			}
-			else
-			{
-				if (ImGui::Button(filenameString.c_str()))
-				{
-
 				}
+
+				//------Open Asset Editor------
+				if (!directoryEntry.is_directory())
+				{
+					OpenAssetEditor(path.string());
+				}
+				//------Open Asset Editor------
 			}
+			ImGui::TextWrapped("%s", filenameString.c_str());
+			ImGui::NextColumn();
+
+			ImGui::PopID();
 		}
+		ImGui::Columns(1);
+		ImGui::SliderFloat("ThumbnailSize", &ThumbnailSize, 16.0f, 512.0f);
+		ImGui::SliderFloat("Padding", &Padding, 2.0f, 16.0f);
+
+		//Right Click, Draw For Create Material File
+
 
 		ImGui::End();
+	}
+
+	void ContentBrowserPanel::CreateMaterialAsset(std::string filePath)
+	{
+		Ref<Material> pMaterial = CreateRef<Material>("Material");
+		Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>(pMaterial);
+
+		filePath += "\\Test.mut";
+
+		SerializerMaterial serializerMaterial;
+		serializerMaterial.SerializerMaterialAsset(filePath, pMaterial, pMaterialInstance);
 	}
 
 }

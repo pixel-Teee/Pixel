@@ -1,17 +1,31 @@
 #include "pxpch.h"
 #include "Renderer.h"
-
-#include "Platform/OpenGL/OpenGLShader.h"
 #include "Renderer2D.h"
+#include "Pixel/Renderer/3D/Renderer3D.h"
+#include "Pixel/Renderer/3D/ShaderStringFactory.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Pixel {
 
-	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
+	Renderer::SceneData* Renderer::m_SceneData = nullptr;
 
 	void Renderer::Init()
 	{
 		RenderCommand::Init();
-		Renderer2D::Init();
+		//Renderer2D::Init();
+		Renderer3D::Init();
+		ShaderStringFactory::Init();
+
+		m_SceneData = new Renderer::SceneData;
+	}
+
+	void Renderer::Finitialize()
+	{
+		RenderCommand::Finitialize();
+		if (m_SceneData != nullptr) {
+			delete m_SceneData;
+			m_SceneData = nullptr;
+		}
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
@@ -35,6 +49,6 @@ namespace Pixel {
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
 
 		vertexArray->Bind();
-		RenderCommand::DrawIndexed(vertexArray);
+		RenderCommand::DrawIndexed(Primitive::TRIANGLE, vertexArray);
 	}
 }
