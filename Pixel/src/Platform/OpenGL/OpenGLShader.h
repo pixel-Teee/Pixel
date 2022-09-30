@@ -25,6 +25,12 @@ namespace Pixel {
 		virtual void SetFloat4(const std::string& name, const glm::vec4& value) override;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
 
+		virtual void SetData(const std::string& name, void* data) override;
+
+		virtual void SubmitData(Ref<Context> pContext) override;
+
+		virtual void SubmitData(Ref<Context> pContext, const std::string& cbvName) override;
+
 		virtual const std::string& GetName() const override { return m_Name; }
 
 		void UploadUniformInt(const std::string& name, int value);

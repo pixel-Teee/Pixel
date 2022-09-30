@@ -54,10 +54,10 @@ namespace Pixel {
 		return std::make_shared<Model>(path);
 	}
 
-	void Model::DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId)
+	void Model::DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, Ref<Shader> pShader, int32_t entityId)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
-			m_Meshes[i]->DrawShadowMap(pContext, transform, entityId);
+			m_Meshes[i]->DrawShadowMap(pContext, pShader, transform, entityId);
 	}
 
 	/*------------------------------------------------------

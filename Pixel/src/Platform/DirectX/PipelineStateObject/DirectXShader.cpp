@@ -11,6 +11,7 @@
 #include "DirectXSrvShaderParameter.h"
 #include "DirectXRootSignature.h"
 #include "Pixel/Renderer/Sampler/Sampler.h"
+#include "Platform/DirectX/Context/GraphicsContext.h"
 
 namespace Pixel {
 
@@ -104,12 +105,32 @@ namespace Pixel {
 			}
 
 			//std::cout << "test" << std::endl;
+			m_DataCache = nullptr;
+
+			m_DataCache = new char* [m_CbvShaderParameter.size()];
+
+			//------create cache------
+			for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+			{
+				m_DataCache[i] = new char[m_CbvShaderParameter[i]->m_Size];
+			}
+			//------create cache------
 		}
+
 	}
 
 	DirectXShader::~DirectXShader()
 	{
+		if (m_DataCache != nullptr)
+		{
+			for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+			{
+				delete m_DataCache[i];
+			}
+			delete m_DataCache;
 
+			m_DataCache = nullptr;
+		}	
 	}
 
 	void DirectXShader::Bind() const
@@ -162,6 +183,99 @@ namespace Pixel {
 		return "";
 	}
 
+
+	void DirectXShader::SetData(const std::string& name, void* data)
+	{
+		size_t pos = name.find('.');
+		bool hasDot = pos != std::string::npos;
+
+		if (hasDot)
+		{
+			//extract constant buffer name
+			std::string constBufferName = name.substr(0, std::max(pos - 1, 0ull));
+			Ref<DirectXCbvShaderParameter> pCbvShaderParameter;
+			uint32_t cbvIndex = 0;
+			for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+			{
+				if (constBufferName == m_CbvShaderParameter[i]->m_Name)
+				{
+					pCbvShaderParameter = m_CbvShaderParameter[i];
+					cbvIndex = i;
+					break;
+				}
+			}
+			PX_CORE_ASSERT(pCbvShaderParameter != nullptr, "shader parameter name is error!")
+			//extract constant buffer variable name
+			CbvVariableParameter cbvVariableParameter;
+			bool findVariable = false;
+			std::string variableName = name.substr(pos + 1);
+			for (size_t i = 0; i < pCbvShaderParameter->m_CbvVariableParameters.size(); ++i)
+			{
+				if (pCbvShaderParameter->m_CbvVariableParameters[i].m_VariableName == variableName)
+				{
+					cbvVariableParameter = pCbvShaderParameter->m_CbvVariableParameters[i];
+					findVariable = true;
+					break;
+				}
+			}
+			PX_CORE_ASSERT(findVariable, "shader parameter name is error!");
+
+			//------set to cache------
+			memcpy(m_DataCache[cbvIndex] + cbvVariableParameter.m_StartOffset, data, cbvVariableParameter.m_Size);
+			//------set to cache------
+		}
+		else
+		{
+			//just constant buffer variable name
+			std::string constBufferName = name.substr(0, std::max(pos - 1, 0ull));
+			Ref<DirectXCbvShaderParameter> pCbvShaderParameter;
+			uint32_t cbvIndex = 0;
+			for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+			{
+				if (constBufferName == m_CbvShaderParameter[i]->m_Name)
+				{
+					pCbvShaderParameter = m_CbvShaderParameter[i];
+					cbvIndex = i;
+					break;
+				}
+			}
+			PX_CORE_ASSERT(pCbvShaderParameter != nullptr, "shader parameter name is error!");
+
+			//------set to cache------
+			memcpy(m_DataCache[cbvIndex], data, pCbvShaderParameter->m_Size);
+			//------set to cache------
+		}
+	}
+
+	void DirectXShader::SubmitData(Ref<Context> pContext)
+	{
+		Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
+		//copy cache to context
+		for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+		{
+			pGraphicsContext->SetDynamicConstantBufferView(m_CbvShaderParameter[i]->m_RootIndex, m_CbvShaderParameter[i]->m_Size, m_DataCache[i]);
+		}
+	}
+
+	void DirectXShader::SubmitData(Ref<Context> pContext, const std::string& cbvName)
+	{
+		Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
+
+		//get the root index
+		uint32_t rootIndex = -1;
+		for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+		{
+			if (m_CbvShaderParameter[i]->m_Name == cbvName)
+			{
+				rootIndex = i;
+				break;
+			}
+		}
+
+		PX_CORE_ASSERT(rootIndex != -1, "const buffer view name could't find!");
+
+		pGraphicsContext->SetDynamicConstantBufferView(m_CbvShaderParameter[rootIndex]->m_RootIndex, m_CbvShaderParameter[rootIndex]->m_Size, m_DataCache[rootIndex]);
+	}
 
 	std::pair<void*, uint64_t> DirectXShader::GetShaderBinary()
 	{

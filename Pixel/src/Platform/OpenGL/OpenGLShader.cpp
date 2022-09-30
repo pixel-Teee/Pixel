@@ -168,6 +168,14 @@ namespace Pixel {
 		}
 	}
 
+	void OpenGLShader::SubmitData(Ref<Context> pContext)
+	{
+	}
+
+	void OpenGLShader::SubmitData(Ref<Context> pContext, const std::string& cbvName)
+	{
+	}
+
 	void OpenGLShader::Bind() const
 	{
 		glUseProgram(m_RendererID);
@@ -209,6 +217,9 @@ namespace Pixel {
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
 		UploadUniformMat4(name, value);
+	}
+	void OpenGLShader::SetData(const std::string& name, void* data)
+	{
 	}
 	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
 	{

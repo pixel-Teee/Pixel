@@ -26,7 +26,7 @@ namespace Pixel {
 		void Draw();
 
 		void Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId);
-		void DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId);
+		void DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, Ref<Shader> pShader, int32_t entityId);
 		void Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId, MaterialComponent* pMaterialCompoent);
 		void DrawOutLine(const glm::mat4& transform, Ref<Context> pContext);
 

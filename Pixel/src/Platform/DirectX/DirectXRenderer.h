@@ -22,6 +22,7 @@ namespace Pixel {
 	class Framebuffer;
 	class EditorCamera;
 	class SimpleScene;
+	class SamplerDesc;
 
 	struct StaticMeshContext
 	{
@@ -117,7 +118,7 @@ namespace Pixel {
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) override;
 
 		//TODO:need to modify this to virtual function
-		Ref<RootSignature> CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader);
+		Ref<RootSignature> CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, std::vector<Ref<SamplerDesc>> pSampleDescs);
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer

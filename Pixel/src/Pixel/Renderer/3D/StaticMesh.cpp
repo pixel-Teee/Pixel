@@ -425,7 +425,7 @@ namespace Pixel {
 		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
 
-	void StaticMesh::DrawShadowMap(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId)
+	void StaticMesh::DrawShadowMap(Ref<Context> pContext, Ref<Shader> pShader, const glm::mat4& transform, int32_t entityId)
 	{
 		//if (!isFirst)
 		//{
@@ -434,8 +434,13 @@ namespace Pixel {
 		//}
 
 		m_MeshConstant.world = glm::transpose(transform);
+		
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
 
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+		//pShader->SubmitData(pContext, )
+
+		pShader->SetData("cbPerObject", &m_MeshConstant);
+		pShader->SubmitData(pContext, "cbPerObject");
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

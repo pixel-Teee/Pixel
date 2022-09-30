@@ -679,8 +679,6 @@ namespace Pixel {
 
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
-		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
-
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "color buffer's size is not equal to 6!");
 
@@ -713,19 +711,21 @@ namespace Pixel {
 			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(scene->GetRegistry())));
 			lightSpaceMatrix = lightView * lightProjection;
 
-			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+			//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));	
+			m_RenderShadowMapVs->SetData("cbPass", glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SubmitData(pContext, "cbPass");
 
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
 				if(meshs[i]->m_Model != nullptr)
 				//draw every mesh
-					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
+					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, m_RenderShadowMapVs, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
 		}
 		//------shadow map------
-
+		
 		//------get the cpu descriptor handle------
 		std::vector<Ref<DescriptorCpuHandle>> m_CpuHandles;
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
@@ -733,6 +733,8 @@ namespace Pixel {
 			m_CpuHandles.push_back(pDirectxFrameBuffer->m_pColorBuffers[i]->GetRTV());
 		}
 		//------get the cpu descriptor handle------
+
+		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
@@ -1081,9 +1083,6 @@ namespace Pixel {
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
-		//TODO:bind root signature, in the future, in terms of the material shader parameter to create root signature
-		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
-
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "color buffer's size is not equal to 6!");
 
@@ -1116,13 +1115,15 @@ namespace Pixel {
 			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(pScene->GetRegistry())));
 			lightSpaceMatrix = lightView * lightProjection;
 
-			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+			//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SetData("cbPass", glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SubmitData(pContext, "cbPass");
 
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
 				if (meshs[i]->m_Model != nullptr)
 					//draw every mesh
-					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(pScene->GetRegistry()), pContext, entityIds[i]);
+					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(pScene->GetRegistry()), pContext, m_RenderShadowMapVs, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
@@ -1139,6 +1140,8 @@ namespace Pixel {
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
+		//TODO:bind root signature, in the future, in terms of the material shader parameter to create root signature
+		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
 		{
@@ -1385,8 +1388,6 @@ namespace Pixel {
 
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
-		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
-
 		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
 		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "color buffer's size is not equal to 6!");
 
@@ -1419,13 +1420,15 @@ namespace Pixel {
 			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(scene->GetRegistry())));
 			lightSpaceMatrix = lightView * lightProjection;
 
-			pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+			//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SetData("cbPass", glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SubmitData(pContext, "cbPass");
 
 			for (uint32_t i = 0; i < meshs.size(); ++i)
 			{
 				if(meshs[i]->m_Model != nullptr)
 				//draw every mesh
-					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i]);
+					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, m_RenderShadowMapVs, entityIds[i]);
 			}
 
 			m_ShadowMap->EndRendering(*pContext);
@@ -1442,6 +1445,8 @@ namespace Pixel {
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
+
+		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
 		{
@@ -2125,15 +2130,20 @@ namespace Pixel {
 		//samplerDesc->SetBorderColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 		samplerDesc->SetTextureAddressMode(AddressMode::BORDER);
 
-		m_RenderShadowMapRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
-		m_RenderShadowMapRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
-		(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		std::vector<Ref<SamplerDesc>> samplerDescs;
+		samplerDescs.push_back(samplerDesc);
+
+		//m_RenderShadowMapRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		//m_RenderShadowMapRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		//(*m_RenderShadowMapRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		//m_RenderShadowMapRootSignature->Finalize(L"RenderShadowMapRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_RenderShadowMapRootSignature = CreateRootSignature(m_RenderShadowMapVs, m_RenderShadowMapPs, samplerDescs);
 		m_RenderShadowMapRootSignature->Finalize(L"RenderShadowMapRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 
 		m_RenderShadowMapPso->SetRootSignature(m_RenderShadowMapRootSignature);
@@ -2807,19 +2817,23 @@ namespace Pixel {
 		return m_PsoArray.size();
 	}
 
-	Ref<RootSignature> DirectXRenderer::CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
+	Ref<RootSignature> DirectXRenderer::CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, std::vector<Ref<SamplerDesc>> samplerDescs)
 	{
 		//return Ref<RootSignature>();
 		Ref<DirectXShader> pDirectXVertexShader = std::static_pointer_cast<DirectXShader>(pVertexShader);
 		Ref<DirectXShader> pDirectXPixelShader = std::static_pointer_cast<DirectXShader>(pPixelShader);
 
-		uint32_t totalRootBindings = pDirectXVertexShader->m_CbvShaderParameter.size() + pDirectXVertexShader->m_SrvShaderParameter.size() + pDirectXPixelShader->m_CbvShaderParameter.size() + pDirectXPixelShader->m_SrvShaderParameter.size();
+		uint32_t totalRootBindings = pDirectXVertexShader->m_CbvShaderParameter.size() + (pDirectXVertexShader->m_SrvShaderParameter.size() > 0 ? 1 : 0) + pDirectXPixelShader->m_CbvShaderParameter.size() + (pDirectXPixelShader->m_SrvShaderParameter.size() > 0 ? 1 : 0);
 
 		Ref<RootSignature> pRootSignature = RootSignature::Create(totalRootBindings, 1);
 
 		//TODO:need to fix?
-		Ref<SamplerDesc> defaultSample = SamplerDesc::Create();
-		pRootSignature->InitStaticSampler(0, defaultSample, ShaderVisibility::Pixel);
+		//Ref<SamplerDesc> defaultSample = SamplerDesc::Create();
+		//pRootSignature->InitStaticSampler(0, defaultSample, ShaderVisibility::Pixel);
+		for (size_t i = 0; i < samplerDescs.size(); ++i)
+		{
+			pRootSignature->InitStaticSampler(i, samplerDescs[i], ShaderVisibility::Pixel);
+		}
 		
 		//in terms of shader to create root signature
 		PX_CORE_ASSERT(pDirectXVertexShader->m_ShaderType == ShaderType::VertexShader, "shader type is error!");
@@ -2840,14 +2854,19 @@ namespace Pixel {
 		//	//(*pRootSignature)[totalOffset + i].InitAsDescriptorRange()
 		//}
 		//TODO:need to fix, is there have SkinMatrices, then use buffer srv
-		(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXVertexShader->m_SrvShaderParameter.size(), ShaderVisibility::Vertex);
+		if (pDirectXVertexShader->m_SrvShaderParameter.size() > 0)
+		{
+			(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXVertexShader->m_MaxBindPointIndex + 1, ShaderVisibility::Vertex);
+			//++totalOffset;
+		}
 		for (size_t i = 0; i < pDirectXVertexShader->m_SrvShaderParameter.size(); ++i)
 		{
 			pDirectXVertexShader->m_SrvShaderParameter[i]->m_RootIndex = totalOffset;
 			pDirectXVertexShader->m_SrvShaderParameter[i]->m_Offset = i;
 		}
 
-		++totalOffset;
+		if (pDirectXVertexShader->m_SrvShaderParameter.size() > 0)
+			++totalOffset;
 
 		for (size_t i = 0; i < pDirectXPixelShader->m_CbvShaderParameter.size(); ++i)
 		{
@@ -2855,7 +2874,11 @@ namespace Pixel {
 			pDirectXPixelShader->m_CbvShaderParameter[i]->m_RootIndex = totalOffset + i;
 		}
 
-		(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXVertexShader->m_SrvShaderParameter.size(), ShaderVisibility::Vertex);
+		totalOffset += pDirectXPixelShader->m_CbvShaderParameter.size();
+
+		if(pDirectXPixelShader->m_SrvShaderParameter.size() > 0)
+			(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXPixelShader->m_MaxBindPointIndex + 1, ShaderVisibility::Pixel);
+
 		for (size_t i = 0; i < pDirectXPixelShader->m_SrvShaderParameter.size(); ++i)
 		{
 			pDirectXPixelShader->m_SrvShaderParameter[i]->m_RootIndex = totalOffset;
@@ -3270,6 +3293,7 @@ namespace Pixel {
 		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
 		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
 		m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		
 		//------Create RootSignature------
 
 		//-----Create Blend State------
@@ -3295,6 +3319,11 @@ namespace Pixel {
 
 		m_GeometryVertexShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "VS", "vs_5_0");
 		m_GeometryPixelShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "PS", "ps_5_0");
+
+		//------in terms of shader reflection to create root signature------
+		//m_pDeferredShadingRootSignature = CreateRootSignature(m_GeometryVertexShader, m_GeometryPixelShader);
+		//m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		//------in terms of shader reflection to create root signature------
 
 		//------in terms of shader's information to create root signature------
 		//CreateRootSignature()

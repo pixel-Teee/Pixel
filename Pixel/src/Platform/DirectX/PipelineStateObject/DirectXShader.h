@@ -11,12 +11,6 @@ namespace Pixel {
 	class DirectXSrvShaderParameter;
 	class DirectXRootSignature;
 
-	enum class ShaderType
-	{
-		VertexShader,
-		PixelShader
-	};
-
 	class DirectXShader : public Shader
 	{
 	public:
@@ -44,6 +38,12 @@ namespace Pixel {
 		virtual const std::string& GetName() const override;
 		//------garbage------
 
+		virtual void SetData(const std::string& name, void* data) override;
+
+		virtual void SubmitData(Ref<Context> pContext) override;
+
+		virtual void SubmitData(Ref<Context> pContext, const std::string& cbvName) override;
+
 		std::pair<void*, uint64_t> GetShaderBinary();
 
 		ShaderType GetShaderType();
@@ -64,10 +64,12 @@ namespace Pixel {
 
 		bool m_IsGenerated;
 
-		Ref<DirectXRootSignature> m_pRootSignature;
+		//Ref<DirectXRootSignature> m_pRootSignature;
 
 		ShaderType m_ShaderType;
 		//uint32_t m_AlignedCbvSize;
+
+		char** m_DataCache;
 
 		friend class DirectXRenderer;
 	};
