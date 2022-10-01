@@ -27,7 +27,7 @@ namespace Pixel {
 		//function type
 		ShaderFunctionType m_functionType;
 
-		ShaderFunction(const std::string& ShowName, Pixel::Ref<Material> pMaterial);
+		ShaderFunction(const std::string& ShowName, Ref<Material> pMaterial);
 
 		Meta()
 		//Input

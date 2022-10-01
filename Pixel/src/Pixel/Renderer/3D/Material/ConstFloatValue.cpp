@@ -139,7 +139,7 @@ namespace Pixel
 	}
 
 	//give the main header use 
-	bool ConstFloatValue::GetDeclareString(std::string& OutString) const
+	bool ConstFloatValue::GetDeclareString(std::string& OutString, int32_t registerId) const
 	{
 		//could in material provide, then declare in header top, uniform
 		if (!m_bIsCustom)

@@ -12,6 +12,9 @@
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Renderer/3D/StaticMesh.h"
+#include "Texture2DShaderFunction.h"
+#include "OutputNode.h"
+#include "InputNode.h"
 
 namespace Pixel {
 	uint32_t ShaderStringFactory::m_ShaderValueIndex;
@@ -66,6 +69,12 @@ namespace Pixel {
 		const std::string& value3, const std::string& value4)
 	{
 		return std::string("float4") + "(" + value1 + ", " + value2 + ", " + value3 + ", " + value4 + ")";//float4(value1, value2, value3, value4)
+	}
+
+	std::string ShaderStringFactory::Tex2D(Texture2DShaderFunction* pTexture2DShaderFunction)
+	{
+		return pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
+			+ " = " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ");\n";
 	}
 
 	std::string ShaderStringFactory::GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement)

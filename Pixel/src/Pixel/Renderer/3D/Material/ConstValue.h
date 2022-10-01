@@ -13,7 +13,7 @@ namespace Pixel
 		//if bIsCustom, then will declare as uniform variable
 		ConstValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 
-		virtual bool GetDeclareString(std::string & OutString) const = 0;
+		virtual bool GetDeclareString(std::string & OutString, int32_t registerId = -1) const = 0;
 
 		virtual ~ConstValue();
 
