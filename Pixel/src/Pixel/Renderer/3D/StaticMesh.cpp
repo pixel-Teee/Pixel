@@ -275,10 +275,13 @@ namespace Pixel {
 		pContext->DrawIndexed(m_IndexBuffer->GetCount());
 	}
 
-	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial)
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
 	{
 		if (pMaterial->IsTransparent)
+		{
+			pContext->SetRootSignature(*Application::Get().GetRenderer()->GetPso(TransParentPsoIndex, pMaterial->IsTransparent)->GetRootSignature());
 			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(TransParentPsoIndex, pMaterial->IsTransparent)));
+		}
 		else
 		{
 			//in terms of the pTestMaterial to create complete pso
@@ -290,7 +293,7 @@ namespace Pixel {
 				PsoIndex = Application::Get().GetRenderer()->CreateCompleteMaterialPso(pTestMaterial->m_PsoIndex, layout);
 				pTestMaterial->dirty = false;
 			}
-
+			pContext->SetRootSignature(*Application::Get().GetRenderer()->GetPso(PsoIndex, pMaterial->IsTransparent)->GetRootSignature());
 			pContext->SetPipelineState(*(Application::Get().GetRenderer()->GetPso(PsoIndex, pMaterial->IsTransparent)));
 					
 		}
@@ -304,32 +307,55 @@ namespace Pixel {
 		}
 		m_MeshConstant.editor = entityId;
 
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MeshConstants, sizeof(MeshConstant), &m_MeshConstant);
+		pVertexShader->SetData("cbPerObject", &m_MeshConstant);
+		pVertexShader->SubmitData(pContext);
+
+		pPixelShader->SetTextureDescriptor("gAlbedoMap", pMaterial->albedoMap->GetHandle());
+		pPixelShader->SetTextureDescriptor("gNormalMap", pMaterial->normalMap->GetHandle());
+		pPixelShader->SetTextureDescriptor("gRoughnessMap", pMaterial->roughnessMap->GetHandle());
+		pPixelShader->SetTextureDescriptor("gMetallicMap", pMaterial->metallicMap->GetHandle());
+		pPixelShader->SetTextureDescriptor("gAoMap", pMaterial->aoMap->GetHandle());
+
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());
 
 		//get descriptor size
 		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 
 		Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+
 		uint32_t offsetItem = Application::Get().GetRenderer()->GetDescriptorHeapOffset();
 
-		std::vector<DescriptorHandle> handles;
-		for (uint32_t i = 0; i < 5; ++i)
-		{
-			DescriptorHandle secondHandle = (*totalTextureDescriptorHeapFirstHandle) + (i + offsetItem) * DescriptorSize;
-			handles.push_back(secondHandle);
-		}
+		Ref<DescriptorHandle> offsetDescriptorHandle = CreateRef<DescriptorHandle>(*(totalTextureDescriptorHeapFirstHandle)+DescriptorSize * offsetItem);
 
-		Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-		Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
-
-		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());
-		//bind texture
-		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, handles[0].GetGpuHandle());
+		pPixelShader->SubmitTextureDescriptor(pContext, offsetDescriptorHandle);
 
 		Application::Get().GetRenderer()->SetDescriptorHeapOffset(offsetItem + 5);
+
+		//get descriptor size
+		//uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+		//
+		//Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+		//uint32_t offsetItem = Application::Get().GetRenderer()->GetDescriptorHeapOffset();
+		//
+		//std::vector<DescriptorHandle> handles;
+		//for (uint32_t i = 0; i < 5; ++i)
+		//{
+		//	DescriptorHandle secondHandle = (*totalTextureDescriptorHeapFirstHandle) + (i + offsetItem) * DescriptorSize;
+		//	handles.push_back(secondHandle);
+		//}
+		//
+		//Device::Get()->CopyDescriptorsSimple(1, handles[0].GetCpuHandle(), pMaterial->albedoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[1].GetCpuHandle(), pMaterial->normalMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[2].GetCpuHandle(), pMaterial->roughnessMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[3].GetCpuHandle(), pMaterial->metallicMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//Device::Get()->CopyDescriptorsSimple(1, handles[4].GetCpuHandle(), pMaterial->aoMap->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		//
+		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());
+		////bind texture
+		//pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, handles[0].GetGpuHandle());
+		//
+		//Application::Get().GetRenderer()->SetDescriptorHeapOffset(offsetItem + 5);
 
 		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, pMaterial->m_pDescriptorHeap);
 
@@ -342,7 +368,8 @@ namespace Pixel {
 		m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
 		m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
 
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::MaterialConstants, sizeof(MaterialConstant), &m_MaterialConstant);
+		pPixelShader->SetData("CbMaterial", &m_MaterialConstant);
+		pPixelShader->SubmitData(pContext);
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

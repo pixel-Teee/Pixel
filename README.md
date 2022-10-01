@@ -26,6 +26,10 @@ Select the PixelEditor as the StartupProject
 
 ![ReadMe3](./ScreenShots/ReadMe3.png)
 
+![ReadMe3](./ScreenShots/ReadMe4.png)
+
+Material Graph Editor is developing...
+
 # Features
 
 - Image-Based Lighting

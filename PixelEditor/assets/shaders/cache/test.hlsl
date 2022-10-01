@@ -123,9 +123,9 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 #include "../Common/Common.hlsl"
 PixelOut PS(VertexOut pin){
 float4  ConstFloatValue7;
-ConstFloatValue7 = float4(0.166023, 1.000000, 0.932380, 0.000000);
+ConstFloatValue7 = float4(1.000000, 0.999990, 0.999990, 0.000000);
 float4  ConstFloatValue15;
-ConstFloatValue15 = float4(0.123552, 1.000000, 0.402422, 0.000000);
+ConstFloatValue15 = float4(0.762548, 1.000000, 0.050193, 0.000000);
 float4  MulInputA23 = ConstFloatValue7;
 float4  MulInputB24 = ConstFloatValue15;
 float4  MulOutput24 = float4(0, 0, 0, 1);

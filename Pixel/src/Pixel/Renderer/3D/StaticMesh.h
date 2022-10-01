@@ -46,7 +46,7 @@ namespace Pixel {
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId);
 
 		//TODO:test for material tree
-		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial);
+		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader);
 
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader);
 

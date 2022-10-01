@@ -1151,7 +1151,7 @@ namespace Pixel {
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
 		//TODO:bind root signature, in the future, in terms of the material shader parameter to create root signature
-		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
+		//pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
 		{
@@ -1198,7 +1198,8 @@ namespace Pixel {
 		m_CbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
 		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
 		++m_FrameCount;
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		m_GeometryVertexShader->SetData("cbPass", &m_CbufferGeometryPass);
 
 		m_OpaqueItems.clear();
 		m_TransParentItems.clear();
@@ -1238,7 +1239,7 @@ namespace Pixel {
 		//draw opaque render item
 		for (size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, pTestMaterial);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, pTestMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
 		}
 		
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
