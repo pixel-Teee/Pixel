@@ -16,6 +16,7 @@
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
+#include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 
 namespace Pixel {
 
@@ -321,9 +322,12 @@ namespace Pixel {
 	{
 		//copy descriptor handle cache to descriptor heap from descriptor heap offset
 		std::vector<DescriptorHandle> descriptorHandles;
+
+		uint32_t descriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+
 		for (uint32_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
 		{
-			DescriptorHandle secondHandle = (*pDescriptorHeapHandle) + i;
+			DescriptorHandle secondHandle = (*pDescriptorHeapHandle) + i * descriptorSize;
 			descriptorHandles.push_back(secondHandle);
 		}
 

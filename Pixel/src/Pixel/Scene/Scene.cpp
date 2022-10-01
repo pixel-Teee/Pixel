@@ -872,8 +872,8 @@ namespace Pixel
 				lights.push_back(&light);
 			}
 
-			//find camera
-
+			//important
+			Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
 
 			Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 			Application::Get().GetRenderer()->DeferredRendering(pContext, mainCamera, cameraTransform, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this());

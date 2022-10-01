@@ -34,12 +34,12 @@ namespace Pixel {
 	}
 
 	void Model::Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId, 
-	MaterialComponent* pMaterialCompoent)
+	MaterialComponent* pMaterialCompoent, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
 		{
 			if(pMaterialCompoent->m_Materials.size() > i && pMaterialCompoent->m_Materials[i] != nullptr)
-				m_Meshes[i]->Draw(pContext, transform, entityId, pMaterialCompoent->m_Materials[i]);
+				m_Meshes[i]->Draw(pContext, transform, entityId, pMaterialCompoent->m_Materials[i], pVertexShader, pPixelShader);
 		}
 	}
 

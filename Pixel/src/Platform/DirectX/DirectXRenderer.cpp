@@ -741,7 +741,7 @@ namespace Pixel {
 		}
 		//------get the cpu descriptor handle------
 
-		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
+		//pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
@@ -791,7 +791,10 @@ namespace Pixel {
 		m_CbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
 		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
 		++m_FrameCount;
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+
+		m_GeometryVertexShader->SetData("cbPass", &m_CbufferGeometryPass);
+
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
 		
 		m_OpaqueItems.clear();
 		m_TransParentItems.clear();
@@ -831,14 +834,14 @@ namespace Pixel {
 		//draw opaque render item
 		for(size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
 		}
 
 		//draw runtime camera's model
 
 		for (uint32_t i = 0; i < cameraTransformant.size(); ++i)
 		{
-			pCameraModel->Draw(cameraTransformant[i]->GetGlobalTransform(scene->GetRegistry()), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get());
+			pCameraModel->Draw(cameraTransformant[i]->GetGlobalTransform(scene->GetRegistry()), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get(), m_GeometryVertexShader, m_GeometryPixelShader);
 		}
 
 		//draw direct light's arrow model
@@ -846,7 +849,7 @@ namespace Pixel {
 		{
 			if (lights[i]->lightType == LightType::DirectLight)
 			{
-				m_pArrowModel->Draw(lightTrans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, -1, m_pArrowModelMaterial.get());
+				m_pArrowModel->Draw(lightTrans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, -1, m_pArrowModelMaterial.get(), m_GeometryVertexShader, m_GeometryPixelShader);
 			}
 		}
 
@@ -1027,7 +1030,7 @@ namespace Pixel {
 		//draw transparent render item
 		for (size_t i = 0; i < m_TransParentItems.size(); ++i)
 		{
-			m_TransParentItems[i].pStaticMesh->Draw(pContext, m_TransParentItems[i].transform, m_TransParentItems[i].entityId, m_TransParentItems[i].pSubMaterial);
+			m_TransParentItems[i].pStaticMesh->Draw(pContext, m_TransParentItems[i].transform, m_TransParentItems[i].entityId, m_TransParentItems[i].pSubMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
 		}
 		//------third pass:forward transparent pass------
 
@@ -1453,7 +1456,7 @@ namespace Pixel {
 		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
 		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
 
-		pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
+		//pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
 		{
@@ -1502,7 +1505,9 @@ namespace Pixel {
 		m_CbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
 		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
 		++m_FrameCount;
-		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+
+		m_GeometryVertexShader->SetData("cbPass", &m_CbufferGeometryPass);
 
 		m_OpaqueItems.clear();
 		m_TransParentItems.clear();
@@ -1535,7 +1540,7 @@ namespace Pixel {
 		//draw opaque render item
 		for (size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
@@ -1698,7 +1703,7 @@ namespace Pixel {
 		//draw transparent render item
 		for (size_t i = 0; i < m_TransParentItems.size(); ++i)
 		{
-			m_TransParentItems[i].pStaticMesh->Draw(pContext, m_TransParentItems[i].transform, m_TransParentItems[i].entityId, m_TransParentItems[i].pSubMaterial);
+			m_TransParentItems[i].pStaticMesh->Draw(pContext, m_TransParentItems[i].transform, m_TransParentItems[i].entityId, m_TransParentItems[i].pSubMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
 		}
 		//------third pass:forward transparent pass------
 
@@ -3294,18 +3299,19 @@ namespace Pixel {
 		m_DefaultGeometryShadingPso = PSO::CreateGraphicsPso(L"DeferredShadingGeometryPso");
 
 		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
-
+		std::vector<Ref<SamplerDesc>> samplerDescs;
+		samplerDescs.push_back(samplerDesc);
 		//------Create RootSignature------
-		m_pDeferredShadingRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
-		m_pDeferredShadingRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
-		(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
-		m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		//m_pDeferredShadingRootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		//m_pDeferredShadingRootSignature->InitStaticSampler(0, samplerDesc, ShaderVisibility::Pixel);
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		//(*m_pDeferredShadingRootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		//m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 		
 		//------Create RootSignature------
 
@@ -3334,8 +3340,8 @@ namespace Pixel {
 		m_GeometryPixelShader = Shader::Create("assets/shaders/DeferredShading/GeometryPass.hlsl", "PS", "ps_5_0");
 
 		//------in terms of shader reflection to create root signature------
-		//m_pDeferredShadingRootSignature = CreateRootSignature(m_GeometryVertexShader, m_GeometryPixelShader);
-		//m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		m_pDeferredShadingRootSignature = CreateRootSignature(m_GeometryVertexShader, m_GeometryPixelShader, samplerDescs);
+		m_pDeferredShadingRootSignature->Finalize(L"DeferredShadingGeometryRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
 		//------in terms of shader reflection to create root signature------
 
 		//------in terms of shader's information to create root signature------
