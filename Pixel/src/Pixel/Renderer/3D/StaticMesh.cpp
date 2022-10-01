@@ -359,17 +359,20 @@ namespace Pixel {
 
 		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, pMaterial->m_pDescriptorHeap);
 
-		m_MaterialConstant.Albedo = pMaterial->gAlbedo;
-		m_MaterialConstant.Ao = pMaterial->gAo;
-		m_MaterialConstant.Metallic = pMaterial->gMetallic;
-		m_MaterialConstant.Roughness = pMaterial->gRoughness;
-		m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
-		m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
-		m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
-		m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
+		//m_MaterialConstant.Albedo = pMaterial->gAlbedo;
+		//m_MaterialConstant.Ao = pMaterial->gAo;
+		//m_MaterialConstant.Metallic = pMaterial->gMetallic;
+		//m_MaterialConstant.Roughness = pMaterial->gRoughness;
+		//m_MaterialConstant.HaveNormal = pMaterial->HaveNormal;
+		//m_MaterialConstant.shadingModel = (uint32_t)pMaterial->shadingModel;
+		//m_MaterialConstant.ClearCoat = pMaterial->ClearCoat;
+		//m_MaterialConstant.ClearCoatRoughness = pMaterial->ClearCoatRoughness;//for clear coat
 
-		pPixelShader->SetData("CbMaterial", &m_MaterialConstant);
-		pPixelShader->SubmitData(pContext);
+		int32_t haveNormal = true;
+		uint32_t shadingModelId = (uint32_t)pMaterial->shadingModel;
+		pPixelShader->SetData("CbMaterial.ShadingModelID", &shadingModelId);
+		pPixelShader->SetData("CbMaterial.HaveNormal", &haveNormal);
+		pPixelShader->SubmitData(pContext, "CbMaterial");
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

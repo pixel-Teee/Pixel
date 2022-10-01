@@ -23,7 +23,7 @@ namespace Pixel
 		virtual bool GetFunctionString(std::string& OutString) const;
 		//if ConstFloatValue is uniform, then registerId will use, but glsl don't have this
 		//else don't use registerId
-		bool GetDeclareString(std::string& OutString, uint32_t registerId) const;
+		virtual bool GetDeclareString(std::string& OutString) const override;
 		//before compile shader, will call this function reset temp variable name
 		virtual void ResetInShaderName();
 

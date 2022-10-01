@@ -510,6 +510,8 @@ namespace Pixel {
 
 		//create new node
 		CreateNewNodes();
+
+		ShowNodeContextMenu();
 	}
 
 	void GraphNodeEditor::ShowLabel(const std::string& label, ImColor color)
@@ -550,6 +552,37 @@ namespace Pixel {
 			if (ImGui::MenuItem("ConstFloatValue4"))
 			{
 				CreateConstFloatValue4();
+			}
+			ImGui::EndPopup();
+		}
+		ed::Resume();
+	}
+
+	void GraphNodeEditor::ShowNodeContextMenu()
+	{
+		ed::Suspend();
+		if (m_CurrentSelectedGraphNode != nullptr)
+		{
+			if (ed::ShowNodeContextMenu(&(m_CurrentSelectedGraphNode->m_NodeId)))
+				ImGui::OpenPopup("Node Context Menu");
+		}		
+		ed::Resume();
+
+		ed::Suspend();
+		if (ImGui::BeginPopup("Node Context Menu"))
+		{
+			if (ImGui::MenuItem("promote to parameter"))
+			{
+				if (m_CurrentSelectedGraphNode != nullptr)
+				{
+					Ref<ShaderFunction> pShaderFunction = m_CurrentSelectedGraphNode->p_Owner;
+
+					if (pShaderFunction->GetShaderFunctionType() == ShaderFunctionType::ConstFloatValue4)
+					{
+						//set to constant buffer variable
+						std::static_pointer_cast<ConstFloatValue>(pShaderFunction)->m_bIsCustom = true;
+					}
+				}			
 			}
 			ImGui::EndPopup();
 		}

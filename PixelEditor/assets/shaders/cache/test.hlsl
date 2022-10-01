@@ -17,18 +17,6 @@ cbuffer cbPass : register(b1)
 	float gHeight;
 };
 
-cbuffer CbMaterial : register(b2)
-{
-	float3 gAlbedo;
-	float gRoughness;
-	float gMetallic;
-	float gAo;
-	bool HaveNormal;//have normal
-	int ShadingModelID;//shading model id
-	float ClearCoat;//for clear coat
-	float ClearCoatRoughness;//for clear coat
-};
-
 struct VertexIn
 {
 	float3 PosL : POSITION;
@@ -121,17 +109,17 @@ Texture2D gAoMap : register(t4);
 SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
 #include "../Common/Common.hlsl"
-PixelOut PS(VertexOut pin){
+cbuffer CbMaterial : register(b2)
+{
 float4  ConstFloatValue7;
-ConstFloatValue7 = float4(1.000000, 0.999990, 0.999990, 0.000000);
-float4  ConstFloatValue15;
-ConstFloatValue15 = float4(0.762548, 1.000000, 0.050193, 0.000000);
-float4  MulInputA23 = ConstFloatValue7;
-float4  MulInputB24 = ConstFloatValue15;
-float4  MulOutput24 = float4(0, 0, 0, 1);
-MulOutput24 = MulInputA23 * MulInputB24;
+bool HaveNormal;
+int ShadingModelID;
+float ClearCoat;
+float ClearCoatRoughness;
+};
+PixelOut PS(VertexOut pin){
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = MulOutput24;
+float4  Albedo = ConstFloatValue7;
 float  Roughness = 0;
 float  Metallic = 0;
 float  Ao = 0;

@@ -50,6 +50,8 @@ namespace Pixel {
 
 		void CreateNewNodes();
 
+		void ShowNodeContextMenu();
+
 		//------create logic nodes------
 		void CreateMul();
 

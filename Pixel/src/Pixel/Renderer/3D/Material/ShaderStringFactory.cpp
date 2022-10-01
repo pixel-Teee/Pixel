@@ -110,6 +110,14 @@ namespace Pixel {
 	}
 	std::string ShaderStringFactory::CreateDeferredGeometryShaderString(Ref<Material> pMaterial, Ref<StaticMesh> pStaticMesh)
 	{
+		//create deferred geometry shader
+		std::ifstream geometryPassIncludes("assets/shaders/Common/GeomertyPass1.hlsl");
+		std::stringstream buffer;
+		buffer << geometryPassIncludes.rdbuf();
+		std::string out = buffer.str();
+
+		geometryPassIncludes.close();
+
 		std::string PixelShaderInclude;//just for include, some useful shader
 		std::string PixelShaderDynamic;//TODO:not used temporarily
 		std::string PixelShaderInputDeclare;//pixel shader input declare
@@ -122,21 +130,16 @@ namespace Pixel {
 		//PixelShaderInputDeclare:interms of the static mesh's vertex buffer's layout to create pixel shader input declare(x)
 
 		//PixelShaderOutputDeclare:this is fixed
-
+		pMaterial->GetShaderTreeString(PixelShaderFunctionString);
 		//PixelShaderFunctionString:get shader tree string, then get the cbuffer
-
+		CreatePixelShaderUserConstant(PixelShaderConstantString, pMaterial);
 		//PixelShaderConstantString:cbuffer declare
-		
-		//create deferred geometry shader
-		std::ifstream geometryPassIncludes("assets/shaders/Common/GeomertyPass1.hlsl");
-		std::stringstream buffer;
-		buffer << geometryPassIncludes.rdbuf();
-		std::string out = buffer.str();
-		
-		geometryPassIncludes.close();
+				
 		out += PixelShaderInclude + "\n";
+		out += PixelShaderConstantString + "\n";
 		out += "PixelOut PS(VertexOut pin){\n";
-		pMaterial->GetShaderTreeString(out);
+		//pMaterial->GetShaderTreeString(out);
+		out += PixelShaderFunctionString;
 		out += "return pixelOut;\n}";
 
 		//write to cache
@@ -156,5 +159,24 @@ namespace Pixel {
 	void ShaderStringFactory::GetIncludeShader(std::string& Out)
 	{
 		Out = "#include \"../Common/Common.hlsl\"";
+	}
+	void ShaderStringFactory::CreatePixelShaderUserConstant(std::string& Out, Ref<Material> pMaterial)
+	{
+		std::string temp = "cbuffer CbMaterial : register(b2)\n{\n";
+
+		pMaterial->CreateConstValueDeclare(temp);
+
+		//other information
+		temp += "bool HaveNormal;\n";
+
+		temp += "int ShadingModelID;\n";
+
+		//TODO:in the future, in terms shading model to add these shader parameter
+		temp += "float ClearCoat;\n";
+		temp += "float ClearCoatRoughness;\n";
+
+		temp += "};";
+
+		Out += temp;
 	}
 }

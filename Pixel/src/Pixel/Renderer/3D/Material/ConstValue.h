@@ -8,10 +8,12 @@ namespace Pixel
 	class Meta(Enable) ConstValue : public ShaderFunction
 	{
 	public:
-		Meta()
+		//Meta()
 		ConstValue();
 		//if bIsCustom, then will declare as uniform variable
 		ConstValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
+
+		virtual bool GetDeclareString(std::string & OutString) const = 0;
 
 		virtual ~ConstValue();
 

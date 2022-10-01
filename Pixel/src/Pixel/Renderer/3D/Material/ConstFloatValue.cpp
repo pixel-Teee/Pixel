@@ -139,7 +139,7 @@ namespace Pixel
 	}
 
 	//give the main header use 
-	bool ConstFloatValue::GetDeclareString(std::string& OutString, uint32_t location) const
+	bool ConstFloatValue::GetDeclareString(std::string& OutString) const
 	{
 		//could in material provide, then declare in header top, uniform
 		if (!m_bIsCustom)
@@ -148,15 +148,15 @@ namespace Pixel
 		{
 			OutString += ShaderStringFactory::Float() + " ";
 		}
-		else if (m_pOutputs[1]->GetValueType() == ValueType::VT_2)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_2)
 		{
 			OutString += ShaderStringFactory::Float2() + " ";
 		}
-		else if (m_pOutputs[2]->GetValueType() == ValueType::VT_3)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_3)
 		{
 			OutString += ShaderStringFactory::Float3() + " ";
 		}
-		else if (m_pOutputs[3]->GetValueType() == ValueType::VT_4)
+		else if (m_pOutputs[0]->GetValueType() == ValueType::VT_4)
 		{
 			OutString += ShaderStringFactory::Float4() += " ";
 		}

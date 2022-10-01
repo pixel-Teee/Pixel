@@ -17,18 +17,6 @@ cbuffer cbPass : register(b1)
 	float gHeight;
 };
 
-cbuffer CbMaterial : register(b2)
-{
-	float3 gAlbedo;
-	float gRoughness;
-	float gMetallic;
-	float gAo;
-	bool HaveNormal;//have normal
-	int ShadingModelID;//shading model id
-	float ClearCoat;//for clear coat
-	float ClearCoatRoughness;//for clear coat
-};
-
 struct VertexIn
 {
 	float3 PosL : POSITION;

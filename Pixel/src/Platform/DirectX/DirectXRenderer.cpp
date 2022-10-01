@@ -455,6 +455,9 @@ namespace Pixel {
 		m_pArrowModelMaterial->m_Materials.push_back(pSubMaterial);
 		pSubMaterial->shadingModel = ShadingModel::SM_Unlit;
 		//------create arrow for direct light------
+
+		m_TestVertexShader = Shader::Create("assets/shaders/Cache/test.hlsl", "VS", "vs_5_0");
+		m_TestFragShader = Shader::Create("assets/shaders/Cache/test.hlsl", "PS", "ps_5_0");
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)

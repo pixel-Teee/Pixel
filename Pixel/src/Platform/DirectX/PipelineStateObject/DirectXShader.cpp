@@ -205,7 +205,7 @@ namespace Pixel {
 		if (hasDot)
 		{
 			//extract constant buffer name
-			std::string constBufferName = name.substr(0, std::max(pos - 1, 0ull));
+			std::string constBufferName = name.substr(0, pos);
 			Ref<DirectXCbvShaderParameter> pCbvShaderParameter;
 			uint32_t cbvIndex = 0;
 			for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)

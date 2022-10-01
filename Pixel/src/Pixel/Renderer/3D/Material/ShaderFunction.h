@@ -110,6 +110,6 @@ namespace Pixel {
 
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
-			
+		friend class Material;
 	};
 }

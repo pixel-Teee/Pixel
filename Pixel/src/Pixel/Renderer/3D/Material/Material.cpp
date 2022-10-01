@@ -5,6 +5,7 @@
 #include "ShaderMainFunction.h"
 #include "InputNode.h"
 #include "OutputNode.h"
+#include "ConstFloatValue.h"
 //------my library------
 
 namespace Pixel {
@@ -126,6 +127,21 @@ namespace Pixel {
 			{
 				m_pShaderMainFunction = std::static_pointer_cast<ShaderMainFunction>(m_pShaderFunctionArray[i]);
 			}
+		}
+	}
+
+	void Material::CreateConstValueDeclare(std::string& OutString)
+	{
+		for (size_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			rttr::type tempType = rttr::type::get(*m_pShaderFunctionArray[i]);
+
+			if (!tempType.is_derived_from<ConstValue>() || !m_pShaderFunctionArray[i]->m_bIsVisited)
+				continue;
+
+			Ref<ConstValue> pTemp = std::static_pointer_cast<ConstValue>(m_pShaderFunctionArray[i]);
+
+			pTemp->GetDeclareString(OutString);
 		}
 	}
 
