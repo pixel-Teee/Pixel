@@ -12,6 +12,10 @@ namespace Pixel
 {
     ShaderMainFunction::ShaderMainFunction()
     {
+		m_InputNodeDisplayColor = { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f) };
+		m_InputNodeDisplayName = { "Normal", "Albedo", "Roughness", "Metallic", "AO"};
+
+        m_HeaderColor = glm::vec3(0.86f, 0.625f, 0.86f);
     }
 
     bool ShaderMainFunction::GetShaderTreeString(std::string& OutString)
@@ -62,23 +66,23 @@ namespace Pixel
         std::string InputName = "Normal";
         Ref<InputNode> pInputNode;
         pInputNode = CreateRef<InputNode>(ValueType::VT_4, InputName, shared_from_this());
-        m_pInputs.push_back(pInputNode);
+        m_pInputs.push_back(pInputNode);      
 
         InputName = "Albedo";
         pInputNode = CreateRef<InputNode>(ValueType::VT_4, InputName, shared_from_this());
-        m_pInputs.push_back(pInputNode);
+        m_pInputs.push_back(pInputNode);      
 
         InputName = "Roughness";
         pInputNode = CreateRef<InputNode>(ValueType::VT_1, InputName, shared_from_this());
-        m_pInputs.push_back(pInputNode);
+        m_pInputs.push_back(pInputNode);      
 
         InputName = "Metallic";
         pInputNode = CreateRef<InputNode>(ValueType::VT_1, InputName, shared_from_this());
-        m_pInputs.push_back(pInputNode);
+        m_pInputs.push_back(pInputNode);      
 
         InputName = "Ao";
         pInputNode = CreateRef<InputNode>(ValueType::VT_1, InputName, shared_from_this());
-        m_pInputs.push_back(pInputNode);
+        m_pInputs.push_back(pInputNode);     
 	}
 
     void ShaderMainFunction::GetNormalString(std::string& OutString)
@@ -86,6 +90,11 @@ namespace Pixel
         if (GetNormalNode()->GetOutputLink())
         {
             (std::static_pointer_cast<ShaderFunction>(GetNormalNode()->GetOutputLink()->GetOwner()))->GetShaderTreeString(OutString);
+        }
+        else
+        {
+            //TODO:need to fix this
+            //OutString += GetNormalNode()->GetNodeName() + " = " + "float4(pin.NormalW, 1.0f);\n";
         }
     }
 
@@ -96,9 +105,11 @@ namespace Pixel
 
         OutString += "pixelOut.gBufferPosition.xyz = pin.PosW;\n";
 
-        OutString += "if (HaveNormal)\npixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;\n";
+		//OutString += "if (HaveNormal)\npixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;\n";
+		//
+		//OutString += "else\npixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;\n";
 
-        OutString += "else\npixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;\n";
+        OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
 
 		//OutString += "pixelOut.gBufferNormal.xyz" 
         //OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";

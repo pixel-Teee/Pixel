@@ -6,6 +6,7 @@
 #include "InputNode.h"
 #include "OutputNode.h"
 #include "ConstFloatValue.h"
+#include "TextureShaderFunction.h"
 //------my library------
 
 namespace Pixel {
@@ -142,6 +143,22 @@ namespace Pixel {
 			Ref<ConstValue> pTemp = std::static_pointer_cast<ConstValue>(m_pShaderFunctionArray[i]);
 
 			pTemp->GetDeclareString(OutString);
+		}
+	}
+
+	void Material::CreateTextureDeclare(std::string& OutString, uint32_t registerId)
+	{
+		for (size_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			rttr::type tempType = rttr::type::get(*m_pShaderFunctionArray[i]);
+
+			if (!tempType.is_derived_from<TextureShaderFunction>() || !m_pShaderFunctionArray[i]->m_bIsVisited)
+				continue;
+
+			Ref<TextureShaderFunction> pTemp = std::static_pointer_cast<TextureShaderFunction>(m_pShaderFunctionArray[i]);
+
+			pTemp->GetDeclareString(OutString, registerId);
+			++registerId;
 		}
 	}
 

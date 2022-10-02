@@ -36,6 +36,8 @@ file(GLOB_RECURSE Headers
 "src/Pixel/Renderer/3D/Material/Mul.h"
 "src/Pixel/Renderer/3D/Material/ConstFloatValue.h"
 "src/Pixel/Renderer/3D/Material/ConstValue.h"
+"src/Pixel/Renderer/3D/Material/TextureShaderFunction.h"
+"src/Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
 "src/Pixel/Animation/*.h"
 )
 

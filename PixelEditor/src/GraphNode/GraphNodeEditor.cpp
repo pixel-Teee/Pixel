@@ -18,6 +18,7 @@
 #include "Pixel/Renderer/DescriptorHandle/DescriptorHandle.h"
 #include "Pixel/Renderer/3D/Material/Mul.h"
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
+#include "Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 #include "Pixel/Scene/SceneSerializer.h"
 #include "Pixel/Scene/SimpleScene.h"
@@ -105,7 +106,7 @@ namespace Pixel {
 			{
 				Ref<GraphPin> pGraphPins = CreateRef<GraphPin>();
 				pGraphPins->m_PinId = m_pMaterial->GetShaderFunction()[i]->GetInputNode(j)->GetPutNodeId();
-				pGraphPins->m_PinName = m_pMaterial->GetShaderFunction()[i]->GetInputNode(j)->GetNodeName();
+				pGraphPins->m_PinName = m_pMaterial->GetShaderFunction()[i]->m_InputNodeDisplayName[j];
 				pGraphPins->m_OwnerNode = pGraphNode;
 				pGraphNode->m_InputPin.push_back(pGraphPins);
 				m_GraphPins.push_back(pGraphPins);
@@ -117,7 +118,7 @@ namespace Pixel {
 			{
 				Ref<GraphPin> pGraphPins = CreateRef<GraphPin>();
 				pGraphPins->m_PinId = m_pMaterial->GetShaderFunction()[i]->GetOutputNode(j)->GetPutNodeId();
-				pGraphPins->m_PinName = m_pMaterial->GetShaderFunction()[i]->GetOutputNode(j)->GetNodeName();
+				pGraphPins->m_PinName = m_pMaterial->GetShaderFunction()[i]->m_OutputNodeDisplayName[j];
 				pGraphPins->m_OwnerNode = pGraphNode;
 				pGraphNode->m_OutputPin.push_back(pGraphPins);
 				m_GraphPins.push_back(pGraphPins);
@@ -234,11 +235,13 @@ namespace Pixel {
 		//}
 		for (size_t i = 0; i < m_GraphNodes.size(); ++i)
 		{
-
 			if (m_GraphNodes[i]->m_NodeId.Get() == 1)
 			{
 				m_BlueprintNodeBuilder->Begin(m_GraphNodes[i]->m_NodeId);
-				m_BlueprintNodeBuilder->Header();
+				glm::vec3 headerColor = m_GraphNodes[i]->p_Owner->m_HeaderColor;
+				//draw header
+				m_BlueprintNodeBuilder->Header(ImVec4(headerColor.r, headerColor.g, headerColor.b, 1.0f));
+				//m_BlueprintNodeBuilder->Header();
 				ImGui::Spring(0);
 				ImGui::TextUnformatted(m_GraphNodes[i]->p_Owner->GetShowName().c_str());
 				ImGui::Spring(1);
@@ -325,11 +328,57 @@ namespace Pixel {
 			//show details
 			Ref<ShaderFunction> pShaderFunction = m_CurrentSelectedGraphNode->p_Owner;
 
-			if (pShaderFunction->GetShaderFunctionType() == ShaderFunctionType::ConstFloatValue4)
+			//if (pShaderFunction->GetShaderFunctionType() == ShaderFunctionType::ConstFloatValue4)
+			//{
+			//	Ref<ConstFloatValue> pConstFloatValue4ShaderFuntion = std::static_pointer_cast<ConstFloatValue>(pShaderFunction);
+			//	
+			//	ImGui::ColorEdit4("const float value 4", pConstFloatValue4ShaderFuntion->m_Value.data());
+			//}
+			static char buf[256];
+
+			if (rttr::type::get(*pShaderFunction) == rttr::type::get<ConstFloatValue>())
 			{
-				Ref<ConstFloatValue> pConstFloatValue4ShaderFuntion = std::static_pointer_cast<ConstFloatValue>(pShaderFunction);
+				Ref<ConstFloatValue> pConstFloatValueShaderFuntion = std::static_pointer_cast<ConstFloatValue>(pShaderFunction);
+
+				if (pConstFloatValueShaderFuntion->m_Value.size() == 4)
+				{
+					if (pConstFloatValueShaderFuntion->m_bIsCustom)
+					{
+						memset(buf, 0, sizeof(buf));
+						strcpy_s(buf, sizeof(buf), pConstFloatValueShaderFuntion->GetShowName().c_str());
+						ImGui::Separator();
+						ImGui::Text("parameter name");
+						ImGui::SameLine();
+						//edit parameter name and texture default parameter
+						if (ImGui::InputText("##parameter name", buf, 256))
+						{
+							std::string str = std::string(buf);
+							pConstFloatValueShaderFuntion->SetShowName(str);//edit parameter name
+						}
+						//ImGui::Separator();
+					}
+
+					ImGui::Separator();
+					ImGui::Text("value");
+					ImGui::SameLine();
+					ImGui::ColorEdit4("##const float value 4", pConstFloatValueShaderFuntion->m_Value.data());
+				}
+			}
+			else if (rttr::type::get(*pShaderFunction) == rttr::type::get<Texture2DShaderFunction>())
+			{
+				Ref<Texture2DShaderFunction> pTexture2DShaderFunction = std::static_pointer_cast<Texture2DShaderFunction>(pShaderFunction);
 				
-				ImGui::ColorEdit4("const float value 4", pConstFloatValue4ShaderFuntion->m_Value.data());
+				memset(buf, 0, sizeof(buf));
+				strcpy_s(buf, sizeof(buf), pTexture2DShaderFunction->GetShowName().c_str());
+				ImGui::Separator();
+				ImGui::Text("parameter name");
+				ImGui::SameLine();
+				//edit parameter name and texture default parameter
+				if (ImGui::InputText("##parameter name", buf, 256))
+				{
+					std::string str = std::string(buf);
+					pTexture2DShaderFunction->SetShowName(str);//edit parameter name
+				}
 			}
 		}
 
@@ -352,8 +401,9 @@ namespace Pixel {
 				continue;
 			m_BlueprintNodeBuilder->Begin(node->m_NodeId);
 
+			glm::vec3 headerColor = node->p_Owner->m_HeaderColor;
 			//draw header
-			m_BlueprintNodeBuilder->Header(ImColor(255, 255, 255, 255));
+			m_BlueprintNodeBuilder->Header(ImVec4(headerColor.r, headerColor.g, headerColor.b, 1.0f));
 			ImGui::Spring(0);
 			ImGui::TextUnformatted(node->p_Owner->GetShowName().c_str());
 			ImGui::Spring(1);
@@ -361,24 +411,30 @@ namespace Pixel {
 			ImGui::Spring(0);
 			m_BlueprintNodeBuilder->EndHeader();
 
+			uint32_t i = 0;
 			//draw input pin
 			for(auto& input : node->m_InputPin)
 			{
 				m_BlueprintNodeBuilder->Input(input->m_PinId);
-				DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
+				glm::vec3 color = node->p_Owner->m_InputNodeDisplayColor[i];
+				DrawPinIcon(ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, 1.0f)), ImColor(32, 32, 32, 255));
 				ImGui::Spring(0);
 				ImGui::TextUnformatted(input->m_PinName.c_str());
 				m_BlueprintNodeBuilder->EndInput();
+				++i;
 			}
 
+			i = 0;
 			//draw output pin
 			for(auto& output : node->m_OutputPin)
 			{
 				m_BlueprintNodeBuilder->Output(output->m_PinId);
 				ImGui::TextUnformatted(output->m_PinName.c_str());		
 				ImGui::Spring(0);
-				DrawPinIcon(ImColor(255, 255, 255, 255), ImColor(32, 32, 32, 255));
+				glm::vec3 color = node->p_Owner->m_OutputNodeDisplayColor[i];
+				DrawPinIcon(ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, 1.0f)), ImColor(32, 32, 32, 255));
 				m_BlueprintNodeBuilder->EndOutput();
+				++i;
 			}
 			m_BlueprintNodeBuilder->End();
 		}
@@ -553,6 +609,13 @@ namespace Pixel {
 			{
 				CreateConstFloatValue4();
 			}
+
+			if (ImGui::MenuItem("Texture2D"))
+			{
+				CreateTexture2D(textureParameterSuffix);
+				++textureParameterSuffix;
+			}
+
 			ImGui::EndPopup();
 		}
 		ed::Resume();
@@ -570,20 +633,21 @@ namespace Pixel {
 
 		ed::Suspend();
 		if (ImGui::BeginPopup("Node Context Menu"))
-		{
-			if (ImGui::MenuItem("promote to parameter"))
+		{		
+			if (m_CurrentSelectedGraphNode != nullptr)
 			{
-				if (m_CurrentSelectedGraphNode != nullptr)
-				{
-					Ref<ShaderFunction> pShaderFunction = m_CurrentSelectedGraphNode->p_Owner;
+				Ref<ShaderFunction> pShaderFunction = m_CurrentSelectedGraphNode->p_Owner;
 
-					if (pShaderFunction->GetShaderFunctionType() == ShaderFunctionType::ConstFloatValue4)
+				//if it's type is const float value, then can promote to parameter
+				if (rttr::type::get(*pShaderFunction) == rttr::type::get<ConstFloatValue>())
+				{
+					if (ImGui::MenuItem("promote to parameter"))
 					{
-						//set to constant buffer variable
 						std::static_pointer_cast<ConstFloatValue>(pShaderFunction)->m_bIsCustom = true;
 					}
-				}			
-			}
+				}
+			}			
+
 			ImGui::EndPopup();
 		}
 		ed::Resume();
@@ -607,7 +671,7 @@ namespace Pixel {
 			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
 			inputPin->m_PinId = pMul->GetInputNode(i)->GetPutNodeId();
 			inputPin->m_OwnerNode = pGraphNode;
-			inputPin->m_PinName = pMul->GetInputNode(i)->GetNodeName();
+			inputPin->m_PinName = pMul->m_InputNodeDisplayName[i];
 			pGraphNode->m_InputPin.push_back(inputPin);
 			m_GraphPins.push_back(inputPin);
 		}
@@ -618,7 +682,7 @@ namespace Pixel {
 			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
 			outputPin->m_PinId = pMul->GetOutputNode(i)->GetPutNodeId();
 			outputPin->m_OwnerNode = pGraphNode;
-			outputPin->m_PinName = pMul->GetOutputNode(i)->GetNodeName();
+			outputPin->m_PinName = pMul->m_OutputNodeDisplayName[i];
 			pGraphNode->m_OutputPin.push_back(outputPin);
 			m_GraphPins.push_back(outputPin);
 		}
@@ -648,7 +712,7 @@ namespace Pixel {
 			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
 			inputPin->m_PinId = pConstFloatValue4->GetInputNode(i)->GetPutNodeId();
 			inputPin->m_OwnerNode = pGraphNode;
-			inputPin->m_PinName = pConstFloatValue4->GetInputNode(i)->GetNodeName();
+			inputPin->m_PinName = pConstFloatValue4->m_InputNodeDisplayName[i];
 			pGraphNode->m_InputPin.push_back(inputPin);
 			m_GraphPins.push_back(inputPin);
 		}
@@ -659,7 +723,7 @@ namespace Pixel {
 			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
 			outputPin->m_PinId = pConstFloatValue4->GetOutputNode(i)->GetPutNodeId();
 			outputPin->m_OwnerNode = pGraphNode;
-			outputPin->m_PinName = pConstFloatValue4->GetOutputNode(i)->GetNodeName();
+			outputPin->m_PinName = pConstFloatValue4->m_OutputNodeDisplayName[i];
 			pGraphNode->m_OutputPin.push_back(outputPin);
 			m_GraphPins.push_back(outputPin);
 		}
@@ -668,6 +732,46 @@ namespace Pixel {
 
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pConstFloatValue4);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateTexture2D(uint32_t textureParameterSuffix)
+	{
+		Ref<ShaderFunction> pTexture = CreateRef<Texture2DShaderFunction>("TextureParameter" + std::to_string(textureParameterSuffix), m_pMaterial);
+		pTexture->AddToMaterialOwner();
+		pTexture->ConstructPutNodeAndSetPutNodeOwner();
+		pTexture->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pTexture->GetFunctioNodeId();
+		pGraphNode->p_Owner = pTexture;
+
+		for (size_t i = 0; i < pTexture->GetInputNodeNum(); ++i)
+		{
+			pTexture->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pTexture->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pTexture->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pTexture->GetOutputNodeNum(); ++i)
+		{
+			pTexture->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pTexture->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pTexture->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pTexture);
 		//------add to material shader function------
 	}
 

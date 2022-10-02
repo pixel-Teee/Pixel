@@ -66,7 +66,7 @@ namespace Pixel {
 	{
 		if (registerId != -1)
 		{
-			OutString += "Texture2D " + m_ShowName + " register(t" + std::to_string(registerId) + ");\n";
+			OutString += "Texture2D " + m_ShowName + " : register(t" + std::to_string(registerId) + ");\n";
 		}
 		else
 		{

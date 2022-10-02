@@ -33,7 +33,10 @@ namespace Pixel {
 		bool GetShaderTreeString(std::string& OutString);
 
 		//create const buffer value declare
-		void CreateConstValueDeclare(std::string & OutString);
+		void CreateConstValueDeclare(std::string& OutString);
+
+		//create texture value declare
+		void CreateTextureDeclare(std::string & OutString, uint32_t registerId);
 
 		std::string& GetMaterialName() { return m_MaterialName; }
 

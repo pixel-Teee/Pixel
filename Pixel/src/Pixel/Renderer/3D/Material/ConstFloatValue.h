@@ -10,7 +10,7 @@ namespace Pixel
 	{
 	public:
 		Meta()
-		ConstFloatValue() = default;
+		ConstFloatValue();
 		ConstFloatValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom);
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();

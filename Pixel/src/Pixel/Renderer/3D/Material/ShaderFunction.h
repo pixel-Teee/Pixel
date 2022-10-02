@@ -8,11 +8,11 @@ namespace Pixel {
 	class InputNode;
 
 	class OutputNode;
-	enum class Meta(Enable) ShaderFunctionType {
-		ConstFloatValue4 = 0,
-		Mul = 1,
-		Main = 2,
-	};
+	//enum class Meta(Enable) ShaderFunctionType {
+	//	ConstFloatValue4 = 0,
+	//	Mul = 1,
+	//	Main = 2,
+	//};
 	//node logic
 	class Meta(Enable) ShaderFunction : public std::enable_shared_from_this<ShaderFunction>
 	{
@@ -22,10 +22,6 @@ namespace Pixel {
 		Meta()
 		//node name
 		std::string m_ShowName;
-
-		Meta()
-		//function type
-		ShaderFunctionType m_functionType;
 
 		ShaderFunction(const std::string& ShowName, Ref<Material> pMaterial);
 
@@ -65,7 +61,7 @@ namespace Pixel {
 		void SetShowName(const std::string& showName);
 		//------get node name and set node name------
 
-		ShaderFunctionType GetFunctionType();
+		//ShaderFunctionType GetFunctionType();
 
 		//------get node and set node id------
 		uint32_t GetFunctioNodeId();
@@ -102,8 +98,15 @@ namespace Pixel {
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
 
-		ShaderFunctionType GetShaderFunctionType() { return m_functionType; }
+		std::vector<std::string> m_InputNodeDisplayName;
+
+		std::vector<glm::vec3> m_InputNodeDisplayColor;
 		
+		std::vector<std::string> m_OutputNodeDisplayName;
+
+		std::vector<glm::vec3> m_OutputNodeDisplayColor;
+
+		glm::vec3 m_HeaderColor;
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;

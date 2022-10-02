@@ -56,6 +56,8 @@ namespace Pixel {
 		void CreateMul();
 
 		void CreateConstFloatValue4();
+
+		void CreateTexture2D(uint32_t textureParameterSuffix);
 		//------create logic nodes------
 
 		Ref<GraphPin> FindPin(ed::PinId pinId);
@@ -98,5 +100,7 @@ namespace Pixel {
 		//------current selected graph node------
 
 		bool m_IsPreviewEventBlocked;
+
+		uint32_t textureParameterSuffix = 0;
 	};
 }

@@ -72,11 +72,6 @@ namespace Pixel {
 		return m_ShowName;
 	}
 
-	ShaderFunctionType ShaderFunction::GetFunctionType()
-	{
-		return m_functionType;
-	}
-
 	uint32_t ShaderFunction::GetFunctioNodeId()
 	{
 		return m_NodeId;

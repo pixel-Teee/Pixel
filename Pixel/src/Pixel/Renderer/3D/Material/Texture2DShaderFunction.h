@@ -7,7 +7,10 @@ namespace Pixel {
 	class Meta(Enable) Texture2DShaderFunction : public TextureShaderFunction
 	{
 	public:
+
 		Meta()
+		Texture2DShaderFunction();
+
 		Texture2DShaderFunction(const std::string & ShowName, Ref<Material> pMaterial);
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner() override;

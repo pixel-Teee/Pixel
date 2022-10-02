@@ -97,38 +97,37 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-//------material texture------
-Texture2D gAlbedoMap : register(t0);
-Texture2D gNormalMap : register(t1);
-Texture2D gRoughnessMap : register(t2);
-Texture2D gMetallicMap : register(t3);
-Texture2D gAoMap : register(t4);
-//------material texture------
-
 //------material samplers------
 SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
 #include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
-float4  ConstFloatValue7;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
+Texture2D TextureParameter0 : register(t0);
+Texture2D TextureParameter1 : register(t1);
+
 PixelOut PS(VertexOut pin){
-float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = ConstFloatValue7;
+float4  ConstFloatValue7;
+ConstFloatValue7 = float4(0.988417, 0.381628, 0.381628, 0.000000);
+float2  Texture2DCoordinateInput15 = float2(ConstFloatValue7.x, ConstFloatValue7.y);
+float4  Texture2DOutput16 = float4(0, 0, 0, 0);
+Texture2DOutput16 = TextureParameter0.Sample(gsamPointWrap, Texture2DCoordinateInput15);
+float2  Texture2DCoordinateInput24 = pin.TexCoord;
+float4  Texture2DOutput25 = float4(0, 0, 0, 0);
+Texture2DOutput25 = TextureParameter1.Sample(gsamPointWrap, Texture2DCoordinateInput24);
+float4  Normal = Texture2DOutput16;
+float4  Albedo = Texture2DOutput25;
 float  Roughness = 0;
 float  Metallic = 0;
 float  Ao = 0;
 PixelOut pixelOut = (PixelOut)(0.0f);
 pixelOut.gBufferPosition.xyz = pin.PosW;
-if (HaveNormal)
-pixelOut.gBufferNormal.xyz = (pin.NormalW.xyz + 1.0f) / 2.0f;
-else
-pixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;
+pixelOut.gBufferNormal.xyz = Normal.xyz;
 pixelOut.gBufferAlbedo.xyz = Albedo.xyz;
 pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
 pixelOut.gVelocity.w = ClearCoat;

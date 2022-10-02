@@ -9,12 +9,25 @@
 
 namespace Pixel
 {
+	ConstFloatValue::ConstFloatValue()
+	{
+		m_OutputNodeDisplayColor = { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f)};
+		m_OutputNodeDisplayName = { "", "", "", "", "" };
+
+		m_HeaderColor = { 1.0f, 0.83f, 0.0f };
+	}
+
 	//------ConstFloatValue------
 	ConstFloatValue::ConstFloatValue(const std::string& showName, Ref<Material> pMaterial, uint32_t valueNumber, bool bIsCustom)
 		:ConstValue(showName, pMaterial, valueNumber, bIsCustom)
 	{
 		m_valueNumber = valueNumber;
 		m_bIsCustom = bIsCustom;
+
+		m_OutputNodeDisplayColor = { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f) };
+		m_OutputNodeDisplayName = { "", "", "", "", "" };
+
+		m_HeaderColor = { 1.0f, 0.83f, 0.0f };
 	}
 
 	void ConstFloatValue::ConstructPutNodeAndSetPutNodeOwner()
@@ -26,7 +39,8 @@ namespace Pixel
 		Ref<OutputNode> pOutputNode;
 		pOutputNode = CreateRef<OutputNode>((ValueType)(m_valueNumber - 1), OutputName, shared_from_this());
 		m_pOutputs.push_back(pOutputNode);
-
+		m_OutputNodeDisplayName.push_back("");
+		m_OutputNodeDisplayColor.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 		//create temp variable
 		//if temp variable ConstFloatValue have 4 components
 		//and will create 4 temp variable

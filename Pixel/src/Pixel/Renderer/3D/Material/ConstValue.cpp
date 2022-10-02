@@ -17,10 +17,6 @@ namespace Pixel
 	{
 		m_bIsCustom = bIsCustom;
 		//m_functionType = ShaderFunction::ShaderFunctionType::ConstFloat4;
-		if(valueNumber == 4)
-		{
-			m_functionType = ShaderFunctionType::ConstFloatValue4;
-		}
 	}
 
 	ConstValue::~ConstValue()

@@ -97,14 +97,6 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-//------material texture------
-Texture2D gAlbedoMap : register(t0);
-Texture2D gNormalMap : register(t1);
-Texture2D gRoughnessMap : register(t2);
-Texture2D gMetallicMap : register(t3);
-Texture2D gAoMap : register(t4);
-//------material texture------
-
 //------material samplers------
 SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------

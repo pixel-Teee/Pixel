@@ -30,5 +30,7 @@
 #include "Pixel/Renderer/3D/Material/Mul.h"
 #include "Pixel/Renderer/3D/Material/ConstValue.h"
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
+#include "Pixel/Renderer/3D/Material/TextureShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
 
 #include "Pixel/Animation/Bone.h"

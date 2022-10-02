@@ -184,7 +184,15 @@ namespace Pixel {
 		temp += "float ClearCoat;\n";
 		temp += "float ClearCoatRoughness;\n";
 
-		temp += "};";
+		temp += "};\n";
+
+		Out += temp;
+
+		temp.clear();//clear string
+
+		uint32_t registerId = 0;
+		
+		pMaterial->CreateTextureDeclare(temp, registerId);
 
 		Out += temp;
 	}

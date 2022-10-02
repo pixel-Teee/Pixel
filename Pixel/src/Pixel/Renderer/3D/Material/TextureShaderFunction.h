@@ -6,6 +6,7 @@ namespace Pixel {
 	class Meta(Enable) TextureShaderFunction : public ShaderFunction
 	{
 	public:
+		Meta()
 		TextureShaderFunction();
 
 		TextureShaderFunction(const std::string & ShowName, Ref<Material> pMaterial);
