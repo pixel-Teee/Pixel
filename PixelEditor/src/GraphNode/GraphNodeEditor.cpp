@@ -689,6 +689,10 @@ namespace Pixel {
 
 		m_GraphNodes.push_back(pGraphNode);
 
+		//PIXEL_CORE_INFO("{0}, {1}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pMul);
 		//------add to material shader function------
@@ -730,6 +734,8 @@ namespace Pixel {
 
 		m_GraphNodes.push_back(pGraphNode);
 
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pConstFloatValue4);
 		//------add to material shader function------
@@ -769,6 +775,8 @@ namespace Pixel {
 		}
 
 		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
 
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pTexture);

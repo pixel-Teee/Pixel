@@ -27,17 +27,7 @@ file(GLOB_RECURSE Headers
 "src/Pixel/Scene/Components/*.h"
 "src/Pixel/Core/UUID.h"
 "src/Pixel/Scene/SceneCamera.h"
-"src/Pixel/Renderer/3D/Material/Material.h"
-"src/Pixel/Renderer/3D/Material/ShaderFunction.h"
-"src/Pixel/Renderer/3D/Material/ShaderMainFunction.h"
-"src/Pixel/Renderer/3D/Material/InputNode.h"
-"src/Pixel/Renderer/3D/Material/OutputNode.h"
-"src/Pixel/Renderer/3D/Material/PutNode.h"
-"src/Pixel/Renderer/3D/Material/Mul.h"
-"src/Pixel/Renderer/3D/Material/ConstFloatValue.h"
-"src/Pixel/Renderer/3D/Material/ConstValue.h"
-"src/Pixel/Renderer/3D/Material/TextureShaderFunction.h"
-"src/Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
+"src/Pixel/Renderer/3D/Material/*.h"
 "src/Pixel/Animation/*.h"
 )
 

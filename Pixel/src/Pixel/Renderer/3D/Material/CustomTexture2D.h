@@ -5,30 +5,34 @@
 //------my library------
 
 namespace Pixel {
-	class CustomSamplerState : public MaterialCustomPara
+	class Meta(Enable) CustomTexture2D : public MaterialCustomPara
 	{
 	public:
-		CustomSamplerState();
+		Meta()
+		CustomTexture2D();
 
-		virtual ~CustomSamplerState();
+		virtual ~CustomTexture2D();
 
 		//sampler state
 		//TODO:Sampler Desc will renamed SamplerState
-		Ref<SamplerDesc> m_SamplerState;
+		//Ref<SamplerDesc> m_SamplerState;
 
-		CustomSamplerState& operator=(const CustomSamplerState& rhs)
+		CustomTexture2D& operator=(const CustomTexture2D& rhs)
 		{
 			//assign name
 			MaterialCustomPara::operator=(rhs);
 			//TODO:is it required clone function?
 			//m_SamplerState = rhs.m_SamplerState;
-			m_SamplerState = rhs.m_SamplerState->Clone();
+			//m_SamplerState = rhs.m_SamplerState->Clone();
 			return *this;
 		}
 
-		friend bool operator==(const CustomSamplerState& lhs, const CustomSamplerState& rhs)
+		friend bool operator==(const CustomTexture2D& lhs, const CustomTexture2D& rhs)
 		{
 			return lhs.ConstValueName == rhs.ConstValueName;
 		}
+
+		RTTR_ENABLE(MaterialCustomPara)
+		RTTR_REGISTRATION_FRIEND
 	};
 }

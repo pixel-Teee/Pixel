@@ -7,6 +7,7 @@
 #include "OutputNode.h"
 #include "ConstFloatValue.h"
 #include "TextureShaderFunction.h"
+#include "Texture2DShaderFunction.h"
 //------my library------
 
 namespace Pixel {
@@ -129,6 +130,10 @@ namespace Pixel {
 				m_pShaderMainFunction = std::static_pointer_cast<ShaderMainFunction>(m_pShaderFunctionArray[i]);
 			}
 		}
+
+		//------link all parameters------
+		LinkAllParameters();
+		//------link all parameters------
 	}
 
 	void Material::CreateConstValueDeclare(std::string& OutString)
@@ -159,6 +164,45 @@ namespace Pixel {
 
 			pTemp->GetDeclareString(OutString, registerId);
 			++registerId;
+		}
+	}
+
+	void Material::LinkAllParameters()
+	{
+		//create material parameter
+		m_PSShaderCustomValue.clear();
+		//interms of the shader function array to create custom float value and custom texture 2D
+		for (size_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			if (rttr::type::get(*m_pShaderFunctionArray[i]) == rttr::type::get<ConstFloatValue>())
+			{
+				Ref<ConstFloatValue> pConstFloatValue = std::static_pointer_cast<ConstFloatValue>(m_pShaderFunctionArray[i]);
+
+				if (!pConstFloatValue->m_bIsCustom)
+					continue;
+
+				Ref<CustomFloatValue> pCustomFloatValue = CreateRef<CustomFloatValue>();
+				pCustomFloatValue->ConstValueName = m_pShaderFunctionArray[i]->m_ShowName;
+				pCustomFloatValue->m_Values.resize(pConstFloatValue->m_valueNumber);
+				pCustomFloatValue->m_ValueType = (ValueType)(pConstFloatValue->m_valueNumber - 1);
+				m_PSShaderCustomValue.push_back(pCustomFloatValue);
+			}
+		}
+
+		m_PSShaderCustomTexture.clear();
+		for (size_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
+		{
+			if (rttr::type::get(*m_pShaderFunctionArray[i]) == rttr::type::get<Texture2DShaderFunction>())
+			{
+				Ref<Texture2DShaderFunction> pTexture2DShaderFunction = std::static_pointer_cast<Texture2DShaderFunction>(m_pShaderFunctionArray[i]);
+				
+				Ref<CustomTexture2D> pCustomTexture = CreateRef<CustomTexture2D>();
+				pCustomTexture->ConstValueName = m_pShaderFunctionArray[i]->m_ShowName;
+				
+				//TODO:need to some information
+
+				m_PSShaderCustomTexture.push_back(pCustomTexture);
+			}
 		}
 	}
 

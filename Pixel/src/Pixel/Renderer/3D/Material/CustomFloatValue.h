@@ -2,28 +2,22 @@
 
 #include <vector>
 
+#include "PutNode.h"//TODO:use value type, need to fix this, remove this
 #include "MaterialCustomPara.h"
 
 namespace Pixel {
-	class CustomFloatValue : public MaterialCustomPara
+
+	class Meta(Enable) CustomFloatValue : public MaterialCustomPara
 	{
 	public:
-		enum class ValueType
-		{
-			VT_1,//float
-			VT_2,//float2
-			VT_3,//float3
-			VT_4,//float4
-			VT_4X4,//float4x4
-			VT_MAX
-		};
-
 		CustomFloatValue();
 
 		virtual ~CustomFloatValue();
 
+		Meta()
 		std::vector<float> m_Values;//if this value type is VT_4X4, then there will have 16 floats
 
+		Meta()
 		ValueType m_ValueType;
 
 		CustomFloatValue& operator=(const CustomFloatValue& rhs)
@@ -43,5 +37,7 @@ namespace Pixel {
 
 		RTTR_ENABLE(MaterialCustomPara)
 		RTTR_REGISTRATION_FRIEND
+
+		friend class Material;
 	};
 }

@@ -14,7 +14,7 @@ namespace Pixel {
 	class Meta(Enable) Material : public MaterialBase
 	{
 	public:
-
+		Meta()
 		Material();
 
 		virtual ~Material();
@@ -43,6 +43,8 @@ namespace Pixel {
 		void SetMaterialName(const std::string& materialName);
 
 		std::vector<glm::ivec2>& GetLinks() { return m_Links; }
+
+		void LinkAllParameters();
 
 		Meta()
 		std::string m_MaterialName;//material name

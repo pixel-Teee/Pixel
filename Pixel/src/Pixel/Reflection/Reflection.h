@@ -21,6 +21,7 @@
 
 #include "Pixel/Core/UUID.h"
 #include "Pixel/Scene/SceneCamera.h"
+#include "Pixel/Renderer/3D/Material/MaterialBase.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/3D/Material/ShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
@@ -32,5 +33,8 @@
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 #include "Pixel/Renderer/3D/Material/TextureShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/MaterialCustomPara.h"
+#include "Pixel/Renderer/3D/Material/CustomFloatValue.h"
+#include "Pixel/Renderer/3D/Material/CustomTexture2D.h"
 
 #include "Pixel/Animation/Bone.h"

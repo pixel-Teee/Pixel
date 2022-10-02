@@ -4,11 +4,8 @@
 
 namespace Pixel {
 
-	RTTR_REGISTRATION
+	MaterialBase::MaterialBase()
 	{
-		using namespace rttr;
-		registration::class_<MaterialBase>("MaterialBase")
-			.constructor<>()
-			.property("m_PSShaderCustomValue", &MaterialBase::m_PSShaderCustomValue);
+
 	}
 }

@@ -162,6 +162,7 @@ namespace Pixel {
 
 		pMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(testCompilerVertex, testCompilerFrag, pMaterial->m_PsoIndex);
 		pMaterial->dirty = true;
+		pMaterial->LinkAllParameters();
 
 		return out;
 	}

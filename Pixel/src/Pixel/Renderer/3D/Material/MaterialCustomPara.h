@@ -6,13 +6,15 @@
 
 namespace Pixel {
 	//------material's custom parameter------
-	class MaterialCustomPara
+	class Meta(Enable) MaterialCustomPara
 	{
 	public:
+		Meta()
 		MaterialCustomPara() = default;
 
 		virtual ~MaterialCustomPara();
 
+		Meta()
 		//shader parameter name
 		std::string ConstValueName;
 

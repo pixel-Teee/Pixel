@@ -7,6 +7,7 @@ namespace Pixel {
 		VT_2,
 		VT_3,
 		VT_4,
+		VT_4X4,//float4x4
 		VT_MAX
 	};
 
