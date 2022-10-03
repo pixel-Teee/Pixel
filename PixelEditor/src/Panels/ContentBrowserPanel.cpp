@@ -13,6 +13,7 @@
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
 #include "Pixel/Renderer/3D/Material/InputNode.h"
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
@@ -31,6 +32,33 @@ namespace Pixel {
 
 	//once we have projects hub, change this
 	extern const std::filesystem::path g_AssetPath = "assets";
+
+	static std::string extractFileName(const std::string& physicalPath)
+	{
+		//std::string result;
+
+		std::string fileName;
+
+		size_t pos = physicalPath.find_last_of("/\\");
+		if (pos == std::string::npos)
+		{
+			fileName = physicalPath;
+		}
+		else
+		{
+			fileName = physicalPath.substr(pos + 1);
+		}
+
+		size_t dotPos = fileName.find_last_of('.');
+
+		if (dotPos == std::string::npos)
+			return fileName;
+		else
+		{
+			fileName = fileName.substr(0, dotPos - 1);
+			return fileName;
+		}
+	}
 
 	ContentBrowserPanel::ContentBrowserPanel()
 	:m_CurrentDirectory(g_AssetPath)
@@ -113,7 +141,12 @@ namespace Pixel {
 				pMaterial->GetMainFunction()->GetInputNode(2)->SetPutNodeId(4);
 				pMaterial->GetMainFunction()->GetInputNode(3)->SetPutNodeId(5);
 				pMaterial->GetMainFunction()->GetInputNode(4)->SetPutNodeId(6);
-				pMaterial->SetMaterialName(AssetManager::GetSingleton().GetVirtualPath(AssetManager::GetSingleton().to_string(physicalFilePath)));
+				//pMaterial->SetMaterialName(AssetManager::GetSingleton().GetVirtualPath(AssetManager::GetSingleton().to_string(physicalFilePath)));
+
+				//extract the material name
+				std::string materialName = extractFileName(AssetManager::GetSingleton().to_string(physicalFilePath));
+
+				pMaterial->SetMaterialName(materialName);
 
 				AssetManager::GetSingleton().CreateTestMaterial(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterial);
 
@@ -185,7 +218,29 @@ namespace Pixel {
 			{
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 				ImGui::ImageButton((ImTextureID)(m_FileHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
+				if (ImGui::IsItemClicked(1))
+				{
+					const std::string& itemPath = relativePath.string();
+					if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					{
+						//create material instance
+						ImGui::OpenPopup("##CreateMaterialInstance");
+					}
+				}
 				ImGui::PopStyleColor();
+
+
+				if (ImGui::BeginPopup("##CreateMaterialInstance"))
+				{
+					if (ImGui::MenuItem("CreateMaterialInstance"))
+					{
+						const std::string& itemPath = relativePath.string();
+						//create material instance
+						CreateMaterialInstance(AssetManager::GetSingleton().GetVirtualPath(itemPath));
+					}
+
+					ImGui::EndPopup();
+				}
 
 				if (ImGui::BeginDragDropSource())
 				{
@@ -269,44 +324,7 @@ namespace Pixel {
 							m_CurrentTestMaterialPath = materialPhysicalPath;
 
 							//read the test material from the material path
-							m_pMaterial = CreateRef<Material>();
-							//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
-							//
-							rapidjson::Document doc;
-
-							std::ifstream stream(materialPhysicalPath);
-							std::stringstream strStream;
-							strStream << stream.rdbuf();
-
-							rttr::type materialType = rttr::type::get<Material>();
-							
-							if (!doc.Parse(strStream.str().data()).HasParseError())
-							{
-								//TODO:need to fix, need a perfect reflection scheme
-								if (doc.HasMember(materialType.get_name().to_string().c_str()) && doc[materialType.get_name().to_string().c_str()].IsObject())
-								{
-									SceneSerializer::FromJsonRecursive(*m_pMaterial, doc[materialType.get_name().to_string().c_str()], true);
-								}
-							}
-							stream.close();
-
-							for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
-							{
-								//if(m_pMaterial->GetShaderFunction(i))
-
-								if (m_pMaterial->GetShaderFunction()[i]->GetFunctioNodeId() == 1)
-								{
-									m_pMaterial->m_pShaderMainFunction = std::static_pointer_cast<ShaderMainFunction>(m_pMaterial->GetShaderFunction()[i]);
-								}
-							}
-							
-							//for (size_t i = 0; i < m_pMaterial->GetShaderFunction().size(); ++i)
-							//{
-							//	//m_pMaterial->GetShaderFunction()[i]->ConstructPutNodeAndSetPutNodeOwner();
-							//	//m_pMaterial->GetShaderFunction()[i]->m_pOwner = 
-							//}
-
-							m_pMaterial->PostLink();
+							m_pMaterial = AssetManager::GetSingleton().GetTestMaterial(AssetManager::GetSingleton().GetVirtualPath(itemPath));
 
 							int32_t slashPos = itemPath.find_last_of('\\');
 							std::string editorPathFileName = itemPath.substr(std::min((unsigned long long)(slashPos + 1), itemPath.size() - 1));
@@ -333,6 +351,7 @@ namespace Pixel {
 						}
 					}
 				}
+
 				ImGui::TextWrapped("%s", filenameString.c_str());
 				ImGui::NextColumn();
 			}
@@ -365,6 +384,20 @@ namespace Pixel {
 	void ContentBrowserPanel::RegisterIsGraphEditorAliveCallBack(std::function<void(bool)> func)
 	{
 		m_IsGraphEditorAlive = func;
+	}
+
+	void ContentBrowserPanel::CreateMaterialInstance(std::string& virtualPath)
+	{
+		//path is virtual path(material virtual path)
+		//open dialog, to create material instance
+		std::wstring physicalFilePath = FileDialogs::SaveFile(L"materialInstance(*.imat)\0*.imat\0");
+		AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
+
+		Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
+
+		AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
+
+		AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
 	}
 
 	void ContentBrowserPanel::RenderMaterialAssetPanel()

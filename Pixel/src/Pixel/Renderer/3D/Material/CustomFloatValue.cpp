@@ -3,6 +3,13 @@
 #include "CustomFloatValue.h"
 
 namespace Pixel {
+	CustomFloatValue::CustomFloatValue()
+	{
 
+	}
 
+	CustomFloatValue::~CustomFloatValue()
+	{
+
+	}
 }

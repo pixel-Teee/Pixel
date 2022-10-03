@@ -10,6 +10,7 @@ namespace Pixel {
 	class Model;
 	struct SubMaterial;
 	class Material;
+	class MaterialInstance;
 	class AssetManager : public Singleton<AssetManager>
 	{
 	public:
@@ -30,6 +31,8 @@ namespace Pixel {
 
 		void AddTestMaterialToAssetRegistry(const std::wstring& physicalPath);
 
+		void AddMaterialInstanceToAssetRegistry(const std::wstring& physicalPath);
+
 		std::string GetVirtualPath(const std::string& physicalFilePath);
 
 		std::string GetAssetPhysicalPath(const std::string& filePath);
@@ -40,6 +43,8 @@ namespace Pixel {
 
 		bool IsInTestMaterialAssetRegistry(std::string& virtualPath);
 
+		bool IsInMaterialInstanceAssetRegistry(std::string& virtualPath);
+
 		Ref<Texture2D> GetTexture(const std::string& virtualPath);
 
 		Ref<Model> GetModel(const std::string& modelRegistry);
@@ -48,21 +53,27 @@ namespace Pixel {
 
 		Ref<Material> GetTestMaterial(const std::string& virtualPath);
 
+		Ref<MaterialInstance> GetMaterialInstance(const std::string& virtualPath);
+
 		void AddModelToAssetRegistry(const std::string& physicalPath);
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
 
 		void CreateTestMaterial(const std::string& physicalPath, Ref<Material> pMaterial);
 
+		void CreateMaterialInstance(const std::string& physicalPath, Ref<MaterialInstance> pMaterialInstance);
+
 		void UpdateMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);//difference update
 
-		std::string  to_string(std::wstring wstr);
+		std::string to_string(std::wstring wstr);
 
 		std::wstring to_wsrting(std::string str);
 
 		std::map<std::string, std::string>& GetMaterialAssetRegistry();
 
 		std::map<std::string, std::string>& GetTestMaterialAssetRegistry();
+
+		std::map<std::string, std::string>& GetMaterialInstanceAssetRegistry();
 	private:
 		std::map<std::string, std::string> m_VirtualPathToPhysicalPathTexture;//asset virtual path <=> asset physical path
 
@@ -96,6 +107,13 @@ namespace Pixel {
 		std::map<std::string, std::string> m_PhysicalPathToVirtualPathTestMaterial;
 
 		std::map<std::string, Ref<Material>> m_TestMaterials;
+
+		//material instance
+		std::map<std::string, std::string> m_VirtualPathToPhysicalPathMaterialInstance;
+
+		std::map<std::string, std::string> m_PhysicalPathToVirtualPathMaterialInstance;
+
+		std::map<std::string, Ref<MaterialInstance>> m_MaterialInstances;//asset virtual path <=> material instance
 
 		//------converter------
 		using convert_t = std::codecvt_utf8<wchar_t>;

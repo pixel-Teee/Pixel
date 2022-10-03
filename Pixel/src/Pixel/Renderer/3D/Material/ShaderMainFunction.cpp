@@ -15,7 +15,7 @@ namespace Pixel
 		m_InputNodeDisplayColor = { glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f) };
 		m_InputNodeDisplayName = { "Normal", "Albedo", "Roughness", "Metallic", "AO"};
 
-        m_HeaderColor = glm::vec3(0.86f, 0.625f, 0.86f);
+        m_HeaderColor = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
     bool ShaderMainFunction::GetShaderTreeString(std::string& OutString)

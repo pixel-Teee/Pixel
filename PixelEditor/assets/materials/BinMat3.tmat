@@ -3,8 +3,8 @@
   {
     "type": "Pixel::Material",
     "m_PSShaderCustomValue": [],
-    "m_PSShaderCustomSampler": [],
-    "m_MaterialName": "",
+    "m_PSShaderCustomTexture": [],
+    "m_MaterialName": "BinMat",
     "dirty": false,
     "m_PsoIndex": -1,
     "m_pShaderFunctionArray": [

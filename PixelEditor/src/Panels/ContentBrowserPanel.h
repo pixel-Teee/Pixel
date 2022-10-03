@@ -23,6 +23,8 @@ namespace Pixel {
 		void RegisterOpenGraphEditorCallBack(std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> func);
 
 		void RegisterIsGraphEditorAliveCallBack(std::function<void(bool)> func);
+
+		void CreateMaterialInstance(std::string& virtualPath);
 	private:
 		void RenderMaterialAssetPanel();
 

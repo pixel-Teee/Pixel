@@ -10,6 +10,7 @@ namespace Pixel {
 	class Meta(Enable) CustomFloatValue : public MaterialCustomPara
 	{
 	public:
+		Meta()
 		CustomFloatValue();
 
 		virtual ~CustomFloatValue();

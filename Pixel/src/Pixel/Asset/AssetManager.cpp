@@ -17,6 +17,7 @@
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Scene/Components/MaterialComponent.h"
 #include "Pixel/Scene/SceneSerializer.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 //------my library------
 
 namespace Pixel {
@@ -187,6 +188,28 @@ namespace Pixel {
 					}
 				}
 			}
+
+			if (doc.HasMember("MaterialInstance") && doc["MaterialInstance"].IsArray())
+			{
+				rapidjson::Value& array = doc["MaterialInstance"].GetArray();
+
+				std::string registyPath = "MaterialInstance";
+
+				for (auto iter = array.Begin();
+					iter != array.End(); ++iter)
+				{
+					const rapidjson::Value& attribute = *iter;
+					PX_CORE_ASSERT(attribute.IsObject(), "attribute is not object!");
+
+					for (rapidjson::Value::ConstMemberIterator itr2 = attribute.MemberBegin();
+						itr2 != attribute.MemberEnd(); ++itr2)
+					{
+						std::string assetRegistryPath = itr2->name.GetString();//don't include the asset prefix, etc. asset\\scene\\fish.pixel
+						m_VirtualPathToPhysicalPathMaterialInstance[assetRegistryPath] = itr2->value.GetString();
+						m_PhysicalPathToVirtualPathMaterialInstance[itr2->value.GetString()] = assetRegistryPath;
+					}
+				}
+			}
 		}
 
 		stream.close();
@@ -245,6 +268,17 @@ namespace Pixel {
 		writer.Key("TestMaterial");
 		writer.StartArray();
 		for (auto& item : m_VirtualPathToPhysicalPathTestMaterial)
+		{
+			writer.StartObject();
+			writer.Key(item.first.c_str());
+			writer.String(item.second.c_str());
+			writer.EndObject();
+		}
+		writer.EndArray();
+
+		writer.Key("MaterialInstance");
+		writer.StartArray();
+		for (auto& item : m_VirtualPathToPhysicalPathMaterialInstance)
 		{
 			writer.StartObject();
 			writer.Key(item.first.c_str());
@@ -411,6 +445,41 @@ namespace Pixel {
 		}
 	}
 
+	void AssetManager::AddMaterialInstanceToAssetRegistry(const std::wstring& physicalPath)
+	{
+		std::string convertedFilePath = to_string(physicalPath);
+
+		size_t pos = convertedFilePath.find_last_of("\\");
+
+		if (pos != std::string::npos)
+		{
+			//extract the filename
+			std::string fileName;
+			size_t dotPos = convertedFilePath.substr(pos).find_last_of(".");
+			if (dotPos != std::string::npos)
+			{
+				fileName = convertedFilePath.substr(pos + 1).substr(0, dotPos - 1);
+			}
+			else
+			{
+				fileName = convertedFilePath.substr(pos);
+			}
+
+			std::filesystem::path PhysicalPath(physicalPath);
+
+			auto relativePath = std::filesystem::relative(PhysicalPath, g_AssetPath);
+
+			std::string relativePathString = relativePath.string();
+
+			//construct the virtual path
+			std::string virtualFilePath = "MaterialInstance\\" + fileName;
+			m_VirtualPathToPhysicalPathMaterialInstance.insert({ virtualFilePath, relativePathString });
+			m_PhysicalPathToVirtualPathMaterialInstance.insert({ relativePathString, virtualFilePath });
+
+			SaveRegistry();
+		}
+	}
+
 	bool AssetManager::IsInAssetRegistry(std::string filepath)
 	{
 		if (m_PhysicalPathToVirtualPathTexture.find(filepath) != m_PhysicalPathToVirtualPathTexture.end())
@@ -430,6 +499,10 @@ namespace Pixel {
 			return true;
 		}
 		if (m_PhysicalPathToVirtualPathTestMaterial.find(filepath) != m_PhysicalPathToVirtualPathTestMaterial.end())
+		{
+			return true;
+		}
+		if (m_PhysicalPathToVirtualPathMaterialInstance.find(filepath) != m_PhysicalPathToVirtualPathMaterialInstance.end())
 		{
 			return true;
 		}
@@ -576,7 +649,34 @@ namespace Pixel {
 				//}
 				//stream.close();
 
-				//post load the sub material
+				rapidjson::Document doc;
+
+				std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
+				std::stringstream strStream;
+				strStream << stream.rdbuf();
+
+				rttr::type materialType = rttr::type::get<Material>();
+
+				if (!doc.Parse(strStream.str().data()).HasParseError())
+				{
+					//TODO:need to fix, need a perfect reflection scheme
+					if (doc.HasMember(materialType.get_name().to_string().c_str()) && doc[materialType.get_name().to_string().c_str()].IsObject())
+					{
+						SceneSerializer::FromJsonRecursive(*m_TestMaterials[virtualPath], doc[materialType.get_name().to_string().c_str()], true);
+					}
+				}
+				stream.close();
+
+				for (size_t i = 0; i < m_TestMaterials[virtualPath]->GetShaderFunction().size(); ++i)
+				{
+					//if(m_pMaterial->GetShaderFunction(i))
+
+					if (m_TestMaterials[virtualPath]->GetShaderFunction()[i]->GetFunctioNodeId() == 1)
+					{
+						m_TestMaterials[virtualPath]->m_pShaderMainFunction = std::reinterpret_pointer_cast<ShaderMainFunction>(m_TestMaterials[virtualPath]->GetShaderFunction()[i]);
+					}
+				}
+
 				m_TestMaterials[virtualPath]->PostLink();
 			}
 			else
@@ -584,6 +684,51 @@ namespace Pixel {
 				//TODO:open the small window to tell user to fix asset registry
 			}
 			return m_TestMaterials[virtualPath];
+		}
+	}
+
+	Ref<MaterialInstance> AssetManager::GetMaterialInstance(const std::string& virtualPath)
+	{
+		if (m_MaterialInstances.find(virtualPath) != m_MaterialInstances.end())
+		{
+			return m_MaterialInstances[virtualPath];
+		}
+		else
+		{
+			std::string physicalPath;
+
+			if (m_VirtualPathToPhysicalPathMaterialInstance.find(virtualPath) != m_VirtualPathToPhysicalPathMaterialInstance.end())
+			{
+				physicalPath = m_VirtualPathToPhysicalPathMaterialInstance[virtualPath];
+
+				//load test material
+				m_MaterialInstances[virtualPath] = CreateRef<MaterialInstance>();
+
+				//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
+				//
+				//rapidjson::Document doc;
+				//
+				////from the physical asset path to load the material and post load
+				//std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
+				//std::stringstream strStream;
+				//strStream << stream.rdbuf();
+				//if (!doc.Parse(strStream.str().data()).HasParseError())
+				//{
+				//	//read the sub material
+				//	if (doc.HasMember(typeDesc->name) && doc[typeDesc->name].IsObject())
+				//	{
+				//		typeDesc->Read(doc[typeDesc->name], m_TestMaterials[virtualPath].get(), nullptr, false);
+				//	}
+				//}
+				//stream.close();
+
+				//post load the sub material
+			}
+			else
+			{
+				//TODO:open the small window to tell user to fix asset registry
+			}
+			return m_MaterialInstances[virtualPath];
 		}
 	}
 
@@ -661,6 +806,21 @@ namespace Pixel {
 		rttr::type materialType = rttr::type::get<Material>();
 		writer.Key(materialType.get_name().to_string().c_str());
 		SceneSerializer::ToJsonRecursive(*pMaterial, writer, true);
+		writer.EndObject();
+		std::string data = strBuf.GetString();
+		std::ofstream fout(physicalPath);
+		fout << data.c_str();
+		fout.close();
+	}
+
+	void AssetManager::CreateMaterialInstance(const std::string& physicalPath, Ref<MaterialInstance> pMaterialInstance)
+	{
+		rapidjson::StringBuffer strBuf;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+		writer.StartObject();
+		rttr::type materialType = rttr::type::get<MaterialInstance>();
+		writer.Key(materialType.get_name().to_string().c_str());
+		SceneSerializer::ToJsonRecursive(*pMaterialInstance, writer, true);
 		writer.EndObject();
 		std::string data = strBuf.GetString();
 		std::ofstream fout(physicalPath);
@@ -754,9 +914,21 @@ namespace Pixel {
 		return m_VirtualPathToPhysicalPathTestMaterial;
 	}
 
+	std::map<std::string, std::string>& AssetManager::GetMaterialInstanceAssetRegistry()
+	{
+		return m_VirtualPathToPhysicalPathMaterialInstance;
+	}
+
 	bool AssetManager::IsInTestMaterialAssetRegistry(std::string& virtualPath)
 	{
 		if (m_VirtualPathToPhysicalPathTestMaterial.find(virtualPath) != m_VirtualPathToPhysicalPathTestMaterial.end())
+			return true;
+		return false;
+	}
+
+	bool AssetManager::IsInMaterialInstanceAssetRegistry(std::string& virtualPath)
+	{
+		if (m_VirtualPathToPhysicalPathMaterialInstance.find(virtualPath) != m_VirtualPathToPhysicalPathMaterialInstance.end())
 			return true;
 		return false;
 	}

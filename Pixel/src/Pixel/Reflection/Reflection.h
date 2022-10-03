@@ -23,6 +23,7 @@
 #include "Pixel/Scene/SceneCamera.h"
 #include "Pixel/Renderer/3D/Material/MaterialBase.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 #include "Pixel/Renderer/3D/Material/ShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
 #include "Pixel/Renderer/3D/Material/PutNode.h"

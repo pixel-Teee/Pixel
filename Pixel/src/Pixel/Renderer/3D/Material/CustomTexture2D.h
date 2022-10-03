@@ -5,6 +5,7 @@
 //------my library------
 
 namespace Pixel {
+	class Texture2D;
 	class Meta(Enable) CustomTexture2D : public MaterialCustomPara
 	{
 	public:
@@ -31,6 +32,8 @@ namespace Pixel {
 		{
 			return lhs.ConstValueName == rhs.ConstValueName;
 		}
+
+		Ref<Texture2D> m_pTexture;
 
 		RTTR_ENABLE(MaterialCustomPara)
 		RTTR_REGISTRATION_FRIEND

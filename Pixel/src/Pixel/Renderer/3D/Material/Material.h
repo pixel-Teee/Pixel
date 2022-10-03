@@ -9,6 +9,7 @@ namespace Pixel {
 	//------forward declare------
 	class ShaderMainFunction;
 	class ShaderFunction;
+	class Shader;
 	//------forward declare------
 
 	class Meta(Enable) Material : public MaterialBase
@@ -68,6 +69,10 @@ namespace Pixel {
 		//std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
 		Meta()
 		std::vector<glm::ivec2> m_Links;
+
+		Ref<Shader> m_pVertexShader;
+
+		Ref<Shader> m_pPixelShader;
 
 		void PostLink();
 
