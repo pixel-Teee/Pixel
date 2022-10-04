@@ -24,6 +24,7 @@
 #include "Pixel/Scene/SimpleScene.h"
 #include "Pixel/Scene/Components/StaticMeshComponent.h"
 #include "Pixel/Renderer/3D/Model.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -279,6 +280,10 @@ namespace Pixel {
 		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
 			//save will also call the compiler
+			m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
+			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
+			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
+			PIXEL_CORE_INFO(out);
 
 			//save the material
 			rapidjson::StringBuffer strBuf;
@@ -292,6 +297,22 @@ namespace Pixel {
 			std::ofstream fout(m_MaterialPhysicalPath);
 			fout << data.c_str();
 			fout.close();
+
+			//notify reference to this material's material instance to construct parameter
+			auto& materialInstances = AssetManager::GetSingleton().GetMaterialInstances();
+
+			for (auto& materialInstance : materialInstances)
+			{
+				if (materialInstance.second->GetMaterial() == m_pMaterial)
+				{
+					//reconstruct
+					materialInstance.second->ReConstructParameter(m_pMaterial);
+
+					//resave the material instance to disk
+
+					break;
+				}
+			}
 		}
 		ImGui::PopStyleVar(1);
 		ImGui::EndHorizontal();
@@ -354,6 +375,7 @@ namespace Pixel {
 						{
 							std::string str = std::string(buf);
 							pConstFloatValueShaderFuntion->SetShowName(str);//edit parameter name
+							pConstFloatValueShaderFuntion->ResetInShaderName();
 						}
 						//ImGui::Separator();
 					}

@@ -100,6 +100,12 @@ namespace Pixel
 
 	bool ShaderMainFunction::GetFunctionString(std::string& OutString) const
 	{
+        //special case
+        if (m_pInputs[IN_NORMAL]->GetOutputLink() == nullptr)
+        {
+            OutString += "Normal = float4(pin.NormalW, 1.0f);\n";
+        }
+
         //OutString += "PixelOut PS(VertexOut pin)\n{\n";
         OutString += "PixelOut pixelOut = (PixelOut)(0.0f);\n";
 

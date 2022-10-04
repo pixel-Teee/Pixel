@@ -57,8 +57,33 @@ namespace Pixel {
 		}
 	}
 
+	void MaterialInstance::ReConstructParameter(Ref<Material> pMaterial)
+	{
+		//------set parameter------
+		m_PSShaderCustomValue.clear();
+		m_PSShaderCustomValue.resize(pMaterial->m_PSShaderCustomValue.size());
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomValue.size(); ++i)
+		{
+			m_PSShaderCustomValue[i] = CreateRef<CustomFloatValue>();
+			//m_PSShaderCustomValue[i]->m_
+			m_PSShaderCustomValue[i]->ConstValueName = pMaterial->m_PSShaderCustomValue[i]->ConstValueName;
+			m_PSShaderCustomValue[i]->m_ValueType = pMaterial->m_PSShaderCustomValue[i]->m_ValueType;
+			m_PSShaderCustomValue[i]->m_Values.resize(pMaterial->m_PSShaderCustomValue[i]->m_Values.size());
+		}
+
+		m_PSShaderCustomTexture.clear();
+		m_PSShaderCustomTexture.resize(pMaterial->m_PSShaderCustomTexture.size());
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomTexture.size(); ++i)
+		{
+			m_PSShaderCustomTexture[i] = CreateRef<CustomTexture2D>();
+			m_PSShaderCustomTexture[i]->ConstValueName = pMaterial->m_PSShaderCustomTexture[i]->ConstValueName;
+		}
+		//------set parameter------
+	}
+
 	void MaterialInstance::SetMaterial(std::string& virtualPath)
 	{
+		m_MaterialPath = virtualPath;
 		//from the asset manager to get the material
 		Ref<Material> pMaterial = AssetManager::GetSingleton().GetTestMaterial(virtualPath);
 
@@ -71,6 +96,7 @@ namespace Pixel {
 		m_PSShaderCustomValue.resize(pMaterial->m_PSShaderCustomValue.size());
 		for (size_t i = 0; i < pMaterial->m_PSShaderCustomValue.size(); ++i)
 		{
+			m_PSShaderCustomValue[i] = CreateRef<CustomFloatValue>();
 			//m_PSShaderCustomValue[i]->m_
 			m_PSShaderCustomValue[i]->ConstValueName = pMaterial->m_PSShaderCustomValue[i]->ConstValueName;
 			m_PSShaderCustomValue[i]->m_ValueType = pMaterial->m_PSShaderCustomValue[i]->m_ValueType;
@@ -81,8 +107,19 @@ namespace Pixel {
 		m_PSShaderCustomTexture.resize(pMaterial->m_PSShaderCustomTexture.size());
 		for (size_t i = 0; i < pMaterial->m_PSShaderCustomTexture.size(); ++i)
 		{
+			m_PSShaderCustomTexture[i] = CreateRef<CustomTexture2D>();
 			m_PSShaderCustomTexture[i]->ConstValueName = pMaterial->m_PSShaderCustomTexture[i]->ConstValueName;
 		}
 		//------set parameter------
+	}
+
+	std::string MaterialInstance::GetMaterialPath()
+	{
+		return m_MaterialPath;
+	}
+
+	Ref<Material> MaterialInstance::GetMaterial()
+	{
+		return m_pMaterial;
 	}
 }

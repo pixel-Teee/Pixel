@@ -9,6 +9,7 @@
 #include <rapidjson/prettywriter.h>
 
 #include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
+#include "Components/MaterialTreeComponent.h"
 
 namespace Pixel {
 
@@ -93,6 +94,12 @@ namespace Pixel {
 		{
 			rttr::instance obj = entity.GetComponent<LightComponent>();
 			out.Key("LightComponent");
+			ToJsonRecursive(obj, out, false);
+		}
+		if (entity.HasComponent<MaterialTreeComponent>())
+		{
+			rttr::instance obj = entity.GetComponent<MaterialTreeComponent>();
+			out.Key("MaterialTreeComponent");
 			ToJsonRecursive(obj, out, false);
 		}
 	}
@@ -453,6 +460,12 @@ namespace Pixel {
 			newEntity.AddComponent<LightComponent>();
 			rttr::instance obj = newEntity.GetComponent<LightComponent>();
 			FromJsonRecursive(obj, object["LightComponent"], false);
+		}
+		if (object.HasMember("MaterialTreeComponent"))
+		{
+			newEntity.AddComponent<MaterialTreeComponent>();
+			rttr::instance obj = newEntity.GetComponent<MaterialTreeComponent>();
+			FromJsonRecursive(obj, object["MaterialTreeComponent"], false);
 		}
 	}
 

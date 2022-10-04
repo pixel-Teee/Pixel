@@ -7,4 +7,11 @@ namespace Pixel {
 	{
 
 	}
+
+	void MaterialTreeComponent::AddMaterialInstance()
+	{
+		m_Materials.push_back(nullptr);
+
+		m_MaterialPaths.push_back(std::string());
+	}
 }

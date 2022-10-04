@@ -20,6 +20,8 @@ namespace Pixel {
 		virtual void SetRasterizerState(Ref<RasterState> pRasterState) = 0;
 		virtual void SetDepthState(Ref<DepthState> pDepthState) = 0;
 		virtual void SetPrimitiveTopologyType(PiplinePrimitiveTopology TopologyType) = 0;
+		virtual bool IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature) = 0;
+		virtual void SetInputLayout(BufferLayout& vertexLayout) = 0;
 
 		virtual Ref<RootSignature> GetRootSignature() const override;
 
@@ -33,6 +35,8 @@ namespace Pixel {
 
 		//pipeline state object
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pPSO;
+
+		size_t m_HashCode;
 	};
 
 	class BlenderState;
@@ -75,6 +79,8 @@ namespace Pixel {
 		//input layout
 		void SetInputLayout(uint32_t NumElements, const D3D12_INPUT_ELEMENT_DESC* pInputElementDescs);
 
+		virtual void SetInputLayout(BufferLayout& vertexLayout);
+
 		void SetVertexShader(const void* Binary, size_t Size);
 		void SetPixelShader(const void* Binary, size_t Size);
 
@@ -86,11 +92,15 @@ namespace Pixel {
 		//------Compute PSO's operation------
 		virtual void SetComputeShader(const void* Binary, size_t Size) override;
 		//------Compute PSO's operation------
+
+		virtual bool IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature) override;
 	private:
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC m_PSODesc;
 
 		Ref<D3D12_INPUT_ELEMENT_DESC> m_InputLayouts;
+
+		BufferLayout m_Layout;
 	};
 
 	class ComputePSO : public DirectXPSO
@@ -113,8 +123,11 @@ namespace Pixel {
 		virtual void SetRenderTargetFormats(uint32_t NumRTVs, const ImageFormat* RTVFormats, ImageFormat DSVFormat, uint32_t MsaaCount = 1, uint32_t MsaaQuality = 0) override;
 		virtual void SetVertexShader(const void* Binary, size_t Size) override;
 		virtual void SetPixelShader(const void* Binary, size_t Size) override;
+		virtual void SetInputLayout(BufferLayout& vertexLayout) override;
 		//------garbage------
+
+		virtual bool IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature) override;
 	private:
-		D3D12_COMPUTE_PIPELINE_STATE_DESC m_PSODesc;
+		D3D12_COMPUTE_PIPELINE_STATE_DESC m_PSODesc;	
 	};
 }

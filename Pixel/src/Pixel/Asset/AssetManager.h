@@ -55,6 +55,8 @@ namespace Pixel {
 
 		Ref<MaterialInstance> GetMaterialInstance(const std::string& virtualPath);
 
+		std::map<std::string, Ref<MaterialInstance>>& GetMaterialInstances();
+
 		void AddModelToAssetRegistry(const std::string& physicalPath);
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);

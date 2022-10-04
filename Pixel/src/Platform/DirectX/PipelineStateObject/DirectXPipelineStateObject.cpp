@@ -17,6 +17,10 @@ namespace Pixel {
 	//compute pipeline state object hash map
 	static std::map<size_t, Microsoft::WRL::ComPtr<ID3D12PipelineState>> s_ComputePSOHashMap;
 
+	static DXGI_FORMAT ShaderDataTypeToDXGIFormat(ShaderDataType dataType);
+
+	static std::string SemanticsToDirectXSemantics(Semantics sematics);
+
 	DirectXPSO::DirectXPSO()
 	{
 
@@ -156,6 +160,42 @@ namespace Pixel {
 			m_InputLayouts = nullptr;
 	}
 
+	void GraphicsPSO::SetInputLayout(BufferLayout& vertexLayout)
+	{
+		m_Layout = vertexLayout;//set vertex buffer layout
+
+		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[vertexLayout.GetElements().size()];
+
+		uint32_t i = 0;
+		for (auto& buffElement : vertexLayout)
+		{
+			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
+			ElementArray[i].SemanticName = new char[temp.size() + 1];
+			std::string temp2(temp.size() + 1, '\0');
+			for (uint32_t j = 0; j < temp.size(); ++j)
+				temp2[j] = temp[j];
+			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
+			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
+			ElementArray[i].SemanticIndex = 0;
+			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
+			ElementArray[i].InputSlot = 0;
+			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			ElementArray[i].InstanceDataStepRate = 0;
+
+			++i;
+		}
+
+		m_PSODesc.InputLayout.NumElements = m_Layout.GetElements().size();
+
+		if (m_Layout.GetElements().size() > 0)
+		{
+			m_InputLayouts.reset(static_cast<D3D12_INPUT_ELEMENT_DESC*>(ElementArray));
+		}
+		else
+			m_InputLayouts = nullptr;
+	}
+
 	void GraphicsPSO::SetVertexShader(const void* Binary, size_t Size)
 	{
 		//first:const_cast
@@ -180,9 +220,9 @@ namespace Pixel {
 		PX_CORE_ASSERT(std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature() != nullptr, "root signature is nullptr!");
 	
 		m_PSODesc.InputLayout.pInputElementDescs = nullptr;
-		size_t HashCode = Utility::HashState((const uint32_t*)&m_PSODesc);
+		size_t HashCode = Utility::HashState(&m_PSODesc);
 		//hash the input layout elements
-		HashCode = Utility::HashState((const uint32_t*)m_InputLayouts.get(), m_PSODesc.InputLayout.NumElements, HashCode);
+		HashCode = Utility::HashState(m_InputLayouts.get(), m_PSODesc.InputLayout.NumElements, HashCode);
 		m_PSODesc.InputLayout.pInputElementDescs = m_InputLayouts.get();
 
 		ID3D12PipelineState** PSORef = nullptr;
@@ -227,6 +267,13 @@ namespace Pixel {
 	void GraphicsPSO::SetComputeShader(const void* Binary, size_t Size)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	bool GraphicsPSO::IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature)
+	{
+		if (m_pRootSignature == pRootSignature && layout == m_Layout)
+			return true;
+		return false;
 	}
 
 	void GraphicsPSO::SetRootSignature(Ref<RootSignature> pRootSignature)
@@ -346,4 +393,66 @@ namespace Pixel {
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	bool ComputePSO::IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature)
+	{
+		return false;
+	}
+
+	void ComputePSO::SetInputLayout(BufferLayout& vertexLayout)
+	{
+		//garbage
+	}
+
+	static DXGI_FORMAT ShaderDataTypeToDXGIFormat(ShaderDataType dataType)
+	{
+		switch (dataType)
+		{
+		case ShaderDataType::Float:
+			return DXGI_FORMAT_R32_FLOAT;
+		case ShaderDataType::Float2:
+			return DXGI_FORMAT_R32G32_FLOAT;
+		case ShaderDataType::Float3:
+			return DXGI_FORMAT_R32G32B32_FLOAT;
+		case ShaderDataType::Float4:
+			return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case ShaderDataType::Int:
+			return DXGI_FORMAT_R32_SINT;
+		case ShaderDataType::Int2:
+			return DXGI_FORMAT_R32G32_SINT;
+		case ShaderDataType::Int3:
+			return DXGI_FORMAT_R32G32B32_SINT;
+		case ShaderDataType::Int4:
+			return DXGI_FORMAT_R32G32B32A32_SINT;
+		case ShaderDataType::Bool:
+			return DXGI_FORMAT_R8_UINT;
+		}
+	}
+
+	//sematics to dx sematics
+	static std::string SemanticsToDirectXSemantics(Semantics sematics)
+	{
+		switch (sematics)
+		{
+		case Semantics::POSITION:
+			return "POSITION";
+		case Semantics::TEXCOORD:
+			return "TEXCOORD";
+		case Semantics::NORMAL:
+			return "NORMAL";
+		case Semantics::TANGENT:
+			return "TANGENT";
+		case Semantics::BINORMAL:
+			return "BINORMAL";
+		case Semantics::COLOR:
+			return "COLOR";
+		case Semantics::BLENDWEIGHT:
+			return "BLENDWEIGHT";
+		case Semantics::BLENDINDICES:
+			return "BLENDINDICES";
+		case Semantics::Editor:
+			return "EDITOR";
+		case Semantics::FLOAT:
+			return "FLOAT";
+		}
+	}
 }

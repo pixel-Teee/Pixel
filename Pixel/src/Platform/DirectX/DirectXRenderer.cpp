@@ -657,7 +657,7 @@ namespace Pixel {
 	}
 
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
-	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials,
+	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials,
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
 	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene)
 	{
@@ -795,7 +795,9 @@ namespace Pixel {
 		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
 		++m_FrameCount;
 
-		m_GeometryVertexShader->SetData("cbPass", &m_CbufferGeometryPass);
+		//m_GeometryVertexShader->SetData("cbPass", &m_CbufferGeometryPass);
+
+		Ref<CbufferGeometryPass> tempPass = CreateRef<CbufferGeometryPass>(m_CbufferGeometryPass);
 
 		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
 		
@@ -808,20 +810,22 @@ namespace Pixel {
 			if (meshs[i]->m_Model != nullptr)
 			{
 				std::vector<Ref<StaticMesh>> pStaticMeshs = meshs[i]->m_Model->GetMeshes();
-				std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
-				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pSubMaterials.size()); ++j)
+				//std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
+				std::vector<Ref<MaterialInstance>> pMaterialInstances = materials[i]->m_Materials;
+				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pMaterialInstances.size()); ++j)
 				{
-					if(pSubMaterials[j] != nullptr)
+					if(pMaterialInstances[j] != nullptr)
 					{
-						if (pSubMaterials[j]->IsTransparent)
-						{
-							float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
-							m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
-						}
-						else
-						{
-							m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
-						}
+						m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], nullptr, pMaterialInstances[j], entityIds[i], 0 });
+						//if (pMaterialInstances[j]->IsTransparent)
+						//{
+						//	float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
+						//	m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
+						//}
+						//else
+						//{
+						//	m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+						//}
 					}
 				}
 			}
@@ -837,24 +841,24 @@ namespace Pixel {
 		//draw opaque render item
 		for(size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
 		}
 
 		//draw runtime camera's model
 
-		for (uint32_t i = 0; i < cameraTransformant.size(); ++i)
-		{
-			pCameraModel->Draw(cameraTransformant[i]->GetGlobalTransform(scene->GetRegistry()), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get(), m_GeometryVertexShader, m_GeometryPixelShader);
-		}
+		//for (uint32_t i = 0; i < cameraTransformant.size(); ++i)
+		//{
+		//	pCameraModel->Draw(cameraTransformant[i]->GetGlobalTransform(scene->GetRegistry()), pContext, (int32_t)cameraEntity[i], pCameraMaterialComponent.get(), m_GeometryVertexShader, m_GeometryPixelShader);
+		//}
 
 		//draw direct light's arrow model
-		for (uint32_t i = 0; i < lights.size(); ++i)
-		{
-			if (lights[i]->lightType == LightType::DirectLight)
-			{
-				m_pArrowModel->Draw(lightTrans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, -1, m_pArrowModelMaterial.get(), m_GeometryVertexShader, m_GeometryPixelShader);
-			}
-		}
+		//for (uint32_t i = 0; i < lights.size(); ++i)
+		//{
+		//	if (lights[i]->lightType == LightType::DirectLight)
+		//	{
+		//		m_pArrowModel->Draw(lightTrans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, -1, m_pArrowModelMaterial.get(), m_GeometryVertexShader, m_GeometryPixelShader);
+		//	}
+		//}
 
 		//------draw outline mesh------
 		if (OutLineMesh != nullptr && OutLineMesh->m_Model != nullptr)
@@ -1092,7 +1096,7 @@ namespace Pixel {
 		//------use for TAA------
 	}
 
-	void DirectXRenderer::DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial)
+	void DirectXRenderer::DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
@@ -1213,20 +1217,22 @@ namespace Pixel {
 			if (meshs[i]->m_Model != nullptr)
 			{
 				std::vector<Ref<StaticMesh>> pStaticMeshs = meshs[i]->m_Model->GetMeshes();
-				std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
-				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pSubMaterials.size()); ++j)
+				//std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
+				std::vector<Ref<MaterialInstance>> pMaterialInstances = materials[i]->m_Materials;
+				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pMaterialInstances.size()); ++j)
 				{
-					if (pSubMaterials[j] != nullptr)
+					if (pMaterialInstances[j] != nullptr)
 					{
-						if (pSubMaterials[j]->IsTransparent)
-						{
-							float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(pScene->GetRegistry())));
-							m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
-						}
-						else
-						{
-							m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
-						}
+						m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], nullptr, pMaterialInstances[j], entityIds[i], 0 });
+						//if (pSubMaterials[j]->IsTransparent)
+						//{
+						//	float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(pScene->GetRegistry())));
+						//	m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
+						//}
+						//else
+						//{
+						//	m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+						//}
 					}
 				}
 			}
@@ -1371,7 +1377,7 @@ namespace Pixel {
 		//------second pass:light pass------
 	}
 
-	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialComponent*> materials, 
+	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, 
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<Scene> scene)
 	{
 		m_Width = pFrameBuffer->GetSpecification().Width;
@@ -1522,20 +1528,14 @@ namespace Pixel {
 			if (meshs[i]->m_Model != nullptr)
 			{
 				std::vector<Ref<StaticMesh>> pStaticMeshs = meshs[i]->m_Model->GetMeshes();
-				std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
-				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pSubMaterials.size()); ++j)
+				std::vector<Ref<MaterialInstance>> pMaterialInstances = materials[i]->m_Materials;
+				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pMaterialInstances.size()); ++j)
 				{
-					if (pSubMaterials[j] != nullptr)
+					if (pMaterialInstances[j] != nullptr)
 					{
-						if (pSubMaterials[j]->IsTransparent)
-						{
-							float distance = glm::distance(pCameraTransformComponent->Translation, glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(scene->GetRegistry())));
-							m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
-						}
-						else
-						{
-							m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
-						}
+
+						m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(scene->GetRegistry()), pStaticMeshs[j], nullptr, pMaterialInstances[j], entityIds[i], 0 });
+					
 					}
 				}
 			}
@@ -2758,6 +2758,9 @@ namespace Pixel {
 
 		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
 
+		std::vector<Ref<SamplerDesc>> samplerDescs;
+		samplerDescs.push_back(samplerDesc);
+
 		//-----Create Blend State------
 		Ref<BlenderState> pBlendState = BlenderState::Create();
 		//-----Create Blend State------
@@ -2787,8 +2790,12 @@ namespace Pixel {
 		pPso->SetVertexShader(VsBinary, VsBinarySize);
 		pPso->SetPixelShader(PsBinary, PsBinarySize);
 
-		pPso->SetRootSignature(m_pDeferredShadingRootSignature);
-		
+		//pPso->SetRootSignature(m_pDeferredShadingRootSignature);
+
+		Ref<RootSignature> pRootSignature = CreateRootSignature(m_TestVertexShader, m_TestFragShader, samplerDescs);
+		pRootSignature->Finalize(L"MaterialTreeRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		pPso->SetRootSignature(pRootSignature);
+
 		if (originalPsoIndex != -1)
 		{
 			m_MaterialPso[originalPsoIndex] = pPso;//replace the original pso
@@ -2806,37 +2813,26 @@ namespace Pixel {
 		//get uninitialized material pso, in terms of vertex input layout to create complete pso
 		Ref<PSO> uninitializedPso = m_MaterialPso[uninitializedPsoIndex];
 
-		//may be release
-		D3D12_INPUT_ELEMENT_DESC* ElementArray = new D3D12_INPUT_ELEMENT_DESC[layout.GetElements().size()];
-
-		uint32_t i = 0;
-		for (auto& buffElement : layout)
-		{
-			std::string temp = SemanticsToDirectXSemantics(buffElement.m_sematics);
-			ElementArray[i].SemanticName = new char[temp.size() + 1];
-			std::string temp2(temp.size() + 1, '\0');
-			for (uint32_t j = 0; j < temp.size(); ++j)
-				temp2[j] = temp[j];
-			memcpy((void*)ElementArray[i].SemanticName, temp2.c_str(), temp2.size());
-			//ElementArray[i].SemanticName = SemanticsToDirectXSemantics(buffElement.m_sematics).c_str();
-			ElementArray[i].SemanticIndex = 0;
-			ElementArray[i].Format = ShaderDataTypeToDXGIFormat(buffElement.Type);
-			ElementArray[i].InputSlot = 0;
-			ElementArray[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-			ElementArray[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-			ElementArray[i].InstanceDataStepRate = 0;
-
-			++i;
-		}
-
+		//PIXEL_CORE_INFO("------Create Complete PipelineStateObject------");
 		//copy constructor
-		std::static_pointer_cast<GraphicsPSO>(uninitializedPso)->SetInputLayout(layout.GetElements().size(), ElementArray);
+		uninitializedPso->SetInputLayout(layout);
 		//initialize the pipeline state object
 		uninitializedPso->Finalize();
 		m_PsoArray.push_back(uninitializedPso);
 
+		//PIXEL_CORE_INFO("------Create Complete PipelineStateObject------");
 		//return pso index
 		return m_PsoArray.size();
+	}
+
+	Ref<PSO> DirectXRenderer::GetUninitializedMaterialPso(uint32_t psoIndex)
+	{
+		return m_MaterialPso[psoIndex];
+	}
+
+	std::vector<Ref<PSO>>& DirectXRenderer::GetCompletePsos()
+	{
+		return m_PsoArray;
 	}
 
 	Ref<RootSignature> DirectXRenderer::CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, std::vector<Ref<SamplerDesc>> samplerDescs)

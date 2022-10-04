@@ -9,6 +9,9 @@
 #include "Pixel/Renderer/DescriptorHandle/DescriptorGpuHandle.h"
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/Context/ContextManager.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "Pixel/Renderer/3D/Material/CustomFloatValue.h"
+#include "Pixel/Renderer/3D/Material/CustomTexture2D.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -414,6 +417,12 @@ namespace Pixel
 				ImGui::CloseCurrentPopup();
 			}
 
+			if (ImGui::MenuItem("MaterialTree"))
+			{
+				m_SelectionContext.AddComponent<MaterialTreeComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 		/*----------Add Component----------*/
@@ -733,5 +742,64 @@ namespace Pixel
 				}
 			}
 		);
+
+		DrawComponent<MaterialTreeComponent>("MaterialTreeComponent", entity, [](auto& component)
+		{
+			std::map<std::string, std::string>& AssetRegistry = AssetManager::GetSingleton().GetMaterialInstanceAssetRegistry();
+
+			if (ImGui::Button("AddMaterialInstance"))
+			{
+				//add material instance
+				component.AddMaterialInstance();
+			}
+
+			for (size_t i = 0; i < component.m_MaterialPaths.size(); ++i)
+			{
+				if (ImGui::BeginCombo(("Material[" + std::to_string(i) + "]").c_str(), component.m_MaterialPaths[i].c_str()))
+				{
+					//ImGui::SameLine();
+					for (auto& item : AssetRegistry)
+					{
+						bool isSelected = item.first == component.m_MaterialPaths[i];
+						if (ImGui::Selectable(item.first.c_str(), isSelected))
+						{
+							component.m_MaterialPaths[i] = item.first;//need to load the sub material
+							component.m_Materials[i] = AssetManager::GetSingleton().GetMaterialInstance(component.m_MaterialPaths[i]);
+						}
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();		
+					}
+					ImGui::EndCombo();
+				}
+
+				if (component.m_Materials[i] != nullptr)
+				{
+					//draw material instance
+					for (size_t j = 0; j < component.m_Materials[i]->m_PSShaderCustomValue.size(); ++j)
+					{
+						ImGui::Text(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str());
+						ImGui::SameLine();
+						if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_1)
+						{
+							ImGui::DragFloat(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+						}
+						else if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_2)
+						{
+							ImGui::DragFloat2(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+						}
+						else if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_3)
+						{
+							ImGui::DragFloat3(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+						}
+						else if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_4)
+						{
+							ImGui::DragFloat4(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+						}
+					}
+				}
+			}
+
+			ImGui::Separator();
+		});
 	}
 }

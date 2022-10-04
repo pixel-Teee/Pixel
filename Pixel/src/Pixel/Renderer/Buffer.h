@@ -53,6 +53,10 @@ namespace Pixel {
 
 		}
 
+		bool operator!=(const BufferElement& rhs) { return !(*this == (rhs)); }
+
+		bool operator==(const BufferElement& rhs);
+
 		uint32_t GetComponentCount() const
 		{
 			switch (Type)
@@ -89,6 +93,8 @@ namespace Pixel {
 
 		inline uint32_t GetStride() const { return m_Stride;}
 		inline const std::vector<BufferElement>& GetElements() const{ return m_Elements; }
+
+		bool operator==(const BufferLayout& rhs);
 
 		std::vector<BufferElement>::iterator begin(){ return m_Elements.begin();}
 		std::vector<BufferElement>::iterator end(){ return m_Elements.end(); }

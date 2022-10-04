@@ -12,6 +12,8 @@ namespace Pixel {
 		Meta()
 		std::vector<std::string> m_MaterialPaths;
 
+		void AddMaterialInstance();
+
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
 	};

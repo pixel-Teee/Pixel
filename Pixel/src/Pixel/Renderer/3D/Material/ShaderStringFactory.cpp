@@ -163,6 +163,8 @@ namespace Pixel {
 		Ref<Shader> testCompilerFrag = Shader::Create(shaderPath, "PS", "ps_5_0");
 
 		pMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(testCompilerVertex, testCompilerFrag, pMaterial->m_PsoIndex);
+		pMaterial->m_pVertexShader = testCompilerVertex;
+		pMaterial->m_pPixelShader = testCompilerFrag;
 		pMaterial->dirty = true;
 		pMaterial->LinkAllParameters();
 

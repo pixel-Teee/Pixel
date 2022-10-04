@@ -34,8 +34,11 @@ namespace Pixel
 {
 		//create temp output variable
 		std::string OutputID = std::to_string(++ShaderStringFactory::m_ShaderValueIndex);
-		std::string OutputName = "ConstFloatValue" + OutputID;
-
+		std::string OutputName;
+		if (!m_bIsCustom)
+			OutputName = "ConstFloatValue" + OutputID;
+		else
+			OutputName = m_ShowName;
 		Ref<OutputNode> pOutputNode;
 		pOutputNode = CreateRef<OutputNode>((ValueType)(m_valueNumber - 1), OutputName, shared_from_this());
 		m_pOutputs.push_back(pOutputNode);
@@ -185,7 +188,11 @@ namespace Pixel
 	{
 		//reset name
 		std::string OutputId = std::to_string(ShaderStringFactory::m_ShaderValueIndex);
-		std::string OutputName = "ConstFloatValue" + OutputId;
+		std::string OutputName;
+		if (!m_bIsCustom)
+			OutputName = "ConstFloatValue" + OutputId;
+		else
+			OutputName = m_ShowName;
 		m_pOutputs[0]->SetNodeName(OutputName);
 		++ShaderStringFactory::m_ShaderValueIndex;
 		if (m_Value.size() >= 1)

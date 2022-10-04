@@ -19,12 +19,18 @@ namespace Pixel {
 
 		void SetMaterial(std::string & virtualPath);//from the asset manager to get the material
 
-	private:
+		void ReConstructParameter(Ref<Material> pMaterial);
+
+		std::string GetMaterialPath();
+
+		Ref<Material> GetMaterial();
 
 		Meta()
 		std::vector<Ref<CustomFloatValue>> m_PSShaderCustomValue;
+
 		Meta()
 		std::vector<Ref<CustomTexture2D>> m_PSShaderCustomTexture;
+	private:
 
 		Ref<Material> m_pMaterial;
 
@@ -34,5 +40,7 @@ namespace Pixel {
 
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
+
+		friend class MaterialTreeComponent;
 	};
 }

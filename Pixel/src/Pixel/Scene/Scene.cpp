@@ -686,15 +686,15 @@ namespace Pixel
 
 	void Scene::OnUpdateEditorDeferred(Timestep& ts, EditorCamera& camera, Ref<Framebuffer>& pGeoFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Entity& SelectedEntity)
 	{
-		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
+		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialTreeComponent>);
 
 		std::vector<TransformComponent*> trans;
 		std::vector<StaticMeshComponent*> meshs;
-		std::vector<MaterialComponent*> materials;
+		std::vector<MaterialTreeComponent*> materials;
 		std::vector<int32_t> entityIds;
 		for (auto entity : group)
 		{
-			auto& [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialComponent>(entity);
+			auto& [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialTreeComponent>(entity);
 
 			//in terms of transform and mesh to draw
 			trans.push_back(&transform);
@@ -843,15 +843,15 @@ namespace Pixel
 
 		if (mainCamera)
 		{
-			auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialComponent>);
+			auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialTreeComponent>);
 
 			std::vector<TransformComponent*> trans;
 			std::vector<StaticMeshComponent*> meshs;
-			std::vector<MaterialComponent*> materials;
+			std::vector<MaterialTreeComponent*> materials;
 			std::vector<int32_t> entityIds;
 			for (auto entity : group)
 			{
-				auto& [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialComponent>(entity);
+				auto& [transform, mesh, material] = group.get<TransformComponent, StaticMeshComponent, MaterialTreeComponent>(entity);
 
 				//in terms of transform and mesh to draw
 				trans.push_back(&transform);
@@ -1311,6 +1311,12 @@ namespace Pixel
 
 	template<>
 	void Scene::OnComponentAdded<RigidBody3DComponent>(Entity entity, RigidBody3DComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MaterialTreeComponent>(Entity entity, MaterialTreeComponent& component)
 	{
 
 	}

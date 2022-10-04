@@ -395,6 +395,8 @@ namespace Pixel {
 
 		Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
 
+		pMaterialInstance->SetMaterial(virtualPath);
+
 		AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
 
 		AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);

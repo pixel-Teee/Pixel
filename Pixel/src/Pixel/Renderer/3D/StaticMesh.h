@@ -50,6 +50,9 @@ namespace Pixel {
 
 		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader);
 
+		//TODO:test for material tree
+		void Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<MaterialInstance> pMaterial, Ref<CbufferGeometryPass> geometryPass);
+
 		void DrawShadowMap(Ref<Context> pContext, Ref<Shader> pShader, const glm::mat4& transform, int32_t entityId);
 		void DrawOutLine(Ref<Context> pContext, const glm::mat4& transform);
 

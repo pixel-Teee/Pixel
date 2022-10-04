@@ -704,6 +704,24 @@ namespace Pixel {
 				//load test material
 				m_MaterialInstances[virtualPath] = CreateRef<MaterialInstance>();
 
+				rapidjson::Document doc;
+
+				std::ifstream stream(g_AssetPath.string() + "\\" + physicalPath);
+				std::stringstream strStream;
+				strStream << stream.rdbuf();
+
+				rttr::type materialType = rttr::type::get<MaterialInstance>();
+
+				if (!doc.Parse(strStream.str().data()).HasParseError())
+				{
+					//TODO:need to fix, need a perfect reflection scheme
+					if (doc.HasMember(materialType.get_name().to_string().c_str()) && doc[materialType.get_name().to_string().c_str()].IsObject())
+					{
+						SceneSerializer::FromJsonRecursive(*m_MaterialInstances[virtualPath], doc[materialType.get_name().to_string().c_str()], true);
+					}
+				}
+				stream.close();
+
 				//Reflect::TypeDescriptor* typeDesc = Reflect::TypeResolver<Material>::get();
 				//
 				//rapidjson::Document doc;
@@ -722,7 +740,8 @@ namespace Pixel {
 				//}
 				//stream.close();
 
-				//post load the sub material
+				//post load the material
+				m_MaterialInstances[virtualPath]->SetMaterial(m_MaterialInstances[virtualPath]->GetMaterialPath());
 			}
 			else
 			{
@@ -730,6 +749,11 @@ namespace Pixel {
 			}
 			return m_MaterialInstances[virtualPath];
 		}
+	}
+
+	std::map<std::string, Ref<MaterialInstance>>& AssetManager::GetMaterialInstances()
+	{
+		return m_MaterialInstances;
 	}
 
 	void AssetManager::AddModelToAssetRegistry(const std::string& physicalPath)

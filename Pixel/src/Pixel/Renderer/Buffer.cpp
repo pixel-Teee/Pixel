@@ -70,4 +70,22 @@ namespace Pixel {
 		return nullptr;
 	}
 
+	bool BufferLayout::operator==(const BufferLayout& rhs)
+	{
+		if (m_Elements.size() != rhs.m_Elements.size())
+			return false;
+		for (size_t i = 0; i < m_Elements.size(); ++i)
+		{
+			if (m_Elements[i] != rhs.m_Elements[i])
+				return false;
+		}
+		return true;
+	}
+
+	bool BufferElement::operator==(const BufferElement& rhs)
+	{
+		return Name == rhs.Name && Type == rhs.Type && Offset == rhs.Offset &&
+			Size == rhs.Size && Normalized == rhs.Normalized && m_sematics == rhs.m_sematics;
+	}
+
 }

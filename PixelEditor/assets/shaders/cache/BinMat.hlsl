@@ -103,28 +103,25 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 #include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
+float4  a;
+float4  b;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D MyTexture : register(t0);
 
 PixelOut PS(VertexOut pin){
-float2  Texture2DCoordinateInput7 = pin.TexCoord;
-float4  Texture2DOutput8 = float4(0, 0, 0, 0);
-Texture2DOutput8 = MyTexture.Sample(gsamPointWrap, Texture2DCoordinateInput7);
-float4  ConstFloatValue16;
-ConstFloatValue16 = float4(0.996139, 0.738275, 0.088460, 0.000000);
-float4  MulInputA24 = Texture2DOutput8;
-float4  MulInputB25 = ConstFloatValue16;
-float4  MulOutput25 = float4(0, 0, 0, 1);
-MulOutput25 = MulInputA24 * MulInputB25;
+float4  MulInputA15 = a;
+float4  MulInputB16 = b;
+float4  MulOutput16 = float4(0, 0, 0, 1);
+MulOutput16 = MulInputA15 * MulInputB16;
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = MulOutput25;
+float4  Albedo = MulOutput16;
 float  Roughness = 0;
 float  Metallic = 0;
 float  Ao = 0;
+Normal = float4(pin.NormalW, 1.0f);
 PixelOut pixelOut = (PixelOut)(0.0f);
 pixelOut.gBufferPosition.xyz = pin.PosW;
 pixelOut.gBufferNormal.xyz = Normal.xyz;

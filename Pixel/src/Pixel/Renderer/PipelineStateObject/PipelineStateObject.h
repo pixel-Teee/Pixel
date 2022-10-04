@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pixel/Renderer/RendererType.h"
+#include "Pixel/Renderer/Buffer.h"
 
 namespace Pixel {
 	class Device;
@@ -11,6 +12,8 @@ namespace Pixel {
 	class RasterState;
 	class DepthState;
 	//------many state------
+
+	class RootSignature;
 	class PSO
 	{
 	public:
@@ -31,11 +34,17 @@ namespace Pixel {
 
 		//virtual void SetInputLayout()
 
+		virtual void SetInputLayout(BufferLayout& vertexLayout) = 0;
+
 		virtual void SetVertexShader(const void* Binary, size_t Size) = 0;
 
 		virtual void SetPixelShader(const void* Binary, size_t Size) = 0;
 
 		virtual void SetComputeShader(const void* Binary, size_t Size) = 0;
+
+		virtual
+
+		virtual bool IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature) = 0;
 
 		virtual Ref<RootSignature> GetRootSignature() const = 0;
 

@@ -14,6 +14,7 @@
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/PipelineStateObject/PipelineStateObject.h"
 #include "Pixel/Renderer/PipelineStateObject/RootSignature.h"
+#include "Pixel/Renderer/3d/Material/MaterialInstance.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -478,6 +479,70 @@ namespace Pixel {
 		//unbind descriptor heap
 		//Ref<DescriptorHeap> nullHeap = DescriptorHeap::Create();
 		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
+
+		m_MeshConstant.previousWorld = glm::transpose(transform);
+	}
+
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<MaterialInstance> pMaterial, Ref<CbufferGeometryPass> geometryPass)
+	{
+		//bind pso and root signature
+		Ref<Material> pOriginalMaterial = pMaterial->GetMaterial();
+
+		if (pOriginalMaterial->dirty)
+		{
+			pOriginalMaterial->dirty = false;
+			
+			BufferLayout layout = m_VertexBuffer->GetLayout();
+			//create complete pso
+			Application::Get().GetRenderer()->CreateCompleteMaterialPso(pOriginalMaterial->m_PsoIndex, layout);
+		}
+		
+		Ref<PSO> completePso;
+		//find pso, how to interms of the buffer layout and material to find pso?
+		std::vector<Ref<PSO>>& psos = Application::Get().GetRenderer()->GetCompletePsos();
+
+		for (size_t i = 0; i < psos.size(); ++i)
+		{
+			//root signature?
+			if (psos[i]->IsMatchPso(m_VertexBuffer->GetLayout(), Application::Get().GetRenderer()->GetUninitializedMaterialPso(pOriginalMaterial->m_PsoIndex)->GetRootSignature()))
+			{
+				completePso = psos[i];
+				break;
+			}
+		}
+
+		PX_CORE_ASSERT(completePso != nullptr, "could not find pso!");
+
+		pContext->SetPipelineState(*completePso);
+		pContext->SetRootSignature(*(completePso->GetRootSignature()));
+		
+		Ref<Shader> pVertexShader = pOriginalMaterial->m_pVertexShader;
+		Ref<Shader> pPixelShader = pOriginalMaterial->m_pPixelShader;
+
+		m_MeshConstant.world = glm::transpose(transform);
+		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));
+		if (isFirst)
+		{
+			isFirst = false;
+			m_MeshConstant.previousWorld = glm::transpose(transform);
+		}
+		m_MeshConstant.editor = entityId;
+
+		pVertexShader->SetData("cbPass", geometryPass.get());
+		pVertexShader->SetData("cbPerObject", &m_MeshConstant);
+		pVertexShader->SubmitData(pContext);
+
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomValue.size(); ++i)
+		{
+			pPixelShader->SetData("CbMaterial." + pMaterial->m_PSShaderCustomValue[i]->ConstValueName, pMaterial->m_PSShaderCustomValue[i]->m_Values.data());
+		}
+		int32_t shadingModelId = 1;
+		pPixelShader->SetData("CbMaterial.ShadingModelID", &shadingModelId);
+		pPixelShader->SubmitData(pContext);
+
+		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_IndexBuffer->GetCount());
 
 		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
