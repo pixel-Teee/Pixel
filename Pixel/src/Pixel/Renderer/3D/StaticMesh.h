@@ -25,6 +25,7 @@ namespace Pixel {
 	class DescriptorHeap;
 	struct SubMaterial;
 	class Material;
+	class Bone;
 	class StaticMesh
 	{
 	public:
@@ -75,6 +76,9 @@ namespace Pixel {
 
 		Ref<VertexBuffer> m_VertexBuffer;
 		Ref<IndexBuffer> m_IndexBuffer;
+
+		std::vector<Ref<Bone>> m_AffectBones;
+		std::vector<glm::mat4> m_FinalMatrices;
 
 		int32_t PsoIndex = -1;//pipeline state object index, one for opaque, one for transparent
 		uint32_t TransParentPsoIndex;

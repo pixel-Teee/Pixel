@@ -112,12 +112,12 @@ float ClearCoatRoughness;
 };
 
 PixelOut PS(VertexOut pin){
-float4  MulInputA15 = a;
-float4  MulInputB16 = b;
-float4  MulOutput16 = float4(0, 0, 0, 1);
-MulOutput16 = MulInputA15 * MulInputB16;
+float4  MulInputA23 = a;
+float4  MulInputB24 = b;
+float4  MulOutput24 = float4(0, 0, 0, 1);
+MulOutput24 = MulInputA23 * MulInputB24;
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = MulOutput16;
+float4  Albedo = MulOutput24;
 float  Roughness = 0;
 float  Metallic = 0;
 float  Ao = 0;

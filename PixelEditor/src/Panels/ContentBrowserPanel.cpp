@@ -250,7 +250,7 @@ namespace Pixel {
 					//query the asset virtual path
 					const std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
 
-					PIXEL_CORE_INFO("{0}", strlen(virtualPath.c_str()) * sizeof(char));
+					//PIXEL_CORE_INFO("{0}", strlen(virtualPath.c_str()) * sizeof(char));
 
 					//pass the asset virtual path
 					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", virtualPath.c_str(), (strlen(virtualPath.c_str()) + 1) * sizeof(char), ImGuiCond_Once);

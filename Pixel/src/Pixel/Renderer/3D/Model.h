@@ -10,7 +10,8 @@
 #include <assimp/postprocess.h>
 
 namespace Pixel {
-
+	class Skeleton;
+	class Bone;
 	class Model
 	{
 	public:
@@ -36,6 +37,9 @@ namespace Pixel {
 		bool m_EntityDirty = false;
 
 		static Ref<Model> Create(const std::string& path);
+
+		//read heirarchy data, to construct bone 
+		void ReadHeirarchyData(const aiNode* src, Ref<Bone> parentBone);
 	private:
 		//the model's every meshes
 		std::vector<Ref<StaticMesh>> m_Meshes;
@@ -43,6 +47,8 @@ namespace Pixel {
 
 		std::map<std::string, BoneInfo> m_BoneInfoMap;
 		int32_t m_BoneCounter = 0;
+
+		Ref<Skeleton> m_pSkeleton;
 
 		auto& GetBoneInfoMap() { return m_BoneInfoMap; }
 		int32_t GetBoneCount() { return m_BoneCounter; }

@@ -6,8 +6,32 @@
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Scene/Components/TestMaterialComponent.h"
+#include "Pixel/Animation/Bone.h"
+#include "Pixel/Animation/Skeleton.h"
 
 namespace Pixel {
+
+	static glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
+	{
+		glm::mat4 to;
+
+		//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
+		to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
+		to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
+		to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
+		to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
+		return to;
+	}
+
+	static glm::vec3 GetGLMVec(const aiVector3D& vec)
+	{
+		return glm::vec3(vec.x, vec.y, vec.z);
+	}
+
+	static glm::quat GetGLMQuat(const aiQuaternion& pOrientation)
+	{
+		return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+	}
 
 	//draw model's every meshes
 	void Model::Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer)
@@ -76,6 +100,14 @@ namespace Pixel {
 
 		m_directory = path.substr(path.find_last_of("/\\"));
 
+		//read bone hierarchy from aiScene's aiNode
+		m_pSkeleton = CreateRef<Skeleton>();
+		Ref<Bone> pBone = CreateRef<Bone>();
+		//m_pSkeleton->m_BoneArray.push_back(pBone);
+
+		//read heirarchy data
+		ReadHeirarchyData(scene->mRootNode, pBone);
+
 		ProcessNode(scene->mRootNode, scene);
 	}
 
@@ -134,6 +166,71 @@ namespace Pixel {
 			elements.push_back({ ShaderDataType::Float3, "a_Tangent", Semantics::TANGENT });
 			elements.push_back({ ShaderDataType::Float3, "a_Binormal", Semantics::BINORMAL });
 			bufferSize += mesh->mNumVertices * 24;
+		}
+
+		if (mesh->HasBones())
+		{
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT] = new unsigned char[mesh->mNumVertices * 4 * 4];//float4
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES] = new unsigned char[mesh->mNumVertices * 4 * 4];//int4
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDWEIGHT] = mesh->mNumVertices * 4 * 4;
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDINDICES] = mesh->mNumVertices * 4 * 4;
+			elements.push_back({ ShaderDataType::Float4, "a_BlendWeight", Semantics::BLENDWEIGHT });
+			elements.push_back({ ShaderDataType::Int4, "a_BlendIndices", Semantics::BLENDINDICES });
+			bufferSize += mesh->mNumVertices * 32;
+
+			memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT], 0, mesh->mNumVertices * 4 * 4);
+			memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES], 0, mesh->mNumVertices * 4 * 4);
+
+			//std::vector<glm::ivec4> boneIndices;
+			std::vector<Ref<Bone>> tempBones;
+			for (int32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+			{
+				std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+
+				Ref<Bone> pBone;
+				uint32_t index = -1;
+				for (size_t i = 0; i < tempBones.size(); ++i)
+				{
+					if (tempBones[i]->m_Name == boneName)
+					{
+						pBone = tempBones[i];
+						index = i;
+						break;
+					}
+				}
+
+				if (pBone == nullptr)
+				{
+					tempBones.push_back(m_pSkeleton->GetBone(boneName));
+					index = tempBones.size() - 1;//index
+				}
+
+				aiVertexWeight* weights = mesh->mBones[boneIndex]->mWeights;
+				int32_t numWeights = mesh->mBones[boneIndex]->mNumWeights;
+
+				for (int32_t weightIndex = 0; weightIndex < numWeights, 4; ++weightIndex)
+				{
+					int32_t vertexId = weights[weightIndex].mVertexId;
+					float weight = weights[weightIndex].mWeight;
+					
+					//set to vertices
+					//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * weightIndex], &weight, 4);
+					//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * weightIndex], &index, 4);
+					for (int32_t j = 0; j < 4; ++j)
+					{
+						float* temp = (float*)(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16]);
+						if (temp[j] == 0)//blend weight
+						{
+							memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * j], &weight, 4);
+							memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * j], &index, 4);
+							break;
+						}
+					}
+				}
+			}
+
+			staticMesh->m_AffectBones = tempBones;
+			staticMesh->m_FinalMatrices.resize(staticMesh->m_AffectBones.size());//resize
 		}
 		//------Editor------
 		//staticMesh->m_DataBuffer[(uint64_t)Semantics::Editor] = new unsigned char[mesh->mNumVertices * 4];
@@ -292,5 +389,24 @@ namespace Pixel {
 		//}
 
 		return staticMesh;
+	}
+
+	void Model::ReadHeirarchyData(const aiNode* src, Ref<Bone> parentBone)
+	{
+		//parentBone = CreateRef<Bone>();
+		//Ref<Bone> pBone = CreateRef<Bone> pBone;
+		parentBone->m_Name = src->mName.data;
+		parentBone->m_OffsetMatrix = ConvertMatrixToGLMFormat(src->mTransformation);
+		parentBone->m_Childrens.resize(src->mNumChildren);//resize
+
+		//push a bone
+		m_pSkeleton->m_BoneArray.push_back(parentBone);
+
+		for (int32_t i = 0; i < src->mNumChildren; ++i)
+		{
+			Ref<Bone> childrenBone = CreateRef<Bone>();
+			ReadHeirarchyData(src->mChildren[i], childrenBone);
+			parentBone->m_Childrens[i] = childrenBone;
+		}
 	}
 }
