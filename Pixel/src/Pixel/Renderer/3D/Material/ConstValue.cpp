@@ -9,6 +9,7 @@ namespace Pixel
 {
 	ConstValue::ConstValue()
 	{
+		m_bIsCustom = false;
 	}
 
 	//------ConstValue------

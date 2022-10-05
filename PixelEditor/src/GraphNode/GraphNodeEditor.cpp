@@ -268,15 +268,15 @@ namespace Pixel {
 		ImGui::BeginChild("TopPanel", ImVec2(0, panelHeight));
 		ImGui::BeginHorizontal("TopPanel");
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, panelHeight / 8.0f);
-		if(ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
-		{
-			//generate and compiler
-
-			m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
-			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
-			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
-			PIXEL_CORE_INFO(out);
-		}
+		//if(ImGui::Button("Compiler", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
+		//{
+		//	//generate and compiler
+		//
+		//	m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
+		//	//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
+		//	std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
+		//	PIXEL_CORE_INFO(out);
+		//}
 		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
 			//save will also call the compiler
@@ -400,6 +400,23 @@ namespace Pixel {
 				{
 					std::string str = std::string(buf);
 					pTexture2DShaderFunction->SetShowName(str);//edit parameter name
+				}
+
+				//edit texture
+				if (ImGui::BeginCombo("Texture Parameter", pTexture2DShaderFunction->m_TextureVirtualPath.c_str()))
+				{
+					//for(auto& item :)
+					auto& textures = AssetManager::GetSingleton().GetTextureAssetRegistry();
+
+					for (auto& item : textures)
+					{
+						bool isSelected = item.first == pTexture2DShaderFunction->m_TextureVirtualPath;
+						if (ImGui::Selectable(item.first.c_str(), isSelected))
+						{
+							pTexture2DShaderFunction->m_TextureVirtualPath = item.first;//set to it
+						}
+					}
+					ImGui::EndCombo();
 				}
 			}
 		}

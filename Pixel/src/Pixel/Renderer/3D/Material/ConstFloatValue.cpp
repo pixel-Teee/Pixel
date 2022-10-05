@@ -42,8 +42,8 @@ namespace Pixel
 		Ref<OutputNode> pOutputNode;
 		pOutputNode = CreateRef<OutputNode>((ValueType)(m_valueNumber - 1), OutputName, shared_from_this());
 		m_pOutputs.push_back(pOutputNode);
-		m_OutputNodeDisplayName.push_back("");
-		m_OutputNodeDisplayColor.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+		//m_OutputNodeDisplayName.push_back("");
+		//m_OutputNodeDisplayColor.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 		//create temp variable
 		//if temp variable ConstFloatValue have 4 components
 		//and will create 4 temp variable

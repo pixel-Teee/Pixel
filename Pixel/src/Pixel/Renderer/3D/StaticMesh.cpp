@@ -492,6 +492,19 @@ namespace Pixel {
 		//bind pso and root signature
 		Ref<Material> pOriginalMaterial = pMaterial->GetMaterial();
 
+		if (pOriginalMaterial->m_PsoIndex == -1)
+		{
+			std::string shaderPath = "assets/shaders/Cache/" + pOriginalMaterial->m_MaterialName + ".hlsl";
+			//TODO:in the future, use shader cache
+			Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0");
+			Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0");
+			pOriginalMaterial->m_pVertexShader = pVertexShader;
+			pOriginalMaterial->m_pPixelShader = pPixelShader;
+			pOriginalMaterial->dirty = true;
+			pOriginalMaterial->LinkAllParameters();
+			pOriginalMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(pVertexShader, pPixelShader, pOriginalMaterial->m_PsoIndex);
+		}
+
 		if (pOriginalMaterial->dirty)
 		{
 			pOriginalMaterial->dirty = false;
@@ -543,6 +556,17 @@ namespace Pixel {
 		int32_t shadingModelId = 1;
 		pPixelShader->SetData("CbMaterial.ShadingModelID", &shadingModelId);
 		pPixelShader->SubmitData(pContext);
+
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomTexture.size(); ++i)
+		{
+			pPixelShader->SetTextureDescriptor(pMaterial->m_PSShaderCustomTexture[i]->ConstValueName, pMaterial->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
+		}
+
+		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+		Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+		Ref<DescriptorHandle> offsetHandle = CreateRef<DescriptorHandle>((*totalTextureDescriptorHeapFirstHandle) + Application::Get().GetRenderer()->GetDescriptorHeapOffset() * DescriptorSize);
+		pPixelShader->SubmitTextureDescriptor(pContext, offsetHandle);
+		Application::Get().GetRenderer()->SetDescriptorHeapOffset(Application::Get().GetRenderer()->GetDescriptorHeapOffset() + pMaterial->m_PSShaderCustomTexture.size());
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());

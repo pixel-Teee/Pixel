@@ -8,6 +8,7 @@
 #include "ConstFloatValue.h"
 #include "TextureShaderFunction.h"
 #include "Texture2DShaderFunction.h"
+#include "Pixel/Asset/AssetManager.h"
 //------my library------
 
 namespace Pixel {
@@ -186,6 +187,11 @@ namespace Pixel {
 				pCustomFloatValue->m_Values.resize(pConstFloatValue->m_valueNumber);
 				pCustomFloatValue->m_ValueType = (ValueType)(pConstFloatValue->m_valueNumber - 1);
 				m_PSShaderCustomValue.push_back(pCustomFloatValue);
+				
+				for (size_t j = 0; j < pCustomFloatValue->m_Values.size(); ++j)
+				{
+					pCustomFloatValue->m_Values[j] = pConstFloatValue->m_Value[j];
+				}
 			}
 		}
 
@@ -200,7 +206,8 @@ namespace Pixel {
 				pCustomTexture->ConstValueName = m_pShaderFunctionArray[i]->m_ShowName;
 				
 				//TODO:need to some information
-
+				pCustomTexture->m_VirtualPath = pTexture2DShaderFunction->m_TextureVirtualPath;
+				pCustomTexture->m_pTexture = AssetManager::GetSingleton().GetTexture(pCustomTexture->m_VirtualPath);//get texture
 				m_PSShaderCustomTexture.push_back(pCustomTexture);
 			}
 		}

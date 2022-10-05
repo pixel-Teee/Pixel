@@ -69,6 +69,10 @@ namespace Pixel {
 			m_PSShaderCustomValue[i]->ConstValueName = pMaterial->m_PSShaderCustomValue[i]->ConstValueName;
 			m_PSShaderCustomValue[i]->m_ValueType = pMaterial->m_PSShaderCustomValue[i]->m_ValueType;
 			m_PSShaderCustomValue[i]->m_Values.resize(pMaterial->m_PSShaderCustomValue[i]->m_Values.size());
+			for (size_t j = 0; j < m_PSShaderCustomValue[i]->m_Values.size(); ++j)
+			{
+				m_PSShaderCustomValue[i]->m_Values[j] = pMaterial->m_PSShaderCustomValue[i]->m_Values[j];//assign
+			}
 		}
 
 		m_PSShaderCustomTexture.clear();
@@ -77,6 +81,8 @@ namespace Pixel {
 		{
 			m_PSShaderCustomTexture[i] = CreateRef<CustomTexture2D>();
 			m_PSShaderCustomTexture[i]->ConstValueName = pMaterial->m_PSShaderCustomTexture[i]->ConstValueName;
+			m_PSShaderCustomTexture[i]->m_VirtualPath = pMaterial->m_PSShaderCustomTexture[i]->m_VirtualPath;
+			m_PSShaderCustomTexture[i]->m_pTexture = AssetManager::GetSingleton().GetTexture(m_PSShaderCustomTexture[i]->m_VirtualPath);
 		}
 		//------set parameter------
 	}
@@ -101,6 +107,10 @@ namespace Pixel {
 			m_PSShaderCustomValue[i]->ConstValueName = pMaterial->m_PSShaderCustomValue[i]->ConstValueName;
 			m_PSShaderCustomValue[i]->m_ValueType = pMaterial->m_PSShaderCustomValue[i]->m_ValueType;
 			m_PSShaderCustomValue[i]->m_Values.resize(pMaterial->m_PSShaderCustomValue[i]->m_Values.size());
+			for (size_t j = 0; j < m_PSShaderCustomValue[i]->m_Values.size(); ++j)
+			{
+				m_PSShaderCustomValue[i]->m_Values[j] = pMaterial->m_PSShaderCustomValue[i]->m_Values[j];//assign
+			}
 		}
 
 		m_PSShaderCustomTexture.clear();
@@ -109,6 +119,8 @@ namespace Pixel {
 		{
 			m_PSShaderCustomTexture[i] = CreateRef<CustomTexture2D>();
 			m_PSShaderCustomTexture[i]->ConstValueName = pMaterial->m_PSShaderCustomTexture[i]->ConstValueName;
+			m_PSShaderCustomTexture[i]->m_VirtualPath = pMaterial->m_PSShaderCustomTexture[i]->m_VirtualPath;
+			m_PSShaderCustomTexture[i]->m_pTexture = AssetManager::GetSingleton().GetTexture(m_PSShaderCustomTexture[i]->m_VirtualPath);
 		}
 		//------set parameter------
 	}

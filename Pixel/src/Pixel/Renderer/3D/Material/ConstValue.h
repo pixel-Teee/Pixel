@@ -17,6 +17,7 @@ namespace Pixel
 
 		virtual ~ConstValue();
 
+		Meta()
 		//if this is not user provided, then use default value
 		bool m_bIsCustom;
 

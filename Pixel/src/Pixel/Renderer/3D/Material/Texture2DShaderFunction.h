@@ -23,6 +23,10 @@ namespace Pixel {
 
 		virtual bool GetOutputValueString(std::string & OutString) const;
 
+		Meta()
+		//texture virtual path
+		std::string m_TextureVirtualPath;
+
 		enum InputValueElement
 		{
 			IN_TEXCOORD,

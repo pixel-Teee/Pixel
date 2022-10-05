@@ -1,0 +1,8 @@
+{
+    "Entities": [
+        {"IDComponent":{"ID":{"m_UUID":152104488012386066}},"TagComponent":{"Tag":"Empty Entity"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":-6.779345512390137,"y":0.0,"z":0.0},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}},"StaticMeshComponent":{"path":"Model\\Cube"},"MaterialTreeComponent":{}
+        },
+        {"IDComponent":{"ID":{"m_UUID":11823896207055880062}},"TagComponent":{"Tag":"Empty Entity"},"TransformComponent":{"parentUUID":{"m_UUID":0},"childrensUUID":[],"Translation":{"x":0.0,"y":0.0,"z":0.0},"Rotation":{"x":0.0,"y":0.0,"z":0.0},"Scale":{"x":1.0,"y":1.0,"z":1.0}},"StaticMeshComponent":{"path":"Model\\Cube"},"MaterialTreeComponent":{}
+        }
+    ]
+}

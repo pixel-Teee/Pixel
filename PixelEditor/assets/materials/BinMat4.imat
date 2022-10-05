@@ -1,0 +1,16 @@
+{
+  "Pixel::MaterialInstance": 
+  {
+    "type": "Pixel::MaterialInstance",
+    "m_PSShaderCustomValue": [
+      {
+        "type": "Pixel::CustomFloatValue",
+        "ConstValueName": "a",
+        "m_Values": [ 0.0, 0.0, 0.0, 0.0 ],
+        "m_ValueType": "VT_4"
+      }
+    ],
+    "m_PSShaderCustomTexture": [],
+    "m_MaterialPath": "TestMaterial\\BinMat4"
+  }
+}

@@ -756,6 +756,11 @@ namespace Pixel {
 		return m_MaterialInstances;
 	}
 
+	std::map<std::string, Ref<Texture2D>>& AssetManager::GetTextures()
+	{
+		return m_textures;
+	}
+
 	void AssetManager::AddModelToAssetRegistry(const std::string& physicalPath)
 	{
 		size_t pos = physicalPath.find_last_of("\\");
@@ -927,6 +932,11 @@ namespace Pixel {
 	std::wstring AssetManager::to_wsrting(std::string str)
 	{
 		return m_strconverter.from_bytes(str);
+	}
+
+	std::map<std::string, std::string>& AssetManager::GetTextureAssetRegistry()
+	{
+		return m_VirtualPathToPhysicalPathTexture;
 	}
 
 	std::map<std::string, std::string>& AssetManager::GetMaterialAssetRegistry()

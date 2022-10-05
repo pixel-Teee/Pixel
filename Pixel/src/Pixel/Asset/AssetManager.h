@@ -57,6 +57,8 @@ namespace Pixel {
 
 		std::map<std::string, Ref<MaterialInstance>>& GetMaterialInstances();
 
+		std::map<std::string, Ref<Texture2D>>& GetTextures();
+
 		void AddModelToAssetRegistry(const std::string& physicalPath);
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
@@ -70,6 +72,8 @@ namespace Pixel {
 		std::string to_string(std::wstring wstr);
 
 		std::wstring to_wsrting(std::string str);
+
+		std::map<std::string, std::string>& GetTextureAssetRegistry();
 
 		std::map<std::string, std::string>& GetMaterialAssetRegistry();
 

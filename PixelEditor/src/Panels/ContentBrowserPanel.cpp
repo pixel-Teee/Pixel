@@ -55,7 +55,7 @@ namespace Pixel {
 			return fileName;
 		else
 		{
-			fileName = fileName.substr(0, dotPos - 1);
+			fileName = fileName.substr(0, dotPos);
 			return fileName;
 		}
 	}

@@ -51,10 +51,10 @@ namespace Pixel {
 		std::string m_MaterialName;//material name
 
 		//------material's uninitialized pso index, will in terms of the model's vertex input layout to create complete pso------
-		Meta()
+		//Meta()
 		bool dirty = false;
 
-		Meta()
+		//Meta()
 		int32_t m_PsoIndex = -1;
 		//------material's uninitialized pso index, will in terms of the model's vertex input layout to create complete pso------
 

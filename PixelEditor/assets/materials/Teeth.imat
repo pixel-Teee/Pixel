@@ -1,0 +1,3 @@
+{
+    "Pixel::MaterialInstance":{"type":"Pixel::MaterialInstance","m_PSShaderCustomValue":[],"m_PSShaderCustomTexture":[{"type":"Pixel::CustomTexture2D","ConstValueName":"BaseColor","m_VirtualPath":"Texture\\teeth_baseColor"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MetallicRoughness","m_VirtualPath":"Texture\\mouth_metallicRoughness"},{"type":"Pixel::CustomTexture2D","ConstValueName":"Normal","m_VirtualPath":"Texture\\teeth_normal"}],"m_MaterialPath":"TestMaterial\\Teeth"}
+}

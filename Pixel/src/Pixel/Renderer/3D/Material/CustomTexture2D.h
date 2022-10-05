@@ -32,6 +32,8 @@ namespace Pixel {
 		{
 			return lhs.ConstValueName == rhs.ConstValueName;
 		}
+		Meta()
+		std::string m_VirtualPath;
 
 		Ref<Texture2D> m_pTexture;
 
