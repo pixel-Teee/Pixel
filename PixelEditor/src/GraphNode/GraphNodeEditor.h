@@ -62,6 +62,10 @@ namespace Pixel {
 
 		Ref<GraphPin> FindPin(ed::PinId pinId);
 
+		Ref<GraphLink> FindLink(ed::LinkId linkId);
+
+		Ref<GraphNode> FindNode(ed::NodeId nodeId);
+
 		ed::EditorContext* m_Editor = nullptr;
 
 		std::string m_GraphNodeEditorConfigPath;

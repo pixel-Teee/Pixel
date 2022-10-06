@@ -655,7 +655,9 @@ namespace Pixel
 			{
 				const char* LightTypeString[] = { "PointLight", "DirectLight", "SpointLight" };
 				const char* currentLightTypeString = LightTypeString[(int)component.lightType];
-				if (ImGui::BeginCombo("Light Type", currentLightTypeString))
+				ImGui::Text("LightType");
+				ImGui::SameLine();
+				if (ImGui::BeginCombo("##Light Type", currentLightTypeString))
 				{
 					for (int i = 0; i < 3; ++i)
 					{
@@ -672,9 +674,15 @@ namespace Pixel
 				}
 				if (component.lightType == LightType::PointLight)
 				{
+					//ImGui::Text("Light Color");
+					//ImGui::SameLine();
 					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
 					//ImGui::DragFloat("Light diffuse", &component.diffuse, 10.0f, 1.0f, 1000.0f);
+					//ImGui::Text("Light constant");
+					//ImGui::SameLine();
 					ImGui::DragFloat("Light constant", &component.constant, 0.02f, 0.02f, 1.0f, "%.2f");
+					//ImGui::Text("Light linear");
+					//ImGui::SameLine();
 					ImGui::DragFloat("Light linear", &component.linear, 0.02f, 0.02f, 1.0f, "%.2f");
 					ImGui::DragFloat("Light quadratic", &component.quadratic, 0.0005f, 0.0070f, 2.0f, "%.4f");
 					ImGui::Checkbox("DisplayPointLightVolume", &component.DisplayLightVolume);
@@ -752,10 +760,13 @@ namespace Pixel
 				//add material instance
 				component.AddMaterialInstance();
 			}
+			ImGui::Separator();//separator
 
 			for (size_t i = 0; i < component.m_MaterialPaths.size(); ++i)
 			{
-				if (ImGui::BeginCombo(("Material[" + std::to_string(i) + "]").c_str(), component.m_MaterialPaths[i].c_str()))
+				ImGui::Text(("Material[" + std::to_string(i) + "]").c_str());
+				ImGui::SameLine();
+				if (ImGui::BeginCombo(("##Material[" + std::to_string(i) + "]").c_str(), component.m_MaterialPaths[i].c_str()))
 				{
 					//ImGui::SameLine();
 					for (auto& item : AssetRegistry)
@@ -767,7 +778,7 @@ namespace Pixel
 							component.m_Materials[i] = AssetManager::GetSingleton().GetMaterialInstance(component.m_MaterialPaths[i]);
 						}
 						if (isSelected)
-							ImGui::SetItemDefaultFocus();		
+							ImGui::SetItemDefaultFocus();
 					}
 					ImGui::EndCombo();
 				}
@@ -777,29 +788,54 @@ namespace Pixel
 					//draw material instance
 					for (size_t j = 0; j < component.m_Materials[i]->m_PSShaderCustomValue.size(); ++j)
 					{
-						ImGui::Text(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str());
+						ImGui::Text(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str());//variable name
 						ImGui::SameLine();
 						if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_1)
 						{
-							ImGui::DragFloat(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+							ImGui::DragFloat(("##" + component.m_MaterialPaths[i] + component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName).c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f, "0.3f", ImGuiSliderFlags_None);
 						}
 						else if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_2)
 						{
-							ImGui::DragFloat2(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+							ImGui::DragFloat2(("##" + component.m_MaterialPaths[i] + component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName).c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
 						}
 						else if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_3)
 						{
-							ImGui::DragFloat3(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+							ImGui::DragFloat3(("##" + component.m_MaterialPaths[i] + component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName).c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
 						}
 						else if (component.m_Materials[i]->m_PSShaderCustomValue[j]->m_ValueType == ValueType::VT_4)
 						{
-							ImGui::DragFloat4(component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName.c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
+							ImGui::DragFloat4(("##" + component.m_MaterialPaths[i] + component.m_Materials[i]->m_PSShaderCustomValue[j]->ConstValueName).c_str(), component.m_Materials[i]->m_PSShaderCustomValue[j]->m_Values.data(), 0.05f, 0.0f, 1.0f);
 						}
 					}
-				}
-			}
 
-			ImGui::Separator();
+					std::map<std::string, std::string>& AssetRegistry = AssetManager::GetSingleton().GetTextureAssetRegistry();
+					for (size_t j = 0; j < component.m_Materials[i]->m_PSShaderCustomTexture.size(); ++j)
+					{		
+						ImGui::Text(component.m_Materials[i]->m_PSShaderCustomTexture[j]->ConstValueName.c_str());//variable name
+						ImGui::SameLine();
+						std::string temp = "##" + component.m_MaterialPaths[i] + component.m_Materials[i]->m_PSShaderCustomTexture[j]->ConstValueName;//temp widget label
+						if (ImGui::BeginCombo(temp.c_str(), component.m_Materials[i]->m_PSShaderCustomTexture[j]->m_VirtualPath.c_str()))
+						{			
+							for (auto& item : AssetRegistry)
+							{
+								bool isSelected = item.first == component.m_Materials[i]->m_PSShaderCustomTexture[j]->m_VirtualPath;
+								if (ImGui::Selectable(item.first.c_str(), isSelected))
+								{
+									//component.m_MaterialPaths[i] = item.first;//need to load the sub material
+									//component.m_Materials[i] = AssetManager::GetSingleton().GetMaterialInstance(component.m_MaterialPaths[i]);
+									component.m_Materials[i]->m_PSShaderCustomTexture[j]->m_VirtualPath = item.first;
+									component.m_Materials[i]->m_PSShaderCustomTexture[j]->m_pTexture = AssetManager::GetSingleton().GetTexture(item.first);
+								}
+								if (isSelected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+							ImGui::SameLine();
+						}			
+					}
+				}
+				ImGui::Separator();
+			}		
 		});
 	}
 }

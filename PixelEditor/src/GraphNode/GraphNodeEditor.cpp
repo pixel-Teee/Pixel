@@ -141,10 +141,12 @@ namespace Pixel {
 				if (m_GraphPins[i]->m_PinId.Get() == inputPinId)
 				{
 					pGraphLinks->m_InputPin = m_GraphPins[i];
+					m_GraphPins[i]->m_NodeLink = pGraphLinks;
 				}
 				if (m_GraphPins[i]->m_PinId.Get() == outputPinId)
 				{
 					pGraphLinks->m_OutputPin = m_GraphPins[i];
+					m_GraphPins[i]->m_NodeLink = pGraphLinks;
 				}
 			}
 			++ShaderStringFactory::m_ShaderValueIndex;
@@ -204,7 +206,7 @@ namespace Pixel {
 			//2.draw link
 			DrawLinks();
 
-			//3.handle create node
+			//3.handle create links and delete nodes and delete links
 			HandleInteraction();		
 			ed::End();
 			//ImGui::EndHorizontal();
@@ -603,6 +605,121 @@ namespace Pixel {
 		}
 		ed::EndCreate();
 
+		if (ed::BeginDelete())
+		{
+			ed::LinkId linkId = 0;
+			
+			while (ed::QueryDeletedLink(&linkId))
+			{
+				if (ed::AcceptDeletedItem())
+				{
+					//Ref<GraphLink> pGraphLink = FindLink(linkId);
+					//
+					//Ref<GraphPin> pGraphInputPin = pGraphLink->m_InputPin.lock();
+					//Ref<GraphPin> pGraphOutputPin = pGraphLink->m_OutputPin.lock();
+
+				}
+			}
+
+			ed::NodeId nodeId = 0;
+
+			while (ed::QueryDeletedNode(&nodeId))
+			{
+				if (ed::AcceptDeletedItem())
+				{
+					//find owner
+					Ref<GraphNode> pGrapNodes = FindNode(nodeId);
+
+					//find all graph links, then delete
+					std::vector<Ref<GraphPin>> InputPins = pGrapNodes->m_InputPin;
+					std::vector<Ref<GraphPin>> OutputPins = pGrapNodes->m_OutputPin;
+
+					std::vector<Ref<GraphLink>> needDeletedLinks;
+					for (size_t i = 0; i < InputPins.size(); ++i)
+					{
+						if (InputPins[i]->m_NodeLink != nullptr)
+						{
+							Ref<GraphLink> pNodeLinks = InputPins[i]->m_NodeLink;//node link
+							Ref<GraphPin> pOutputPin = pNodeLinks->m_OutputPin.lock();
+							if (pOutputPin != nullptr)
+							{
+								pOutputPin->m_NodeLink = nullptr;
+							}
+							needDeletedLinks.push_back(pNodeLinks);
+						}				
+					}
+
+					for (size_t i = 0; i < OutputPins.size(); ++i)
+					{
+						if (OutputPins[i]->m_NodeLink != nullptr)
+						{
+							Ref<GraphLink> pNodeLinks = OutputPins[i]->m_NodeLink;//node link
+							Ref<GraphPin> pInputPin = pNodeLinks->m_InputPin.lock();
+							if (pInputPin != nullptr)
+							{
+								pInputPin->m_NodeLink = nullptr;
+							}
+							needDeletedLinks.push_back(pNodeLinks);
+						}				
+					}
+
+					std::vector<glm::ivec2>& logicLinks = m_pMaterial->GetLinks();
+
+					logicLinks.erase(std::remove_if(logicLinks.begin(), logicLinks.end(), [&InputPins, &OutputPins](glm::ivec2& link) {
+						for (size_t i = 0; i < InputPins.size(); ++i)
+						{
+							if (InputPins[i]->m_PinId.Get() == link.x || InputPins[i]->m_PinId.Get() == link.y)
+								return true;
+						}
+						for (size_t i = 0; i < OutputPins.size(); ++i)
+						{
+							if (OutputPins[i]->m_PinId.Get() == link.x || OutputPins[i]->m_PinId.Get() == link.y)
+								return true;
+						}
+						return false;
+					}), logicLinks.end());
+
+					m_GraphPins.erase(std::remove_if(m_GraphPins.begin(), m_GraphPins.end(), [&InputPins](Ref<GraphPin> pGraphPin) { 
+						for (size_t i = 0; i < InputPins.size(); ++i)
+						{
+							if (InputPins[i] == pGraphPin) return true;
+						}
+						return false;
+					}), m_GraphPins.end());
+
+					m_GraphPins.erase(std::remove_if(m_GraphPins.begin(), m_GraphPins.end(), [&OutputPins](Ref<GraphPin> pGraphPin) {
+						for (size_t i = 0; i < OutputPins.size(); ++i)
+						{
+							if (OutputPins[i] == pGraphPin) return true;
+						}
+						return false;
+					}), m_GraphPins.end());
+
+					InputPins.clear();
+					OutputPins.clear();
+
+					m_GraphLinks.erase(std::remove_if(m_GraphLinks.begin(), m_GraphLinks.end(), [&needDeletedLinks](Ref<GraphLink> pGraphLink) {
+						for (size_t i = 0; i < needDeletedLinks.size(); ++i)
+						{
+							if (needDeletedLinks[i] == pGraphLink) return true;
+						}
+						return false;
+					}), m_GraphLinks.end());
+
+					m_GraphNodes.erase(std::find(m_GraphNodes.begin(), m_GraphNodes.end(), pGrapNodes));
+
+					for (size_t i = 0; i < m_pMaterial->m_pShaderFunctionArray.size(); ++i)
+					{
+						if (m_pMaterial->m_pShaderFunctionArray[i] == pGrapNodes->p_Owner)
+						{
+							m_pMaterial->m_pShaderFunctionArray.erase(std::find(m_pMaterial->m_pShaderFunctionArray.begin(), m_pMaterial->m_pShaderFunctionArray.end(), pGrapNodes->p_Owner));
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		//create new node
 		CreateNewNodes();
 
@@ -828,6 +945,24 @@ namespace Pixel {
 		{
 			if (m_GraphPins[i]->m_PinId == pinId)
 				return m_GraphPins[i];
+		}
+		return nullptr;
+	}
+	Ref<GraphLink> GraphNodeEditor::FindLink(ed::LinkId linkId)
+	{
+		for (size_t i = 0; i < m_GraphLinks.size(); ++i)
+		{
+			if (m_GraphLinks[i]->m_LinkId == linkId)
+				return m_GraphLinks[i];
+		}
+		return nullptr;
+	}
+	Ref<GraphNode> GraphNodeEditor::FindNode(ed::NodeId nodeId)
+	{
+		for (size_t i = 0; i < m_GraphNodes.size(); ++i)
+		{
+			if (m_GraphNodes[i]->m_NodeId == nodeId)
+				return m_GraphNodes[i];
 		}
 		return nullptr;
 	}

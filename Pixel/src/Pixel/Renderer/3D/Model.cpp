@@ -167,71 +167,71 @@ namespace Pixel {
 			elements.push_back({ ShaderDataType::Float3, "a_Binormal", Semantics::BINORMAL });
 			bufferSize += mesh->mNumVertices * 24;
 		}
-
-		if (mesh->HasBones())
-		{
-			staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT] = new unsigned char[mesh->mNumVertices * 4 * 4];//float4
-			staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES] = new unsigned char[mesh->mNumVertices * 4 * 4];//int4
-			staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDWEIGHT] = mesh->mNumVertices * 4 * 4;
-			staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDINDICES] = mesh->mNumVertices * 4 * 4;
-			elements.push_back({ ShaderDataType::Float4, "a_BlendWeight", Semantics::BLENDWEIGHT });
-			elements.push_back({ ShaderDataType::Int4, "a_BlendIndices", Semantics::BLENDINDICES });
-			bufferSize += mesh->mNumVertices * 32;
-
-			memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT], 0, mesh->mNumVertices * 4 * 4);
-			memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES], 0, mesh->mNumVertices * 4 * 4);
-
-			//std::vector<glm::ivec4> boneIndices;
-			std::vector<Ref<Bone>> tempBones;
-			for (int32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
-			{
-				std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
-
-				Ref<Bone> pBone;
-				uint32_t index = -1;
-				for (size_t i = 0; i < tempBones.size(); ++i)
-				{
-					if (tempBones[i]->m_Name == boneName)
-					{
-						pBone = tempBones[i];
-						index = i;
-						break;
-					}
-				}
-
-				if (pBone == nullptr)
-				{
-					tempBones.push_back(m_pSkeleton->GetBone(boneName));
-					index = tempBones.size() - 1;//index
-				}
-
-				aiVertexWeight* weights = mesh->mBones[boneIndex]->mWeights;
-				int32_t numWeights = mesh->mBones[boneIndex]->mNumWeights;
-
-				for (int32_t weightIndex = 0; weightIndex < numWeights, 4; ++weightIndex)
-				{
-					int32_t vertexId = weights[weightIndex].mVertexId;
-					float weight = weights[weightIndex].mWeight;
-					
-					//set to vertices
-					//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * weightIndex], &weight, 4);
-					//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * weightIndex], &index, 4);
-					for (int32_t j = 0; j < 4; ++j)
-					{
-						float* temp = (float*)(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16]);
-						if (temp[j] == 0)//blend weight
-						{
-							memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * j], &weight, 4);
-							memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * j], &index, 4);
-							break;
-						}
-					}
-				}
-			}
-
-			staticMesh->m_AffectBones = tempBones;
-			staticMesh->m_FinalMatrices.resize(staticMesh->m_AffectBones.size());//resize
-		}
+		//
+		//if (mesh->HasBones())
+		//{
+		//	staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT] = new unsigned char[mesh->mNumVertices * 4 * 4];//float4
+		//	staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES] = new unsigned char[mesh->mNumVertices * 4 * 4];//int4
+		//	staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDWEIGHT] = mesh->mNumVertices * 4 * 4;
+		//	staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDINDICES] = mesh->mNumVertices * 4 * 4;
+		//	elements.push_back({ ShaderDataType::Float4, "a_BlendWeight", Semantics::BLENDWEIGHT });
+		//	elements.push_back({ ShaderDataType::Int4, "a_BlendIndices", Semantics::BLENDINDICES });
+		//	bufferSize += mesh->mNumVertices * 32;
+		//
+		//	memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT], 0, mesh->mNumVertices * 4 * 4);
+		//	memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES], 0, mesh->mNumVertices * 4 * 4);
+		//
+		//	//std::vector<glm::ivec4> boneIndices;
+		//	std::vector<Ref<Bone>> tempBones;
+		//	for (int32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+		//	{
+		//		std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+		//
+		//		Ref<Bone> pBone;
+		//		uint32_t index = -1;
+		//		for (size_t i = 0; i < tempBones.size(); ++i)
+		//		{
+		//			if (tempBones[i]->m_Name == boneName)
+		//			{
+		//				pBone = tempBones[i];
+		//				index = i;
+		//				break;
+		//			}
+		//		}
+		//
+		//		if (pBone == nullptr)
+		//		{
+		//			tempBones.push_back(m_pSkeleton->GetBone(boneName));
+		//			index = tempBones.size() - 1;//index
+		//		}
+		//
+		//		aiVertexWeight* weights = mesh->mBones[boneIndex]->mWeights;
+		//		int32_t numWeights = mesh->mBones[boneIndex]->mNumWeights;
+		//
+		//		for (int32_t weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+		//		{
+		//			int32_t vertexId = weights[weightIndex].mVertexId;
+		//			float weight = weights[weightIndex].mWeight;
+		//			
+		//			//set to vertices
+		//			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * weightIndex], &weight, 4);
+		//			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * weightIndex], &index, 4);
+		//			//for (int32_t j = 0; j < 4; ++j)
+		//			//{
+		//			//	float* temp = (float*)(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16]);
+		//			//	if (temp[j] == 0)//blend weight
+		//			//	{
+		//			//		memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * j], &weight, 4);
+		//			//		memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * j], &index, 4);
+		//			//		break;
+		//			//	}
+		//			//}
+		//		}
+		//	}
+		//
+		//	staticMesh->m_AffectBones = tempBones;
+		//	staticMesh->m_FinalMatrices.resize(staticMesh->m_AffectBones.size());//resize
+		//}
 		//------Editor------
 		//staticMesh->m_DataBuffer[(uint64_t)Semantics::Editor] = new unsigned char[mesh->mNumVertices * 4];
 		//staticMesh->m_DataBufferSize[(uint64_t)Semantics::Editor] = mesh->mNumVertices * 4;

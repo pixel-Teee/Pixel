@@ -103,6 +103,7 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 #include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
+float4  a;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
@@ -113,19 +114,23 @@ Texture2D MetallicRoughness : register(t1);
 Texture2D Normal : register(t2);
 
 PixelOut PS(VertexOut pin){
-float2  Texture2DCoordinateInput36 = pin.TexCoord;
-float4  Texture2DOutput37 = float4(0, 0, 0, 0);
-Texture2DOutput37 = Normal.Sample(gsamPointWrap, Texture2DCoordinateInput36);
-float2  Texture2DCoordinateInput15 = pin.TexCoord;
-float4  Texture2DOutput16 = float4(0, 0, 0, 0);
-Texture2DOutput16 = BaseColor.Sample(gsamPointWrap, Texture2DCoordinateInput15);
 float2  Texture2DCoordinateInput25 = pin.TexCoord;
 float4  Texture2DOutput26 = float4(0, 0, 0, 0);
-Texture2DOutput26 = MetallicRoughness.Sample(gsamPointWrap, Texture2DCoordinateInput25);
-float4  Normal = Texture2DOutput37;
-float4  Albedo = Texture2DOutput16;
-float  Roughness = Texture2DOutput26.y;
-float  Metallic = Texture2DOutput26.x;
+Texture2DOutput26 = Normal.Sample(gsamPointWrap, Texture2DCoordinateInput25);
+float2  Texture2DCoordinateInput7 = pin.TexCoord;
+float4  Texture2DOutput8 = float4(0, 0, 0, 0);
+Texture2DOutput8 = BaseColor.Sample(gsamPointWrap, Texture2DCoordinateInput7);
+float4  MulInputA43 = a;
+float4  MulInputB44 = Texture2DOutput8;
+float4  MulOutput44 = float4(0, 0, 0, 1);
+MulOutput44 = MulInputA43 * MulInputB44;
+float2  Texture2DCoordinateInput16 = pin.TexCoord;
+float4  Texture2DOutput17 = float4(0, 0, 0, 0);
+Texture2DOutput17 = MetallicRoughness.Sample(gsamPointWrap, Texture2DCoordinateInput16);
+float4  Normal = Texture2DOutput26;
+float4  Albedo = MulOutput44;
+float  Roughness = Texture2DOutput17.y;
+float  Metallic = Texture2DOutput17.x;
 float  Ao = 0;
 PixelOut pixelOut = (PixelOut)(0.0f);
 pixelOut.gBufferPosition.xyz = pin.PosW;

@@ -103,29 +103,25 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 #include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
-float4  Roughness;
+float4  mytexture;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D MyTextureA : register(t0);
-Texture2D MyTextureB : register(t1);
+Texture2D a : register(t0);
 
 PixelOut PS(VertexOut pin){
 float2  Texture2DCoordinateInput15 = pin.TexCoord;
 float4  Texture2DOutput16 = float4(0, 0, 0, 0);
-Texture2DOutput16 = MyTextureA.Sample(gsamPointWrap, Texture2DCoordinateInput15);
-float2  Texture2DCoordinateInput24 = pin.TexCoord;
-float4  Texture2DOutput25 = float4(0, 0, 0, 0);
-Texture2DOutput25 = MyTextureB.Sample(gsamPointWrap, Texture2DCoordinateInput24);
-float4  MulInputA33 = Texture2DOutput16;
-float4  MulInputB34 = Texture2DOutput25;
-float4  MulOutput34 = float4(0, 0, 0, 1);
-MulOutput34 = MulInputA33 * MulInputB34;
+Texture2DOutput16 = a.Sample(gsamPointWrap, Texture2DCoordinateInput15);
+float4  MulInputA24 = mytexture;
+float4  MulInputB25 = Texture2DOutput16;
+float4  MulOutput25 = float4(0, 0, 0, 1);
+MulOutput25 = MulInputA24 * MulInputB25;
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = MulOutput34;
-float  Roughness = Roughness.x;
+float4  Albedo = MulOutput25;
+float  Roughness = 0;
 float  Metallic = 0;
 float  Ao = 0;
 Normal = float4(pin.NormalW, 1.0f);

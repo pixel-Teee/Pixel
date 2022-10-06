@@ -562,11 +562,15 @@ namespace Pixel {
 			pPixelShader->SetTextureDescriptor(pMaterial->m_PSShaderCustomTexture[i]->ConstValueName, pMaterial->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
 		}
 
-		uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
-		Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
-		Ref<DescriptorHandle> offsetHandle = CreateRef<DescriptorHandle>((*totalTextureDescriptorHeapFirstHandle) + Application::Get().GetRenderer()->GetDescriptorHeapOffset() * DescriptorSize);
-		pPixelShader->SubmitTextureDescriptor(pContext, offsetHandle);
-		Application::Get().GetRenderer()->SetDescriptorHeapOffset(Application::Get().GetRenderer()->GetDescriptorHeapOffset() + pMaterial->m_PSShaderCustomTexture.size());
+		if (pMaterial->m_PSShaderCustomTexture.size() > 0)
+		{
+			pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());//set descriptor heap
+			uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+			Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+			Ref<DescriptorHandle> offsetHandle = CreateRef<DescriptorHandle>((*totalTextureDescriptorHeapFirstHandle) + Application::Get().GetRenderer()->GetDescriptorHeapOffset() * DescriptorSize);
+			pPixelShader->SubmitTextureDescriptor(pContext, offsetHandle);
+			Application::Get().GetRenderer()->SetDescriptorHeapOffset(Application::Get().GetRenderer()->GetDescriptorHeapOffset() + pMaterial->m_PSShaderCustomTexture.size());
+		}	
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());
 		pContext->SetIndexBuffer(m_IndexBuffer->GetIBV());
