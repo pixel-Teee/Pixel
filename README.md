@@ -20,15 +20,9 @@ Select the PixelEditor as the StartupProject
 
 # ScreenShot
 
-![ReadMe1](./ScreenShots/ReadMe1.png)
+![](ScreenShots/plant.jpg)
 
-![ReadMe2](./ScreenShots/ReadMe2.png)
-
-![ReadMe3](./ScreenShots/ReadMe3.png)
-
-![ReadMe3](./ScreenShots/ReadMe4.png)
-
-Material Graph Editor is developing...
+![](ScreenShots/rabbit.jpg)
 
 # Features
 

@@ -1,0 +1,3 @@
+{
+    "Pixel::MaterialInstance":{"type":"Pixel::MaterialInstance","m_PSShaderCustomValue":[],"m_PSShaderCustomTexture":[{"type":"Pixel::CustomTexture2D","ConstValueName":"MyNormal","m_VirtualPath":"Texture\\knight_normal"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MyColor","m_VirtualPath":"Texture\\knight_baseColor"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MetallicRoughness","m_VirtualPath":"Texture\\knight_metallicRoughness"}],"m_MaterialPath":"TestMaterial\\BinMat4"}
+}

@@ -1,0 +1,3 @@
+{
+    "Pixel::MaterialInstance":{"type":"Pixel::MaterialInstance","m_PSShaderCustomValue":[],"m_PSShaderCustomTexture":[{"type":"Pixel::CustomTexture2D","ConstValueName":"MyBaseColor","m_VirtualPath":"Texture\\Bunny_baseColor"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MyNormal","m_VirtualPath":"Texture\\Bunny_normal"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MetallicRoughness","m_VirtualPath":"Texture\\Bunny_metallicRoughness"}],"m_MaterialPath":"TestMaterial\\Body"}
+}
