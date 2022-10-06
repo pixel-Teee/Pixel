@@ -55,6 +55,8 @@ namespace Pixel {
 
 		Ref<MaterialInstance> GetMaterialInstance(const std::string& virtualPath);
 
+		std::map<std::string, Ref<Material>>& GetMaterials();
+
 		std::map<std::string, Ref<MaterialInstance>>& GetMaterialInstances();
 
 		std::map<std::string, Ref<Texture2D>>& GetTextures();

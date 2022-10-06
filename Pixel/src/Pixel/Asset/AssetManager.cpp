@@ -761,6 +761,11 @@ namespace Pixel {
 		return m_textures;
 	}
 
+	std::map<std::string, Ref<Material>>& AssetManager::GetMaterials()
+	{
+		return m_TestMaterials;
+	}
+
 	void AssetManager::AddModelToAssetRegistry(const std::string& physicalPath)
 	{
 		size_t pos = physicalPath.find_last_of("\\");

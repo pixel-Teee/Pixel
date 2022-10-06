@@ -22,6 +22,8 @@ struct VertexIn
 	float3 PosL : POSITION;
 	float2 TexCoord : TEXCOORD;
 	float3 NormalL : NORMAL;
+	float3 TangentL : TANGENT;
+	float3 BinormalL : BINORMAL;
 	//int Editor : EDITOR;
 };
 
@@ -31,6 +33,8 @@ struct VertexOut
 	float3 PosW : POSITION;
 	float2 TexCoord : TEXCOORD;
 	float3 NormalW : NORMAL;
+	float3 TangentW : TANGENT;
+	float3 BinormalW : BINORMAL;
 	int Editor : EDITOR;
 
 	//------use for TAA------
@@ -86,7 +90,7 @@ VertexOut VS(VertexIn vin)
 	vout.PosW = posW.xyz;
 
 	vout.NormalW = mul(vin.NormalL, (float3x3)transpose(ginvWorld));
-
+	vout.TangentW = mul(vin.TangentL, (float3x3)transpose(ginvWorld));
 	//homogeneous clipping
 	//vout.PosH = mul(posW, gView);
 	vout.PosH = mul(mul(posW, gViewProjection), jitterMat);
@@ -103,31 +107,33 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 #include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
-float4  mytexture;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D a : register(t0);
+Texture2D MyNormal : register(t0);
+Texture2D MyColor : register(t1);
+Texture2D MetallicRoughness : register(t2);
 
 PixelOut PS(VertexOut pin){
-float2  Texture2DCoordinateInput15 = pin.TexCoord;
-float4  Texture2DOutput16 = float4(0, 0, 0, 0);
-Texture2DOutput16 = a.Sample(gsamPointWrap, Texture2DCoordinateInput15);
-float4  MulInputA24 = mytexture;
-float4  MulInputB25 = Texture2DOutput16;
-float4  MulOutput25 = float4(0, 0, 0, 1);
-MulOutput25 = MulInputA24 * MulInputB25;
-float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = MulOutput25;
-float  Roughness = 0;
-float  Metallic = 0;
+float2  Texture2DCoordinateInput7 = pin.TexCoord;
+float4  Texture2DOutput8 = float4(0, 0, 0, 0);
+Texture2DOutput8 = DecodeNormalMap(pin.NormalW, pin.TangentW, MyNormal.Sample(gsamPointWrap, Texture2DCoordinateInput7) * 2.0f - 1.0f);
+float2  Texture2DCoordinateInput17 = pin.TexCoord;
+float4  Texture2DOutput18 = float4(0, 0, 0, 0);
+Texture2DOutput18 = MyColor.Sample(gsamPointWrap, Texture2DCoordinateInput17);
+float2  Texture2DCoordinateInput27 = pin.TexCoord;
+float4  Texture2DOutput28 = float4(0, 0, 0, 0);
+Texture2DOutput28 = MetallicRoughness.Sample(gsamPointWrap, Texture2DCoordinateInput27);
+float4  Normal = Texture2DOutput8;
+float4  Albedo = Texture2DOutput18;
+float  Roughness = Texture2DOutput28.y;
+float  Metallic = Texture2DOutput28.x;
 float  Ao = 0;
-Normal = float4(pin.NormalW, 1.0f);
 PixelOut pixelOut = (PixelOut)(0.0f);
 pixelOut.gBufferPosition.xyz = pin.PosW;
-pixelOut.gBufferNormal.xyz = Normal.xyz;
+pixelOut.gBufferNormal.xyz = (Normal.xyz + 1.0f) / 2.0f;
 pixelOut.gBufferAlbedo.xyz = Albedo.xyz;
 pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
 pixelOut.gVelocity.w = ClearCoat;

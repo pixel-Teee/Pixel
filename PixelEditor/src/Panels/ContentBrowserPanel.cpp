@@ -104,19 +104,19 @@ namespace Pixel {
 			if (ImGui::MenuItem("Import Model"))
 			{
 				//create model
-				std::wstring physicalFilePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj\0model(*.gltf)\0*.gltf\0model(*.glb)\0*.glb\0");
+				std::wstring physicalFilePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj\0model(*.gltf)\0*.gltf\0model(*.glb)\0*.glb\0", std::filesystem::absolute(m_CurrentDirectory).wstring().c_str());
 				AssetManager::GetSingleton().AddModelToAssetRegistry(AssetManager::GetSingleton().to_string(physicalFilePath));
 			}
 
 			if (ImGui::MenuItem("Import Texture"))
 			{
-				std::wstring physicalFilePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr\0");
+				std::wstring physicalFilePath = FileDialogs::OpenFile(L"texture(*.jpg)\0*.jpg\0texture(*.png)\0*.png\0texture(*.hdr)\0*.hdr\0", std::filesystem::absolute(m_CurrentDirectory).wstring().c_str());
 				AssetManager::GetSingleton().AddTextureToAssetRegistry(physicalFilePath);
 			}
 
 			if (ImGui::MenuItem("Create Material"))
 			{
-				std::wstring physicalFilePath = FileDialogs::SaveFile(L"material(*.mat)\0*.mat\0");
+				std::wstring physicalFilePath = FileDialogs::SaveFile(L"material(*.mat)\0*.mat\0", std::filesystem::absolute(m_CurrentDirectory).wstring().c_str());
 
 				Ref<SubMaterial> pSubMaterial = CreateRef<SubMaterial>();
 
@@ -150,7 +150,30 @@ namespace Pixel {
 
 				AssetManager::GetSingleton().CreateTestMaterial(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterial);
 
-				AssetManager::GetSingleton().AddTestMaterialToAssetRegistry(physicalFilePath);				
+				AssetManager::GetSingleton().AddTestMaterialToAssetRegistry(physicalFilePath);	
+
+				//may be covering previous already loaded material
+				std::map<std::string, Ref<Material>>& materials = AssetManager::GetSingleton().GetMaterials();
+
+				//------get the relative physical path------
+				std::filesystem::path PhysicalPath(AssetManager::GetSingleton().to_string(physicalFilePath));
+
+				auto relativePath = std::filesystem::relative(PhysicalPath, g_AssetPath);
+
+				std::string relativePathString = relativePath.string();
+				//------get the relative physical path------
+				
+				std::string virtualPath = AssetManager::GetSingleton().GetVirtualPath(relativePathString);
+
+				for (auto& item : materials)
+				{
+					if (item.first == virtualPath)
+					{
+						item.second = pMaterial;
+						//need to notify material editor?
+						break;
+					}
+				}
 			}
 			ImGui::EndPopup();
 		}
@@ -319,36 +342,29 @@ namespace Pixel {
 					{
 						const std::string& materialPhysicalPath = g_AssetPath.string() + "\\" + relativePath.string();
 
-						if (m_CurrentTestMaterialPath != materialPhysicalPath)
+						m_CurrentTestMaterialPath = materialPhysicalPath;
+
+						//read the test material from the material path
+						m_pMaterial = AssetManager::GetSingleton().GetTestMaterial(AssetManager::GetSingleton().GetVirtualPath(itemPath));
+
+						int32_t slashPos = itemPath.find_last_of('\\');
+						std::string editorPathFileName = itemPath.substr(std::min((unsigned long long)(slashPos + 1), itemPath.size() - 1));
+
+						int32_t dotPos = editorPathFileName.find_last_of(".");
+						std::string graphNodeEditorPath;
+						if (dotPos != std::string::npos)
 						{
-							m_CurrentTestMaterialPath = materialPhysicalPath;
-
-							//read the test material from the material path
-							m_pMaterial = AssetManager::GetSingleton().GetTestMaterial(AssetManager::GetSingleton().GetVirtualPath(itemPath));
-
-							int32_t slashPos = itemPath.find_last_of('\\');
-							std::string editorPathFileName = itemPath.substr(std::min((unsigned long long)(slashPos + 1), itemPath.size() - 1));
-
-							int32_t dotPos = editorPathFileName.find_last_of(".");
-							std::string graphNodeEditorPath;
-							if (dotPos != std::string::npos)
-							{
-								graphNodeEditorPath = editorPathFileName.substr(0, dotPos);
-							}
-							else
-							{
-								graphNodeEditorPath = editorPathFileName;
-							}
-
-							//notify editor layer to open graph editor
-							m_OpenGraphEditor(graphNodeEditorPath, materialPhysicalPath, m_pMaterial);
-							m_IsGraphEditorAlive(true);
-							//m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial, m_pFramebuffer);
+							graphNodeEditorPath = editorPathFileName.substr(0, dotPos);
 						}
-						else if (m_CurrentTestMaterialPath == materialPhysicalPath)
+						else
 						{
-							m_IsGraphEditorAlive(true);
+							graphNodeEditorPath = editorPathFileName;
 						}
+
+						//notify editor layer to open graph editor
+						m_OpenGraphEditor(graphNodeEditorPath, materialPhysicalPath, m_pMaterial);
+						m_IsGraphEditorAlive(true);
+						//m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial, m_pFramebuffer);
 					}
 				}
 

@@ -75,10 +75,8 @@ namespace Pixel {
 
 	bool Texture2DShaderFunction::GetFunctionString(std::string& OutString) const
 	{
-		OutString += ShaderStringFactory::Tex2D(const_cast<Texture2DShaderFunction*>(this));
-
 		//TODO:if it is normal map, need to decode
-
+		OutString += ShaderStringFactory::Tex2D(const_cast<Texture2DShaderFunction*>(this), m_bDecodeNormal);
 		return true;
 	}
 

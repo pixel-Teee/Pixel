@@ -90,7 +90,7 @@ namespace Pixel {
 	void Model::LoadModel(const std::string& path)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -167,7 +167,7 @@ namespace Pixel {
 			elements.push_back({ ShaderDataType::Float3, "a_Binormal", Semantics::BINORMAL });
 			bufferSize += mesh->mNumVertices * 24;
 		}
-		//
+		
 		//if (mesh->HasBones())
 		//{
 		//	staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT] = new unsigned char[mesh->mNumVertices * 4 * 4];//float4
@@ -216,16 +216,16 @@ namespace Pixel {
 		//			//set to vertices
 		//			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * weightIndex], &weight, 4);
 		//			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * weightIndex], &index, 4);
-		//			//for (int32_t j = 0; j < 4; ++j)
-		//			//{
-		//			//	float* temp = (float*)(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16]);
-		//			//	if (temp[j] == 0)//blend weight
-		//			//	{
-		//			//		memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * j], &weight, 4);
-		//			//		memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * j], &index, 4);
-		//			//		break;
-		//			//	}
-		//			//}
+		//			for (int32_t j = 0; j < 4; ++j)
+		//			{
+		//				float* temp = (float*)(&(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16]));
+		//				if (temp[j] == 0)//blend weight
+		//				{
+		//					memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * j], &weight, 4);
+		//					memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * j], &index, 4);
+		//					break;
+		//				}
+		//			}
 		//		}
 		//	}
 		//

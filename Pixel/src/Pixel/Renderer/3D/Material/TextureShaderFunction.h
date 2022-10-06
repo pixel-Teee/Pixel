@@ -18,8 +18,9 @@ namespace Pixel {
 		virtual bool GetDeclareString(std::string& OutString, int32_t registerId = -1) const;
 
 		//virtual bool GetOutputValueString(std::string& OutString) const = 0;
-
+		bool& GetDecodedNormal();
 	protected:
+		Meta()
 		bool m_bDecodeNormal;
 
 		RTTR_ENABLE(ShaderFunction)

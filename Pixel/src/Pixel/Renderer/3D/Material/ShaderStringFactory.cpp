@@ -71,10 +71,18 @@ namespace Pixel {
 		return std::string("float4") + "(" + value1 + ", " + value2 + ", " + value3 + ", " + value4 + ")";//float4(value1, value2, value3, value4)
 	}
 
-	std::string ShaderStringFactory::Tex2D(Texture2DShaderFunction* pTexture2DShaderFunction)
+	std::string ShaderStringFactory::Tex2D(Texture2DShaderFunction* pTexture2DShaderFunction, bool decodeNormal)
 	{
-		return pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
-			+ " = " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ");\n";
+		if (decodeNormal)
+		{
+			return pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
+				+ " = " + "DecodeNormalMap(pin.NormalW, pin.TangentW, " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ") * 2.0f - 1.0f)" + ";\n";
+		}
+		else
+		{
+			return	pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
+				+ " = " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ");\n";
+		}
 	}
 
 	std::string ShaderStringFactory::GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement)

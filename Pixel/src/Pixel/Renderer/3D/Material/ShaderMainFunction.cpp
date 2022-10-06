@@ -115,7 +115,7 @@ namespace Pixel
 		//
 		//OutString += "else\npixelOut.gBufferNormal.xyz = (DecodeNormalMap(pin.TexCoord, pin.PosW, pin.NormalW) + 1.0f) / 2.0f;\n";
 
-        OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";
+        OutString += "pixelOut.gBufferNormal.xyz = (" + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + " + 1.0f) / 2.0f" + ";\n";
 
 		//OutString += "pixelOut.gBufferNormal.xyz" 
         //OutString += "pixelOut.gBufferNormal.xyz = " + ShaderStringFactory::GetValueElement(m_pInputs[IN_NORMAL], (ShaderStringFactory::ValueElement)(ShaderStringFactory::VE_R | ShaderStringFactory::VE_G | ShaderStringFactory::VE_B)) + ";\n";

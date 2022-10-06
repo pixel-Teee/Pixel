@@ -25,6 +25,7 @@
 #include "Pixel/Scene/Components/StaticMeshComponent.h"
 #include "Pixel/Renderer/3D/Model.h"
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "Pixel/Core/KeyCodes.h"
 
 //------other library------
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -191,6 +192,11 @@ namespace Pixel {
 			//ImGui::EndHorizontal();
 			//ImGui::BeginHorizontal("graph editor##");
 			ed::Begin("Graph Node Editor Canvas");
+
+			if (ImGui::IsKeyPressed(KeyCodes::PX_KEY_F))
+			{
+				ed::NavigateToContent();
+			}
 			
 			//ImVec2 content2 = ImGui::GetContentRegionAvail();
 			//PIXEL_CORE_INFO("{0}, {1}", content2.x, content2.y);
@@ -404,8 +410,10 @@ namespace Pixel {
 					pTexture2DShaderFunction->SetShowName(str);//edit parameter name
 				}
 
+				ImGui::Text("Texture Parameter");
+				ImGui::SameLine();
 				//edit texture
-				if (ImGui::BeginCombo("Texture Parameter", pTexture2DShaderFunction->m_TextureVirtualPath.c_str()))
+				if (ImGui::BeginCombo("##Texture Parameter", pTexture2DShaderFunction->m_TextureVirtualPath.c_str()))
 				{
 					//for(auto& item :)
 					auto& textures = AssetManager::GetSingleton().GetTextureAssetRegistry();
@@ -420,6 +428,9 @@ namespace Pixel {
 					}
 					ImGui::EndCombo();
 				}
+				ImGui::Text("IsNormal");
+				ImGui::SameLine();
+				ImGui::Checkbox("##IsNormal", &(pTexture2DShaderFunction->GetDecodedNormal()));
 			}
 		}
 
@@ -564,6 +575,8 @@ namespace Pixel {
 						Ref<GraphLink> pGraphLink = CreateRef<GraphLink>();
 						pGraphLink->m_InputPin = inputPin;
 						pGraphLink->m_OutputPin = outputPin;
+						inputPin->m_NodeLink = pGraphLink;
+						outputPin->m_NodeLink = pGraphLink;
 						pGraphLink->m_LinkId = ++ShaderStringFactory::m_ShaderValueIndex;
 						//add new graph link to m_GraphLinks
 						m_GraphLinks.push_back(pGraphLink);
@@ -706,16 +719,22 @@ namespace Pixel {
 						return false;
 					}), m_GraphLinks.end());
 
-					m_GraphNodes.erase(std::find(m_GraphNodes.begin(), m_GraphNodes.end(), pGrapNodes));
+					auto iter = std::find_if(m_GraphNodes.begin(), m_GraphNodes.end(), [&pGrapNodes](Ref<GraphNode> pGraphNode) {
+						return pGraphNode == pGrapNodes;
+					});
+					//delete graph node
+					m_GraphNodes.erase(iter);
 
 					for (size_t i = 0; i < m_pMaterial->m_pShaderFunctionArray.size(); ++i)
 					{
 						if (m_pMaterial->m_pShaderFunctionArray[i] == pGrapNodes->p_Owner)
 						{
-							m_pMaterial->m_pShaderFunctionArray.erase(std::find(m_pMaterial->m_pShaderFunctionArray.begin(), m_pMaterial->m_pShaderFunctionArray.end(), pGrapNodes->p_Owner));
+							m_pMaterial->DeleteShaderFunction(m_pMaterial->m_pShaderFunctionArray[i]);
 							break;
 						}
 					}
+
+					m_CurrentSelectedGraphNode = nullptr;//TODO:use weak_ptr
 				}
 			}
 		}

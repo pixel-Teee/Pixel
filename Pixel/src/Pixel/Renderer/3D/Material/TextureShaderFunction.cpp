@@ -8,12 +8,13 @@
 namespace Pixel {
 	TextureShaderFunction::TextureShaderFunction()
 	{
-
+		m_bDecodeNormal = false;
 	}
 
 	TextureShaderFunction::TextureShaderFunction(const std::string& ShowName, Ref<Material> pMaterial)
 		: ShaderFunction(ShowName, pMaterial)
 	{
+		m_bDecodeNormal = false;
 	}
 
 	TextureShaderFunction::~TextureShaderFunction()
@@ -73,6 +74,11 @@ namespace Pixel {
 			OutString += "Texture2D " + m_ShowName + ";\n";
 		}
 		return true;
+	}
+
+	bool& TextureShaderFunction::GetDecodedNormal()
+	{
+		return m_bDecodeNormal;
 	}
 
 }

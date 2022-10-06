@@ -40,8 +40,6 @@ namespace Pixel
 		//UI Panels
 		void UI_Toobar();
 
-		void OpenGraphEditor();
-
 		void CreateGraphEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial);
 		
 		void SetGraphEditorAlive(bool alive);

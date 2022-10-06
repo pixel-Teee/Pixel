@@ -46,7 +46,7 @@ namespace Pixel {
 
 		static std::string FloatConst4(const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4);
 
-		static std::string Tex2D(Texture2DShaderFunction* pTexture2DShaderFunction);
+		static std::string Tex2D(Texture2DShaderFunction* pTexture2DShaderFunction, bool decodeNormal);
 
 		static std::string GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement);
 
