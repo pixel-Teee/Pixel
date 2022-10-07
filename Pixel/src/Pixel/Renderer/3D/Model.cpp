@@ -128,6 +128,7 @@ namespace Pixel {
 	Ref<StaticMesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		Ref<StaticMesh> staticMesh = CreateRef<StaticMesh>();
+		staticMesh->m_Name = mesh->mName.C_Str();//assign name
 		std::vector<BufferElement> elements;
 
 		uint32_t bufferSize = 0;

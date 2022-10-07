@@ -23,6 +23,8 @@ namespace Pixel {
 
 		void SaveRegistry();//save asset registry
 
+		void DeleteRegistry(const std::string& virtualPath);
+
 		void AddTextureToAssetRegistry(const std::wstring& filePath);
 
 		void AddSceneToAssetRegistry(const std::string& filePath);
@@ -37,7 +39,7 @@ namespace Pixel {
 
 		std::string GetAssetPhysicalPath(const std::string& filePath);
 
-		bool IsInAssetRegistry(std::string filepath);
+		bool IsInAssetRegistry(std::string physicalPath);
 
 		bool IsInMaterialAssetRegistry(std::string virtualPath);
 

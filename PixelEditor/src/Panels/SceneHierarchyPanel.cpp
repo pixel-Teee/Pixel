@@ -12,6 +12,8 @@
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 #include "Pixel/Renderer/3D/Material/CustomFloatValue.h"
 #include "Pixel/Renderer/3D/Material/CustomTexture2D.h"
+#include "Pixel/Renderer/3D/Model.h"
+#include "Pixel/Renderer/3D/StaticMesh.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -618,6 +620,19 @@ namespace Pixel
 
 					ImGui::EndDragDropTarget();
 				}
+
+				if (component.m_Model != nullptr)
+				{
+					//show submesh name
+					if (ImGui::CollapsingHeader("SubMesh"))
+					{
+						std::vector<Ref<StaticMesh>>& meshes = component.m_Model->GetMeshes();//get meshes
+						for (size_t i = 0; i < meshes.size(); ++i)
+						{
+							ImGui::BulletText(meshes[i]->GetName().c_str());//show name
+						}
+					}
+				}			
 			}
 		);
 		

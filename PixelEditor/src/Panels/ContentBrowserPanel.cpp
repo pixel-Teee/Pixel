@@ -244,10 +244,16 @@ namespace Pixel {
 				if (ImGui::IsItemClicked(1))
 				{
 					const std::string& itemPath = relativePath.string();
-					if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					//if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					//{
+					//	//create material instance
+					//	ImGui::OpenPopup("##CreateMaterialInstance");
+					//}
+
+					if (AssetManager::GetSingleton().IsInAssetRegistry(itemPath))
 					{
-						//create material instance
-						ImGui::OpenPopup("##CreateMaterialInstance");
+						//right click
+						ImGui::OpenPopup("##RightClickAsset");
 					}
 				}
 				if (ImGui::IsItemClicked(0))//open material instance
@@ -263,13 +269,28 @@ namespace Pixel {
 				ImGui::PopStyleColor();
 
 
-				if (ImGui::BeginPopup("##CreateMaterialInstance"))
+				if (ImGui::BeginPopup("##RightClickAsset"))
 				{
-					if (ImGui::MenuItem("CreateMaterialInstance"))
+					const std::string& itemPath = relativePath.string();
+					if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
 					{
-						const std::string& itemPath = relativePath.string();
-						//create material instance
-						CreateMaterialInstance(AssetManager::GetSingleton().GetVirtualPath(itemPath));
+						if (ImGui::MenuItem("CreateMaterialInstance"))
+						{
+							const std::string& itemPath = relativePath.string();
+							//create material instance
+							CreateMaterialInstance(AssetManager::GetSingleton().GetVirtualPath(itemPath));
+						}
+					}
+					
+					//from asset registry to delete it
+					//TODO:find all reference it's assets, to notify them
+					if (AssetManager::GetSingleton().IsInAssetRegistry(itemPath))
+					{
+						//if delete material, then will be delete material instance
+						if (ImGui::MenuItem("DeleteAsset"))
+						{
+							AssetManager::GetSingleton().DeleteRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath));
+						}				
 					}
 
 					ImGui::EndPopup();

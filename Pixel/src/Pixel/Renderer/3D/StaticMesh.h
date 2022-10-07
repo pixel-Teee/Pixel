@@ -64,6 +64,8 @@ namespace Pixel {
 		unsigned char* GetDataBuffer(Semantics channel) { return m_DataBuffer[(uint64_t)channel]; }
 		uint32_t GetDataBufferSize(Semantics channel) { return m_DataBufferSize[(uint64_t)channel]; }
 		uint32_t GetIndexBufferSize() { return m_IndexSize;  }
+
+		std::string& GetName() { return m_Name; }
 	private:
 		/*------Data------*/
 		unsigned char* m_DataBuffer[(uint64_t)Semantics::MAX];
@@ -79,6 +81,8 @@ namespace Pixel {
 
 		std::vector<Ref<Bone>> m_AffectBones;
 		std::vector<glm::mat4> m_FinalMatrices;
+
+		std::string m_Name;//mesh name
 
 		int32_t PsoIndex = -1;//pipeline state object index, one for opaque, one for transparent
 		uint32_t TransParentPsoIndex;
@@ -97,5 +101,6 @@ namespace Pixel {
 		MaterialConstant m_MaterialConstant;
 
 		friend class Model;
+		friend struct StaticMeshComponent;
 	};
 }

@@ -31,7 +31,7 @@ namespace Pixel {
 		void Draw(const glm::mat4& transform, Ref<Context> pContext, int32_t entityId, MaterialComponent* pMaterialCompoent, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader);
 		void DrawOutLine(const glm::mat4& transform, Ref<Context> pContext);
 
-		std::vector<Ref<StaticMesh>> GetMeshes() { return m_Meshes; }
+		std::vector<Ref<StaticMesh>>& GetMeshes() { return m_Meshes; }
 
 		void SetEntityDirty(bool dirty) { m_EntityDirty = dirty; }
 		bool m_EntityDirty = false;
@@ -40,6 +40,7 @@ namespace Pixel {
 
 		//read heirarchy data, to construct bone 
 		void ReadHeirarchyData(const aiNode* src, Ref<Bone> parentBone);
+
 	private:
 		//the model's every meshes
 		std::vector<Ref<StaticMesh>> m_Meshes;
@@ -63,5 +64,7 @@ namespace Pixel {
 
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
+
+		friend struct StaticMeshComponent;
 	};
 }

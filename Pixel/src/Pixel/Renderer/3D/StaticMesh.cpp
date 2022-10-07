@@ -69,6 +69,7 @@ namespace Pixel {
 		m_IndexBuffer = others.m_IndexBuffer;
 		m_AffectBones = others.m_AffectBones;
 		m_FinalMatrices = others.m_FinalMatrices;
+		m_Name = others.m_Name;
 
 		for (uint32_t i = 0; i < (uint32_t)Semantics::MAX; ++i)
 		{
@@ -144,6 +145,7 @@ namespace Pixel {
 		m_IndexBuffer = rhs.m_IndexBuffer;
 		m_AffectBones = rhs.m_AffectBones;
 		m_FinalMatrices = rhs.m_FinalMatrices;
+		m_Name = rhs.m_Name;
 
 		for (uint32_t i = 0; i < (uint32_t)Semantics::MAX; ++i)
 		{

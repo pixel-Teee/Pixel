@@ -53,6 +53,8 @@ namespace Pixel {
 			return m_PhysicalPathToVirtualPathMaterial[physicalFilePath];
 		if (m_PhysicalPathToVirtualPathTestMaterial.find(physicalFilePath) != m_PhysicalPathToVirtualPathTestMaterial.end())
 			return m_PhysicalPathToVirtualPathTestMaterial[physicalFilePath];
+		if (m_PhysicalPathToVirtualPathMaterialInstance.find(physicalFilePath) != m_PhysicalPathToVirtualPathMaterialInstance.end())
+			return m_PhysicalPathToVirtualPathMaterialInstance[physicalFilePath];
 		return "";
 	}
 
@@ -294,6 +296,53 @@ namespace Pixel {
 		fout.close();
 	}
 
+	void AssetManager::DeleteRegistry(const std::string& virtualPath)
+	{
+		if (m_VirtualPathToPhysicalPathTexture.find(virtualPath) != m_VirtualPathToPhysicalPathTexture.end())
+		{
+			const std::string& physicalPath = m_PhysicalPathToVirtualPathTexture[virtualPath];//get physical path
+			m_VirtualPathToPhysicalPathTexture.erase(virtualPath);
+			m_PhysicalPathToVirtualPathTexture.erase(physicalPath);
+		}
+
+		if (m_VirtualPathToPhysicalPathScene.find(virtualPath) != m_VirtualPathToPhysicalPathScene.end())
+		{
+			std::string physicalPath = m_PhysicalPathToVirtualPathScene[virtualPath];
+			m_VirtualPathToPhysicalPathScene.erase(virtualPath);
+			m_PhysicalPathToVirtualPathScene.erase(physicalPath);
+		}
+
+		if (m_VirtualPathToPhysicalPathModel.find(virtualPath) != m_VirtualPathToPhysicalPathModel.end())
+		{
+			std::string physicalPath = m_VirtualPathToPhysicalPathModel[virtualPath];
+			m_VirtualPathToPhysicalPathModel.erase(virtualPath);
+			m_PhysicalPathToVirtualPathScene.erase(physicalPath);
+		}
+
+		if (m_VirtualPathToPhysicalPathMaterial.find(virtualPath) != m_VirtualPathToPhysicalPathMaterial.end())
+		{
+			std::string physicalPath = m_VirtualPathToPhysicalPathMaterial[virtualPath];
+			m_VirtualPathToPhysicalPathMaterial.erase(virtualPath);
+			m_PhysicalPathToVirtualPathMaterial.erase(physicalPath);
+		}
+
+		if (m_VirtualPathToPhysicalPathTestMaterial.find(virtualPath) != m_VirtualPathToPhysicalPathTestMaterial.end())
+		{
+			std::string physicalPath = m_VirtualPathToPhysicalPathTestMaterial[virtualPath];
+			m_VirtualPathToPhysicalPathTestMaterial.erase(virtualPath);
+			m_PhysicalPathToVirtualPathTestMaterial.erase(physicalPath);
+		}
+
+		if (m_VirtualPathToPhysicalPathMaterialInstance.find(virtualPath) != m_VirtualPathToPhysicalPathMaterialInstance.end())
+		{
+			std::string physicalPath = m_VirtualPathToPhysicalPathMaterialInstance[virtualPath];
+			m_VirtualPathToPhysicalPathMaterialInstance.erase(virtualPath);
+			m_PhysicalPathToVirtualPathMaterialInstance.erase(physicalPath);
+		}
+
+		SaveRegistry();
+	}
+
 	void AssetManager::AddTextureToAssetRegistry(const std::wstring& filePath)
 	{
 		//file path is texture's physical file path
@@ -480,29 +529,29 @@ namespace Pixel {
 		}
 	}
 
-	bool AssetManager::IsInAssetRegistry(std::string filepath)
+	bool AssetManager::IsInAssetRegistry(std::string physicalPath)
 	{
-		if (m_PhysicalPathToVirtualPathTexture.find(filepath) != m_PhysicalPathToVirtualPathTexture.end())
+		if (m_PhysicalPathToVirtualPathTexture.find(physicalPath) != m_PhysicalPathToVirtualPathTexture.end())
 		{
 			return true;
 		}
-		if (m_PhysicalPathToVirtualPathModel.find(filepath) != m_PhysicalPathToVirtualPathModel.end())
+		if (m_PhysicalPathToVirtualPathModel.find(physicalPath) != m_PhysicalPathToVirtualPathModel.end())
 		{
 			return true;
 		}
-		if (m_PhysicalPathToVirtualPathTexture.find(filepath) != m_PhysicalPathToVirtualPathTexture.end())
+		if (m_PhysicalPathToVirtualPathTexture.find(physicalPath) != m_PhysicalPathToVirtualPathTexture.end())
 		{
 			return true;
 		}
-		if(m_PhysicalPathToVirtualPathMaterial.find(filepath) != m_PhysicalPathToVirtualPathMaterial.end())
+		if(m_PhysicalPathToVirtualPathMaterial.find(physicalPath) != m_PhysicalPathToVirtualPathMaterial.end())
 		{
 			return true;
 		}
-		if (m_PhysicalPathToVirtualPathTestMaterial.find(filepath) != m_PhysicalPathToVirtualPathTestMaterial.end())
+		if (m_PhysicalPathToVirtualPathTestMaterial.find(physicalPath) != m_PhysicalPathToVirtualPathTestMaterial.end())
 		{
 			return true;
 		}
-		if (m_PhysicalPathToVirtualPathMaterialInstance.find(filepath) != m_PhysicalPathToVirtualPathMaterialInstance.end())
+		if (m_PhysicalPathToVirtualPathMaterialInstance.find(physicalPath) != m_PhysicalPathToVirtualPathMaterialInstance.end())
 		{
 			return true;
 		}
