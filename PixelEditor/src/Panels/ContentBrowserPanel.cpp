@@ -250,6 +250,16 @@ namespace Pixel {
 						ImGui::OpenPopup("##CreateMaterialInstance");
 					}
 				}
+				if (ImGui::IsItemClicked(0))//open material instance
+				{
+					//TODO:need to fix encapsulate a function
+					const std::string& itemPath = relativePath.string();
+					if (AssetManager::GetSingleton().IsInMaterialInstanceAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					{
+						//open material instance editor panel
+
+					}
+				}
 				ImGui::PopStyleColor();
 
 

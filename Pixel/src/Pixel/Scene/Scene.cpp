@@ -438,7 +438,7 @@ namespace Pixel
 		CopyComponent<MaterialComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<StaticMeshComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<LightComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		//CopyComponent<MaterialTreeComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<MaterialTreeComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<RigidBody3DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
@@ -1199,7 +1199,7 @@ namespace Pixel
 		CopyComponentIfExists<MaterialComponent>(newEntity, entity);
 		CopyComponentIfExists<StaticMeshComponent>(newEntity, entity);
 		CopyComponentIfExists<LightComponent>(newEntity, entity);
-		//CopyComponentIfExists<MaterialTreeComponent>(newEntity, entity);
+		CopyComponentIfExists<MaterialTreeComponent>(newEntity, entity);
 		CopyComponentIfExists<RigidBody3DComponent>(newEntity, entity);
 
 		return newEntity;

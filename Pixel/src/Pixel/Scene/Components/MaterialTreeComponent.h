@@ -7,6 +7,8 @@ namespace Pixel {
 		Meta()
 		MaterialTreeComponent();
 
+		MaterialTreeComponent(const MaterialTreeComponent & rhs);
+
 		std::vector<Ref<MaterialInstance>> m_Materials;
 
 		Meta()
