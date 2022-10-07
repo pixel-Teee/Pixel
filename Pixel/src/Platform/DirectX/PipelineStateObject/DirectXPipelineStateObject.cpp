@@ -61,6 +61,7 @@ namespace Pixel {
 		m_InputLayouts = pso.m_InputLayouts;
 		m_pRootSignature = pso.m_pRootSignature;
 		m_Name = pso.m_Name;
+		m_Layout = pso.m_Layout;
 	}
 
 	void GraphicsPSO::SetBlendState(const D3D12_BLEND_DESC& BlendDesc)

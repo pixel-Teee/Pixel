@@ -128,7 +128,7 @@ namespace Pixel {
 
 			if (ImGui::MenuItem("Create Test Material"))
 			{
-				std::wstring physicalFilePath = FileDialogs::SaveFile(L"test material(*.tmat)\0*.tmat\0");
+				std::wstring physicalFilePath = FileDialogs::SaveFile(L"test material(*.tmat)\0*.tmat\0", std::filesystem::absolute(m_CurrentDirectory).wstring().c_str());
 
 				Ref<Material> pMaterial = CreateRef<Material>();
 				//pMaterial->GetMainFunction()->ConstructPutNodeAndSetPutNodeOwner();
