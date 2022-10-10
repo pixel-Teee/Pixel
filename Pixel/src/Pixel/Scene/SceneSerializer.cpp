@@ -577,6 +577,11 @@ namespace Pixel {
 		return rttr::variant();
 	}
 
+	size_t SceneSerializer::Hash(rttr::variant& var)
+	{
+		return size_t();
+	}
+
 	void SceneSerializer::ReadArrayRecursively(rttr::variant_sequential_view& view, rapidjson::Value& value, bool withType)
 	{
 		view.set_size(value.Size());

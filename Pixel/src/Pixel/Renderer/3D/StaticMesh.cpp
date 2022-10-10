@@ -489,10 +489,10 @@ namespace Pixel {
 		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
 
-	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<MaterialInstance> pMaterial, Ref<CbufferGeometryPass> geometryPass)
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<MaterialInstance> pMaterialInstance, Ref<CbufferGeometryPass> geometryPass)
 	{
 		//bind pso and root signature
-		Ref<Material> pOriginalMaterial = pMaterial->GetMaterial();
+		Ref<Material> pOriginalMaterial = pMaterialInstance->GetMaterial();//get original material
 
 		if (pOriginalMaterial->m_PsoIndex == -1)
 		{
@@ -504,10 +504,10 @@ namespace Pixel {
 			pOriginalMaterial->m_pPixelShader = pPixelShader;
 			pOriginalMaterial->dirty = true;
 			pOriginalMaterial->LinkAllParameters();
-			pOriginalMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(pVertexShader, pPixelShader, pOriginalMaterial->m_PsoIndex);
+			pOriginalMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(pVertexShader, pPixelShader, pOriginalMaterial->m_PsoIndex);//uninitialized pso index
 		}
 
-		if (pOriginalMaterial->dirty)
+		if (pOriginalMaterial->dirty)//create complete pipeline state object
 		{
 			pOriginalMaterial->dirty = false;
 			
@@ -551,27 +551,27 @@ namespace Pixel {
 		pVertexShader->SetData("cbPerObject", &m_MeshConstant);
 		pVertexShader->SubmitData(pContext);
 
-		for (size_t i = 0; i < pMaterial->m_PSShaderCustomValue.size(); ++i)
+		for (size_t i = 0; i < pMaterialInstance->m_PSShaderCustomValue.size(); ++i)
 		{
-			pPixelShader->SetData("CbMaterial." + pMaterial->m_PSShaderCustomValue[i]->ConstValueName, pMaterial->m_PSShaderCustomValue[i]->m_Values.data());
+			pPixelShader->SetData("CbMaterial." + pMaterialInstance->m_PSShaderCustomValue[i]->ConstValueName, pMaterialInstance->m_PSShaderCustomValue[i]->m_Values.data());
 		}
 		int32_t shadingModelId = 1;
 		pPixelShader->SetData("CbMaterial.ShadingModelID", &shadingModelId);
 		pPixelShader->SubmitData(pContext);
 
-		for (size_t i = 0; i < pMaterial->m_PSShaderCustomTexture.size(); ++i)
+		for (size_t i = 0; i < pMaterialInstance->m_PSShaderCustomTexture.size(); ++i)
 		{
-			pPixelShader->SetTextureDescriptor(pMaterial->m_PSShaderCustomTexture[i]->ConstValueName, pMaterial->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
+			pPixelShader->SetTextureDescriptor(pMaterialInstance->m_PSShaderCustomTexture[i]->ConstValueName, pMaterialInstance->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
 		}
 
-		if (pMaterial->m_PSShaderCustomTexture.size() > 0)
+		if (pMaterialInstance->m_PSShaderCustomTexture.size() > 0)
 		{
 			pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());//set descriptor heap
 			uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
 			Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
 			Ref<DescriptorHandle> offsetHandle = CreateRef<DescriptorHandle>((*totalTextureDescriptorHeapFirstHandle) + Application::Get().GetRenderer()->GetDescriptorHeapOffset() * DescriptorSize);
 			pPixelShader->SubmitTextureDescriptor(pContext, offsetHandle);
-			Application::Get().GetRenderer()->SetDescriptorHeapOffset(Application::Get().GetRenderer()->GetDescriptorHeapOffset() + pMaterial->m_PSShaderCustomTexture.size());
+			Application::Get().GetRenderer()->SetDescriptorHeapOffset(Application::Get().GetRenderer()->GetDescriptorHeapOffset() + pMaterialInstance->m_PSShaderCustomTexture.size());
 		}	
 
 		pContext->SetVertexBuffer(0, m_VertexBuffer->GetVBV());

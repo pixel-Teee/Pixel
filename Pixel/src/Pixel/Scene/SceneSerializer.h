@@ -42,6 +42,9 @@ namespace Pixel {
 
 		static rttr::variant ExtractBasicTypes(const rapidjson::Value& jsonValue);
 		//------deserializer------
+
+		//------hash a struct------
+		static size_t Hash(rttr::variant& var);
 	private:
 		Ref<Scene> m_Scene;
 	};
