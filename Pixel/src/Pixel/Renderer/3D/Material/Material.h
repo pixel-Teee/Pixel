@@ -70,17 +70,15 @@ namespace Pixel {
 		Meta()
 		std::vector<Ref<ShaderFunction>> m_pShaderFunctionArray;
 
+		Ref<ShaderKey> m_CurrentShaderKey;
 		Ref<ShaderSet> m_CurrentVertexShaderSet;
-		Ref<ShaderKey> m_CurrentVertexShaderKey;
-
 		Ref<ShaderSet> m_CurrentPixelShaderSet;
-		Ref<ShaderKey> m_CurrentPixelShaderKey;
 
 		//std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
 		Meta()
 		std::vector<glm::ivec2> m_Links;
 
-		Ref<Shader> m_pVertexShader;
+		Ref<Shader> m_pVertexShader;//TODO:need to move to material instance, material just hold the shader set
 
 		Ref<Shader> m_pPixelShader;
 

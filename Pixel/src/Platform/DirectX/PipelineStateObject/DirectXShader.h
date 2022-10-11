@@ -17,6 +17,10 @@ namespace Pixel {
 	{
 	public:
 		DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated = false);
+
+		DirectXShader(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey);
+
+		DirectXShader(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode);
 		virtual ~DirectXShader();
 		//------garbage------
 		virtual void Bind() const override;
@@ -57,8 +61,9 @@ namespace Pixel {
 		ShaderType GetShaderType();
 	private:
 
-		Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::wstring& filename,
-		const D3D_SHADER_MACRO* defines, const std::string& entryPoint, const std::string& target);
+		Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::wstring& filename, const std::string& entryPoint, const std::string& target, Ref<ShaderKey> pShaderKey = nullptr);
+
+		Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::string& shaderCode, const std::string& entryPoint, const std::string& target, Ref<ShaderKey> pShaderKey = nullptr);
 
 		//TODO:in the future, will be to desgin a cache scheme
 		Microsoft::WRL::ComPtr<ID3DBlob> m_pBlobShader;

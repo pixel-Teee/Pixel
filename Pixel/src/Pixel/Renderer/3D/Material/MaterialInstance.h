@@ -5,6 +5,7 @@ namespace Pixel {
 	class CustomTexture2D;
 	class Material;
 	class Texture2D;
+	class Shader;
 	class Meta(Enable) MaterialInstance
 	{
 	public:
@@ -30,6 +31,10 @@ namespace Pixel {
 
 		Meta()
 		std::vector<Ref<CustomTexture2D>> m_PSShaderCustomTexture;
+
+		Ref<Shader> m_VertexShader;
+
+		Ref<Shader> m_PixelShader;//material instance's shader come from the material's shader set
 	private:
 
 		Ref<Material> m_pMaterial;

@@ -21,6 +21,11 @@ namespace Pixel {
 		m_KeyMap[macroName] = value;
 	}
 
+	std::map<std::string, uint32_t>& ShaderKey::GetShaderMap()
+	{
+		return m_KeyMap;
+	}
+
 	bool ShaderKey::operator!=(const ShaderKey& rhs) const
 	{
 		return !operator==(rhs);

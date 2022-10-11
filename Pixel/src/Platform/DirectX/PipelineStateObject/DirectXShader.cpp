@@ -17,6 +17,7 @@
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
+#include "Pixel/Renderer/ShaderKey.h"
 
 namespace Pixel {
 
@@ -30,7 +31,7 @@ namespace Pixel {
 	DirectXShader::DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated)
 	{
 		//in terms of the filepath, to compile the shader
-		m_pBlobShader = CompileShader(StringToWString(filepath), nullptr, EntryPoint, target);
+		m_pBlobShader = CompileShader(StringToWString(filepath), EntryPoint, target);
 
 		m_IsGenerated = IsGenerated;
 		
@@ -131,6 +132,206 @@ namespace Pixel {
 		}
 
 	}
+
+	DirectXShader::DirectXShader(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey)
+	{
+		//in terms of the filepath, to compile the shader
+		m_pBlobShader = CompileShader(StringToWString(filePath), EntryPoint, target, pShaderKey);
+
+		if (target == "vs_5_0")
+		{
+			m_ShaderType = ShaderType::VertexShader;
+		}
+		else if (target == "ps_5_0")
+		{
+			m_ShaderType = ShaderType::PixelShader;
+		}
+
+		//get the reflection information to create shader parameter
+		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> pReflection;
+
+		D3DReflect(m_pBlobShader->GetBufferPointer(), m_pBlobShader->GetBufferSize(), IID_ID3D12ShaderReflection, (void**)pReflection.GetAddressOf());
+
+		D3D12_SHADER_DESC shaderDesc;
+		pReflection->GetDesc(&shaderDesc);
+
+		m_MaxBindPointIndex = 0;
+
+		for (int32_t i = 0; i < shaderDesc.BoundResources; ++i)
+		{
+			D3D12_SHADER_INPUT_BIND_DESC resourceDesc;
+			pReflection->GetResourceBindingDesc(i, &resourceDesc);
+
+			auto bindResourceName = resourceDesc.Name;
+			auto registerSpace = resourceDesc.Space;//temporarily don't use, just use space 0
+			auto resourceType = resourceDesc.Type;
+			auto bindPoint = resourceDesc.BindPoint;
+			auto bindCount = resourceDesc.BindCount;
+
+			if (resourceType == D3D_SIT_CBUFFER)
+			{
+				//cbv
+				ID3D12ShaderReflectionConstantBuffer* constBuffer = pReflection->GetConstantBufferByName(bindResourceName);
+				D3D12_SHADER_BUFFER_DESC bufferDesc;
+				constBuffer->GetDesc(&bufferDesc);
+
+				Ref<DirectXCbvShaderParameter> pCbvShaderParameter = CreateRef<DirectXCbvShaderParameter>();
+				pCbvShaderParameter->m_Name = bindResourceName;
+				pCbvShaderParameter->m_Size = bufferDesc.Size;
+				pCbvShaderParameter->m_BindPoint = bindPoint;
+
+				for (int32_t j = 0; j < bufferDesc.Variables; ++j)
+				{
+					ID3D12ShaderReflectionVariable* variableInterface = constBuffer->GetVariableByIndex(j);
+
+					D3D12_SHADER_VARIABLE_DESC variableDesc;
+					variableInterface->GetDesc(&variableDesc);
+
+					//std::cout << "variable name " << variableDesc.Name << std::endl;
+					//std::cout << "variable offset " << variableDesc.StartOffset << std::endl;
+					//std::cout << "variable size " << variableDesc.Size << std::endl;
+
+					CbvVariableParameter cbvVariableParameter;
+					cbvVariableParameter.m_VariableName = variableDesc.Name;
+					cbvVariableParameter.m_StartOffset = variableDesc.StartOffset;
+					cbvVariableParameter.m_Size = variableDesc.Size;
+					pCbvShaderParameter->m_CbvVariableParameters.push_back(cbvVariableParameter);//push back a variable
+				}
+				m_CbvShaderParameter.push_back(pCbvShaderParameter);
+				m_AlignedCbvSize.push_back(Math::AlignUpWithMask(bufferDesc.Size, 255));
+			}
+			else if (resourceType == D3D_SIT_TEXTURE)
+			{
+				//srv
+				Ref<DirectXSrvShaderParameter> pSrvShaderParameter = CreateRef<DirectXSrvShaderParameter>();
+				pSrvShaderParameter->m_Name = bindResourceName;
+				pSrvShaderParameter->m_BindPoint = bindPoint;
+				m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, bindPoint);
+				m_SrvShaderParameter.push_back(pSrvShaderParameter);
+			}
+		}
+
+		//std::cout << "test" << std::endl;
+		m_DataCache = nullptr;
+
+		m_DataCache = new char* [m_CbvShaderParameter.size()];
+
+		//------create cache------
+		for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+		{
+			m_DataCache[i] = new char[m_CbvShaderParameter[i]->m_Size];
+		}
+		//------create cache------
+
+		//------create descriptor texture------
+		m_SrvDescriptorHandleCache.resize(m_SrvShaderParameter.size());
+		for (size_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
+		{
+			m_SrvDescriptorHandleCache[i] = nullptr;//TODO:to fix, use null descriptor to populate
+		}
+		//------create descriptor texture------
+
+	}
+
+	DirectXShader::DirectXShader(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode)
+	{
+		//in terms of the filepath, to compile the shader
+		m_pBlobShader = CompileShader(shaderCode, EntryPoint, target, pShaderKey);
+
+		if (target == "vs_5_0")
+		{
+			m_ShaderType = ShaderType::VertexShader;
+		}
+		else if (target == "ps_5_0")
+		{
+			m_ShaderType = ShaderType::PixelShader;
+		}
+
+		//get the reflection information to create shader parameter
+		Microsoft::WRL::ComPtr<ID3D12ShaderReflection> pReflection;
+
+		D3DReflect(m_pBlobShader->GetBufferPointer(), m_pBlobShader->GetBufferSize(), IID_ID3D12ShaderReflection, (void**)pReflection.GetAddressOf());
+
+		D3D12_SHADER_DESC shaderDesc;
+		pReflection->GetDesc(&shaderDesc);
+
+		m_MaxBindPointIndex = 0;
+
+		for (int32_t i = 0; i < shaderDesc.BoundResources; ++i)
+		{
+			D3D12_SHADER_INPUT_BIND_DESC resourceDesc;
+			pReflection->GetResourceBindingDesc(i, &resourceDesc);
+
+			auto bindResourceName = resourceDesc.Name;
+			auto registerSpace = resourceDesc.Space;//temporarily don't use, just use space 0
+			auto resourceType = resourceDesc.Type;
+			auto bindPoint = resourceDesc.BindPoint;
+			auto bindCount = resourceDesc.BindCount;
+
+			if (resourceType == D3D_SIT_CBUFFER)
+			{
+				//cbv
+				ID3D12ShaderReflectionConstantBuffer* constBuffer = pReflection->GetConstantBufferByName(bindResourceName);
+				D3D12_SHADER_BUFFER_DESC bufferDesc;
+				constBuffer->GetDesc(&bufferDesc);
+
+				Ref<DirectXCbvShaderParameter> pCbvShaderParameter = CreateRef<DirectXCbvShaderParameter>();
+				pCbvShaderParameter->m_Name = bindResourceName;
+				pCbvShaderParameter->m_Size = bufferDesc.Size;
+				pCbvShaderParameter->m_BindPoint = bindPoint;
+
+				for (int32_t j = 0; j < bufferDesc.Variables; ++j)
+				{
+					ID3D12ShaderReflectionVariable* variableInterface = constBuffer->GetVariableByIndex(j);
+
+					D3D12_SHADER_VARIABLE_DESC variableDesc;
+					variableInterface->GetDesc(&variableDesc);
+
+					//std::cout << "variable name " << variableDesc.Name << std::endl;
+					//std::cout << "variable offset " << variableDesc.StartOffset << std::endl;
+					//std::cout << "variable size " << variableDesc.Size << std::endl;
+
+					CbvVariableParameter cbvVariableParameter;
+					cbvVariableParameter.m_VariableName = variableDesc.Name;
+					cbvVariableParameter.m_StartOffset = variableDesc.StartOffset;
+					cbvVariableParameter.m_Size = variableDesc.Size;
+					pCbvShaderParameter->m_CbvVariableParameters.push_back(cbvVariableParameter);//push back a variable
+				}
+				m_CbvShaderParameter.push_back(pCbvShaderParameter);
+				m_AlignedCbvSize.push_back(Math::AlignUpWithMask(bufferDesc.Size, 255));
+			}
+			else if (resourceType == D3D_SIT_TEXTURE)
+			{
+				//srv
+				Ref<DirectXSrvShaderParameter> pSrvShaderParameter = CreateRef<DirectXSrvShaderParameter>();
+				pSrvShaderParameter->m_Name = bindResourceName;
+				pSrvShaderParameter->m_BindPoint = bindPoint;
+				m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, bindPoint);
+				m_SrvShaderParameter.push_back(pSrvShaderParameter);
+			}
+		}
+
+		//std::cout << "test" << std::endl;
+		m_DataCache = nullptr;
+
+		m_DataCache = new char* [m_CbvShaderParameter.size()];
+
+		//------create cache------
+		for (size_t i = 0; i < m_CbvShaderParameter.size(); ++i)
+		{
+			m_DataCache[i] = new char[m_CbvShaderParameter[i]->m_Size];
+		}
+		//------create cache------
+
+		//------create descriptor texture------
+		m_SrvDescriptorHandleCache.resize(m_SrvShaderParameter.size());
+		for (size_t i = 0; i < m_SrvDescriptorHandleCache.size(); ++i)
+		{
+			m_SrvDescriptorHandleCache[i] = nullptr;//TODO:to fix, use null descriptor to populate
+		}
+		//------create descriptor texture------
+	}
+
 
 	DirectXShader::~DirectXShader()
 	{
@@ -351,19 +552,41 @@ namespace Pixel {
 		return m_ShaderType;
 	}
 
-	Microsoft::WRL::ComPtr<ID3DBlob> DirectXShader::CompileShader(const std::wstring& filename, const D3D_SHADER_MACRO* defines, const std::string& entryPoint, const std::string& target)
+	Microsoft::WRL::ComPtr<ID3DBlob> DirectXShader::CompileShader(const std::wstring& filename, const std::string& entryPoint, const std::string& target, Ref<ShaderKey> pShaderKey)
 	{
+		std::vector<std::string> macroValues;
+		std::vector<D3D_SHADER_MACRO> macros;
+		if (pShaderKey != nullptr)
+		{
+			std::map<std::string, uint32_t>& keyMap = pShaderKey->GetShaderMap();
+
+			for (auto& item : keyMap)
+			{
+				macroValues.push_back(std::to_string(item.second));
+				macros.push_back({ item.first.c_str(), macroValues.back().c_str() });
+			}
+		}
+
 		UINT compileFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
 		compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-
 		HRESULT hr = S_OK;
 
 		Microsoft::WRL::ComPtr<ID3DBlob> byteCode = nullptr;
 		Microsoft::WRL::ComPtr<ID3DBlob> errors;
-		hr = D3DCompileFromFile(filename.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			entryPoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);
+		if (macros.size() == 0)
+		{
+			hr = D3DCompileFromFile(filename.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+				entryPoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);
+		}
+		else
+		{
+			macros.push_back({ nullptr, nullptr });
+
+			hr = D3DCompileFromFile(filename.c_str(), macros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
+				entryPoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);//may be leak?
+		}
 
 		if (errors != nullptr)
 			OutputDebugStringA((char*)errors->GetBufferPointer());
@@ -460,6 +683,50 @@ namespace Pixel {
 		//
 		//	std::cout << "**************************************************" << std::endl;
 		//}
+
+		return byteCode;
+	}
+
+	Microsoft::WRL::ComPtr<ID3DBlob> DirectXShader::CompileShader(const std::string& shaderCode, const std::string& entryPoint, const std::string& target, Ref<ShaderKey> pShaderKey)
+	{
+		std::vector<std::string> macroValues;
+		std::vector<D3D_SHADER_MACRO> macros;
+		if (pShaderKey != nullptr)
+		{
+			std::map<std::string, uint32_t>& keyMap = pShaderKey->GetShaderMap();
+
+			for (auto& item : keyMap)
+			{
+				macroValues.push_back(std::to_string(item.second));
+				macros.push_back({ item.first.c_str(), macroValues.back().c_str() });
+			}
+		}
+
+		UINT compileFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)  
+		compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+		HRESULT hr = S_OK;
+
+		Microsoft::WRL::ComPtr<ID3DBlob> byteCode = nullptr;
+		Microsoft::WRL::ComPtr<ID3DBlob> errors;
+		if (macros.size() == 0)
+		{
+			hr = D3DCompile(shaderCode.data(), shaderCode.size(), NULL, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+				entryPoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);
+		}
+		else
+		{
+			macros.push_back({ nullptr, nullptr });
+
+			hr = D3DCompile(shaderCode.data(), shaderCode.size(), NULL, macros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
+				entryPoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);//may be leak?
+		}
+
+		if (errors != nullptr)
+			OutputDebugStringA((char*)errors->GetBufferPointer());
+
+		PX_CORE_ASSERT(hr >= 0, "compile shaders error!");
 
 		return byteCode;
 	}

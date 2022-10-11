@@ -135,6 +135,10 @@ namespace Pixel {
 		void CreatePickerPso();
 
 		void CreateDefaultDeferredShadingPso();//create deferred geometry shading renderer and deferred light shading renderer
+
+		void GetShader(Ref<StaticMesh> pStaticMesh, Ref<MaterialInstance> pMaterialInstance);
+
+		Ref<ShaderKey> GetShaderKey(Ref<StaticMesh> pStaticMesh, Ref<Material> pMaterial);
 		
 		//------Foward Renderer------
 		Ref<PSO> m_defaultPso;

@@ -20,10 +20,18 @@ cbuffer cbPass : register(b1)
 struct VertexIn
 {
 	float3 PosL : POSITION;
+#if HAVE_TEXCOORD > 0
 	float2 TexCoord : TEXCOORD;
+#endif
+#if HAVE_NORMAL > 0
 	float3 NormalL : NORMAL;
+#endif
+#if HAVE_TANGENT > 0
 	float3 TangentL : TANGENT;
+#endif
+#if HAVE_BINORMAL > 0
 	float3 BinormalL : BINORMAL;
+#endif
 	//int Editor : EDITOR;
 };
 
@@ -31,10 +39,18 @@ struct VertexOut
 {
 	float4 PosH : SV_POSITION;
 	float3 PosW : POSITION;
+#if HAVE_TEXCOORD > 0
 	float2 TexCoord : TEXCOORD;
+#endif
+#if HAVE_NORMAL > 0
 	float3 NormalW : NORMAL;
+#endif
+#if HAVE_TANGENT > 0
 	float3 TangentW : TANGENT;
+#endif
+#if HAVE_BINORMAL > 0
 	float3 BinormalW : BINORMAL;
+#endif
 	int Editor : EDITOR;
 
 	//------use for TAA------
@@ -89,18 +105,20 @@ VertexOut VS(VertexIn vin)
 	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
 	vout.PosW = posW.xyz;
 
+#if HAVE_NORMAL > 0
 	vout.NormalW = mul(vin.NormalL, (float3x3)transpose(ginvWorld));
+#endif
+
+#if HAVE_TANGENT > 0
 	vout.TangentW = mul(vin.TangentL, (float3x3)transpose(ginvWorld));
+#endif
 	//homogeneous clipping
 	//vout.PosH = mul(posW, gView);
 	vout.PosH = mul(mul(posW, gViewProjection), jitterMat);
 
+#if HAVE_TEXCOORD > 0
 	vout.TexCoord = vin.TexCoord;
-
+#endif
 	vout.Editor = gEditor;
 	return vout;
 }
-
-//------material samplers------
-SamplerState gsamPointWrap : register(s0);//static sampler
-//------material samplers------

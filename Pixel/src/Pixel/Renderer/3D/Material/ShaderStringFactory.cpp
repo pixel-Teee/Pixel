@@ -178,6 +178,79 @@ namespace Pixel {
 
 		return out;
 	}
+	std::string ShaderStringFactory::CreateDeferredGeometryVertexShaderString(Ref<Material> pMaterial)
+	{
+		//create deferred geometry shader
+		std::ifstream geometryPassIncludes("assets/shaders/Common/GeomertyPassVertex.hlsl");
+		std::stringstream buffer;
+		buffer << geometryPassIncludes.rdbuf();
+		std::string out = buffer.str();
+
+		geometryPassIncludes.close();
+
+		//TODO:need to fix in there
+		//pMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(testCompilerVertex, testCompilerFrag, pMaterial->m_PsoIndex);
+		//pMaterial->m_pVertexShader = testCompilerVertex;
+		//pMaterial->m_pPixelShader = testCompilerFrag;
+		//pMaterial->dirty = true;
+		//pMaterial->LinkAllParameters();
+
+		return out;
+	}
+	std::string ShaderStringFactory::CreateDeferredGeometryPixelShaderString(Ref<Material> pMaterial)
+	{
+		//create deferred geometry shader
+		std::ifstream geometryPassIncludes("assets/shaders/Common/GeomertyPassPixel.hlsl");
+		std::stringstream buffer;
+		buffer << geometryPassIncludes.rdbuf();
+		std::string out = buffer.str();
+
+		geometryPassIncludes.close();
+
+		std::string PixelShaderInclude;//just for include, some useful shader
+		std::string PixelShaderDynamic;//TODO:not used temporarily
+		std::string PixelShaderInputDeclare;//pixel shader input declare
+		std::string PixelShaderOutputDeclare;//pixel shader output declare, this will be fixed
+		std::string PixelShaderConstantString;//pxiel shader constant string
+		std::string PixelShaderFunctionString;//pixel shader function string
+
+		//PixelShaderInclude:from shader string factory to get common shader path
+		GetIncludeShader(PixelShaderInclude);
+		//PixelShaderInputDeclare:interms of the static mesh's vertex buffer's layout to create pixel shader input declare(x)
+
+		//PixelShaderOutputDeclare:this is fixed
+		pMaterial->GetShaderTreeString(PixelShaderFunctionString);
+		//PixelShaderFunctionString:get shader tree string, then get the cbuffer
+		CreatePixelShaderUserConstant(PixelShaderConstantString, pMaterial);
+		//PixelShaderConstantString:cbuffer declare
+
+		out += PixelShaderInclude + "\n";
+		out += PixelShaderConstantString + "\n";
+		out += "PixelOut PS(VertexOut pin){\n";
+		//pMaterial->GetShaderTreeString(out);
+		out += PixelShaderFunctionString;
+		out += "return pixelOut;\n}";
+
+		std::string shaderPath = "assets/shaders/Cache/" + pMaterial->m_MaterialName + ".hlsl";
+
+		//write to cache
+		std::ofstream cache(shaderPath);
+		cache << out;
+		cache.close();
+
+		//TODO:need to fix these
+		//TODO:in the future, will in there to compile shader
+		//Ref<Shader> testCompilerVertex = Shader::Create(shaderPath, "VS", "vs_5_0");
+		//Ref<Shader> testCompilerFrag = Shader::Create(shaderPath, "PS", "ps_5_0");
+
+		//pMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(testCompilerVertex, testCompilerFrag, pMaterial->m_PsoIndex);
+		//pMaterial->m_pVertexShader = testCompilerVertex;
+		//pMaterial->m_pPixelShader = testCompilerFrag;
+		//pMaterial->dirty = true;
+		//pMaterial->LinkAllParameters();
+
+		return out;
+	}
 	void ShaderStringFactory::GetIncludeShader(std::string& Out)
 	{
 		Out = "#include \"../Common/Common.hlsl\"";

@@ -52,6 +52,10 @@ namespace Pixel {
 
 		static std::string CreateDeferredGeometryShaderString(Ref<Material> pMaterial, Ref<StaticMesh> pStaticMesh);
 
+		static std::string CreateDeferredGeometryVertexShaderString(Ref<Material> pMaterial);
+
+		static std::string CreateDeferredGeometryPixelShaderString(Ref<Material> pMaterial);
+
 		static void GetIncludeShader(std::string& Out);
 
 		static void CreatePixelShaderUserConstant(std::string& Out, Ref<Material> pMaterial);

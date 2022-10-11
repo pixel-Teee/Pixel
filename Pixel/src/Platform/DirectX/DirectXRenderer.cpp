@@ -60,6 +60,9 @@
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 //------material related------
 
+#include "Pixel/Renderer/Shader.h"
+#include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
+
 #include "stb_image.h"
 
 #include "Pixel/Scene/Scene.h"
@@ -847,11 +850,7 @@ namespace Pixel {
 		for(size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
 			//------first to check the material instance's original material instance have shader?------
-			Ref<Material> MaterialOwner = m_OpaqueItems[i].pMaterialInstance->GetMaterial();
-
-			//------in terms some information to generate shader key------
-
-			//------in terms some information to generate shader key------
+			//Ref<Material> MaterialOwner = m_OpaqueItems[i].pMaterialInstance->GetMaterial();
 
 			//------first to check the material instance's original material instance have shader?------
 			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
@@ -3430,6 +3429,99 @@ namespace Pixel {
 
 		m_DeferredShadingLightPsoIndex = CreateDeferredLightPso(layout);
 		//------Create Deferred Light Renderer------
+	}
+
+	void DirectXRenderer::GetShader(Ref<StaticMesh> pStaticMesh, Ref<MaterialInstance> pMaterialInstance)
+	{
+		//first to get shader key
+		Ref<ShaderKey> pShaderKey = GetShaderKey(pStaticMesh, pMaterialInstance->GetMaterial());
+
+		//compare shader key and material's shader key
+		Ref<Material> pMaterial = pMaterialInstance->GetMaterial();
+	
+		pMaterial->m_CurrentShaderKey = pShaderKey;//set shader key
+
+		//to find shader 
+		if (pMaterial->m_CurrentVertexShaderSet == nullptr)
+		{
+			pMaterial->m_CurrentVertexShaderSet = AssetManager::GetSingleton().GetVertexShaderSet(pMaterial->GetMaterialName());		
+		}
+
+		if (pMaterial->m_CurrentVertexShaderSet->find(*pShaderKey) == pMaterial->m_CurrentVertexShaderSet->end())
+		{
+			//from material to get shader
+			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryVertexShaderString(pMaterial);
+
+			Ref<Shader> pVertexShader = Shader::Create("VS", "vs_5_0", pShaderKey, shaderCode);
+			//create new shader
+			pMaterial->m_CurrentVertexShaderSet->insert({ *pShaderKey, pVertexShader });
+		}
+
+		Ref<Shader> vertexShader = (*pMaterial->m_CurrentVertexShaderSet)[*pMaterial->m_CurrentShaderKey];
+
+		pMaterialInstance->m_VertexShader = vertexShader;//set vertex shader
+
+		//to find shader 
+		if (pMaterial->m_CurrentPixelShaderSet == nullptr)
+		{
+			pMaterial->m_CurrentPixelShaderSet = AssetManager::GetSingleton().GetPixelShaderSet(pMaterial->GetMaterialName());
+		}
+
+		if (pMaterial->m_CurrentPixelShaderSet->find(*pShaderKey) == pMaterial->m_CurrentPixelShaderSet->end())
+		{
+			//from material to get shader
+			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryPixelShaderString(pMaterial);
+
+			Ref<Shader> pPixelShader = Shader::Create("PS", "ps_5_0", pShaderKey, shaderCode);
+			//create new shader
+			pMaterial->m_CurrentPixelShaderSet->insert({ *pShaderKey, pPixelShader });
+		}
+
+		Ref<Shader> pixelShader = (*pMaterial->m_CurrentPixelShaderSet)[*pMaterial->m_CurrentShaderKey];
+
+		pMaterialInstance->m_PixelShader = pixelShader;//set pixel shader
+	}
+
+	Ref<ShaderKey> DirectXRenderer::GetShaderKey(Ref<StaticMesh> pStaticMesh, Ref<Material> pMaterial)
+	{
+		//------in terms of the static mesh to generate vertex layout macro------
+		Ref<ShaderKey> pShaderKey = CreateRef<ShaderKey>();
+
+		Ref<VertexBuffer> pVertexBuffer = pStaticMesh->GetVertexBuffer();
+
+		const BufferLayout& bufferLayout = pVertexBuffer->GetLayout();
+
+		for (auto& iter = bufferLayout.begin(); iter != bufferLayout.end(); ++iter)
+		{
+			//in terms of the buffer layout to generate macro
+			switch (iter->m_sematics)
+			{
+			case Semantics::POSITION:
+				pShaderKey->SetShaderKey("HAVE_POSITION", 1);
+				break;
+			case Semantics::TEXCOORD:
+				pShaderKey->SetShaderKey("HAVE_TEXCOORD", 1);
+				break;
+			case Semantics::NORMAL:
+				pShaderKey->SetShaderKey("HAVE_NORMAL", 1);
+				break;
+			case Semantics::TANGENT:
+				pShaderKey->SetShaderKey("HAVE_TANGENT", 1);
+				break;
+			case Semantics::BINORMAL:
+				pShaderKey->SetShaderKey("HAVE_BINORMAL", 1);
+				break;
+			case Semantics::BLENDWEIGHT:
+				pShaderKey->SetShaderKey("HAVE_BLENDWEIGHT", 1);
+				break;
+			case Semantics::BLENDINDICES:
+				pShaderKey->SetShaderKey("HAVE_BLENDINDICES", 1);
+				break;
+			}
+		}
+
+		//------in terms of the static mesh to generate vertex layout macro------
+		return pShaderKey;
 	}
 
 	void DirectXRenderer::CreateConvertHDRToCubePipeline()
