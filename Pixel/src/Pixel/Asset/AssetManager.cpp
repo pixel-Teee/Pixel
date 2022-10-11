@@ -810,6 +810,17 @@ namespace Pixel {
 		return m_textures;
 	}
 
+	Ref<ShaderSet> AssetManager::GetVertexShaderSet(const std::string& shaderName)
+	{
+		//in terms shader name to get shader set
+		return m_VertexShaderMap.GetShader(shaderName);
+	}
+
+	Ref<ShaderSet> AssetManager::GetPixelShaderSet(const std::string& shaderName)
+	{
+		return m_PixelShaderMap.GetShader(shaderName);
+	}
+
 	std::map<std::string, Ref<Material>>& AssetManager::GetMaterials()
 	{
 		return m_TestMaterials;

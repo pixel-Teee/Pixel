@@ -55,6 +55,11 @@
 #include "Platform/DirectX/PipelineStateObject/DirectXSrvShaderParameter.h"
 //------shader parameter------
 
+//------material related------
+#include "Pixel/Renderer/3D/Material/Material.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+//------material related------
+
 #include "stb_image.h"
 
 #include "Pixel/Scene/Scene.h"
@@ -841,6 +846,14 @@ namespace Pixel {
 		//draw opaque render item
 		for(size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
+			//------first to check the material instance's original material instance have shader?------
+			Ref<Material> MaterialOwner = m_OpaqueItems[i].pMaterialInstance->GetMaterial();
+
+			//------in terms some information to generate shader key------
+
+			//------in terms some information to generate shader key------
+
+			//------first to check the material instance's original material instance have shader?------
 			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
 		}
 

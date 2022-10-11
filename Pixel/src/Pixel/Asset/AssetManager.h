@@ -4,6 +4,7 @@
 #include <locale>
 
 #include "Pixel/Core/Singleton.h"
+#include "Pixel/Renderer/ShaderMap.h"
 
 namespace Pixel {
 	class Texture2D;
@@ -11,6 +12,7 @@ namespace Pixel {
 	struct SubMaterial;
 	class Material;
 	class MaterialInstance;
+	//class ShaderMap::ShaderSet;
 	class AssetManager : public Singleton<AssetManager>
 	{
 	public:
@@ -56,6 +58,11 @@ namespace Pixel {
 		Ref<Material> GetTestMaterial(const std::string& virtualPath);
 
 		Ref<MaterialInstance> GetMaterialInstance(const std::string& virtualPath);
+
+		//in terms of shader name (material name) to get shader set
+		Ref<ShaderSet> GetVertexShaderSet(const std::string& shaderName);
+
+		Ref<ShaderSet> GetPixelShaderSet(const std::string& shaderName);
 
 		std::map<std::string, Ref<Material>>& GetMaterials();
 
@@ -129,5 +136,10 @@ namespace Pixel {
 		using convert_t = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<convert_t, wchar_t> m_strconverter;
 		//------converter------
+
+		//------shader map------
+		ShaderMap m_VertexShaderMap;//just to save entire shader map
+		ShaderMap m_PixelShaderMap;
+		//------shader map------
 	};
 }

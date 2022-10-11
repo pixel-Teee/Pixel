@@ -5,11 +5,15 @@
 //TODO:reflection module need this header file
 #include "ShaderFunction.h"
 
+#include "Pixel/Renderer/ShaderMap.h"
+
 namespace Pixel {
 	//------forward declare------
 	class ShaderMainFunction;
 	class ShaderFunction;
 	class Shader;
+	class ShaderMap;
+	class ShaderKey;
 	//------forward declare------
 
 	class Meta(Enable) Material : public MaterialBase
@@ -65,6 +69,12 @@ namespace Pixel {
 		//other shader function
 		Meta()
 		std::vector<Ref<ShaderFunction>> m_pShaderFunctionArray;
+
+		Ref<ShaderSet> m_CurrentVertexShaderSet;
+		Ref<ShaderKey> m_CurrentVertexShaderKey;
+
+		Ref<ShaderSet> m_CurrentPixelShaderSet;
+		Ref<ShaderKey> m_CurrentPixelShaderKey;
 
 		//std::map<uint32_t, uint32_t> m_Links;//input node <=> output node
 		Meta()

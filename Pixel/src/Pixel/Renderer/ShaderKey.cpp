@@ -21,6 +21,11 @@ namespace Pixel {
 		m_KeyMap[macroName] = value;
 	}
 
+	bool ShaderKey::operator!=(const ShaderKey& rhs) const
+	{
+		return !operator==(rhs);
+	}
+
 	bool ShaderKey::operator==(const ShaderKey& rhs) const
 	{
 		if (m_KeyMap.size() != rhs.m_KeyMap.size())

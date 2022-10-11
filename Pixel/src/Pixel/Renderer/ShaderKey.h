@@ -16,6 +16,8 @@ namespace Pixel {
 
 		void SetShaderKey(const std::string& macroName, uint32_t value);
 
+		bool operator!=(const ShaderKey& rhs) const;
+
 		bool operator==(const ShaderKey& rhs) const;
 
 		bool operator<(const ShaderKey& rhs) const;
