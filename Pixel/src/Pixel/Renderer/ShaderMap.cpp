@@ -23,7 +23,12 @@ namespace Pixel {
 	{
 		if (m_ShaderMap.find(Name) != m_ShaderMap.end())
 			return m_ShaderMap[Name];
-		return nullptr;
+		else
+		{
+			//TODO:create shader set?
+			m_ShaderMap[Name] = CreateRef<ShaderSet>();
+			return m_ShaderMap[Name];
+		}
 	}
 
 	void ShaderMap::DeleteShader(const std::string& name)

@@ -851,7 +851,7 @@ namespace Pixel {
 		{
 			//------first to check the material instance's original material instance have shader?------
 			//Ref<Material> MaterialOwner = m_OpaqueItems[i].pMaterialInstance->GetMaterial();
-
+			GetShader(m_OpaqueItems[i].pStaticMesh, m_OpaqueItems[i].pMaterialInstance);
 			//------first to check the material instance's original material instance have shader?------
 			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
 		}
@@ -3436,7 +3436,6 @@ namespace Pixel {
 		//first to get shader key
 		Ref<ShaderKey> pShaderKey = GetShaderKey(pStaticMesh, pMaterialInstance->GetMaterial());
 
-		//compare shader key and material's shader key
 		Ref<Material> pMaterial = pMaterialInstance->GetMaterial();
 	
 		pMaterial->m_CurrentShaderKey = pShaderKey;//set shader key
