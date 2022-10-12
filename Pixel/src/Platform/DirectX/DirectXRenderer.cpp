@@ -3451,7 +3451,10 @@ namespace Pixel {
 			//from material to get shader
 			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryVertexShaderString(pMaterial);
 
+			PIXEL_CORE_INFO("{0}", shaderCode);
+
 			Ref<Shader> pVertexShader = Shader::Create("VS", "vs_5_0", pShaderKey, shaderCode);
+			
 			//create new shader
 			pMaterial->m_CurrentVertexShaderSet->insert({ *pShaderKey, pVertexShader });
 		}
@@ -3470,6 +3473,8 @@ namespace Pixel {
 		{
 			//from material to get shader
 			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryPixelShaderString(pMaterial);
+
+			PIXEL_CORE_INFO("{0}", shaderCode);
 
 			Ref<Shader> pPixelShader = Shader::Create("PS", "ps_5_0", pShaderKey, shaderCode);
 			//create new shader

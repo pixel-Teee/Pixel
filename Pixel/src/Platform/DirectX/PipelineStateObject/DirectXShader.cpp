@@ -695,10 +695,15 @@ namespace Pixel {
 		{
 			std::map<std::string, uint32_t>& keyMap = pShaderKey->GetShaderMap();
 
+			macroValues.resize(keyMap.size());
+
+			uint32_t i = 0;
 			for (auto& item : keyMap)
 			{
-				macroValues.push_back(std::to_string(item.second));
-				macros.push_back({ item.first.c_str(), macroValues.back().c_str() });
+				//macroValues.push_back(std::to_string(item.second));
+				macroValues[i] = std::to_string(item.second);
+				macros.push_back({ item.first.c_str(), macroValues[i].c_str() });
+				++i;
 			}
 		}
 
