@@ -58,6 +58,7 @@
 //------material related------
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
 //------material related------
 
 #include "Pixel/Renderer/Shader.h"
@@ -3451,10 +3452,20 @@ namespace Pixel {
 			//from material to get shader
 			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryVertexShaderString(pMaterial);
 
+			//save the shader code to the cache path
+			std::string shaderPath = "assets/shaders/Cache/GeometryPassVertex" + pMaterial->m_MaterialName + ".hlsl";
+
 			PIXEL_CORE_INFO("{0}", shaderCode);
 
-			Ref<Shader> pVertexShader = Shader::Create("VS", "vs_5_0", pShaderKey, shaderCode);
-			
+			//------write to cache path------
+			std::ofstream cache(shaderPath);
+			cache << shaderCode;
+			cache.close();
+			//------write to cache path------
+
+			//Ref<Shader> pVertexShader = Shader::Create("VS", "vs_5_0", pShaderKey, shaderCode);
+			Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0", pShaderKey);
+
 			//create new shader
 			pMaterial->m_CurrentVertexShaderSet->insert({ *pShaderKey, pVertexShader });
 		}
@@ -3471,12 +3482,22 @@ namespace Pixel {
 
 		if (pMaterial->m_CurrentPixelShaderSet->find(*pShaderKey) == pMaterial->m_CurrentPixelShaderSet->end())
 		{
+			pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();//clear shader string flag
 			//from material to get shader
 			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryPixelShaderString(pMaterial);
 
+			//save the shader code to cache path
+			std::string shaderPath = "assets/shaders/Cache/GeometryPassPixel" + pMaterial->m_MaterialName + ".hlsl";
+
 			PIXEL_CORE_INFO("{0}", shaderCode);
 
-			Ref<Shader> pPixelShader = Shader::Create("PS", "ps_5_0", pShaderKey, shaderCode);
+			//------write to cache path------
+			std::ofstream cache(shaderPath);
+			cache << shaderCode;
+			cache.close();
+			//------write to cache path------
+
+			Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0", pShaderKey);
 			//create new shader
 			pMaterial->m_CurrentPixelShaderSet->insert({ *pShaderKey, pPixelShader });
 		}

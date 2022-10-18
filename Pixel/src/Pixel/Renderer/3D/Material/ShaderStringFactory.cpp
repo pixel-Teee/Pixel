@@ -184,7 +184,14 @@ namespace Pixel {
 		std::ifstream geometryPassIncludes("assets/shaders/Common/GeomertyPassVertex.hlsl");
 		std::stringstream buffer;
 		buffer << geometryPassIncludes.rdbuf();
-		std::string out = buffer.str();
+		std::string out;
+
+		std::string VertexShaderInclude;
+
+		GetIncludeShader(VertexShaderInclude);
+
+		out += VertexShaderInclude + "\n";
+		out += buffer.str();
 
 		geometryPassIncludes.close();
 
@@ -193,7 +200,7 @@ namespace Pixel {
 		//pMaterial->m_pVertexShader = testCompilerVertex;
 		//pMaterial->m_pPixelShader = testCompilerFrag;
 		//pMaterial->dirty = true;
-		//pMaterial->LinkAllParameters();
+		//pMaterial->LinkAllParameters();	
 
 		return out;
 	}
@@ -231,12 +238,12 @@ namespace Pixel {
 		out += PixelShaderFunctionString;
 		out += "return pixelOut;\n}";
 
-		std::string shaderPath = "assets/shaders/Cache/" + pMaterial->m_MaterialName + ".hlsl";
+		//std::string shaderPath = "assets/shaders/Cache/" + pMaterial->m_MaterialName + ".hlsl";
 
 		//write to cache
-		std::ofstream cache(shaderPath);
-		cache << out;
-		cache.close();
+		//std::ofstream cache(shaderPath);
+		//cache << out;
+		//cache.close();
 
 		//TODO:need to fix these
 		//TODO:in the future, will in there to compile shader

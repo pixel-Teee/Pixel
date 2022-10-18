@@ -1,3 +1,4 @@
+#include "../Common/Common.hlsl"
 //------mesh constants------
 cbuffer cbPerObject : register(b0)
 {
