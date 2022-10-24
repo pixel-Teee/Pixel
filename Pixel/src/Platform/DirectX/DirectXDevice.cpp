@@ -129,7 +129,7 @@ namespace Pixel {
 		m_pWindowHandle = windowHandle;
 	}
 
-	Microsoft::WRL::ComPtr<ID3D12Device> DirectXDevice::GetDevice()
+	Microsoft::WRL::ComPtr<ID3D12Device1> DirectXDevice::GetDevice()
 {
 		return m_pD3dDevice;
 	}

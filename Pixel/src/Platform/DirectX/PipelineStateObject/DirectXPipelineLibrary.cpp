@@ -2,6 +2,8 @@
 
 #include "DirectXPipelineLibrary.h"
 
+#include "Platform/DirectX/DirectXDevice.h"
+
 namespace Pixel {
 	DirectXPipelineLibrary::DirectXPipelineLibrary()
 	{
@@ -12,5 +14,6 @@ namespace Pixel {
 	{
 		//initialize pipeline library
 
+		//std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreatePipelineLibrary();
 	}
 }

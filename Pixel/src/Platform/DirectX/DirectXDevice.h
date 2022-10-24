@@ -29,7 +29,7 @@ namespace Pixel {
 		void SetWindowHandle(GLFWwindow* windowHandle);
 		//static Ref<DirectXDevice> Get();
 
-		Microsoft::WRL::ComPtr<ID3D12Device> GetDevice();
+		Microsoft::WRL::ComPtr<ID3D12Device1> GetDevice();
 		Microsoft::WRL::ComPtr<IDXGIFactory4> GetDxgiFactory();
 
 		Ref<CommandListManager> GetCommandListManager();
@@ -84,7 +84,7 @@ namespace Pixel {
 		GLFWwindow* m_pWindowHandle;
 
 		Microsoft::WRL::ComPtr<IDXGIFactory4> m_pDxgiFactory;
-		Microsoft::WRL::ComPtr<ID3D12Device> m_pD3dDevice;
+		Microsoft::WRL::ComPtr<ID3D12Device1> m_pD3dDevice;
 
 		//back buffer format and depth stencil buffer format
 		DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;//[0, 1]
