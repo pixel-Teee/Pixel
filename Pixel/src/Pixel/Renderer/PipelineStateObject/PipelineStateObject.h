@@ -42,8 +42,6 @@ namespace Pixel {
 
 		virtual void SetComputeShader(const void* Binary, size_t Size) = 0;
 
-		virtual
-
 		virtual bool IsMatchPso(BufferLayout layout, Ref<RootSignature> pRootSignature) = 0;
 
 		virtual Ref<RootSignature> GetRootSignature() const = 0;
