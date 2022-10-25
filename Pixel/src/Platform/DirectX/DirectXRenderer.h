@@ -24,6 +24,7 @@ namespace Pixel {
 	class SimpleScene;
 	class SamplerDesc;
 	class MaterialInstance;
+	class PipelineLibrary;
 
 	struct StaticMeshContext
 	{
@@ -118,7 +119,7 @@ namespace Pixel {
 
 		virtual Ref<DescriptorHandle> GetNullDescriptorHandle() override;
 
-		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex) override;
+		virtual void CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Material> pOriginalMaterial, BufferLayout& layout) override;
 
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) override;
 
@@ -128,6 +129,9 @@ namespace Pixel {
 
 		//TODO:need to modify this to virtual function
 		Ref<RootSignature> CreateRootSignature(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, std::vector<Ref<SamplerDesc>> pSampleDescs);
+
+		Ref<PipelineLibrary> GetPipelineLibrary() override;
+
 	private:
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
@@ -384,6 +388,10 @@ namespace Pixel {
 		Ref<Shader> m_TestVertexShader;
 		Ref<Shader> m_TestFragShader;
 		//------all material's uninitialized pso, will in terms of the vertex input layout to create complete pso------
+
+		//------pipeline state library------
+		Ref<PipelineLibrary> m_PipelineLibrary;
+		//------pipeline state library------
 	};
 }
  

@@ -2,6 +2,8 @@
 
 #include "ShaderKey.h"
 
+#include "Pixel/Asset/AssetManager.h"
+
 namespace Pixel {
 	ShaderKey::ShaderKey()
 	{
@@ -24,6 +26,28 @@ namespace Pixel {
 	std::map<std::string, uint32_t>& ShaderKey::GetShaderMap()
 	{
 		return m_KeyMap;
+	}
+
+	void ShaderKey::FinitializeCombineKey()
+	{
+		std::string res;
+		for (auto& iter : m_KeyMap)
+		{
+			res += iter.first;//combine key
+			res += std::to_string(iter.second);//combine value
+		}
+		m_CombineKey = res;
+		m_CombineKeyW = AssetManager::GetSingleton().to_wsrting(m_CombineKey);//temporarily use asset manager's combine key
+	}
+
+	std::string& ShaderKey::GetCombineKey()
+	{
+		return m_CombineKey;
+	}
+
+	std::wstring& ShaderKey::GetCombineKeyW()
+	{
+		return m_CombineKeyW;
 	}
 
 	bool ShaderKey::operator!=(const ShaderKey& rhs) const

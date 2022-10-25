@@ -8,6 +8,9 @@
 #include "Platform/DirectX/State/DirectXBlenderState.h"
 #include "Platform/DirectX/State/DirectXRasterState.h"
 #include "Platform/DirectX/State/DirectXDepthState.h"
+#include "Platform/DirectX/DirectXRenderer.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXPipelineLibrary.h"
+#include "Pixel/Core/Application.h"
 
 namespace Pixel {
 
@@ -195,6 +198,8 @@ namespace Pixel {
 		}
 		else
 			m_InputLayouts = nullptr;
+
+		m_PSODesc.InputLayout.pInputElementDescs = m_InputLayouts.get();//set input layout
 	}
 
 	void GraphicsPSO::SetVertexShader(const void* Binary, size_t Size)
@@ -281,6 +286,9 @@ namespace Pixel {
 	{
 		//throw std::logic_error("The method or operation is not implemented.");
 		m_pRootSignature = pRootSignature;
+
+		//set root signature
+		m_PSODesc.pRootSignature = std::static_pointer_cast<DirectXRootSignature>(m_pRootSignature)->GetNativeSignature();
 	}
 
 	//------Graphics PSO------

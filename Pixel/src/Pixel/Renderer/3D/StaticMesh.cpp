@@ -284,6 +284,7 @@ namespace Pixel {
 
 	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Material> pTestMaterial, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
 	{
+		/*
 		if (pMaterial->IsTransparent)
 		{
 			pContext->SetRootSignature(*Application::Get().GetRenderer()->GetPso(TransParentPsoIndex, pMaterial->IsTransparent)->GetRootSignature());
@@ -390,6 +391,7 @@ namespace Pixel {
 		//pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, nullHeap);
 
 		m_MeshConstant.previousWorld = glm::transpose(transform);
+		*/
 	}
 
 	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<SubMaterial> pMaterial, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader)
@@ -493,7 +495,8 @@ namespace Pixel {
 	{
 		//bind pso and root signature
 		Ref<Material> pOriginalMaterial = pMaterialInstance->GetMaterial();//get original material
-
+	
+		/*
 		if (pOriginalMaterial->m_PsoIndex == -1)
 		{
 			std::string shaderPath = "assets/shaders/Cache/" + pOriginalMaterial->m_MaterialName + ".hlsl";
@@ -504,9 +507,9 @@ namespace Pixel {
 			pOriginalMaterial->m_pPixelShader = pPixelShader;
 			pOriginalMaterial->dirty = true;
 			pOriginalMaterial->LinkAllParameters();
-			pOriginalMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(pVertexShader, pPixelShader, pOriginalMaterial->m_PsoIndex);//uninitialized pso index
+			pOriginalMaterial->m_PsoIndex = Application::Get().GetRenderer()->CreateMaterialPso(pVertexShader, pPixelShader, pOriginalMaterial);//uninitialized pso index
 		}
-
+		
 		if (pOriginalMaterial->dirty)//create complete pipeline state object
 		{
 			pOriginalMaterial->dirty = false;
@@ -515,7 +518,8 @@ namespace Pixel {
 			//create complete pso
 			Application::Get().GetRenderer()->CreateCompleteMaterialPso(pOriginalMaterial->m_PsoIndex, layout);
 		}
-		
+		*/
+		/*
 		Ref<PSO> completePso;
 		//find pso, how to interms of the buffer layout and material to find pso?
 		std::vector<Ref<PSO>>& psos = Application::Get().GetRenderer()->GetCompletePsos();
@@ -529,14 +533,17 @@ namespace Pixel {
 				break;
 			}
 		}
-
-		PX_CORE_ASSERT(completePso != nullptr, "could not find pso!");
-
-		pContext->SetPipelineState(*completePso);
-		pContext->SetRootSignature(*(completePso->GetRootSignature()));
+		*/
+		//TODO:to fix const&
+		BufferLayout layout = m_VertexBuffer->GetLayout();
+		Application::Get().GetRenderer()->CreateMaterialPso(pMaterialInstance->m_VertexShader, pMaterialInstance->m_PixelShader, pOriginalMaterial, layout);
+		//PX_CORE_ASSERT(completePso != nullptr, "could not find pso!");
 		
-		Ref<Shader> pVertexShader = pOriginalMaterial->m_pVertexShader;
-		Ref<Shader> pPixelShader = pOriginalMaterial->m_pPixelShader;
+		pContext->SetPipelineState(*pOriginalMaterial->m_CurrentPso);
+		pContext->SetRootSignature(*(pOriginalMaterial->m_CurrentPso->GetRootSignature()));
+		
+		Ref<Shader> pVertexShader = pMaterialInstance->m_VertexShader;
+		Ref<Shader> pPixelShader = pMaterialInstance->m_PixelShader;
 
 		m_MeshConstant.world = glm::transpose(transform);
 		m_MeshConstant.invWorld = glm::transpose(glm::inverse(transform));

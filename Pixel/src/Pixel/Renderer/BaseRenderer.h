@@ -15,6 +15,7 @@ namespace Pixel {
 	class DescriptorHeap;
 	class SimpleScene;
 	class MaterialTreeComponent;
+	class PipelineLibrary;
 	//renderer interface
 	class BaseRenderer
 	{
@@ -29,7 +30,7 @@ namespace Pixel {
 
 		virtual uint32_t CreateDeferredLightPso(BufferLayout& layout) = 0;
 
-		virtual uint32_t CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex) = 0;
+		virtual void CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Material> pOriginalMaterial, BufferLayout& layout) = 0;
 
 		virtual uint32_t CreateCompleteMaterialPso(uint32_t uninitializedPsoIndex, BufferLayout& layout) = 0;
 
@@ -93,6 +94,8 @@ namespace Pixel {
 		virtual Ref<DescriptorHandle> GetNullDescriptorHandle() = 0;
 
 		virtual std::vector<Ref<PSO>>& GetCompletePsos() = 0;
+
+		virtual Ref<PipelineLibrary> GetPipelineLibrary() = 0;
 
 		static Ref<BaseRenderer> Create();
 	};

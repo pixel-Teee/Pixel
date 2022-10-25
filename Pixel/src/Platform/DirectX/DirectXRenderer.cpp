@@ -7,6 +7,7 @@
 #include "Platform/DirectX/PipelineStateObject/DirectXPipelineStateObject.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXRootSignature.h"
 #include "Platform/DirectX/PipelineStateObject/DirectXShader.h"
+#include "Platform/DirectX/PipelineStateObject/DirectXPipelineLibrary.h"
 //------pso related------
 
 //------buffer related------
@@ -467,6 +468,11 @@ namespace Pixel {
 
 		//m_TestVertexShader = Shader::Create("assets/shaders/Cache/test.hlsl", "VS", "vs_5_0");
 		//m_TestFragShader = Shader::Create("assets/shaders/Cache/test.hlsl", "PS", "ps_5_0");
+
+		//------create pipeline library------
+		m_PipelineLibrary = PipelineLibrary::Create();
+		m_PipelineLibrary->Init();
+		//------create pipeline library------
 	}
 
 	uint32_t DirectXRenderer::CreatePso(BufferLayout& layout)
@@ -2763,12 +2769,16 @@ namespace Pixel {
 		return m_NullDescriptor;
 	}
 
-	uint32_t DirectXRenderer::CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, int32_t originalPsoIndex)
+	void DirectXRenderer::CreateMaterialPso(Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Material> pOriginalMaterial, BufferLayout& layout)
 	{
-		//create uninitialized pso, will in terms of the model's vertex input layout to create complete pso
+		//create a unique name
+		Ref<ShaderKey> pShaderKey = pOriginalMaterial->m_CurrentShaderKey;
+
+		std::wstring materialName = AssetManager::GetSingleton().to_wsrting(pOriginalMaterial->GetMaterialName());
+		std::wstring uniqueName = pShaderKey->GetCombineKeyW() + materialName;
 
 		//------Create Deferred Geometry Rendere------
-		Ref<PSO> pPso = PSO::CreateGraphicsPso(L"MaterialPso");
+		Ref<PSO> pPso = PSO::CreateGraphicsPso(uniqueName.c_str());
 
 		Ref<SamplerDesc> samplerDesc = SamplerDesc::Create();
 
@@ -2807,18 +2817,23 @@ namespace Pixel {
 		//pPso->SetRootSignature(m_pDeferredShadingRootSignature);
 
 		Ref<RootSignature> pRootSignature = CreateRootSignature(m_TestVertexShader, m_TestFragShader, samplerDescs);
-		pRootSignature->Finalize(L"MaterialTreeRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		pRootSignature->Finalize(L"MaterialTreeRootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);//material tree root signature
 		pPso->SetRootSignature(pRootSignature);
 
-		if (originalPsoIndex != -1)
+		pPso->SetInputLayout(layout);
+
+		if (m_PipelineLibrary->AlreadyExist(uniqueName))
 		{
-			m_MaterialPso[originalPsoIndex] = pPso;//replace the original pso
-			return originalPsoIndex;
+			//load the already exist pso
+			std::static_pointer_cast<DirectXPipelineLibrary>(m_PipelineLibrary)->LoadGraphicsPipeline(uniqueName, pPso);
 		}
 		else
 		{
-			m_MaterialPso.push_back(pPso);
-			return m_MaterialPso.size() - 1;
+			pPso->Finalize();
+			m_PipelineLibrary->InsertNewName(uniqueName);//insert new name
+			//store the pso to the library
+			m_PipelineLibrary->StorePipeline(uniqueName, pPso);
+			pOriginalMaterial->m_CurrentPso = pPso;//set pso
 		}
 	}
 
@@ -2918,6 +2933,11 @@ namespace Pixel {
 		}
 	
 		return pRootSignature;
+	}
+
+	Ref<PipelineLibrary> DirectXRenderer::GetPipelineLibrary()
+	{
+		return m_PipelineLibrary;//return pipeline library
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()
@@ -3547,6 +3567,7 @@ namespace Pixel {
 		}
 
 		//------in terms of the static mesh to generate vertex layout macro------
+		pShaderKey->FinitializeCombineKey();//use for pso name
 		return pShaderKey;
 	}
 

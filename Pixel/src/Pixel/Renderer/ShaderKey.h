@@ -18,6 +18,12 @@ namespace Pixel {
 
 		std::map<std::string, uint32_t>& GetShaderMap();
 
+		void FinitializeCombineKey();
+
+		std::string& GetCombineKey();
+
+		std::wstring& GetCombineKeyW();//for pso name 
+
 		bool operator!=(const ShaderKey& rhs) const;
 
 		bool operator==(const ShaderKey& rhs) const;
@@ -28,5 +34,9 @@ namespace Pixel {
 	private:
 		//macro name and it's value
 		std::map<std::string, uint32_t> m_KeyMap;
+
+		std::string m_CombineKey;
+
+		std::wstring m_CombineKeyW;//combine key
 	};
 }

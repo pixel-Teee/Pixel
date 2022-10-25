@@ -101,6 +101,8 @@ namespace Pixel {
 		Ref<D3D12_INPUT_ELEMENT_DESC> m_InputLayouts;
 
 		BufferLayout m_Layout;
+
+		friend class DirectXPipelineLibrary;
 	};
 
 	class ComputePSO : public DirectXPSO

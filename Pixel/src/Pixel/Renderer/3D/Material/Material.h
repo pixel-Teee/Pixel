@@ -14,6 +14,7 @@ namespace Pixel {
 	class Shader;
 	class ShaderMap;
 	class ShaderKey;
+	class PSO;
 	//------forward declare------
 
 	class Meta(Enable) Material : public MaterialBase
@@ -59,7 +60,7 @@ namespace Pixel {
 		bool dirty = false;
 
 		//Meta()
-		int32_t m_PsoIndex = -1;
+		Ref<PSO> m_CurrentPso;//interms of the vertex layout to change
 		//------material's uninitialized pso index, will in terms of the model's vertex input layout to create complete pso------
 
 		//logic node
