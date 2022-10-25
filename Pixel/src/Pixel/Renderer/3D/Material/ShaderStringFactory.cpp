@@ -234,6 +234,7 @@ namespace Pixel {
 
 		out += PixelShaderInclude + "\n";
 		out += PixelShaderConstantString + "\n";
+		out += "SamplerState gsamPointWrap : register(s0);\n";
 		out += "PixelOut PS(VertexOut pin){\n";
 		//pMaterial->GetShaderTreeString(out);
 		out += PixelShaderFunctionString;

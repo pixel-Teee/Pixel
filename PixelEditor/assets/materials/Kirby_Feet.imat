@@ -1,0 +1,3 @@
+{
+    "Pixel::MaterialInstance":{"type":"Pixel::MaterialInstance","m_PSShaderCustomValue":[],"m_PSShaderCustomTexture":[{"type":"Pixel::CustomTexture2D","ConstValueName":"BaseColor","m_VirtualPath":"Texture\\Arms_baseColor"}],"m_MaterialPath":"TestMaterial\\Kirby"}
+}
