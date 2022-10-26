@@ -132,7 +132,11 @@ namespace Pixel {
 
 		Ref<PipelineLibrary> GetPipelineLibrary() override;
 
+		virtual void DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Framebuffer> pFrameBuffer) override;
+
 	private:
+
+		void CreatePreviewNodePso();
 
 		void CreateDefaultForwardRendererPso();//use for model's forward renderer
 
@@ -392,6 +396,13 @@ namespace Pixel {
 		//------pipeline state library------
 		Ref<PipelineLibrary> m_PipelineLibrary;
 		//------pipeline state library------
+
+		//------preview node pipeline state object------
+		std::vector<Ref<PSO>> m_PreviewNodePsos;
+		Ref<PSO> m_PreviewNodePso;
+		std::vector<Ref<Shader>> m_TempShader;
+		std::vector<Ref<RootSignature>> m_TempRootSignature;
+		//------preview node pipeline state object------
 	};
 }
  

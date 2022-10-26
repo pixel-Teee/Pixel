@@ -26,6 +26,8 @@ namespace Pixel {
 		//give the temp variable one id, variable name + id
 		static uint32_t m_ShaderValueIndex;
 
+		static bool m_GenerateIntermediateNodesResult;
+
 		static void Init();
 
 		static std::string Float();
@@ -55,6 +57,8 @@ namespace Pixel {
 		static std::string CreateDeferredGeometryVertexShaderString(Ref<Material> pMaterial);
 
 		static std::string CreateDeferredGeometryPixelShaderString(Ref<Material> pMaterial);
+
+		static void GenerateIntermediateShaderString(Ref<Material> pMaterial, Ref<StaticMesh> pStaticMesh);
 
 		static void GetIncludeShader(std::string& Out);
 

@@ -7,6 +7,7 @@ namespace Pixel {
 
 	class ShaderFunction;
 	class GraphPin;
+	class Framebuffer;
 
 	class GraphNode {
 	public:
@@ -19,6 +20,8 @@ namespace Pixel {
 
 		//many output pins
 		std::vector<Ref<GraphPin>> m_OutputPin;
+
+		Ref<Framebuffer> m_PreviewTexture;
 
 		GraphNode();
 	};

@@ -15,13 +15,17 @@
 #include "Texture2DShaderFunction.h"
 #include "OutputNode.h"
 #include "InputNode.h"
+#include "ShaderMainFunction.h"
 
 namespace Pixel {
 	uint32_t ShaderStringFactory::m_ShaderValueIndex;
 
+	bool ShaderStringFactory::m_GenerateIntermediateNodesResult;
+
 	void ShaderStringFactory::Init()
 	{
 		m_ShaderValueIndex = 0;
+		m_GenerateIntermediateNodesResult = false;
 	}
 
 	std::string ShaderStringFactory::Float()
@@ -260,6 +264,62 @@ namespace Pixel {
 
 		return out;
 	}
+
+	void ShaderStringFactory::GenerateIntermediateShaderString(Ref<Material> pMaterial, Ref<StaticMesh> pStaticMesh)
+	{
+		//create deferred geometry shader
+		std::ifstream geometryPassIncludes("assets/shaders/Common/GeometryPassQuad.hlsl");
+		std::stringstream buffer;
+		buffer << geometryPassIncludes.rdbuf();
+		std::string out = buffer.str();
+
+		geometryPassIncludes.close();
+
+		std::string PixelShaderInclude;//just for include, some useful shader
+		std::string PixelShaderDynamic;//TODO:not used temporarily
+		std::string PixelShaderInputDeclare;//pixel shader input declare
+		std::string PixelShaderOutputDeclare;//pixel shader output declare, this will be fixed
+		std::string PixelShaderConstantString;//pxiel shader constant string
+		std::string PixelShaderFunctionString;//pixel shader function string
+
+		//PixelShaderInclude:from shader string factory to get common shader path
+		//GetIncludeShader(PixelShaderInclude);
+		//PixelShaderInputDeclare:interms of the static mesh's vertex buffer's layout to create pixel shader input declare(x)
+
+		//PixelShaderOutputDeclare:this is fixed
+		pMaterial->GetShaderTreeString(PixelShaderFunctionString);
+		//PixelShaderFunctionString:get shader tree string, then get the cbuffer
+		CreatePixelShaderUserConstant(PixelShaderConstantString, pMaterial);
+		//PixelShaderConstantString:cbuffer declare
+
+		//out += "\n#include \"../../Common/Common.hlsl\"\n";
+		//out += "\n" + PixelShaderInclude + "\n";
+		out += "\n" + PixelShaderConstantString;
+		//out += "SamplerState gsamPointWrap : register(s0);\n";
+		out += "PixelOut PS(VertexOut pin){\n";
+		//pMaterial->GetShaderTreeString(out);
+		//out += PixelShaderFunctionString;
+		//out += "return pixelOut;\n}";
+		out += "PixelOut pixelOut = (PixelOut)(0.0f);\n";
+
+		for (uint32_t i = 0; i < pMaterial->GetShaderFunction().size(); ++i)
+		{
+			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += out;
+			pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
+			//skip shader main function
+			if (pMaterial->GetShaderFunction()[i]->GetOutputNodeNum() == 0) continue;
+			std::string temp;//temp
+			temp = pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetNodeName() + ";\n";
+			//copy to intermediate shader string
+			pMaterial->GetShaderFunction()[i]->GetShaderTreeString(pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString);
+			
+			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += "pixelOut.finalColor = " + temp;//copy to 
+			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += "return pixelOut;\n}";
+
+			//PIXEL_CORE_INFO("{0}******", pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString);
+		}
+	}
+
 	void ShaderStringFactory::GetIncludeShader(std::string& Out)
 	{
 		Out = "#include \"../Common/Common.hlsl\"";

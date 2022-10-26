@@ -50,6 +50,8 @@ namespace Pixel {
 
 		void CreateNewNodes();
 
+		void DrawIntermediatePreviewNodes(Ref<GraphNode> pGraphNode);
+
 		void ShowNodeContextMenu();
 
 		//------create logic nodes------
@@ -91,6 +93,11 @@ namespace Pixel {
 		//------preview scene texture------
 		Ref<DescriptorHandle> m_PreviewSceneTextureHandle;
 		//------preview scene texture------
+
+		//------preview intermediate nodes texture------
+		std::vector<Ref<DescriptorHandle>> m_PreviewIntermediateNodesTextureHandles;
+		//------preview intermediate nodes texture------
+
 		float m_TopPanelHeight;
 		float m_DownPanelHeight;
 

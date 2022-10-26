@@ -363,6 +363,10 @@ namespace Pixel {
 		//std::static_pointer_cast<DirectXDevice>(Device::Get())->GetDevice()->CreateShaderResourceView(nullptr, &resourceViewDesc, std::static_pointer_cast<DirectXDescriptorCpuHandle>(m_NullDescriptor->GetCpuHandle())->GetCpuHandle());
 		m_TotalBindTextureDescriptorHeapFirstHandle = m_TotalBindTextureDescriptorHeap->Alloc(1023);
 		//------create total texture descriptor heap------
+
+		//------create preview intermediate node pipeline state object------
+		
+		//------create preview intermediate node pipeline state object------
 	}
 
 	DirectXRenderer::~DirectXRenderer()
@@ -472,6 +476,7 @@ namespace Pixel {
 		//------create pipeline library------
 		m_PipelineLibrary = PipelineLibrary::Create();
 		m_PipelineLibrary->Init();
+		CreatePreviewNodePso();
 		//------create pipeline library------
 	}
 
@@ -2917,7 +2922,8 @@ namespace Pixel {
 
 		for (size_t i = 0; i < pDirectXPixelShader->m_CbvShaderParameter.size(); ++i)
 		{
-			(*pRootSignature)[totalOffset + i].InitAsConstantBuffer(totalOffset + i, ShaderVisibility::Pixel);
+			//TODO:replace totalOffset + i to pDirectXPixelShader->m_CbvShaderParameter[i]->m_BindPoint
+			(*pRootSignature)[totalOffset + i].InitAsConstantBuffer(pDirectXPixelShader->m_CbvShaderParameter[i]->m_BindPoint, ShaderVisibility::Pixel);
 			pDirectXPixelShader->m_CbvShaderParameter[i]->m_RootIndex = totalOffset + i;
 		}
 
@@ -2938,6 +2944,137 @@ namespace Pixel {
 	Ref<PipelineLibrary> DirectXRenderer::GetPipelineLibrary()
 	{
 		return m_PipelineLibrary;//return pipeline library
+	}
+
+	void DirectXRenderer::DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Framebuffer> pFrameBuffer)
+	{
+		//interms of vertex shader function and pixel shader function to draw
+
+		Ref<SamplerDesc> pSamplerDesc = SamplerDesc::Create();
+		std::vector<Ref<SamplerDesc>> samplerDescs;
+		samplerDescs.push_back(pSamplerDesc);
+		//create complete pso
+		Ref<RootSignature> pRootSignature = CreateRootSignature(pVertexShader, pPixelShader, samplerDescs);
+
+		pRootSignature->Finalize(L"PreviewNode", RootSignatureFlag::AllowInputAssemblerInputLayout);
+
+		m_TempRootSignature.push_back(pRootSignature);//holds the life time?
+		
+		m_PreviewNodePso->SetRootSignature(pRootSignature);
+
+		m_TempShader.push_back(pVertexShader);
+		m_TempShader.push_back(pPixelShader);
+
+		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(pVertexShader)->GetShaderBinary();
+		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(pPixelShader)->GetShaderBinary();
+
+		Ref<PSO> tempPso = std::make_shared<GraphicsPSO>(*std::static_pointer_cast<GraphicsPSO>(m_PreviewNodePso));
+
+		tempPso->SetVertexShader(VsBinary, VsBinarySize);
+		tempPso->SetPixelShader(PsBinary, PsBinarySize);
+
+		tempPso->Finalize();//finalize preview node pso
+
+		m_PreviewNodePsos.push_back(tempPso);//push
+
+		Ref<GraphicsPSO> pGraphicsPso = std::static_pointer_cast<GraphicsPSO>(tempPso);
+		
+		Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);//direct frame buffer
+
+		PX_CORE_ASSERT(pDirectXFrameBuffer->m_pColorBuffers.size() == 1, "frame buffer size error!");
+		//------transiation resource state-----
+		pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pColorBuffers[0]), ResourceStates::RenderTarget, true);
+		//------transiation resource state------
+
+		std::vector<Ref<DescriptorCpuHandle>> renderTargets;
+		renderTargets.push_back(pDirectXFrameBuffer->m_pColorBuffers[0]->GetRTV());
+
+		pGraphicsContext->SetPipelineState(*pGraphicsPso);
+		pGraphicsContext->SetRootSignature(*pRootSignature);
+		pGraphicsContext->SetRenderTargets(1, renderTargets);
+		pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+		//---set viewport and scissor---
+		ViewPort vp;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = pDirectXFrameBuffer->m_pColorBuffers[0]->GetWidth();
+		vp.Height = pDirectXFrameBuffer->m_pColorBuffers[0]->GetHeight();
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+
+		PixelRect scissor;
+		scissor.Left = 0;
+		scissor.Right = pDirectXFrameBuffer->m_pColorBuffers[0]->GetWidth();
+		scissor.Top = 0;
+		scissor.Bottom = pDirectXFrameBuffer->m_pColorBuffers[0]->GetHeight();
+
+		pGraphicsContext->SetViewportAndScissor(vp, scissor);
+		//---set viewport and scissor---
+
+		pGraphicsContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
+		pGraphicsContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());
+		pGraphicsContext->DrawIndexed(m_QuadIndexBuffer->GetCount());
+
+		pGraphicsContext->TransitionResource(*(pDirectXFrameBuffer->m_pColorBuffers[0]), ResourceStates::Common, true);
+	}
+
+	void DirectXRenderer::CreatePreviewNodePso()
+	{
+		m_PreviewNodePso = PSO::CreateGraphicsPso(L"PreviewNodePso");//preview pso
+
+		//Ref<SamplerDesc> defaultSampler = SamplerDesc::Create();
+		//------Create Root Signature------
+		//m_rootSignature = RootSignature::Create((uint32_t)RootBindings::NumRootBindings, 1);
+		//m_rootSignature->InitStaticSampler(0, defaultSampler, ShaderVisibility::Pixel);
+		//(*m_rootSignature)[(size_t)RootBindings::MeshConstants].InitAsConstantBuffer(0, ShaderVisibility::Vertex);//root descriptor, only need to bind virtual address
+		//(*m_rootSignature)[(size_t)RootBindings::MaterialConstants].InitAsConstantBuffer(2, ShaderVisibility::Pixel);
+		//(*m_rootSignature)[(size_t)RootBindings::MaterialSRVs].InitAsDescriptorRange(RangeType::SRV, 0, 10, ShaderVisibility::ALL);
+		//(*m_rootSignature)[(size_t)RootBindings::MaterialSamplers].InitAsDescriptorRange(RangeType::SAMPLER, 1, 10, ShaderVisibility::Pixel);
+		//(*m_rootSignature)[(size_t)RootBindings::CommonSRVs].InitAsDescriptorRange(RangeType::SRV, 10, 10, ShaderVisibility::Pixel);
+		//(*m_rootSignature)[(size_t)RootBindings::CommonCBV].InitAsConstantBuffer(1, ShaderVisibility::ALL);
+		//(*m_rootSignature)[(size_t)RootBindings::SkinMatrices].InitiAsBufferSRV(20, ShaderVisibility::ALL);
+		//m_rootSignature->Finalize(L"RootSignature", RootSignatureFlag::AllowInputAssemblerInputLayout);
+		//------Create Root Signature------
+
+		//------Create Shader--------	
+		//m_forwardVs = Shader::Create("assets/shaders/ForwardShading/ForwardShading.hlsl", "VS", "vs_5_0");
+		//m_forwardPs = Shader::Create("assets/shaders/ForwardShading/ForwardShading.hlsl", "PS", "ps_5_0");
+		//------Create Shader--------
+		 
+		//-----Create Blend State------
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		//pBlendState->SetRenderTargetBlendState(0, true);
+		//-----Create Blend State------
+
+		//------Create Raster State------
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//------Create Raster State------
+
+		//------Create Depth State------
+		Ref<DepthState> pDepthState = DepthState::Create();
+		pDepthState->DepthTest(false);
+		//------Create Depth State------
+
+		m_PreviewNodePso->SetBlendState(pBlendState);
+		m_PreviewNodePso->SetRasterizerState(pRasterState);
+		m_PreviewNodePso->SetDepthState(pDepthState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM };
+		m_PreviewNodePso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
+		m_PreviewNodePso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
+		{ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false} };//for plane
+
+		m_PreviewNodePso->SetInputLayout(layout);
+
+		//auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardVs)->GetShaderBinary();
+		//auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(m_forwardPs)->GetShaderBinary();
+		//m_defaultPso->SetVertexShader(VsBinary, VsBinarySize);
+		//m_defaultPso->SetPixelShader(PsBinary, PsBinarySize);
+
+		//m_defaultPso->SetRootSignature(m_rootSignature);
+		//------Create Default Forward Renderer Pso------
 	}
 
 	void DirectXRenderer::CreateDefaultForwardRendererPso()

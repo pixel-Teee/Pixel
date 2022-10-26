@@ -107,6 +107,8 @@ namespace Pixel {
 		std::vector<glm::vec3> m_OutputNodeDisplayColor;
 
 		glm::vec3 m_HeaderColor;
+
+		std::string m_IntermediateShaderString;//use for intermediate nodes
 	protected:
 		//dfs check flag
 		bool m_bIsVisited;

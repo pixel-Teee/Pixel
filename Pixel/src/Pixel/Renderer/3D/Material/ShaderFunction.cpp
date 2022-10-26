@@ -247,6 +247,13 @@ namespace Pixel {
 			if (!GetFunctionString(OutString))
 				return false;
 
+			/*
+			if (ShaderStringFactory::m_GenerateIntermediateNodesResult)
+			{
+				m_IntermediateShaderString = OutString;//copy the intermediate result
+			}
+			*/
+
 			return true;
 		}
 	}

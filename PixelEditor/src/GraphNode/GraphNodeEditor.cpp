@@ -36,6 +36,13 @@
 #include "rapidjson/prettywriter.h"
 //------other library------
 
+#include "Pixel/Renderer/Device/Device.h"
+#include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/Context/ContextManager.h"
+#include "Pixel/Renderer/Context/Context.h"
+#include "Pixel/Renderer/BaseRenderer.h"
+#include "Pixel/Renderer/Buffer/GpuResource.h"
+
 namespace Pixel {
 
 	//extern const std::filesystem::path g_AssetPath;
@@ -66,6 +73,15 @@ namespace Pixel {
 		m_HeaderBackgroundTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 
 		m_PreviewSceneTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+
+		//------apply for preview intermediate nodes texture handle------
+		m_PreviewIntermediateNodesTextureHandles.resize(128);
+
+		for (size_t i = 0; i < 128; ++i)
+		{
+			m_PreviewIntermediateNodesTextureHandles[i] = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+		}
+		//------apply for preview intermediate nodes texture handle------
 
 		Device::Get()->CopyDescriptorsSimple(1, m_HeaderBackgroundTextureHandle->GetCpuHandle(), m_HeaderBackgroundTexture->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
@@ -322,6 +338,53 @@ namespace Pixel {
 				}
 			}
 		}
+
+		if (ImGui::Button("PreviewNodes", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
+		{
+			ShaderStringFactory::m_GenerateIntermediateNodesResult = true;
+
+			//save the intermediate nodes shader in the shader function(TODO:save the shader in the graph node good?)
+			ShaderStringFactory::GenerateIntermediateShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
+
+			for (size_t i = 0; i < m_GraphNodes.size(); ++i)
+			{
+				//get owner shader function
+				Ref<ShaderFunction> pShaderFunction = m_GraphNodes[i]->p_Owner;
+
+				if (pShaderFunction->GetOutputNodeNum() == 0) continue;//skip shader main function
+
+				Ref<Context> pFinalColorContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+
+				FramebufferSpecification fbSpec;
+				fbSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+				fbSpec.Width = 128.0f;
+				fbSpec.Height = 128.0f;
+
+				m_GraphNodes[i]->m_PreviewTexture = Framebuffer::Create(fbSpec);
+
+				std::string& ShaderCode = pShaderFunction->m_IntermediateShaderString;
+
+				//PIXEL_CORE_INFO("{0}******", ShaderCode);
+
+				std::string shaderPath = "assets/shaders/cache/previewNode/" + m_pMaterial->GetMaterialName() + std::to_string(i) + ".hlsl";
+				//save to disk
+				std::ofstream fstream(shaderPath);
+				fstream << ShaderCode;
+				fstream.close();
+
+				Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0");
+				Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0");
+
+				//draw to m_PreviewTexture
+				
+				Application::Get().GetRenderer()->DrawIntermediatePreviewNodes(pFinalColorContext, pVertexShader, pPixelShader, m_GraphNodes[i]->m_PreviewTexture);
+
+				pFinalColorContext->Finish(true);
+			}
+
+			ShaderStringFactory::m_GenerateIntermediateNodesResult = false;
+		}
+
 		ImGui::PopStyleVar(1);
 		ImGui::EndHorizontal();
 		ImGui::EndChild();
@@ -446,6 +509,7 @@ namespace Pixel {
 
 	void GraphNodeEditor::DrawNodes()
 	{
+		uint32_t currentNodeIndex = 0;
 		for(auto& node : m_GraphNodes)
 		{
 			//skip the main node
@@ -476,6 +540,14 @@ namespace Pixel {
 				++i;
 			}
 
+			//------draw intermediate nodes result------
+			if (node->m_PreviewTexture != nullptr)
+			{
+				//Device::Get()->CopyDescriptorsSimple(1, m_PreviewIntermediateNodesTextureHandles[currentNodeIndex]->GetCpuHandle(), node->m_PreviewTexture->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+				//ImGui::Image((ImTextureID)m_PreviewIntermediateNodesTextureHandles[currentNodeIndex]->GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
+			}
+			//------draw intermediate nodes result------
+
 			i = 0;
 			//draw output pin
 			for(auto& output : node->m_OutputPin)
@@ -489,6 +561,8 @@ namespace Pixel {
 				++i;
 			}
 			m_BlueprintNodeBuilder->End();
+
+			++currentNodeIndex;
 		}
 	}
 
@@ -794,6 +868,12 @@ namespace Pixel {
 			ImGui::EndPopup();
 		}
 		ed::Resume();
+	}
+
+	void GraphNodeEditor::DrawIntermediatePreviewNodes(Ref<GraphNode> pGraphNode)
+	{
+		//draw preview graph node
+
 	}
 
 	void GraphNodeEditor::ShowNodeContextMenu()
