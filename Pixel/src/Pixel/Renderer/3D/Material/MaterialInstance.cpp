@@ -134,4 +134,38 @@ namespace Pixel {
 	{
 		return m_pMaterial;
 	}
+
+	void MaterialInstance::SetMaterial(Ref<Material> pMaterial)
+	{
+		m_pMaterial = pMaterial;
+
+		PX_CORE_ASSERT(pMaterial != nullptr, "couldn't find material");
+
+		//------set parameter------
+		m_PSShaderCustomValue.clear();
+		m_PSShaderCustomValue.resize(pMaterial->m_PSShaderCustomValue.size());
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomValue.size(); ++i)
+		{
+			m_PSShaderCustomValue[i] = CreateRef<CustomFloatValue>();
+			//m_PSShaderCustomValue[i]->m_
+			m_PSShaderCustomValue[i]->ConstValueName = pMaterial->m_PSShaderCustomValue[i]->ConstValueName;
+			m_PSShaderCustomValue[i]->m_ValueType = pMaterial->m_PSShaderCustomValue[i]->m_ValueType;
+			m_PSShaderCustomValue[i]->m_Values.resize(pMaterial->m_PSShaderCustomValue[i]->m_Values.size());
+			for (size_t j = 0; j < m_PSShaderCustomValue[i]->m_Values.size(); ++j)
+			{
+				m_PSShaderCustomValue[i]->m_Values[j] = pMaterial->m_PSShaderCustomValue[i]->m_Values[j];//assign
+			}
+		}
+
+		m_PSShaderCustomTexture.clear();
+		m_PSShaderCustomTexture.resize(pMaterial->m_PSShaderCustomTexture.size());
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomTexture.size(); ++i)
+		{
+			m_PSShaderCustomTexture[i] = CreateRef<CustomTexture2D>();
+			m_PSShaderCustomTexture[i]->ConstValueName = pMaterial->m_PSShaderCustomTexture[i]->ConstValueName;
+			m_PSShaderCustomTexture[i]->m_VirtualPath = pMaterial->m_PSShaderCustomTexture[i]->m_VirtualPath;
+			m_PSShaderCustomTexture[i]->m_pTexture = AssetManager::GetSingleton().GetTexture(m_PSShaderCustomTexture[i]->m_VirtualPath);
+		}
+		//------set parameter------
+	}
 }

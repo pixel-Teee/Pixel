@@ -304,23 +304,27 @@ namespace Pixel {
 		if(ImGui::Button("Save", ImVec2(0, std::max(panelHeight - 8.0f, 0.0f))))
 		{
 			//save will also call the compiler
-			m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
+			//m_pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
 			//call the material's get shader tree string, then save the shader to assets/shaders/ShaderGraph
-			std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
-			PIXEL_CORE_INFO(out);
+			//std::string out = ShaderStringFactory::CreateDeferredGeometryShaderString(m_pMaterial, m_pPreviewScene->GetPreviewModel().m_Model->GetMeshes()[0]);
+			//PIXEL_CORE_INFO(out);
 
 			//save the material
-			rapidjson::StringBuffer strBuf;
-			rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
-			writer.StartObject();
-			rttr::type materialType = rttr::type::get<Material>();
-			writer.Key(materialType.get_name().to_string().c_str());
-			SceneSerializer::ToJsonRecursive(*m_pMaterial, writer, true);
-			writer.EndObject();
-			std::string data = strBuf.GetString();
-			std::ofstream fout(m_MaterialPhysicalPath);
-			fout << data.c_str();
-			fout.close();
+			//rapidjson::StringBuffer strBuf;
+			//rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+			//writer.StartObject();
+			//rttr::type materialType = rttr::type::get<Material>();
+			//writer.Key(materialType.get_name().to_string().c_str());
+			//SceneSerializer::ToJsonRecursive(*m_pMaterial, writer, true);
+			//writer.EndObject();
+			//std::string data = strBuf.GetString();
+			//std::ofstream fout(m_MaterialPhysicalPath);
+			//fout << data.c_str();
+			//fout.close();
+
+			//------update preview scene------
+			m_pPreviewScene->SetModelMaterial(m_pMaterial);
+			//------update preview scene------
 
 			//notify reference to this material's material instance to construct parameter
 			auto& materialInstances = AssetManager::GetSingleton().GetMaterialInstances();
@@ -377,7 +381,7 @@ namespace Pixel {
 
 				//draw to m_PreviewTexture
 				
-				Application::Get().GetRenderer()->DrawIntermediatePreviewNodes(pFinalColorContext, pVertexShader, pPixelShader, m_GraphNodes[i]->m_PreviewTexture);
+				Application::Get().GetRenderer()->DrawIntermediatePreviewNodes(pFinalColorContext, pVertexShader, pPixelShader, m_GraphNodes[i]->m_PreviewTexture, m_pMaterial);
 
 				pFinalColorContext->Finish(true);
 			}
@@ -543,8 +547,8 @@ namespace Pixel {
 			//------draw intermediate nodes result------
 			if (node->m_PreviewTexture != nullptr)
 			{
-				//Device::Get()->CopyDescriptorsSimple(1, m_PreviewIntermediateNodesTextureHandles[currentNodeIndex]->GetCpuHandle(), node->m_PreviewTexture->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
-				//ImGui::Image((ImTextureID)m_PreviewIntermediateNodesTextureHandles[currentNodeIndex]->GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
+				Device::Get()->CopyDescriptorsSimple(1, m_PreviewIntermediateNodesTextureHandles[currentNodeIndex]->GetCpuHandle(), node->m_PreviewTexture->GetColorAttachmentDescriptorCpuHandle(0), DescriptorHeapType::CBV_UAV_SRV);
+				ImGui::Image((ImTextureID)m_PreviewIntermediateNodesTextureHandles[currentNodeIndex]->GetGpuHandle()->GetGpuPtr(), ImVec2(128.0f, 128.0f));
 			}
 			//------draw intermediate nodes result------
 

@@ -23,6 +23,8 @@ namespace Pixel {
 		entt::registry& GetRegistry() { return m_Registry; }
 
 		StaticMeshComponent& GetPreviewModel();
+
+		void SetModelMaterial(Ref<Material> pMaterial);
 	private:
 		entt::registry m_Registry;
 

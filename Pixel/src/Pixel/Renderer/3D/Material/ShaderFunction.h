@@ -98,6 +98,8 @@ namespace Pixel {
 
 		virtual void ConstructPutNodeAndSetPutNodeOwner();
 
+		void ClearVisit();//TODO:need to remove this
+
 		std::vector<std::string> m_InputNodeDisplayName;
 
 		std::vector<glm::vec3> m_InputNodeDisplayColor;

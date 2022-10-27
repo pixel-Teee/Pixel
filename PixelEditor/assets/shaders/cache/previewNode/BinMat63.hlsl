@@ -123,8 +123,6 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 cbuffer CbMaterial : register(b2)
 {
 float4  a;
-float4  b;
-float4  c;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
@@ -133,6 +131,13 @@ float ClearCoatRoughness;
 Texture2D MyTexture : register(t0);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-pixelOut.finalColor = b;
+float2  Texture2DCoordinateInput7 = pin.TexCoord;
+float4  Texture2DOutput8 = float4(0, 0, 0, 0);
+Texture2DOutput8 = MyTexture.Sample(gsamPointWrap, Texture2DCoordinateInput7);
+float4  MulInputA25 = Texture2DOutput8;
+float4  MulInputB26 = a;
+float4  MulOutput26 = float4(0, 0, 0, 1);
+MulOutput26 = MulInputA25 * MulInputB26;
+pixelOut.finalColor = MulOutput26;
 return pixelOut;
 }

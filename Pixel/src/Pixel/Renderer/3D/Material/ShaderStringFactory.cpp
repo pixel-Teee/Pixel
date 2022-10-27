@@ -77,16 +77,24 @@ namespace Pixel {
 
 	std::string ShaderStringFactory::Tex2D(Texture2DShaderFunction* pTexture2DShaderFunction, bool decodeNormal)
 	{
+		std::string result;//return result
+
 		if (decodeNormal)
 		{
-			return pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
+			result += "#if HAVE_NORMAL > 0\n";
+			result += pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
 				+ " = " + "DecodeNormalMap(pin.NormalW, pin.TangentW, " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ") * 2.0f - 1.0f)" + ";\n";
+			result += "#else\n";
+			result += pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
+				+ " = " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ");\n";
+			result += "#endif\n";
 		}
 		else
 		{
-			return	pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
+			result += pTexture2DShaderFunction->GetOutputNode(Texture2DShaderFunction::OUT_COLOR)->GetNodeName()
 				+ " = " + pTexture2DShaderFunction->GetShowName() + ".Sample(gsamPointWrap, " + pTexture2DShaderFunction->GetInputNode(Texture2DShaderFunction::IN_TEXCOORD)->GetNodeName() + ");\n";
 		}
+		return result;
 	}
 
 	std::string ShaderStringFactory::GetValueElement(Ref<PutNode> pPutNode, ValueElement valueElement)
@@ -156,7 +164,7 @@ namespace Pixel {
 		CreatePixelShaderUserConstant(PixelShaderConstantString, pMaterial);
 		//PixelShaderConstantString:cbuffer declare
 				
-		out += PixelShaderInclude + "\n";
+		out += "\n" + PixelShaderInclude + "\n";
 		out += PixelShaderConstantString + "\n";
 		out += "PixelOut PS(VertexOut pin){\n";
 		//pMaterial->GetShaderTreeString(out);
@@ -304,8 +312,10 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < pMaterial->GetShaderFunction().size(); ++i)
 		{
-			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += out;
-			pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
+			std::string result = out;//result
+			//pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
+			for (uint32_t j = 0; j < pMaterial->GetShaderFunction().size(); ++j)
+				pMaterial->GetShaderFunction()[j]->ClearVisit();
 			//skip shader main function
 			if (pMaterial->GetShaderFunction()[i]->GetOutputNodeNum() == 0) continue;
 			std::string temp;//temp
@@ -315,7 +325,7 @@ namespace Pixel {
 			
 			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += "pixelOut.finalColor = " + temp;//copy to 
 			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += "return pixelOut;\n}";
-
+			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString = result + pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString;
 			//PIXEL_CORE_INFO("{0}******", pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString);
 		}
 	}

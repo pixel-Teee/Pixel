@@ -344,5 +344,10 @@ namespace Pixel {
 	}
 
 
+	void ShaderFunction::ClearVisit()
+	{
+		m_bIsVisited = false;
+	}
+
 }
 

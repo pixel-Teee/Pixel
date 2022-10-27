@@ -133,6 +133,9 @@ float ClearCoatRoughness;
 Texture2D MyTexture : register(t0);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-pixelOut.finalColor = b;
+float2  Texture2DCoordinateInput52 = pin.TexCoord;
+float4  Texture2DOutput53 = float4(0, 0, 0, 0);
+Texture2DOutput53 = MyTexture.Sample(gsamPointWrap, Texture2DCoordinateInput52);
+pixelOut.finalColor = Texture2DOutput53;
 return pixelOut;
 }

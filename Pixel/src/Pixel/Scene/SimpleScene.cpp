@@ -17,13 +17,14 @@
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Scene/Entity.h"
 #include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 
 namespace Pixel {
 	SimpleScene::SimpleScene()
 	{
 		//put a cube and a direct light to scene?
 		m_EntityHandle = m_Registry.create();
-		m_pModel = CreateRef<Model>("Resources/models/cube/Cube.fbx");
+		m_pModel = CreateRef<Model>("Resources/models/sphere/Sphere.gltf");
 		m_pSubMaterial = CreateRef<SubMaterial>();//add to material component
 
 		m_pSubMaterial->HaveNormal = true;
@@ -31,8 +32,8 @@ namespace Pixel {
 		m_Registry.emplace<TransformComponent>(m_EntityHandle);
 		m_Registry.emplace<StaticMeshComponent>(m_EntityHandle);
 		m_Registry.get<StaticMeshComponent>(m_EntityHandle).m_Model = m_pModel;
-		m_Registry.emplace<MaterialComponent>(m_EntityHandle);
-		m_Registry.get<MaterialComponent>(m_EntityHandle).m_Materials.push_back(m_pSubMaterial);
+		//m_Registry.emplace<MaterialComponent>(m_EntityHandle);
+		//m_Registry.get<MaterialComponent>(m_EntityHandle).m_Materials.push_back(m_pSubMaterial);
 
 		m_LightEntityHandle = m_Registry.create();
 		m_Registry.emplace<LightComponent>(m_LightEntityHandle);
@@ -115,5 +116,19 @@ namespace Pixel {
 	StaticMeshComponent& SimpleScene::GetPreviewModel()
 	{
 		return m_Registry.get<StaticMeshComponent>(m_EntityHandle);
+	}
+
+	void SimpleScene::SetModelMaterial(Ref<Material> pMaterial)
+	{
+		if (!m_Registry.any_of<MaterialTreeComponent>(m_EntityHandle))
+		{
+			//don't have material tree component, create a material tree component
+			m_Registry.emplace<MaterialTreeComponent>(m_EntityHandle);
+		}
+		//------set preview model material------		
+		m_Registry.get<MaterialTreeComponent>(m_EntityHandle).AddMaterialInstance();//create a new material instance
+		m_Registry.get<MaterialTreeComponent>(m_EntityHandle).m_Materials[0] = CreateRef<MaterialInstance>();
+		m_Registry.get<MaterialTreeComponent>(m_EntityHandle).m_Materials[0]->SetMaterial(pMaterial);
+		//------set preview model material------
 	}
 }

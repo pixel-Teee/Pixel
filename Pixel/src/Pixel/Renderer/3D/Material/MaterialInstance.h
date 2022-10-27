@@ -20,6 +20,8 @@ namespace Pixel {
 
 		void SetMaterial(std::string & virtualPath);//from the asset manager to get the material
 
+		void SetMaterial(Ref<Material> pMaterial);
+
 		void ReConstructParameter(Ref<Material> pMaterial);
 
 		std::string GetMaterialPath();

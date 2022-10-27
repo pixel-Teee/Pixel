@@ -301,12 +301,12 @@ namespace Pixel {
 				m_AlignedCbvSize.push_back(Math::AlignUpWithMask(bufferDesc.Size, 255));
 			}
 			else if (resourceType == D3D_SIT_TEXTURE)
-			{
+			{			
 				//srv
 				Ref<DirectXSrvShaderParameter> pSrvShaderParameter = CreateRef<DirectXSrvShaderParameter>();
 				pSrvShaderParameter->m_Name = bindResourceName;
 				pSrvShaderParameter->m_BindPoint = bindPoint;
-				m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, bindPoint);
+				m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, bindPoint);//max bind point index
 				m_SrvShaderParameter.push_back(pSrvShaderParameter);
 			}
 		}
@@ -418,6 +418,7 @@ namespace Pixel {
 					break;
 				}
 			}
+			if (pCbvShaderParameter == nullptr) return;//TODO:fix this
 			PX_CORE_ASSERT(pCbvShaderParameter != nullptr, "shader parameter name is error!")
 			//extract constant buffer variable name
 			CbvVariableParameter cbvVariableParameter;
@@ -453,6 +454,7 @@ namespace Pixel {
 					break;
 				}
 			}
+			if (pCbvShaderParameter == nullptr) return;
 			PX_CORE_ASSERT(pCbvShaderParameter != nullptr, "shader parameter name is error!");
 
 			//------set to cache------
@@ -513,7 +515,7 @@ namespace Pixel {
 				break;
 			}
 		}
-
+		if (index == -1) return;
 		PX_CORE_ASSERT(index != -1, "texture srv name could't find!");
 
 		m_SrvDescriptorHandleCache[index] = pDescriptorHandle;
@@ -536,6 +538,8 @@ namespace Pixel {
 		{
 			Device::Get()->CopyDescriptorsSimple(1, descriptorHandles[i].GetCpuHandle(), m_SrvDescriptorHandleCache[i]->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		}
+
+		if (m_SrvShaderParameter.size() == 0) return;
 
 		PX_CORE_ASSERT(m_SrvShaderParameter.size() > 0, "srv shader parameter is nullptr!");
 

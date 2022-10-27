@@ -65,6 +65,8 @@
 #include "Pixel/Renderer/Shader.h"
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 
+#include "Pixel/Core/Application.h"
+
 #include "stb_image.h"
 
 #include "Pixel/Scene/Scene.h"
@@ -1270,10 +1272,15 @@ namespace Pixel {
 		//		meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
 		//}
 
+		Ref<CbufferGeometryPass> tempPass = CreateRef<CbufferGeometryPass>(m_CbufferGeometryPass);
+
 		//draw opaque render item
 		for (size_t i = 0; i < m_OpaqueItems.size(); ++i)
 		{
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pSubMaterial, pTestMaterial, m_GeometryVertexShader, m_GeometryPixelShader);
+			//get shader
+			GetShader(m_OpaqueItems[i].pStaticMesh, m_OpaqueItems[i].pMaterialInstance);
+
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
 		}
 		
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
@@ -2929,14 +2936,25 @@ namespace Pixel {
 
 		totalOffset += pDirectXPixelShader->m_CbvShaderParameter.size();
 
-		if(pDirectXPixelShader->m_SrvShaderParameter.size() > 0)
-			(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXPixelShader->m_MaxBindPointIndex + 1, ShaderVisibility::Pixel);
+		if (pDirectXPixelShader->m_SrvShaderParameter.size() > 0)
+		{
+			//(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, pDirectXPixelShader->m_SrvShaderParameter[0]->m_BindPoint, pDirectXPixelShader->m_SrvShaderParameter.size(), ShaderVisibility::Pixel);
+			//(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXPixelShader->m_MaxBindPointIndex + 1, ShaderVisibility::Pixel);
+		}
 
 		for (size_t i = 0; i < pDirectXPixelShader->m_SrvShaderParameter.size(); ++i)
 		{
 			pDirectXPixelShader->m_SrvShaderParameter[i]->m_RootIndex = totalOffset;
-			pDirectXPixelShader->m_SrvShaderParameter[i]->m_Offset = i;
+			pDirectXPixelShader->m_SrvShaderParameter[i]->m_Offset = i;//TODO:modify to bind point?
 		}
+
+		/*
+		for (size_t i = 0; i < pDirectXPixelShader->m_SrvShaderParameter.size(); ++i)
+		{
+			pDirectXPixelShader->m_SrvShaderParameter[i]->m_RootIndex = totalOffset;
+			pDirectXPixelShader->m_SrvShaderParameter[i]->m_Offset = pDirectXPixelShader->m_SrvShaderParameter[i]->m_BindPoint;//TODO:modify to bind point?
+		}
+		*/
 	
 		return pRootSignature;
 	}
@@ -2946,9 +2964,36 @@ namespace Pixel {
 		return m_PipelineLibrary;//return pipeline library
 	}
 
-	void DirectXRenderer::DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Framebuffer> pFrameBuffer)
+	void DirectXRenderer::DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Framebuffer> pFrameBuffer, Ref<Material> pMaterial)
 	{
+		Ref<PSO> tempPso = PSO::CreateGraphicsPso(L"PreviewPso");
 		//interms of vertex shader function and pixel shader function to draw
+				//-----Create Blend State------
+		Ref<BlenderState> pBlendState = BlenderState::Create();
+		//pBlendState->SetRenderTargetBlendState(0, true);
+		//-----Create Blend State------
+
+		//------Create Raster State------
+		Ref<RasterState> pRasterState = RasterState::Create();
+		//------Create Raster State------
+
+		//------Create Depth State------
+		Ref<DepthState> pDepthState = DepthState::Create();
+		pDepthState->DepthTest(false);
+		//------Create Depth State------
+
+		tempPso->SetBlendState(pBlendState);
+		tempPso->SetRasterizerState(pRasterState);
+		tempPso->SetDepthState(pDepthState);
+
+		std::vector<ImageFormat> imageFormats = { ImageFormat::PX_FORMAT_R8G8B8A8_UNORM };
+		tempPso->SetRenderTargetFormats(1, imageFormats.data(), ImageFormat::PX_FORMAT_UNKNOWN);
+		tempPso->SetPrimitiveTopologyType(PiplinePrimitiveTopology::TRIANGLE);
+
+		BufferLayout layout = { {ShaderDataType::Float3, "Position", Semantics::POSITION, false},
+		{ShaderDataType::Float2, "TexCoord", Semantics::TEXCOORD, false} };//for plane
+
+		tempPso->SetInputLayout(layout);
 
 		Ref<SamplerDesc> pSamplerDesc = SamplerDesc::Create();
 		std::vector<Ref<SamplerDesc>> samplerDescs;
@@ -2958,24 +3003,20 @@ namespace Pixel {
 
 		pRootSignature->Finalize(L"PreviewNode", RootSignatureFlag::AllowInputAssemblerInputLayout);
 
-		m_TempRootSignature.push_back(pRootSignature);//holds the life time?
-		
-		m_PreviewNodePso->SetRootSignature(pRootSignature);
-
-		m_TempShader.push_back(pVertexShader);
-		m_TempShader.push_back(pPixelShader);
+		tempPso->SetRootSignature(pRootSignature);
 
 		auto [VsBinary, VsBinarySize] = std::static_pointer_cast<DirectXShader>(pVertexShader)->GetShaderBinary();
 		auto [PsBinary, PsBinarySize] = std::static_pointer_cast<DirectXShader>(pPixelShader)->GetShaderBinary();
 
-		Ref<PSO> tempPso = std::make_shared<GraphicsPSO>(*std::static_pointer_cast<GraphicsPSO>(m_PreviewNodePso));
-
 		tempPso->SetVertexShader(VsBinary, VsBinarySize);
 		tempPso->SetPixelShader(PsBinary, PsBinarySize);
 
-		tempPso->Finalize();//finalize preview node pso
+		tempPso->Finalize();
 
-		m_PreviewNodePsos.push_back(tempPso);//push
+		m_PreviewNodePsos.push_back(tempPso);//holds life time
+
+		m_TempShader.push_back(pVertexShader);
+		m_TempShader.push_back(pPixelShader);
 
 		Ref<GraphicsPSO> pGraphicsPso = std::static_pointer_cast<GraphicsPSO>(tempPso);
 		
@@ -3010,6 +3051,31 @@ namespace Pixel {
 
 		pGraphicsContext->SetViewportAndScissor(vp, scissor);
 		//---set viewport and scissor---
+
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomValue.size(); ++i)
+		{
+			pPixelShader->SetData("CbMaterial." + pMaterial->m_PSShaderCustomValue[i]->ConstValueName, pMaterial->m_PSShaderCustomValue[i]->m_Values.data());
+		}
+		int32_t shadingModelId = 1;
+		pPixelShader->SetData("CbMaterial.ShadingModelID", &shadingModelId);
+		pPixelShader->SubmitData(pGraphicsContext);
+
+		//------set pixel shader texture------
+		for (size_t i = 0; i < pMaterial->m_PSShaderCustomTexture.size(); ++i)
+		{
+			pPixelShader->SetTextureDescriptor(pMaterial->m_PSShaderCustomTexture[i]->ConstValueName, pMaterial->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
+		}
+
+		if (pMaterial->m_PSShaderCustomTexture.size() > 0)
+		{
+			pGraphicsContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());//set descriptor heap
+			uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+			Ref<DescriptorHandle> totalTextureDescriptorHeapFirstHandle = Application::Get().GetRenderer()->GetDescriptorHeapFirstHandle();
+			Ref<DescriptorHandle> offsetHandle = CreateRef<DescriptorHandle>((*totalTextureDescriptorHeapFirstHandle) + Application::Get().GetRenderer()->GetDescriptorHeapOffset() * DescriptorSize);
+			pPixelShader->SubmitTextureDescriptor(pGraphicsContext, offsetHandle);
+			Application::Get().GetRenderer()->SetDescriptorHeapOffset(Application::Get().GetRenderer()->GetDescriptorHeapOffset() + pMaterial->m_PSShaderCustomTexture.size());
+		}
+		//------set pixel shader texture------
 
 		pGraphicsContext->SetVertexBuffer(0, m_QuadVertexBuffer->GetVBV());
 		pGraphicsContext->SetIndexBuffer(m_QuadIndexBuffer->GetIBV());

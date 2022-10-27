@@ -21,19 +21,17 @@ struct VertexIn
 {
 	float3 PosL : POSITION;
 	float2 TexCoord : TEXCOORD;
-	/*
 	float3 NormalL : NORMAL;
 	float3 TangentL : TANGENT;
 	float3 BinormalL : BINORMAL;
-	*/
 	//int Editor : EDITOR;
 };
 
 struct VertexOut
 {
 	float4 PosH : SV_POSITION;
+	float3 PosW : POSITION;
 	float2 TexCoord : TEXCOORD;
-	/*
 	float3 NormalW : NORMAL;
 	float3 TangentW : TANGENT;
 	float3 BinormalW : BINORMAL;
@@ -43,24 +41,18 @@ struct VertexOut
 	float4 preScreenPosition : POSITION2;
 	float4 nowScreenPosition : POSITION3;
 	//------use for TAA------
-	*/
 };
 
 struct PixelOut
 {
-	float4 finalColor : SV_Target;
-	/*
 	float4 gBufferPosition : SV_Target;
-	
 	float4 gBufferNormal : SV_Target1;
 	float4 gVelocity : SV_Target2;
 	float4 gBufferAlbedo : SV_Target3;
 	float4 gBufferRoughnessMetallicAo : SV_Target4;
 	int gEditor : SV_Target5;
-	*/
 };
 
-/*
 static const float2 Halton_2_3[8] =
 {
 	float2(0.0f, -1.0f / 3.0f),
@@ -72,13 +64,11 @@ static const float2 Halton_2_3[8] =
 	float2(3.0f / 4.0f, 1.0f / 9.0f),
 	float2(-7.0f / 8.0f, 7.0f / 9.0f)
 };
-*/
 
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout = (VertexOut)0.0f;
 
-	/*
 	//------calculate jitter------
 	float deltaWidth = 1.0f / gWidth;
 	float deltaHeight = 1.0f / gHeight;
@@ -108,31 +98,49 @@ VertexOut VS(VertexIn vin)
 	vout.TexCoord = vin.TexCoord;
 
 	vout.Editor = gEditor;
-	*/
-
-	vout.PosH = float4(vin.PosL, 1.0f);//draw quad
-	vout.TexCoord = vin.TexCoord;
-
-
 	return vout;
 }
 
 //------material samplers------
 SamplerState gsamPointWrap : register(s0);//static sampler
-//------material samplers------
+//------material samplers------#include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
 float4  a;
-float4  b;
-float4  c;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
 Texture2D MyTexture : register(t0);
+
 PixelOut PS(VertexOut pin){
+float2  Texture2DCoordinateInput7 = pin.TexCoord;
+float4  Texture2DOutput8 = float4(0, 0, 0, 0);
+Texture2DOutput8 = MyTexture.Sample(gsamPointWrap, Texture2DCoordinateInput7);
+float4  MulInputA25 = Texture2DOutput8;
+float4  MulInputB26 = a;
+float4  MulOutput26 = float4(0, 0, 0, 1);
+MulOutput26 = MulInputA25 * MulInputB26;
+float4  Normal = float4(0, 0, 0, 1);
+float4  Albedo = MulOutput26;
+float  Roughness = 0;
+float  Metallic = 0;
+float  Ao = 0;
+Normal = float4(pin.NormalW, 1.0f);
 PixelOut pixelOut = (PixelOut)(0.0f);
-pixelOut.finalColor = b;
+pixelOut.gBufferPosition.xyz = pin.PosW;
+pixelOut.gBufferNormal.xyz = (Normal.xyz + 1.0f) / 2.0f;
+pixelOut.gBufferAlbedo.xyz = Albedo.xyz;
+pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
+pixelOut.gVelocity.w = ClearCoat;
+pixelOut.gBufferRoughnessMetallicAo.x = Roughness;
+pixelOut.gBufferRoughnessMetallicAo.y = Metallic;
+pixelOut.gBufferRoughnessMetallicAo.z = Ao;
+pixelOut.gBufferRoughnessMetallicAo.w = ShadingModelID / 255.0f;
+float2 newPos = ((pin.nowScreenPosition.xy / pin.nowScreenPosition.w) * 0.5f + 0.5f);
+float2 prePos = ((pin.preScreenPosition.xy / pin.preScreenPosition.w) * 0.5f + 0.5f);
+pixelOut.gVelocity.xy = newPos - prePos;
+pixelOut.gVelocity.z = 0.0f;
 return pixelOut;
 }

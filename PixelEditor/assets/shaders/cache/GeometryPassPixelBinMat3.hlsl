@@ -9,14 +9,23 @@ int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
+Texture2D MyTexture : register(t0);
 
+SamplerState gsamPointWrap : register(s0);
 PixelOut PS(VertexOut pin){
-float4  MulInputA23 = a;
-float4  MulInputB24 = b;
-float4  MulOutput24 = float4(0, 0, 0, 1);
-MulOutput24 = MulInputA23 * MulInputB24;
+float4  MulInputA44 = a;
+float4  MulInputB45 = b;
+float4  MulOutput45 = float4(0, 0, 0, 1);
+MulOutput45 = MulInputA44 * MulInputB45;
+float2  Texture2DCoordinateInput52 = pin.TexCoord;
+float4  Texture2DOutput53 = float4(0, 0, 0, 0);
+Texture2DOutput53 = MyTexture.Sample(gsamPointWrap, Texture2DCoordinateInput52);
+float4  MulInputA61 = MulOutput45;
+float4  MulInputB62 = Texture2DOutput53;
+float4  MulOutput62 = float4(0, 0, 0, 1);
+MulOutput62 = MulInputA61 * MulInputB62;
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = MulOutput24;
+float4  Albedo = MulOutput62;
 float  Roughness = c.x;
 float  Metallic = 0;
 float  Ao = 0;

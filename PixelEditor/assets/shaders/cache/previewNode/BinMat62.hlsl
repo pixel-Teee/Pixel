@@ -123,8 +123,6 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 cbuffer CbMaterial : register(b2)
 {
 float4  a;
-float4  b;
-float4  c;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
@@ -133,6 +131,6 @@ float ClearCoatRoughness;
 Texture2D MyTexture : register(t0);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-pixelOut.finalColor = b;
+pixelOut.finalColor = a;
 return pixelOut;
 }

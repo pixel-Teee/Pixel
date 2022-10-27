@@ -77,7 +77,7 @@ namespace Pixel {
 
 		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) = 0;
 
-		virtual void DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShaderFunction, Ref<Shader> pPixelShaderFunction, Ref<Framebuffer> pFrameBuffer) = 0;
+		virtual void DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShaderFunction, Ref<Shader> pPixelShaderFunction, Ref<Framebuffer> pFrameBuffer, Ref<Material> pMaterial) = 0;
 
 		virtual void SetExposure(float exposure) = 0;
 

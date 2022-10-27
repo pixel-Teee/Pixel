@@ -132,7 +132,7 @@ namespace Pixel {
 
 		Ref<PipelineLibrary> GetPipelineLibrary() override;
 
-		virtual void DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Framebuffer> pFrameBuffer) override;
+		virtual void DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShader, Ref<Shader> pPixelShader, Ref<Framebuffer> pFrameBuffer, Ref<Material> pMaterial) override;
 
 	private:
 
