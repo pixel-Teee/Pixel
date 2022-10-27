@@ -12,6 +12,7 @@ namespace Pixel {
 	class Context;
 	class DescriptorHandle;
 	class ShaderKey;
+	class Material;
 	class Shader
 	{
 	public:
@@ -44,10 +45,10 @@ namespace Pixel {
 
 		static Ref<Shader> Create(const std::string& filepath);
 		//static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
-		static Ref<Shader> Create(const std::string& filepath, const std::string& EntryPoint, const std::string& target);
+		static Ref<Shader> Create(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool isGenerated = false, Ref<Material> pMaterial = nullptr);
 
-		static Ref<Shader> Create(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey);
+		static Ref<Shader> Create(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, Ref<Material> pMaterial = nullptr);
 
-		static Ref<Shader> Create(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode);
+		//static Ref<Shader> Create(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode);
 	};
 }

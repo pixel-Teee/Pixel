@@ -18,6 +18,7 @@
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Renderer/Descriptor/DescriptorAllocator.h"
 #include "Pixel/Renderer/ShaderKey.h"
+#include "Pixel/Renderer/3D/Material/Material.h"
 
 namespace Pixel {
 
@@ -28,7 +29,7 @@ namespace Pixel {
 		return converter.from_bytes(str);
 	}
 
-	DirectXShader::DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated)
+	DirectXShader::DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated, Ref<Material> pMaterial)
 	{
 		//in terms of the filepath, to compile the shader
 		m_pBlobShader = CompileShader(StringToWString(filepath), EntryPoint, target);
@@ -98,7 +99,8 @@ namespace Pixel {
 					}
 					m_CbvShaderParameter.push_back(pCbvShaderParameter);
 					m_AlignedCbvSize.push_back(Math::AlignUpWithMask(bufferDesc.Size, 255));
-				}
+				}	
+				/*
 				else if (resourceType == D3D_SIT_TEXTURE)
 				{
 					//srv
@@ -108,7 +110,20 @@ namespace Pixel {
 					m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, bindPoint);
 					m_SrvShaderParameter.push_back(pSrvShaderParameter);
 				}
+				*/
 			}
+
+			if (pMaterial != nullptr)
+			{
+				for (size_t i = 0; i < pMaterial->m_textures.size(); ++i)
+				{
+					Ref<DirectXSrvShaderParameter> pSrvShaderParameter = CreateRef<DirectXSrvShaderParameter>();
+					pSrvShaderParameter->m_Name = pMaterial->m_textures[i];
+					pSrvShaderParameter->m_BindPoint = i;
+					m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, (uint32_t)i);
+					m_SrvShaderParameter.push_back(pSrvShaderParameter);
+				}
+			}		
 
 			//std::cout << "test" << std::endl;
 			m_DataCache = nullptr;
@@ -133,7 +148,7 @@ namespace Pixel {
 
 	}
 
-	DirectXShader::DirectXShader(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey)
+	DirectXShader::DirectXShader(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, Ref<Material> pMaterial)
 	{
 		//in terms of the filepath, to compile the shader
 		m_pBlobShader = CompileShader(StringToWString(filePath), EntryPoint, target, pShaderKey);
@@ -200,6 +215,7 @@ namespace Pixel {
 				m_CbvShaderParameter.push_back(pCbvShaderParameter);
 				m_AlignedCbvSize.push_back(Math::AlignUpWithMask(bufferDesc.Size, 255));
 			}
+			/*
 			else if (resourceType == D3D_SIT_TEXTURE)
 			{
 				//srv
@@ -207,6 +223,19 @@ namespace Pixel {
 				pSrvShaderParameter->m_Name = bindResourceName;
 				pSrvShaderParameter->m_BindPoint = bindPoint;
 				m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, bindPoint);
+				m_SrvShaderParameter.push_back(pSrvShaderParameter);
+			}
+			*/
+		}
+
+		if (pMaterial != nullptr)
+		{
+			for (size_t i = 0; i < pMaterial->m_textures.size(); ++i)
+			{
+				Ref<DirectXSrvShaderParameter> pSrvShaderParameter = CreateRef<DirectXSrvShaderParameter>();
+				pSrvShaderParameter->m_Name = pMaterial->m_textures[i];
+				pSrvShaderParameter->m_BindPoint = i;
+				m_MaxBindPointIndex = std::max(m_MaxBindPointIndex, (uint32_t)i);
 				m_SrvShaderParameter.push_back(pSrvShaderParameter);
 			}
 		}
@@ -233,7 +262,8 @@ namespace Pixel {
 
 	}
 
-	DirectXShader::DirectXShader(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode)
+	/*
+	DirectXShader::DirectXShader(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode, Ref<Material> pMaterial)
 	{
 		//in terms of the filepath, to compile the shader
 		m_pBlobShader = CompileShader(shaderCode, EntryPoint, target, pShaderKey);
@@ -331,7 +361,7 @@ namespace Pixel {
 		}
 		//------create descriptor texture------
 	}
-
+	*/
 
 	DirectXShader::~DirectXShader()
 	{

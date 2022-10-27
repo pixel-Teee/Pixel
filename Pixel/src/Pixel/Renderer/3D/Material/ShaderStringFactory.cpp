@@ -312,6 +312,7 @@ namespace Pixel {
 
 		for (uint32_t i = 0; i < pMaterial->GetShaderFunction().size(); ++i)
 		{
+			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString.clear();
 			std::string result = out;//result
 			//pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();
 			for (uint32_t j = 0; j < pMaterial->GetShaderFunction().size(); ++j)

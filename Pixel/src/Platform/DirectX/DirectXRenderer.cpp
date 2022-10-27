@@ -2939,7 +2939,7 @@ namespace Pixel {
 		if (pDirectXPixelShader->m_SrvShaderParameter.size() > 0)
 		{
 			//(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, pDirectXPixelShader->m_SrvShaderParameter[0]->m_BindPoint, pDirectXPixelShader->m_SrvShaderParameter.size(), ShaderVisibility::Pixel);
-			//(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXPixelShader->m_MaxBindPointIndex + 1, ShaderVisibility::Pixel);
+			(*pRootSignature)[totalOffset].InitAsDescriptorRange(RangeType::SRV, 0, pDirectXPixelShader->m_MaxBindPointIndex + 1, ShaderVisibility::Pixel);
 		}
 
 		for (size_t i = 0; i < pDirectXPixelShader->m_SrvShaderParameter.size(); ++i)
@@ -3673,6 +3673,10 @@ namespace Pixel {
 
 		if (pMaterial->m_CurrentVertexShaderSet->find(*pShaderKey) == pMaterial->m_CurrentVertexShaderSet->end())
 		{
+			for (size_t i = 0; i < pMaterial->m_pShaderFunctionArray.size(); ++i)
+			{
+				pMaterial->m_pShaderFunctionArray[i]->ClearVisit();
+			}
 			//from material to get shader
 			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryVertexShaderString(pMaterial);
 
@@ -3688,7 +3692,7 @@ namespace Pixel {
 			//------write to cache path------
 
 			//Ref<Shader> pVertexShader = Shader::Create("VS", "vs_5_0", pShaderKey, shaderCode);
-			Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0", pShaderKey);
+			Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0", pShaderKey, pMaterial);
 
 			//create new shader
 			pMaterial->m_CurrentVertexShaderSet->insert({ *pShaderKey, pVertexShader });
@@ -3706,7 +3710,11 @@ namespace Pixel {
 
 		if (pMaterial->m_CurrentPixelShaderSet->find(*pShaderKey) == pMaterial->m_CurrentPixelShaderSet->end())
 		{
-			pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();//clear shader string flag
+			for (size_t i = 0; i < pMaterial->m_pShaderFunctionArray.size(); ++i)
+			{
+				pMaterial->m_pShaderFunctionArray[i]->ClearVisit();
+			}
+			//pMaterial->GetMainFunction()->ClearShaderTreeStringFlag();//clear shader string flag
 			//from material to get shader
 			std::string shaderCode = ShaderStringFactory::CreateDeferredGeometryPixelShaderString(pMaterial);
 
@@ -3721,7 +3729,7 @@ namespace Pixel {
 			cache.close();
 			//------write to cache path------
 
-			Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0", pShaderKey);
+			Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0", pShaderKey, pMaterial);
 			//create new shader
 			pMaterial->m_CurrentPixelShaderSet->insert({ *pShaderKey, pPixelShader });
 		}

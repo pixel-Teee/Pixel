@@ -12,15 +12,16 @@ namespace Pixel {
 	class DirectXRootSignature;
 	class DescriptorHandle;
 	class DescriptorHeap;
+	class Material;
 
 	class DirectXShader : public Shader
 	{
 	public:
-		DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated = false);
+		DirectXShader(const std::string& filepath, const std::string& EntryPoint, const std::string& target, bool IsGenerated = false, Ref<Material> pMaterial = nullptr);
 
-		DirectXShader(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey);
+		DirectXShader(const std::string& filePath, const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, Ref<Material> pMaterial = nullptr);
 
-		DirectXShader(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode);
+		//DirectXShader(const std::string& EntryPoint, const std::string& target, Ref<ShaderKey> pShaderKey, const std::string& shaderCode, Ref<Material> pMaterial);
 		virtual ~DirectXShader();
 		//------garbage------
 		virtual void Bind() const override;
@@ -47,7 +48,7 @@ namespace Pixel {
 		virtual void SetData(const std::string& name, void* data) override;
 
 		virtual void SubmitData(Ref<Context> pContext) override;
-
+ 
 		virtual void SubmitData(Ref<Context> pContext, const std::string& cbvName) override;
 
 		virtual void ResetTextureDescriptor() override;

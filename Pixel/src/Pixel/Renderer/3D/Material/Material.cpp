@@ -154,6 +154,7 @@ namespace Pixel {
 
 	void Material::CreateTextureDeclare(std::string& OutString, uint32_t registerId)
 	{
+		m_textures.clear();
 		for (size_t i = 0; i < m_pShaderFunctionArray.size(); ++i)
 		{
 			rttr::type tempType = rttr::type::get(*m_pShaderFunctionArray[i]);
@@ -165,6 +166,9 @@ namespace Pixel {
 
 			pTemp->GetDeclareString(OutString, registerId);
 			++registerId;
+
+			//record some reflection information
+			m_textures.push_back(pTemp->m_ShowName);
 		}
 	}
 

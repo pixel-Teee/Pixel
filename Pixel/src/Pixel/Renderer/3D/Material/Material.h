@@ -83,6 +83,10 @@ namespace Pixel {
 
 		Ref<Shader> m_pPixelShader;
 
+		//------some reflection information------
+		std::vector<std::string> m_textures;
+		//------some reflection information------
+
 		void PostLink();
 
 		RTTR_ENABLE(MaterialBase)

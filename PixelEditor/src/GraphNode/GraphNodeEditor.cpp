@@ -310,17 +310,17 @@ namespace Pixel {
 			//PIXEL_CORE_INFO(out);
 
 			//save the material
-			//rapidjson::StringBuffer strBuf;
-			//rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
-			//writer.StartObject();
-			//rttr::type materialType = rttr::type::get<Material>();
-			//writer.Key(materialType.get_name().to_string().c_str());
-			//SceneSerializer::ToJsonRecursive(*m_pMaterial, writer, true);
-			//writer.EndObject();
-			//std::string data = strBuf.GetString();
-			//std::ofstream fout(m_MaterialPhysicalPath);
-			//fout << data.c_str();
-			//fout.close();
+			rapidjson::StringBuffer strBuf;
+			rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strBuf);
+			writer.StartObject();
+			rttr::type materialType = rttr::type::get<Material>();
+			writer.Key(materialType.get_name().to_string().c_str());
+			SceneSerializer::ToJsonRecursive(*m_pMaterial, writer, true);
+			writer.EndObject();
+			std::string data = strBuf.GetString();
+			std::ofstream fout(m_MaterialPhysicalPath);
+			fout << data.c_str();
+			fout.close();
 
 			//------update preview scene------
 			m_pPreviewScene->SetModelMaterial(m_pMaterial);
@@ -376,8 +376,8 @@ namespace Pixel {
 				fstream << ShaderCode;
 				fstream.close();
 
-				Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0");
-				Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0");
+				Ref<Shader> pVertexShader = Shader::Create(shaderPath, "VS", "vs_5_0", false, m_pMaterial);
+				Ref<Shader> pPixelShader = Shader::Create(shaderPath, "PS", "ps_5_0", false, m_pMaterial);
 
 				//draw to m_PreviewTexture
 				
@@ -815,6 +815,8 @@ namespace Pixel {
 					m_CurrentSelectedGraphNode = nullptr;//TODO:use weak_ptr
 				}
 			}
+
+			ed::EndDelete();
 		}
 
 		//create new node
