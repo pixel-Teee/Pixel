@@ -60,6 +60,8 @@ namespace Pixel {
 		void CreateConstFloatValue4();
 
 		void CreateTexture2D(uint32_t textureParameterSuffix);
+
+		void CreateTexcoordinate();
 		//------create logic nodes------
 
 		Ref<GraphPin> FindPin(ed::PinId pinId);

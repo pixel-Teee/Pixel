@@ -130,7 +130,6 @@ int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D MyTexture : register(t0);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
 float4  MulInputA44 = a;

@@ -19,6 +19,7 @@
 #include "Pixel/Renderer/3D/Material/Mul.h"
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 #include "Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/TextureCoordinate.h"
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 #include "Pixel/Scene/SceneSerializer.h"
 #include "Pixel/Scene/SimpleScene.h"
@@ -871,6 +872,11 @@ namespace Pixel {
 				++textureParameterSuffix;
 			}
 
+			if (ImGui::MenuItem("TexCoordinate"))
+			{
+				CreateTexcoordinate();
+			}
+
 			ImGui::EndPopup();
 		}
 		ed::Resume();
@@ -1041,6 +1047,49 @@ namespace Pixel {
 
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pTexture);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateTexcoordinate()
+	{
+		Ref<ShaderFunction> pTexCoordinate = CreateRef<TextureCoordinate>("TextureCoordinate", m_pMaterial);
+		pTexCoordinate->AddToMaterialOwner();
+		pTexCoordinate->ConstructPutNodeAndSetPutNodeOwner();
+		pTexCoordinate->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pTexCoordinate->GetFunctioNodeId();
+		pGraphNode->p_Owner = pTexCoordinate;
+
+		for (size_t i = 0; i < pTexCoordinate->GetInputNodeNum(); ++i)
+		{
+			pTexCoordinate->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pTexCoordinate->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pTexCoordinate->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pTexCoordinate->GetOutputNodeNum(); ++i)
+		{
+			pTexCoordinate->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pTexCoordinate->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pTexCoordinate->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pTexCoordinate);
 		//------add to material shader function------
 	}
 

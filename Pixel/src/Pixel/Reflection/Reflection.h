@@ -37,5 +37,6 @@
 #include "Pixel/Renderer/3D/Material/MaterialCustomPara.h"
 #include "Pixel/Renderer/3D/Material/CustomFloatValue.h"
 #include "Pixel/Renderer/3D/Material/CustomTexture2D.h"
+#include "Pixel/Renderer/3D/Material/TextureCoordinate.h"
 
 #include "Pixel/Animation/Bone.h"

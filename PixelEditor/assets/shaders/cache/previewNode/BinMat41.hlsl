@@ -132,7 +132,9 @@ Texture2D MyColor : register(t1);
 Texture2D MetallicRoughness : register(t2);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-float2  Texture2DCoordinateInput7 = pin.TexCoord;
+float2  TexCoordinate39 = float2(0, 0);
+TexCoordinate39 = pin.TexCoord;
+float2  Texture2DCoordinateInput7 = TexCoordinate39;
 float4  Texture2DOutput8 = float4(0, 0, 0, 0);
 #if HAVE_NORMAL > 0
 Texture2DOutput8 = DecodeNormalMap(pin.NormalW, pin.TangentW, MyNormal.Sample(gsamPointWrap, Texture2DCoordinateInput7) * 2.0f - 1.0f);
