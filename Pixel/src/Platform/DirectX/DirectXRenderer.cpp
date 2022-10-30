@@ -42,6 +42,7 @@
 #include "Pixel/Renderer/EditorCamera.h"
 #include "Pixel/Math/Math.h"
 #include "Pixel/Scene/SimpleScene.h"
+#include "Pixel/Scene/ThumbNailScene.h"
 #include "Pixel/Scene/Components/TestMaterialComponent.h"
 //-----others------
 
@@ -68,6 +69,7 @@
 #include "Pixel/Core/Application.h"
 
 #include "stb_image.h"
+#include "stb_image_write.h"
 
 #include "Pixel/Scene/Scene.h"
 
@@ -1407,6 +1409,341 @@ namespace Pixel {
 		pContext->SetIndexBuffer(m_pIndexBuffer->GetIBV());
 		pContext->DrawIndexed(m_pIndexBuffer->GetCount());
 		//------second pass:light pass------
+	}
+
+	void DirectXRenderer::DeferredRenderingForThumbNailScene(Ref<Context> pGraphicsContext,
+	const EditorCamera& camera, std::vector<TransformComponent*> trans,
+	std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials,
+	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
+	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer,
+	std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial)
+	{
+		//render thumb nail scene
+		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
+
+		Ref<DirectXFrameBuffer> pDirectxFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFrameBuffer);
+		PX_CORE_ASSERT(pDirectxFrameBuffer->m_pColorBuffers.size() == 6, "color buffer's size is not equal to 6!");
+
+		//------shadow map------
+		LightComponent* mainDirectLight = nullptr;//find the direct light to generate shadow map
+		TransformComponent* mainDirectLightComponent = nullptr;
+		for (uint32_t i = 0; i < lights.size(); ++i)
+		{
+			if (lights[i]->GenerateShadowMap && lights[i]->lightType == LightType::DirectLight)
+			{
+				mainDirectLight = lights[i];
+				mainDirectLightComponent = lightTrans[i];
+				break;
+			}
+		}
+
+		glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
+
+		if (mainDirectLight != nullptr)
+		{
+			pContext->SetPipelineState(*m_RenderShadowMapPso);
+			pContext->SetRootSignature(*m_RenderShadowMapRootSignature);
+			pContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+			m_ShadowMap->BeginRendering(*pContext);
+
+			float nearPlane = 0.01f;
+			float farPlane = 500.0f;
+
+			glm::mat4 lightProjection = glm::transpose(glm::orthoLH_ZO(-mainDirectLight->Range, mainDirectLight->Range, -mainDirectLight->Range, mainDirectLight->Range, nearPlane, mainDirectLight->MaxDistance));
+			glm::mat4 lightView = glm::transpose(glm::inverse(mainDirectLightComponent->GetGlobalTransform(pScene->GetRegistry())));
+			lightSpaceMatrix = lightView * lightProjection;
+
+			//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(glm::mat4), glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SetData("cbPass", glm::value_ptr(lightSpaceMatrix));
+			m_RenderShadowMapVs->SubmitData(pContext, "cbPass");
+
+			for (uint32_t i = 0; i < meshs.size(); ++i)
+			{
+				if (meshs[i]->m_Model != nullptr)
+					//draw every mesh
+					meshs[i]->m_Model->DrawShadowMap(trans[i]->GetGlobalTransform(pScene->GetRegistry()), pContext, m_RenderShadowMapVs, entityIds[i]);
+			}
+
+			m_ShadowMap->EndRendering(*pContext);
+		}
+		//------shadow map------
+
+		//------get the cpu descriptor handle------
+		std::vector<Ref<DescriptorCpuHandle>> m_CpuHandles;
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		{
+			m_CpuHandles.push_back(pDirectxFrameBuffer->m_pColorBuffers[i]->GetRTV());
+		}
+		//------get the cpu descriptor handle------
+
+		Ref<DescriptorCpuHandle> dsvHandle = pDirectxFrameBuffer->m_pDepthBuffer->GetDSV();
+		pGraphicsContext->SetRenderTargets(6, m_CpuHandles, dsvHandle);
+		//TODO:bind root signature, in the future, in terms of the material shader parameter to create root signature
+		//pContext->SetRootSignature(*m_pDeferredShadingRootSignature);
+
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		{
+			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::RenderTarget);
+		}
+		pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pDepthBuffer, ResourceStates::DepthWrite);
+
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size(); ++i)
+		{
+			//clear color buffer
+			pContext->ClearColor(*(pDirectxFrameBuffer->m_pColorBuffers[i]));
+		}
+		pContext->ClearDepth(*(pDirectxFrameBuffer->m_pDepthBuffer));
+
+		//set primitive topology
+		pGraphicsContext->SetPrimitiveTopology(PrimitiveTopology::TRIANGLELIST);
+
+		//set viewport and scissor
+		ViewPort vp;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		vp.Width = pDirectxFrameBuffer->GetSpecification().Width;
+		vp.Height = pDirectxFrameBuffer->GetSpecification().Height;
+		vp.MaxDepth = 1.0f;
+		vp.MinDepth = 0.0f;
+
+		PixelRect scissor;
+		scissor.Left = 0;
+		scissor.Right = pDirectxFrameBuffer->GetSpecification().Width;
+		scissor.Top = 0;
+		scissor.Bottom = pDirectxFrameBuffer->GetSpecification().Height;
+
+		pContext->SetViewportAndScissor(vp, scissor);
+
+		//bind resources
+		glm::mat4x4 gViewProjection = glm::transpose(camera.GetViewProjection());
+		m_CbufferGeometryPass.ViewProjection = gViewProjection;
+		if (m_IsFirst)
+		{
+			m_IsFirst = false;
+			m_CbufferGeometryPass.previousViewProjection = gViewProjection;
+		}
+		m_CbufferGeometryPass.frameCount = m_FrameCount;//for taa
+		m_CbufferGeometryPass.width = pDirectxFrameBuffer->GetSpecification().Width;
+		m_CbufferGeometryPass.height = pDirectxFrameBuffer->GetSpecification().Height;
+		++m_FrameCount;
+		//pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(CbufferGeometryPass), &m_CbufferGeometryPass);
+		m_GeometryVertexShader->SetData("cbPass", &m_CbufferGeometryPass);
+
+		m_OpaqueItems.clear();
+		m_TransParentItems.clear();
+
+		//in terms of the transparent to separate the models
+		for (size_t i = 0; i < meshs.size(); ++i)
+		{
+			if (meshs[i]->m_Model != nullptr)
+			{
+				std::vector<Ref<StaticMesh>> pStaticMeshs = meshs[i]->m_Model->GetMeshes();
+				//std::vector<Ref<SubMaterial>> pSubMaterials = materials[i]->m_Materials;
+				std::vector<Ref<MaterialInstance>> pMaterialInstances = materials[i]->m_Materials;
+				for (size_t j = 0; j < std::min(pStaticMeshs.size(), pMaterialInstances.size()); ++j)
+				{
+					if (pMaterialInstances[j] != nullptr)
+					{
+						m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], nullptr, pMaterialInstances[j], entityIds[i], 0 });
+						//if (pSubMaterials[j]->IsTransparent)
+						//{
+						//	float distance = glm::distance(camera.GetPosition(), glm::vec3(glm::vec4(trans[i]->Translation, 1.0f) * trans[i]->GetGlobalTransform(pScene->GetRegistry())));
+						//	m_TransParentItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], distance });
+						//}
+						//else
+						//{
+						//	m_OpaqueItems.push_back({ trans[i]->GetGlobalTransform(pScene->GetRegistry()), pStaticMeshs[j], pSubMaterials[j], entityIds[i], 0 });
+						//}
+					}
+				}
+			}
+		}
+
+		//for (uint32_t i = 0; i < meshs.size(); ++i)
+		//{
+		//	//draw every mesh
+		//	if(meshs[i]->m_Model != nullptr)
+		//		meshs[i]->m_Model->Draw(trans[i]->GetGlobalTransform(scene->GetRegistry()), pContext, entityIds[i], materials[i]);
+		//}
+
+		Ref<CbufferGeometryPass> tempPass = CreateRef<CbufferGeometryPass>(m_CbufferGeometryPass);
+
+		//draw opaque render item
+		for (size_t i = 0; i < m_OpaqueItems.size(); ++i)
+		{
+			//get shader
+			GetShader(m_OpaqueItems[i].pStaticMesh, m_OpaqueItems[i].pMaterialInstance);
+
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
+		}
+
+		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
+		{
+			pGraphicsContext->TransitionResource(*pDirectxFrameBuffer->m_pColorBuffers[i], ResourceStates::Common);
+		}
+		//editor frame buffer
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pColorBuffers[5]), ResourceStates::Common);
+		pContext->TransitionResource(*(pDirectxFrameBuffer->m_pDepthBuffer), ResourceStates::Common);
+
+		//------second pass:light pass------
+		pContext->SetPipelineState(*m_DefaultLightShadingPso);
+		pContext->SetRootSignature(*m_pDeferredShadingLightRootSignature);
+		//bind render targets
+		std::vector<Ref<DescriptorCpuHandle>> m_lightFrameBufferCpuHandles;
+		Ref<DirectXFrameBuffer> pLightFrame = std::static_pointer_cast<DirectXFrameBuffer>(pLightFrameBuffer);
+		m_lightFrameBufferCpuHandles.push_back(pLightFrame->m_pColorBuffers[0]->GetRTV());
+		m_lightFrameBufferCpuHandles.push_back(pLightFrame->m_pColorBuffers[1]->GetRTV());
+		dsvHandle = pLightFrame->m_pDepthBuffer->GetDSV();
+		pGraphicsContext->SetRenderTargets(2, m_lightFrameBufferCpuHandles, dsvHandle);
+
+		//clear buffer
+		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
+		{
+			pGraphicsContext->TransitionResource(*pLightFrame->m_pColorBuffers[i], ResourceStates::RenderTarget);
+		}
+		pGraphicsContext->TransitionResource(*pLightFrame->m_pDepthBuffer, ResourceStates::DepthWrite);
+
+		for (uint32_t i = 0; i < pLightFrame->m_pColorBuffers.size(); ++i)
+		{
+			//clear color buffer
+			pContext->ClearColor(*(pLightFrame->m_pColorBuffers[i]));
+		}
+		pContext->ClearDepth(*(pLightFrame->m_pDepthBuffer));
+
+		//set viewport and scissor
+		pContext->SetViewportAndScissor(vp, scissor);
+
+		m_lightPass.CameraPosition = camera.GetPosition();
+		m_lightPass.receiveAmbientLight = false;//test
+
+		std::vector<LightComponent*> ReSortedPointLight;
+		std::vector<TransformComponent*> ReSortedPointLightTrans;
+		std::vector<LightComponent*> ReSortedDirectLight;
+		std::vector<TransformComponent*> ReSortedDirectLightTrans;
+		std::vector<LightComponent*> ReSortedSpotLight;
+		std::vector<TransformComponent*> ReSortedSpotLightTrans;
+
+		for (uint32_t i = 0; i < lights.size(); ++i)
+		{
+			//---restored point light---
+			if (lights[i]->lightType == LightType::PointLight)
+			{
+				ReSortedPointLight.push_back(lights[i]);
+				ReSortedPointLightTrans.push_back(lightTrans[i]);
+			}
+			else if (lights[i]->lightType == LightType::DirectLight)
+			{
+				ReSortedDirectLight.push_back(lights[i]);
+				ReSortedDirectLightTrans.push_back(lightTrans[i]);
+			}
+			else if (lights[i]->lightType == LightType::SpotLight)
+			{
+				ReSortedSpotLight.push_back(lights[i]);
+				ReSortedSpotLightTrans.push_back(lightTrans[i]);
+			}
+			//---restored point light---
+		}
+
+		m_lightPass.PointLightNumber = ReSortedPointLight.size();
+		m_lightPass.DirectLightNumber = ReSortedDirectLight.size();
+		m_lightPass.SpotLightNumber = ReSortedSpotLight.size();
+
+		for (uint32_t i = 0; i < ReSortedPointLight.size(); ++i)
+		{
+			m_lightPass.lights[i].Position = (*ReSortedPointLightTrans[i]).Translation;
+			m_lightPass.lights[i].Color = (*ReSortedPointLight[i]).color;
+			m_lightPass.lights[i].Radius = (*ReSortedPointLight[i]).GetSphereLightVolumeRadius();
+		}
+
+		for (uint32_t i = 0; i < ReSortedDirectLight.size(); ++i)
+		{
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Direction = (*ReSortedDirectLightTrans[i]).GetForwardDirection();
+			m_lightPass.lights[i + m_lightPass.PointLightNumber].Color = (*ReSortedDirectLight[i]).color;
+			if (ReSortedDirectLight[i] == mainDirectLight)
+			{
+				m_lightPass.lights[i + m_lightPass.PointLightNumber].GenerateShadow = 1;
+			}
+		}
+
+		for (size_t i = 0; i < ReSortedSpotLight.size(); ++i)
+		{
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Position = (*ReSortedSpotLightTrans[i]).Translation;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Direction = (*ReSortedSpotLightTrans[i]).GetForwardDirection();
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].Color = (*ReSortedSpotLight[i]).color;
+			m_lightPass.lights[i + m_lightPass.PointLightNumber + m_lightPass.DirectLightNumber].CutOff = glm::cos(glm::radians((*ReSortedSpotLight[i]).CutOff));
+		}
+
+		if (mainDirectLight != nullptr)
+		{
+			m_lightPass.LightSpaceMatrix = lightSpaceMatrix;
+		}
+
+		Ref<DirectXCubeTexture> m_pIrradianceCubeTexture = std::static_pointer_cast<DirectXCubeTexture>(m_irradianceCubeTexture);
+
+		pContext->SetDynamicConstantBufferView((uint32_t)RootBindings::CommonCBV, sizeof(LightPass), &m_lightPass);
+
+		//copy descriptor handle
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[0].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[0]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[1].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[1]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[2].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[2]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[3].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[3]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[4].GetCpuHandle(), pDirectxFrameBuffer->m_pColorBuffers[4]->GetSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[5].GetCpuHandle(), m_pIrradianceCubeTexture->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[6].GetCpuHandle(), m_prefilterMap->GetSrvHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[7].GetCpuHandle(), m_LutTexture->GetHandle()->GetCpuHandle(), DescriptorHeapType::CBV_UAV_SRV);
+		Device::Get()->CopyDescriptorsSimple(1, m_DeferredShadingLightGbufferTextureHandles[8].GetCpuHandle(), m_ShadowMap->GetDepthSRV(), DescriptorHeapType::CBV_UAV_SRV);
+		//bind texture resources
+		pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, m_DeferredShadingLightGbufferTextureHeap);
+		pContext->SetDescriptorTable((uint32_t)RootBindings::MaterialSRVs, m_DeferredShadingLightGbufferTextureHandle->GetGpuHandle());
+
+		//bind vertex buffer and index buffer
+		pContext->SetVertexBuffer(0, m_pVertexBuffer->GetVBV());
+		pContext->SetIndexBuffer(m_pIndexBuffer->GetIBV());
+		pContext->DrawIndexed(m_pIndexBuffer->GetCount());
+		//------second pass:light pass------
+	}
+
+	void DirectXRenderer::GenerateThumbNail(Ref<Framebuffer> pFinalColorBuffer, Ref<Texture2D>& pTexture, const std::string& physicalPath)
+	{
+		//copy image from final color buffer to texture
+		Ref<ReadBackBuffer> pReadBack = CreateRef<ReadBackBuffer>();
+		//Ref<StructuredBuffer> pPickBuffer = std::static_pointer_cast<StructuredBuffer>(m_PickerBuffer);
+		//pReadBack->Create(L"ReadBackBuffer", std::static_pointer_cast<DirectXGpuBuffer>(pPickBuffer)->GetElementCount(), std::static_pointer_cast<DirectXGpuBuffer>(m_PickerBuffer)->GetElementSize());
+
+		//Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		//pContext->TransitionResource(*pReadBack, ResourceStates::CopyDest, true);
+		//pContext->TransitionResource(*pPickBuffer, ResourceStates::CopySource, true);
+		//pContext->CopyBufferRegion(*pReadBack, 0, *pPickBuffer, 0, std::static_pointer_cast<ReadBackBuffer>(pReadBack)->GetBufferSize());
+		//pContext->Finish(true);
+
+		//int32_t* value = (int32_t*)(pReadBack->Map());
+
+		//int32_t returnValue = value[m_Width * y + x];
+
+		//pReadBack->UnMap();
+		Ref<DirectXFrameBuffer> pDirectXFrameBuffer = std::static_pointer_cast<DirectXFrameBuffer>(pFinalColorBuffer);
+
+		uint32_t elementCount = pDirectXFrameBuffer->m_pColorBuffers[0]->GetWidth() * pDirectXFrameBuffer->m_pColorBuffers[0]->GetHeight();
+
+		uint32_t elementSize = 32;//32 byte(4 components)
+
+		pReadBack->Create(L"ReadBackBuffer", elementCount, elementSize);
+		
+		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
+		pContext->TransitionResource(*pReadBack, ResourceStates::CopyDest, true);
+		pContext->TransitionResource(*pDirectXFrameBuffer->m_pColorBuffers[0], ResourceStates::CopySource, true);
+		pContext->CopyBuffer(*pReadBack,*pDirectXFrameBuffer->m_pColorBuffers[0]);
+		pContext->Finish(true);
+
+		//save to disk
+		
+		char* value = (char*)(pReadBack->Map());
+
+		stbi_write_jpg(physicalPath.c_str(), pDirectXFrameBuffer->m_Specification.Width, pDirectXFrameBuffer->m_Specification.Height, 4, (const void*)value, 100);
+
+		pReadBack->UnMap();
+
+		pTexture = Texture2D::Create(physicalPath);
 	}
 
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, 

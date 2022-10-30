@@ -9,6 +9,7 @@
 
 namespace Pixel
 {
+	class ThumbNailScene;
 	class EditorLayer : public Pixel::Layer
 	{
 	public:
@@ -43,6 +44,9 @@ namespace Pixel
 		void CreateGraphEditor(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial);
 		
 		void SetGraphEditorAlive(bool alive);
+
+		//virtual path is asset manager
+		void GenerateThumbNail(Ref<Material> pMaterial);
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -122,8 +126,20 @@ namespace Pixel
 		Ref<Framebuffer> m_SimpleSceneFinalColorFrameBuffer;
 		//------simple scene------
 
+		//------thumbnail scene------
+		EditorCamera m_ThumbNailSceneCamera;
+		Ref<Framebuffer> m_ThumbNailSceneGeometryFrameBuffer;
+		Ref<Framebuffer> m_ThumbNailSceneLightFrameBuffer;
+		Ref<Framebuffer> m_ThumbNailSceneFinalColorFrameBuffer;
+		Ref<ThumbNailScene> m_ThumbNailScene;
+		Ref<Material> m_ToGenerateThumbNailMaterial;
+		//------thumbnail scene------
+
 		Ref<GraphNodeEditor> m_CurrentGraphNodeEditor;
 		bool m_IsCurrentGraphNodeEditorAlive;
+
+		std::string m_CurrentThumbNailMaterialVirtualPath;
+		bool m_ToGenerateThumbNail;
 	};
 }
 

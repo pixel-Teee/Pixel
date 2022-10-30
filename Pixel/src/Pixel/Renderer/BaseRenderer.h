@@ -14,6 +14,7 @@ namespace Pixel {
 	class Scene;
 	class DescriptorHeap;
 	class SimpleScene;
+	class ThumbNailScene;
 	class MaterialTreeComponent;
 	class PipelineLibrary;
 	//renderer interface
@@ -53,6 +54,10 @@ namespace Pixel {
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
 			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial) = 0;
 
+		virtual void DeferredRenderingForThumbNailScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
+			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial) = 0;
+
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer) = 0;
 
 		virtual void DrawFrustum(Ref<Context> pGraphicsContext, const EditorCamera& camera, Camera* pCamera, TransformComponent* pCameraTransformComponent, Ref<Framebuffer> pFrameBuffer, Ref<Scene> scene) = 0;
@@ -76,6 +81,9 @@ namespace Pixel {
 		virtual void RenderBlurTexture(Ref<Context> pComputeContext, Ref<Framebuffer> pLightFrameBuffer) = 0;
 
 		virtual void RenderingFinalColorBuffer(Ref<Context> pContext, Ref<Framebuffer> pSceneFrameBuffer, Ref<Framebuffer> pFinalColorBuffer) = 0;
+
+		//copy image from final color buffer to texture
+		virtual void GenerateThumbNail(Ref<Framebuffer> pFinalColorBuffer, Ref<Texture2D>& pTexture, const std::string& physicalPath) = 0;
 
 		virtual void DrawIntermediatePreviewNodes(Ref<Context> pGraphicsContext, Ref<Shader> pVertexShaderFunction, Ref<Shader> pPixelShaderFunction, Ref<Framebuffer> pFrameBuffer, Ref<Material> pMaterial) = 0;
 

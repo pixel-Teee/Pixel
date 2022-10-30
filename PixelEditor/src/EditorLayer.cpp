@@ -12,6 +12,8 @@
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/BaseRenderer.h"
+#include "Pixel/Scene/ThumbNailScene.h"
+#include "Pixel/Renderer/3D/Material/Material.h"
 
 #include <chrono>
 
@@ -31,6 +33,9 @@ namespace Pixel
 
 	void EditorLayer::OnAttach()
 	{
+		m_ToGenerateThumbNail = false;//set to false
+		m_ThumbNailScene = CreateRef<ThumbNailScene>();
+
 		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("Resources/Icons/PauseButton.png");
@@ -103,6 +108,25 @@ namespace Pixel
 		m_SimpleSceneFinalColorFrameBuffer = Framebuffer::Create(fbSpec);
 		/*------Create Simple Scene Framebuffer------*/
 
+		/*------Create ThumbNail Scene Framebuffer------*/
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F,
+		FramebufferTextureFormat::RGBA16F,FramebufferTextureFormat::RGBA8,
+		FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 256;
+		fbSpec.Height = 256;
+		m_ThumbNailSceneGeometryFrameBuffer = Framebuffer::Create(fbSpec);
+
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
+		fbSpec.Width = 256;
+		fbSpec.Height = 256;
+		m_ThumbNailSceneLightFrameBuffer = Framebuffer::Create(fbSpec);
+
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+		fbSpec.Width = 256;
+		fbSpec.Height = 256;
+		m_ThumbNailSceneFinalColorFrameBuffer = Framebuffer::Create(fbSpec);
+		/*------Create ThumbNail Scene Framebuffer------*/
+
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
 
@@ -171,6 +195,8 @@ namespace Pixel
 
 		m_ContentBrowserPanel.RegisterIsGraphEditorAliveCallBack(std::bind(&EditorLayer::SetGraphEditorAlive, this, std::placeholders::_1));
 
+		m_ContentBrowserPanel.RegisterGenerateThumbNail(std::bind(&EditorLayer::GenerateThumbNail, this, std::placeholders::_1));
+	
 		//Set Sky Box
 		//ownership is belgon to Renderer3D
 		//m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
@@ -558,6 +584,25 @@ namespace Pixel
 			m_CurrentGraphNodeEditor->OnUpdate(ts, m_SimpleSceneCamera, m_SimpleSceneGeometryFrameBuffer, m_SimpleSceneLightFrameBuffer, m_SimpleSceneFinalColorFrameBuffer);
 		}
 
+		if (m_ToGenerateThumbNail)
+		{
+			std::map<std::string, Ref<Texture2D>>& preViewImages = AssetManager::GetSingleton().GetMaterialPreviewImages();
+
+			//std::map<std::string, std::string>& MaterialVirtualPathToPreviewImagePhysicalPath = AssetManager::GetSingleton().GetMaterialVirtualPathToPreviewImagePhysicalPath();
+			Ref<Texture2D> pTexture;
+			//save the generate numbnail image to disk
+			std::string previewImagePhysicalPath = "assets/materials/preview/" + m_ToGenerateThumbNailMaterial->m_MaterialName + ".jpg";
+			//m_ThumbNailScene->OnUpdateEditorDeferred(m_ThumbNailSceneGeometryFrameBuffer, m_ThumbNailSceneLightFrameBuffer, m_ThumbNailSceneFinalColorFrameBuffer, )
+			m_ThumbNailScene->OnUpdateEditorDeferred(m_ThumbNailSceneCamera, m_ThumbNailSceneGeometryFrameBuffer, m_ThumbNailSceneLightFrameBuffer, m_ThumbNailSceneFinalColorFrameBuffer, m_ToGenerateThumbNailMaterial);
+			//from frame buffer to copy a image to disk
+			Application::Get().GetRenderer()->GenerateThumbNail(m_ThumbNailSceneFinalColorFrameBuffer, pTexture, previewImagePhysicalPath);
+			//Application::Get().GetRenderer()->GenerateThumbNail(m_ThumbNailSceneFinalColorFrameBuffer, );
+			m_ToGenerateThumbNail = false;
+
+			//insert
+			preViewImages.insert({ previewImagePhysicalPath, pTexture });
+		}
+
 		//Calculate Mouse Pos in Viewport realtive pos
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -819,11 +864,21 @@ namespace Pixel
 	{
 		//open a graph node editor
 		m_CurrentGraphNodeEditor = CreateRef<GraphNodeEditor>(virtualPath, physicalPath, pMaterial, m_SimpleSceneFinalColorFrameBuffer);
+
+		//TODO:when destory, need to remove this register?
+		m_CurrentGraphNodeEditor->RegisterGenerateThumbNail(std::bind(&EditorLayer::GenerateThumbNail, this, std::placeholders::_1));
 	}
 
 	void EditorLayer::SetGraphEditorAlive(bool alive)
 	{
 		m_IsCurrentGraphNodeEditorAlive = alive;
+	}
+
+	void EditorLayer::GenerateThumbNail(Ref<Material> pMaterial)
+	{
+		//m_CurrentThumbNailMaterialVirtualPath = virtualPath;
+		m_ToGenerateThumbNail = true;
+		m_ToGenerateThumbNailMaterial = pMaterial;
 	}
 
 }

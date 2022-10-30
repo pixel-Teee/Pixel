@@ -30,6 +30,7 @@ namespace Pixel {
 
 		bool IsPreviewSceneEventBlocked();
 
+		void RegisterGenerateThumbNail(std::function<void(Ref<Material> pMaterial)> func);
 	private:
 
 		void DrawMainFunctionNode();
@@ -125,5 +126,7 @@ namespace Pixel {
 		bool m_IsPreviewEventBlocked;
 
 		uint32_t textureParameterSuffix = 0;
+
+		std::function<void(Ref<Material> pMaterial)> m_GenerateThumbNail;
 	};
 }

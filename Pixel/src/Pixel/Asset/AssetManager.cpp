@@ -810,6 +810,16 @@ namespace Pixel {
 		return m_textures;
 	}
 
+	std::map<std::string, Ref<Texture2D>>& AssetManager::GetMaterialPreviewImages()
+	{
+		return m_PreviewImages;
+	}
+
+	std::map<std::string, std::string>& AssetManager::GetMaterialVirtualPathToPreviewImagePhysicalPath()
+	{
+		return m_MaterialVirtualPathToPreviewImagePhysicalPath;
+	}
+
 	Ref<ShaderSet> AssetManager::GetVertexShaderSet(const std::string& shaderName)
 	{
 		//in terms shader name to get shader set

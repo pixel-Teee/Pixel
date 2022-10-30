@@ -240,7 +240,35 @@ namespace Pixel {
 			else if (!isDirectory && isInAssetRegistry)
 			{
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-				ImGui::ImageButton((ImTextureID)(m_FileHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
+
+				const std::string& itemPath = relativePath.string();
+
+				if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+				{
+					std::string& virtualPath = AssetManager::GetSingleton().GetVirtualPath(itemPath);
+
+					Ref<Material> pMaterial = AssetManager::GetSingleton().GetTestMaterial(virtualPath);
+
+					std::string previewImagePhysicalPath = "assets/materials/preview/" + pMaterial->m_MaterialName + ".jpg";
+					//get material name
+					//m_GenerateThumbNail(virtualPath, pMaterial);
+					if (!std::filesystem::exists(previewImagePhysicalPath))
+					{
+						m_GenerateThumbNail(pMaterial);
+					}
+					else
+					{
+						//to load image
+						std::map<std::string, Ref<Texture2D>>& previewImages = AssetManager::GetSingleton().GetMaterialPreviewImages();
+						previewImages[previewImagePhysicalPath] = Texture2D::Create(previewImagePhysicalPath);
+					}
+
+					//paste thumbnail image
+
+				}
+				else
+					ImGui::ImageButton((ImTextureID)(m_FileHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
+			
 				if (ImGui::IsItemClicked(1))
 				{
 					const std::string& itemPath = relativePath.string();
@@ -411,10 +439,12 @@ namespace Pixel {
 
 		ImGui::End();
 
+		/*
 		if(m_IsOpen)
 		{
 			RenderMaterialAssetPanel();
 		}
+		*/
 
 		//if (m_IsOpenTestMaterialEditor)
 		//{
@@ -431,6 +461,11 @@ namespace Pixel {
 	void ContentBrowserPanel::RegisterIsGraphEditorAliveCallBack(std::function<void(bool)> func)
 	{
 		m_IsGraphEditorAlive = func;
+	}
+
+	void ContentBrowserPanel::RegisterGenerateThumbNail(std::function<void(Ref<Material>pMaterial)> func)
+	{
+		m_GenerateThumbNail = func;
 	}
 
 	void ContentBrowserPanel::CreateMaterialInstance(std::string& virtualPath)

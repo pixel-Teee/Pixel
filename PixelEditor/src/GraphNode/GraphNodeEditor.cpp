@@ -255,6 +255,11 @@ namespace Pixel {
 		return m_IsPreviewEventBlocked;
 	}
 
+	void GraphNodeEditor::RegisterGenerateThumbNail(std::function<void(Ref<Material>pMaterial)> func)
+	{
+		m_GenerateThumbNail = func;
+	}
+
 	void GraphNodeEditor::DrawMainFunctionNode()
 	{
 		//ed::BeginNode(1);
@@ -331,6 +336,11 @@ namespace Pixel {
 			//------update preview scene------
 			m_pPreviewScene->SetModelMaterial(m_pMaterial);
 			//------update preview scene------
+
+			//------generate numbnail------
+			if(m_GenerateThumbNail != nullptr)
+				m_GenerateThumbNail(m_pMaterial);
+			//------generate numbnail------
 
 			//notify reference to this material's material instance to construct parameter
 			auto& materialInstances = AssetManager::GetSingleton().GetMaterialInstances();

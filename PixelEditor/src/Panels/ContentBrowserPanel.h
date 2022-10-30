@@ -24,6 +24,8 @@ namespace Pixel {
 
 		void RegisterIsGraphEditorAliveCallBack(std::function<void(bool)> func);
 
+		void RegisterGenerateThumbNail(std::function<void(Ref<Material> pMaterial)> func);
+
 		void CreateMaterialInstance(std::string& virtualPath);
 	private:
 		void RenderMaterialAssetPanel();
@@ -59,5 +61,7 @@ namespace Pixel {
 		std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> m_OpenGraphEditor;
 
 		std::function<void(bool)> m_IsGraphEditorAlive;
+
+		std::function<void(Ref<Material> pMaterial)> m_GenerateThumbNail;
 	};
 }

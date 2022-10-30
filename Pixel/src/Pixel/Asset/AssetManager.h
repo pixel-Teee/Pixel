@@ -70,6 +70,10 @@ namespace Pixel {
 
 		std::map<std::string, Ref<Texture2D>>& GetTextures();
 
+		std::map<std::string, Ref<Texture2D>>& GetMaterialPreviewImages();
+
+		std::map<std::string, std::string>& GetMaterialVirtualPathToPreviewImagePhysicalPath();
+
 		void AddModelToAssetRegistry(const std::string& physicalPath);
 
 		void CreateSubMaterial(const std::string& physicalPath, Ref<SubMaterial> pSubMaterial);
@@ -124,6 +128,11 @@ namespace Pixel {
 		std::map<std::string, std::string> m_PhysicalPathToVirtualPathTestMaterial;
 
 		std::map<std::string, Ref<Material>> m_TestMaterials;
+
+		//for preview image(materials)
+		std::map<std::string, Ref<Texture2D>> m_PreviewImages;
+
+		std::map<std::string, std::string> m_MaterialVirtualPathToPreviewImagePhysicalPath;
 
 		//material instance
 		std::map<std::string, std::string> m_VirtualPathToPhysicalPathMaterialInstance;
