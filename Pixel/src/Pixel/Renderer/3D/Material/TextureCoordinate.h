@@ -6,7 +6,7 @@ namespace Pixel {
 	class Meta(Enable) TextureCoordinate : public ShaderFunction
 	{
 	public:
-		//Meta()
+		Meta()
 		TextureCoordinate();
 		//if bIsCustom, then will declare as uniform variable
 		TextureCoordinate(const std::string & showName, Ref<Material> pMaterial);

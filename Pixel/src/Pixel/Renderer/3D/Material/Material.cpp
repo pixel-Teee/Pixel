@@ -143,7 +143,12 @@ namespace Pixel {
 		{
 			rttr::type tempType = rttr::type::get(*m_pShaderFunctionArray[i]);
 
+			//TODO:because of preview node, replace this
+			/*
 			if (!tempType.is_derived_from<ConstValue>() || !m_pShaderFunctionArray[i]->m_bIsVisited)
+				continue;
+			*/
+			if (!tempType.is_derived_from<ConstValue>())
 				continue;
 
 			Ref<ConstValue> pTemp = std::static_pointer_cast<ConstValue>(m_pShaderFunctionArray[i]);

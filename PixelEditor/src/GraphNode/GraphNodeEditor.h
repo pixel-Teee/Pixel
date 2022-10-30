@@ -62,6 +62,16 @@ namespace Pixel {
 		void CreateTexture2D(uint32_t textureParameterSuffix);
 
 		void CreateTexcoordinate();
+
+		void CreateSin();
+
+		void CreateComponentMask();
+
+		void CreateDot();
+
+		void CreateCeil();
+
+		void CreateLerp();
 		//------create logic nodes------
 
 		Ref<GraphPin> FindPin(ed::PinId pinId);

@@ -1,35 +1,54 @@
 #include "../Common/Common.hlsl"
 cbuffer CbMaterial : register(b2)
 {
+float4  a;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D MyNormal : register(t0);
-Texture2D MyColor : register(t1);
-Texture2D MetallicRoughness : register(t2);
 
 SamplerState gsamPointWrap : register(s0);
 PixelOut PS(VertexOut pin){
-float2  Texture2DCoordinateInput7 = pin.TexCoord;
-float4  Texture2DOutput8 = float4(0, 0, 0, 0);
-#if HAVE_NORMAL > 0
-Texture2DOutput8 = DecodeNormalMap(pin.NormalW, pin.TangentW, MyNormal.Sample(gsamPointWrap, Texture2DCoordinateInput7) * 2.0f - 1.0f);
-#else
-Texture2DOutput8 = MyNormal.Sample(gsamPointWrap, Texture2DCoordinateInput7);
-#endif
-float2  Texture2DCoordinateInput17 = pin.TexCoord;
-float4  Texture2DOutput18 = float4(0, 0, 0, 0);
-Texture2DOutput18 = MyColor.Sample(gsamPointWrap, Texture2DCoordinateInput17);
-float2  Texture2DCoordinateInput27 = pin.TexCoord;
-float4  Texture2DOutput28 = float4(0, 0, 0, 0);
-Texture2DOutput28 = MetallicRoughness.Sample(gsamPointWrap, Texture2DCoordinateInput27);
-float4  Normal = Texture2DOutput8;
-float4  Albedo = Texture2DOutput18;
-float  Roughness = Texture2DOutput28.y;
-float  Metallic = Texture2DOutput28.x;
+float4  ConstFloatValue148;
+ConstFloatValue148 = float4(0.000000, 0.000000, 0.000000, 1.000000);
+float4  ConstFloatValue125;
+ConstFloatValue125 = float4(25.120001, 25.120001, 0.000000, 1.000000);
+float2  TexCoordinate15 = float2(0, 0);
+TexCoordinate15 = pin.TexCoord;
+float4  MulInputA18 = ConstFloatValue125;
+float4  MulInputB19 = float4(TexCoordinate15.x, TexCoordinate15.y, TexCoordinate15.y, TexCoordinate15.y);
+float4  MulOutput20 = float4(0, 0, 0, 1);
+MulOutput20 = MulInputA18 * MulInputB19;
+float4  SinInputValue27 = MulOutput20;
+float4  SinOutputValue28 = float4(0, 0, 0, 1);
+SinOutputValue28 = sin(SinInputValue27);
+float4  InputValue33 = SinOutputValue28;
+float  OutputValue34 = 0;
+OutputValue34 = InputValue33.r;
+float4  InputValue38 = SinOutputValue28;
+float  OutputValue39 = 0;
+OutputValue39 = InputValue38.g;
+float  DotA45 = OutputValue34;
+float  DotB46 = OutputValue39;
+float4  Scalar47 = float4(0, 0, 0, 1);
+Scalar47 = dot(DotA45, DotB46);
+float  InputValue80 = Scalar47.x;
+float  CeilOutput81 = 0;
+CeilOutput81 = ceil(InputValue80);
+float4  X86 = ConstFloatValue148;
+float4  Y87 = a;
+float4  S88 = float4(CeilOutput81, CeilOutput81, CeilOutput81, CeilOutput81);
+float4  LerpOutput89 = float4(0, 0, 0, 1);
+LerpOutput89 = lerp(X86, Y87, S88);
+float4  ConstFloatValue61;
+ConstFloatValue61 = float4(0.000000, 1.000000, 0.000000, 1.000000);
+float4  Normal = float4(0, 0, 0, 1);
+float4  Albedo = LerpOutput89;
+float  Roughness = ConstFloatValue61.y;
+float  Metallic = ConstFloatValue61.x;
 float  Ao = 0;
+Normal = float4(pin.NormalW, 1.0f);
 PixelOut pixelOut = (PixelOut)(0.0f);
 pixelOut.gBufferPosition.xyz = pin.PosW;
 pixelOut.gBufferNormal.xyz = (Normal.xyz + 1.0f) / 2.0f;

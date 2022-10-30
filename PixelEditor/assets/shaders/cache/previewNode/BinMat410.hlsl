@@ -130,14 +130,6 @@ float ClearCoatRoughness;
 };
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-float4  ConstFloatValue125;
-ConstFloatValue125 = float4(25.120001, 25.120001, 0.000000, 1.000000);
-float2  TexCoordinate15 = float2(0, 0);
-TexCoordinate15 = pin.TexCoord;
-float4  MulInputA18 = ConstFloatValue125;
-float4  MulInputB19 = float4(TexCoordinate15.x, TexCoordinate15.y, TexCoordinate15.y, TexCoordinate15.y);
-float4  MulOutput20 = float4(0, 0, 0, 1);
-MulOutput20 = MulInputA18 * MulInputB19;
-pixelOut.finalColor = MulOutput20;
+pixelOut.finalColor = a;
 return pixelOut;
 }

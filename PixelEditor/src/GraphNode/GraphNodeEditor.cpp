@@ -20,6 +20,11 @@
 #include "Pixel/Renderer/3D/Material/ConstFloatValue.h"
 #include "Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/TextureCoordinate.h"
+#include "Pixel/Renderer/3D/Material/SinShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/ComponentMask.h"
+#include "Pixel/Renderer/3D/Material/DotShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/CeilShaderFunction.h"
+#include "Pixel/Renderer/3D/Material/LerpShaderFunction.h"
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 #include "Pixel/Scene/SceneSerializer.h"
 #include "Pixel/Scene/SimpleScene.h"
@@ -459,7 +464,8 @@ namespace Pixel {
 					ImGui::Separator();
 					ImGui::Text("value");
 					ImGui::SameLine();
-					ImGui::ColorEdit4("##const float value 4", pConstFloatValueShaderFuntion->m_Value.data());
+					ImGui::InputFloat4("##const float value 4", pConstFloatValueShaderFuntion->m_Value.data(), "%.3f");
+					//ImGui::ColorEdit4("##const float value 4", pConstFloatValueShaderFuntion->m_Value.data(), ImGuiColorEditFlags_Float);//TODO:modify to [0.0f, 1.0f]?
 				}
 			}
 			else if (rttr::type::get(*pShaderFunction) == rttr::type::get<Texture2DShaderFunction>())
@@ -499,6 +505,21 @@ namespace Pixel {
 				ImGui::Text("IsNormal");
 				ImGui::SameLine();
 				ImGui::Checkbox("##IsNormal", &(pTexture2DShaderFunction->GetDecodedNormal()));
+			}
+			else if (rttr::type::get(*pShaderFunction) == rttr::type::get<ComponentMask>())
+			{
+				Ref<ComponentMask> pComponentMaskShaderFunction = std::static_pointer_cast<ComponentMask>(pShaderFunction);
+				ImGui::Separator();
+				//bool rEnable, gEnable, bEnable, aEnable;
+				ImGui::Checkbox("R", &pComponentMaskShaderFunction->R);
+
+				ImGui::Checkbox("G", &pComponentMaskShaderFunction->G);
+
+				ImGui::Checkbox("B", &pComponentMaskShaderFunction->B);
+
+				ImGui::Checkbox("A", &pComponentMaskShaderFunction->A);
+
+				pComponentMaskShaderFunction->UpdateOutputNodeValueType();
 			}
 		}
 
@@ -636,7 +657,10 @@ namespace Pixel {
 				auto outputPin = FindPin(outputPinId);
 				auto inputPin = FindPin(inputPinId);
 
+				//one output pin could link multiple input pin
+				/*
 				bool alreadyLink = false;
+
 				//check the outputpin and inputpin don't have link
 				for(size_t i = 0; i < m_GraphLinks.size(); ++i)
 				{
@@ -645,52 +669,51 @@ namespace Pixel {
 					if (m_GraphLinks[i]->m_OutputPin.lock() == outputPin)
 						alreadyLink = true;
 				}
-				if(!alreadyLink)
-				{
-					ShowLabel("+ Create Link", ImColor(32, 45, 32, 100));
-					if(ed::AcceptNewItem(ImColor(128, 255, 128, 255), 4.0f))
-					{
-						//create new link
-						Ref<GraphLink> pGraphLink = CreateRef<GraphLink>();
-						pGraphLink->m_InputPin = inputPin;
-						pGraphLink->m_OutputPin = outputPin;
-						inputPin->m_NodeLink = pGraphLink;
-						outputPin->m_NodeLink = pGraphLink;
-						pGraphLink->m_LinkId = ++ShaderStringFactory::m_ShaderValueIndex;
-						//add new graph link to m_GraphLinks
-						m_GraphLinks.push_back(pGraphLink);
-						//create logic link
-						uint32_t inputPinLocationIndex = 0, outputPinLocationIndex = 0;
-						if(inputPin->m_OwnerNode.lock())
-						{
-							for (size_t i = 0; i < inputPin->m_OwnerNode.lock()->m_InputPin.size(); ++i)
-							{
-								if (inputPin->m_OwnerNode.lock()->m_InputPin[i] == inputPin)
-								{
-									inputPinLocationIndex = i;
-									break;
-								}
-							}
-						}
-						if(outputPin->m_OwnerNode.lock())
-						{
-							for(size_t i = 0; i < outputPin->m_OwnerNode.lock()->m_OutputPin.size(); ++i)
-							{
-								if(outputPin->m_OwnerNode.lock()->m_OutputPin[i] == outputPin)
-								{
-									outputPinLocationIndex = i;
-									break;
-								}
-							}
-						}
-						//------link two nodes------
-						Ref<InputNode> inputNode = inputPin->m_OwnerNode.lock()->p_Owner->GetInputNode(inputPinLocationIndex);
-						Ref<OutputNode> outputNode = outputPin->m_OwnerNode.lock()->p_Owner->GetOutputNode(outputPinLocationIndex);
-						inputNode->Connection(outputNode);
-						//------link two nodes------
+				*/
 
-						m_pMaterial->GetLinks().push_back(glm::vec2(inputPin->m_PinId.Get(), outputPin->m_PinId.Get()));
+				ShowLabel("+ Create Link", ImColor(32, 45, 32, 100));
+				if (ed::AcceptNewItem(ImColor(128, 255, 128, 255), 4.0f))
+				{
+					//create new link
+					Ref<GraphLink> pGraphLink = CreateRef<GraphLink>();
+					pGraphLink->m_InputPin = inputPin;
+					pGraphLink->m_OutputPin = outputPin;
+					inputPin->m_NodeLink = pGraphLink;
+					outputPin->m_NodeLink = pGraphLink;
+					pGraphLink->m_LinkId = ++ShaderStringFactory::m_ShaderValueIndex;
+					//add new graph link to m_GraphLinks
+					m_GraphLinks.push_back(pGraphLink);
+					//create logic link
+					uint32_t inputPinLocationIndex = 0, outputPinLocationIndex = 0;
+					if (inputPin->m_OwnerNode.lock())
+					{
+						for (size_t i = 0; i < inputPin->m_OwnerNode.lock()->m_InputPin.size(); ++i)
+						{
+							if (inputPin->m_OwnerNode.lock()->m_InputPin[i] == inputPin)
+							{
+								inputPinLocationIndex = i;
+								break;
+							}
+						}
 					}
+					if (outputPin->m_OwnerNode.lock())
+					{
+						for (size_t i = 0; i < outputPin->m_OwnerNode.lock()->m_OutputPin.size(); ++i)
+						{
+							if (outputPin->m_OwnerNode.lock()->m_OutputPin[i] == outputPin)
+							{
+								outputPinLocationIndex = i;
+								break;
+							}
+						}
+					}
+					//------link two nodes------
+					Ref<InputNode> inputNode = inputPin->m_OwnerNode.lock()->p_Owner->GetInputNode(inputPinLocationIndex);
+					Ref<OutputNode> outputNode = outputPin->m_OwnerNode.lock()->p_Owner->GetOutputNode(outputPinLocationIndex);
+					inputNode->Connection(outputNode);
+					//------link two nodes------
+
+					m_pMaterial->GetLinks().push_back(glm::vec2(inputPin->m_PinId.Get(), outputPin->m_PinId.Get()));
 				}
 			}
 			//------create link------
@@ -875,6 +898,31 @@ namespace Pixel {
 			if (ImGui::MenuItem("TexCoordinate"))
 			{
 				CreateTexcoordinate();
+			}
+
+			if (ImGui::MenuItem("Sin"))
+			{
+				CreateSin();
+			}
+
+			if (ImGui::MenuItem("ComponentMask"))
+			{
+				CreateComponentMask();
+			}
+
+			if (ImGui::MenuItem("Dot"))
+			{
+				CreateDot();
+			}
+
+			if (ImGui::MenuItem("Ceil"))
+			{
+				CreateCeil();
+			}
+
+			if (ImGui::MenuItem("Lerp"))
+			{
+				CreateLerp();
 			}
 
 			ImGui::EndPopup();
@@ -1090,6 +1138,221 @@ namespace Pixel {
 
 		//------add to material shader function------
 		m_pMaterial->AddShaderFunction(pTexCoordinate);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateSin()
+	{
+		Ref<ShaderFunction> pSin = CreateRef<SinShaderFunction>("Sin", m_pMaterial);
+		pSin->AddToMaterialOwner();
+		pSin->ConstructPutNodeAndSetPutNodeOwner();
+		pSin->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pSin->GetFunctioNodeId();
+		pGraphNode->p_Owner = pSin;
+
+		for (size_t i = 0; i < pSin->GetInputNodeNum(); ++i)
+		{
+			pSin->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pSin->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pSin->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pSin->GetOutputNodeNum(); ++i)
+		{
+			pSin->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pSin->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pSin->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pSin);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateComponentMask()
+	{
+		Ref<ShaderFunction> pComponentMask = CreateRef<ComponentMask>("Mask", m_pMaterial);
+		pComponentMask->AddToMaterialOwner();
+		pComponentMask->ConstructPutNodeAndSetPutNodeOwner();
+		pComponentMask->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pComponentMask->GetFunctioNodeId();
+		pGraphNode->p_Owner = pComponentMask;
+
+		for (size_t i = 0; i < pComponentMask->GetInputNodeNum(); ++i)
+		{
+			pComponentMask->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pComponentMask->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pComponentMask->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pComponentMask->GetOutputNodeNum(); ++i)
+		{
+			pComponentMask->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pComponentMask->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pComponentMask->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pComponentMask);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateDot()
+	{
+		Ref<ShaderFunction> pDot = CreateRef<DotShaderFunction>("Dot", m_pMaterial);
+		pDot->AddToMaterialOwner();
+		pDot->ConstructPutNodeAndSetPutNodeOwner();
+		pDot->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pDot->GetFunctioNodeId();
+		pGraphNode->p_Owner = pDot;
+
+		for (size_t i = 0; i < pDot->GetInputNodeNum(); ++i)
+		{
+			pDot->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pDot->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pDot->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pDot->GetOutputNodeNum(); ++i)
+		{
+			pDot->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pDot->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pDot->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pDot);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateCeil()
+	{
+		Ref<ShaderFunction> pCeil = CreateRef<CeilShaderFunction>("Ceil", m_pMaterial);
+		pCeil->AddToMaterialOwner();
+		pCeil->ConstructPutNodeAndSetPutNodeOwner();
+		pCeil->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pCeil->GetFunctioNodeId();
+		pGraphNode->p_Owner = pCeil;
+
+		for (size_t i = 0; i < pCeil->GetInputNodeNum(); ++i)
+		{
+			pCeil->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pCeil->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pCeil->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pCeil->GetOutputNodeNum(); ++i)
+		{
+			pCeil->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pCeil->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pCeil->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pCeil);
+		//------add to material shader function------
+	}
+
+	void GraphNodeEditor::CreateLerp()
+	{
+		Ref<ShaderFunction> pLerp = CreateRef<LerpShaderFunction>("Lerp", m_pMaterial);
+		pLerp->AddToMaterialOwner();
+		pLerp->ConstructPutNodeAndSetPutNodeOwner();
+		pLerp->SetFunctionNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+
+		//in terms the logic node to create graph node and push to graph node's vector
+		Ref<GraphNode> pGraphNode = CreateRef<GraphNode>();
+		pGraphNode->m_NodeId = pLerp->GetFunctioNodeId();
+		pGraphNode->p_Owner = pLerp;
+
+		for (size_t i = 0; i < pLerp->GetInputNodeNum(); ++i)
+		{
+			pLerp->GetInputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> inputPin = CreateRef<GraphPin>();
+			inputPin->m_PinId = pLerp->GetInputNode(i)->GetPutNodeId();
+			inputPin->m_OwnerNode = pGraphNode;
+			inputPin->m_PinName = pLerp->m_InputNodeDisplayName[i];
+			pGraphNode->m_InputPin.push_back(inputPin);
+			m_GraphPins.push_back(inputPin);
+		}
+
+		for (size_t i = 0; i < pLerp->GetOutputNodeNum(); ++i)
+		{
+			pLerp->GetOutputNode(i)->SetPutNodeId(++ShaderStringFactory::m_ShaderValueIndex);
+			Ref<GraphPin> outputPin = CreateRef<GraphPin>();
+			outputPin->m_PinId = pLerp->GetOutputNode(i)->GetPutNodeId();
+			outputPin->m_OwnerNode = pGraphNode;
+			outputPin->m_PinName = pLerp->m_OutputNodeDisplayName[i];
+			pGraphNode->m_OutputPin.push_back(outputPin);
+			m_GraphPins.push_back(outputPin);
+		}
+
+		m_GraphNodes.push_back(pGraphNode);
+
+		ed::SetNodePosition(pGraphNode->m_NodeId, ed::ScreenToCanvas(ImGui::GetMousePos()));
+
+		//------add to material shader function------
+		m_pMaterial->AddShaderFunction(pLerp);
 		//------add to material shader function------
 	}
 

@@ -321,6 +321,11 @@ namespace Pixel {
 			if (pMaterial->GetShaderFunction()[i]->GetOutputNodeNum() == 0) continue;
 			std::string temp;//temp
 
+			//temp = pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetNodeName() + ";\n";
+			//copy to intermediate shader string
+			//will call SetValueType
+			pMaterial->GetShaderFunction()[i]->GetShaderTreeString(pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString);
+
 			if (pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetValueType() == ValueType::VT_1)
 			{
 				temp = "float4(" + pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetNodeName() + ", 0.0f, 0.0f, 1.0f);\n";
@@ -333,14 +338,10 @@ namespace Pixel {
 			{
 				temp = "float4(" + pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetNodeName() + ", 1.0f);\n";
 			}
-			else
+			else if (pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetValueType() == ValueType::VT_4)
 			{
 				temp = pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetNodeName() + ";\n";
 			}
-
-			//temp = pMaterial->GetShaderFunction()[i]->GetOutputNode(0)->GetNodeName() + ";\n";
-			//copy to intermediate shader string
-			pMaterial->GetShaderFunction()[i]->GetShaderTreeString(pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString);
 
 			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += "pixelOut.finalColor = " + temp;//copy to 
 			pMaterial->GetShaderFunction()[i]->m_IntermediateShaderString += "return pixelOut;\n}";

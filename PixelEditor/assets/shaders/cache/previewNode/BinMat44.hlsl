@@ -122,18 +122,28 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
 cbuffer CbMaterial : register(b2)
 {
+float4  a;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D MyNormal : register(t0);
-Texture2D MyColor : register(t1);
-Texture2D MetallicRoughness : register(t2);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-float2  TexCoordinate39 = float2(0, 0);
-TexCoordinate39 = pin.TexCoord;
-pixelOut.finalColor = float4(TexCoordinate39, 0.0f, 1.0f);
+float4  ConstFloatValue125;
+ConstFloatValue125 = float4(25.120001, 25.120001, 0.000000, 1.000000);
+float2  TexCoordinate15 = float2(0, 0);
+TexCoordinate15 = pin.TexCoord;
+float4  MulInputA18 = ConstFloatValue125;
+float4  MulInputB19 = float4(TexCoordinate15.x, TexCoordinate15.y, TexCoordinate15.y, TexCoordinate15.y);
+float4  MulOutput20 = float4(0, 0, 0, 1);
+MulOutput20 = MulInputA18 * MulInputB19;
+float4  SinInputValue27 = MulOutput20;
+float4  SinOutputValue28 = float4(0, 0, 0, 1);
+SinOutputValue28 = sin(SinInputValue27);
+float4  InputValue33 = SinOutputValue28;
+float  OutputValue34 = 0;
+OutputValue34 = InputValue33.r;
+pixelOut.finalColor = float4(OutputValue34, 0.0f, 0.0f, 1.0f);
 return pixelOut;
 }

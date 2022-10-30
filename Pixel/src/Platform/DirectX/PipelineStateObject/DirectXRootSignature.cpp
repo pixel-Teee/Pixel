@@ -199,7 +199,8 @@ namespace Pixel {
 			ParameterArray.push_back(Parameter);
 		}
 
-		RootDesc.pParameters = (const D3D12_ROOT_PARAMETER*)(&ParameterArray[0]);
+		if(m_NumParameters > 0)
+			RootDesc.pParameters = (const D3D12_ROOT_PARAMETER*)(&ParameterArray[0]);
 
 		//static sampler
 		RootDesc.NumStaticSamplers = m_NumSamplers;

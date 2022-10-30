@@ -122,25 +122,16 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
 cbuffer CbMaterial : register(b2)
 {
+float4  a;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-Texture2D MyNormal : register(t0);
-Texture2D MyColor : register(t1);
-Texture2D MetallicRoughness : register(t2);
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-float2  TexCoordinate39 = float2(0, 0);
-TexCoordinate39 = pin.TexCoord;
-float2  Texture2DCoordinateInput7 = TexCoordinate39;
-float4  Texture2DOutput8 = float4(0, 0, 0, 0);
-#if HAVE_NORMAL > 0
-Texture2DOutput8 = DecodeNormalMap(pin.NormalW, pin.TangentW, MyNormal.Sample(gsamPointWrap, Texture2DCoordinateInput7) * 2.0f - 1.0f);
-#else
-Texture2DOutput8 = MyNormal.Sample(gsamPointWrap, Texture2DCoordinateInput7);
-#endif
-pixelOut.finalColor = Texture2DOutput8;
+float2  TexCoordinate15 = float2(0, 0);
+TexCoordinate15 = pin.TexCoord;
+pixelOut.finalColor = float4(TexCoordinate15, 0.0f, 1.0f);
 return pixelOut;
 }
