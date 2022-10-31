@@ -132,9 +132,9 @@ namespace Pixel
 
 		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
 
-		m_SimpleSceneCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
+		m_SimpleSceneCamera = EditorCamera(45.0f, 1.788f, 0.01f, 1000.0f);
 
-		m_ThumbNailSceneCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
+		m_ThumbNailSceneCamera = EditorCamera(45.0f, 1.788f, 0.01f, 1000.0f);
 
 		m_IsCurrentGraphNodeEditorAlive = false;
 #if 0	
