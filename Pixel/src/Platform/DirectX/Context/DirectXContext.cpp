@@ -221,6 +221,41 @@ namespace Pixel {
 		m_pCommandList->CopyTextureRegion(&destLoc, x, y, z, &srcLoc, &box);
 	}
 
+	void DirectXContext::CopyTextureToBuffer(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source)
+	{
+		uint32_t RowCount = 0;
+		uint64_t RowPitch = 0;
+		uint64_t TotalSize = 0;
+
+		D3D12_RESOURCE_DESC desc = static_cast<DirectXGpuResource&>(Source).GetComPtrResource()->GetDesc();
+		std::static_pointer_cast<DirectXDevice>(DirectXDevice::Get())->GetDevice()->GetCopyableFootprints(
+			&desc,
+			0,
+			1,//num subresources
+			0,
+			nullptr,
+			&RowCount,
+			&RowPitch,
+			&TotalSize
+		);
+		uint32_t dstRowPitch = (RowPitch + 255) & (~0xFFu);
+		//get the copy target location
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT bufferFootprint = {};
+		bufferFootprint.Footprint.Width = desc.Width;
+		bufferFootprint.Footprint.Height = desc.Height;
+		bufferFootprint.Footprint.Depth = 1;
+		bufferFootprint.Footprint.RowPitch = RowPitch;
+		bufferFootprint.Footprint.Format = desc.Format;
+		
+		Microsoft::WRL::ComPtr<ID3D12Resource> pStagingResource = static_cast<DirectXGpuResource&>(Dest).GetComPtrResource();
+		Microsoft::WRL::ComPtr<ID3D12Resource> pSrcResource = static_cast<DirectXGpuResource&>(Source).GetComPtrResource();
+		const CD3DX12_TEXTURE_COPY_LOCATION copyDest(pStagingResource.Get(), bufferFootprint);
+		//bufferFootprint.Footprint.Format = 
+		const CD3DX12_TEXTURE_COPY_LOCATION copySrc(pSrcResource.Get(), 0);
+
+		m_pCommandList->CopyTextureRegion(&copyDest, 0, 0, 0, &copySrc, nullptr);
+	}
+
 	void DirectXContext::TransitionResource(GpuResource& Resource, ResourceStates State, bool FlushImmediate)
 	{
 		DirectXGpuResource& DirectXResource = static_cast<DirectXGpuResource&>(Resource);

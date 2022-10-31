@@ -64,6 +64,8 @@ namespace Pixel {
 		virtual void CopySubresource(GpuResource& Dest, uint32_t DestSubIndex, GpuResource& Src, uint32_t SrcSubIndex);
 		void CopyTextureRegion(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source, RECT& Rect);
 
+		void CopyTextureToBuffer(GpuResource& Dest, uint32_t x, uint32_t y, uint32_t z, GpuResource& Source);
+
 		virtual void TransitionResource(GpuResource& Resource, ResourceStates NewState, bool FlushImmediate = false) override;
 		virtual void InsertUAVBarrier(GpuResource& Resource, bool FlushImmediate);
 		//------Buffer Operation------

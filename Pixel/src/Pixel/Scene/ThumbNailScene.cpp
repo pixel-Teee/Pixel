@@ -10,6 +10,7 @@
 #include "Pixel/Renderer/Device/Device.h"
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Core/Application.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 
 namespace Pixel {
 	ThumbNailScene::ThumbNailScene()
@@ -98,5 +99,19 @@ namespace Pixel {
 		Ref<Context> pFinalColorContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
 		Application::Get().GetRenderer()->RenderingFinalColorBuffer(pFinalColorContext, pLightFrameBuffer, pFinalFrameBuffer);
 		pFinalColorContext->Finish(true);
+	}
+
+	void ThumbNailScene::SetModelMaterial(Ref<Material> pMaterial)
+	{
+		if (!m_Registry.any_of<MaterialTreeComponent>(m_EntityHandle))
+		{
+			//don't have material tree component, create a material tree component
+			m_Registry.emplace<MaterialTreeComponent>(m_EntityHandle);
+		}
+		//------set preview model material------		
+		m_Registry.get<MaterialTreeComponent>(m_EntityHandle).AddMaterialInstance();//create a new material instance
+		m_Registry.get<MaterialTreeComponent>(m_EntityHandle).m_Materials[0] = CreateRef<MaterialInstance>();
+		m_Registry.get<MaterialTreeComponent>(m_EntityHandle).m_Materials[0]->SetMaterial(pMaterial);
+		//------set preview model material------
 	}
 }

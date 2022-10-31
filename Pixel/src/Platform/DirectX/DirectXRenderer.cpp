@@ -1717,7 +1717,7 @@ namespace Pixel {
 		//pContext->Finish(true);
 
 		//int32_t* value = (int32_t*)(pReadBack->Map());
-
+		
 		//int32_t returnValue = value[m_Width * y + x];
 
 		//pReadBack->UnMap();
@@ -1729,14 +1729,21 @@ namespace Pixel {
 
 		pReadBack->Create(L"ReadBackBuffer", elementCount, elementSize);
 		
+		RECT rect;
+		rect.left = 0;
+		rect.right = pDirectXFrameBuffer->m_pColorBuffers[0]->GetWidth();
+		rect.top = 0;
+		rect.bottom = pDirectXFrameBuffer->m_pColorBuffers[0]->GetHeight();
+
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		pContext->TransitionResource(*pReadBack, ResourceStates::CopyDest, true);
-		pContext->TransitionResource(*pDirectXFrameBuffer->m_pColorBuffers[0], ResourceStates::CopySource, true);
-		pContext->CopyBuffer(*pReadBack,*pDirectXFrameBuffer->m_pColorBuffers[0]);
-		pContext->Finish(true);
+		Ref<GraphicsContext> pGraphicsContext = std::static_pointer_cast<GraphicsContext>(pContext);
+		pGraphicsContext->TransitionResource(*pReadBack, ResourceStates::CopyDest, true);
+		pGraphicsContext->TransitionResource(*pDirectXFrameBuffer->m_pColorBuffers[0], ResourceStates::CopySource, true);
+		pGraphicsContext->CopyTextureToBuffer(*pReadBack, pDirectXFrameBuffer->m_pColorBuffers[0]->GetWidth(), pDirectXFrameBuffer->m_pColorBuffers[0]->GetHeight(), 1, *pDirectXFrameBuffer->m_pColorBuffers[0]);
+		pGraphicsContext->Finish(true);
+		//copy 
 
 		//save to disk
-		
 		char* value = (char*)(pReadBack->Map());
 
 		stbi_write_jpg(physicalPath.c_str(), pDirectXFrameBuffer->m_Specification.Width, pDirectXFrameBuffer->m_Specification.Height, 4, (const void*)value, 100);

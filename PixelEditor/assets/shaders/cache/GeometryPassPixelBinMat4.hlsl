@@ -9,12 +9,14 @@ float ClearCoatRoughness;
 
 SamplerState gsamPointWrap : register(s0);
 PixelOut PS(VertexOut pin){
-float4  ConstFloatValue7;
-ConstFloatValue7 = float4(0.800000, 0.000000, 0.000000, 1.000000);
+float4  ConstFloatValue27;
+ConstFloatValue27 = float4(0.800000, 0.200000, 0.400000, 1.000000);
+float4  ConstFloatValue16;
+ConstFloatValue16 = float4(0.800000, 0.000000, 0.000000, 0.000000);
 float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = float4(ConstFloatValue7.x, ConstFloatValue7.x, ConstFloatValue7.x, ConstFloatValue7.x);
-float  Roughness = 0;
-float  Metallic = 0;
+float4  Albedo = ConstFloatValue27;
+float  Roughness = ConstFloatValue16.x;
+float  Metallic = ConstFloatValue16.x;
 float  Ao = 0;
 Normal = float4(pin.NormalW, 1.0f);
 PixelOut pixelOut = (PixelOut)(0.0f);

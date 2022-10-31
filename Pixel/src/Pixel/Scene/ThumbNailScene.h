@@ -16,6 +16,8 @@ namespace Pixel {
 			Ref<Material> pTestMaterial);
 
 		entt::registry& GetRegistry() { return m_Registry; }
+
+		void SetModelMaterial(Ref<Material> pMaterial);
 	private:
 		entt::registry m_Registry;
 

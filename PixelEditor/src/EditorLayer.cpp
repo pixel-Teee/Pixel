@@ -134,6 +134,8 @@ namespace Pixel
 
 		m_SimpleSceneCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
 
+		m_ThumbNailSceneCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
+
 		m_IsCurrentGraphNodeEditorAlive = false;
 #if 0	
 		//entity
@@ -586,6 +588,8 @@ namespace Pixel
 
 		if (m_ToGenerateThumbNail)
 		{
+			m_ThumbNailSceneCamera.OnUpdate(ts);
+
 			std::map<std::string, Ref<Texture2D>>& preViewImages = AssetManager::GetSingleton().GetMaterialPreviewImages();
 
 			//std::map<std::string, std::string>& MaterialVirtualPathToPreviewImagePhysicalPath = AssetManager::GetSingleton().GetMaterialVirtualPathToPreviewImagePhysicalPath();
@@ -598,9 +602,8 @@ namespace Pixel
 			Application::Get().GetRenderer()->GenerateThumbNail(m_ThumbNailSceneFinalColorFrameBuffer, pTexture, previewImagePhysicalPath);
 			//Application::Get().GetRenderer()->GenerateThumbNail(m_ThumbNailSceneFinalColorFrameBuffer, );
 			m_ToGenerateThumbNail = false;
-
 			//insert
-			preViewImages.insert({ previewImagePhysicalPath, pTexture });
+			preViewImages[previewImagePhysicalPath] = pTexture;
 		}
 
 		//Calculate Mouse Pos in Viewport realtive pos
@@ -879,6 +882,7 @@ namespace Pixel
 		//m_CurrentThumbNailMaterialVirtualPath = virtualPath;
 		m_ToGenerateThumbNail = true;
 		m_ToGenerateThumbNailMaterial = pMaterial;
+		m_ThumbNailScene->SetModelMaterial(pMaterial);
 	}
 
 }

@@ -129,8 +129,8 @@ float ClearCoatRoughness;
 };
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-float4  ConstFloatValue7;
-ConstFloatValue7 = float4(0.800000, 0.000000, 0.000000, 1.000000);
-pixelOut.finalColor = ConstFloatValue7;
+float4  ConstFloatValue16;
+ConstFloatValue16 = float4(0.800000, 0.000000, 0.000000, 0.000000);
+pixelOut.finalColor = ConstFloatValue16;
 return pixelOut;
 }
