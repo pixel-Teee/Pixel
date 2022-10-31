@@ -155,7 +155,7 @@ namespace Pixel {
 		std::string PixelShaderFunctionString;//pixel shader function string
 
 		//PixelShaderInclude:from shader string factory to get common shader path
-		GetIncludeShader(PixelShaderInclude);
+		//GetIncludeShader(PixelShaderInclude);
 		//PixelShaderInputDeclare:interms of the static mesh's vertex buffer's layout to create pixel shader input declare(x)
 
 		//PixelShaderOutputDeclare:this is fixed
@@ -164,8 +164,8 @@ namespace Pixel {
 		CreatePixelShaderUserConstant(PixelShaderConstantString, pMaterial);
 		//PixelShaderConstantString:cbuffer declare
 				
-		out += "\n" + PixelShaderInclude + "\n";
-		out += PixelShaderConstantString + "\n";
+		//out += "\n" + PixelShaderInclude + "\n";
+		out += "\n" + PixelShaderConstantString + "\n";
 		out += "PixelOut PS(VertexOut pin){\n";
 		//pMaterial->GetShaderTreeString(out);
 		out += PixelShaderFunctionString;

@@ -21,17 +21,19 @@ struct VertexIn
 {
 	float3 PosL : POSITION;
 	float2 TexCoord : TEXCOORD;
+	/*
 	float3 NormalL : NORMAL;
 	float3 TangentL : TANGENT;
 	float3 BinormalL : BINORMAL;
+	*/
 	//int Editor : EDITOR;
 };
 
 struct VertexOut
 {
 	float4 PosH : SV_POSITION;
-	float3 PosW : POSITION;
 	float2 TexCoord : TEXCOORD;
+	/*
 	float3 NormalW : NORMAL;
 	float3 TangentW : TANGENT;
 	float3 BinormalW : BINORMAL;
@@ -41,18 +43,24 @@ struct VertexOut
 	float4 preScreenPosition : POSITION2;
 	float4 nowScreenPosition : POSITION3;
 	//------use for TAA------
+	*/
 };
 
 struct PixelOut
 {
+	float4 finalColor : SV_Target;
+	/*
 	float4 gBufferPosition : SV_Target;
+	
 	float4 gBufferNormal : SV_Target1;
 	float4 gVelocity : SV_Target2;
 	float4 gBufferAlbedo : SV_Target3;
 	float4 gBufferRoughnessMetallicAo : SV_Target4;
 	int gEditor : SV_Target5;
+	*/
 };
 
+/*
 static const float2 Halton_2_3[8] =
 {
 	float2(0.0f, -1.0f / 3.0f),
@@ -64,11 +72,13 @@ static const float2 Halton_2_3[8] =
 	float2(3.0f / 4.0f, 1.0f / 9.0f),
 	float2(-7.0f / 8.0f, 7.0f / 9.0f)
 };
+*/
 
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout = (VertexOut)0.0f;
 
+	/*
 	//------calculate jitter------
 	float deltaWidth = 1.0f / gWidth;
 	float deltaHeight = 1.0f / gHeight;
@@ -98,6 +108,12 @@ VertexOut VS(VertexIn vin)
 	vout.TexCoord = vin.TexCoord;
 
 	vout.Editor = gEditor;
+	*/
+
+	vout.PosH = float4(vin.PosL, 1.0f);//draw quad
+	vout.TexCoord = vin.TexCoord;
+
+
 	return vout;
 }
 
@@ -112,10 +128,8 @@ int ShadingModelID;
 float ClearCoat;
 float ClearCoatRoughness;
 };
-
 PixelOut PS(VertexOut pin){
-float4  ConstFloatValue159;
-ConstFloatValue159 = float4(0.000000, 0.000000, 0.000000, 0.000000);
+PixelOut pixelOut = (PixelOut)(0.0f);
 float2  TexCoordinate14 = float2(0, 0);
 TexCoordinate14 = pin.TexCoord;
 float4  ConstFloatValue101;
@@ -127,45 +141,6 @@ MulOutput24 = MulInputA22 * MulInputB23;
 float4  SinInputValue110 = MulOutput24;
 float4  SinOutputValue111 = float4(0, 0, 0, 1);
 SinOutputValue111 = sin(SinInputValue110);
-float4  InputValue116 = SinOutputValue111;
-float  OutputValue117 = 0;
-OutputValue117 = InputValue116.r;
-float4  InputValue121 = SinOutputValue111;
-float  OutputValue122 = 0;
-OutputValue122 = InputValue121.g;
-float  DotA51 = OutputValue117;
-float  DotB52 = OutputValue122;
-float4  Scalar53 = float4(0, 0, 0, 1);
-Scalar53 = dot(DotA51, DotB52);
-float  InputValue60 = Scalar53.x;
-float  CeilOutput61 = 0;
-CeilOutput61 = ceil(InputValue60);
-float4  X66 = ConstFloatValue159;
-float4  Y67 = a;
-float4  S68 = float4(CeilOutput61, CeilOutput61, CeilOutput61, CeilOutput61);
-float4  LerpOutput69 = float4(0, 0, 0, 1);
-LerpOutput69 = lerp(X66, Y67, S68);
-float4  ConstFloatValue130;
-ConstFloatValue130 = float4(1.000000, 0.000000, 0.000000, 1.000000);
-float4  Normal = float4(0, 0, 0, 1);
-float4  Albedo = LerpOutput69;
-float  Roughness = ConstFloatValue130.x;
-float  Metallic = ConstFloatValue130.y;
-float  Ao = 0;
-Normal = float4(pin.NormalW, 1.0f);
-PixelOut pixelOut = (PixelOut)(0.0f);
-pixelOut.gBufferPosition.xyz = pin.PosW;
-pixelOut.gBufferNormal.xyz = (Normal.xyz + 1.0f) / 2.0f;
-pixelOut.gBufferAlbedo.xyz = Albedo.xyz;
-pixelOut.gBufferAlbedo.w = ClearCoatRoughness;
-pixelOut.gVelocity.w = ClearCoat;
-pixelOut.gBufferRoughnessMetallicAo.x = Roughness;
-pixelOut.gBufferRoughnessMetallicAo.y = Metallic;
-pixelOut.gBufferRoughnessMetallicAo.z = Ao;
-pixelOut.gBufferRoughnessMetallicAo.w = ShadingModelID / 255.0f;
-float2 newPos = ((pin.nowScreenPosition.xy / pin.nowScreenPosition.w) * 0.5f + 0.5f);
-float2 prePos = ((pin.preScreenPosition.xy / pin.preScreenPosition.w) * 0.5f + 0.5f);
-pixelOut.gVelocity.xy = newPos - prePos;
-pixelOut.gVelocity.z = 0.0f;
+pixelOut.finalColor = SinOutputValue111;
 return pixelOut;
 }

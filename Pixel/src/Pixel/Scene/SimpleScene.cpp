@@ -32,6 +32,8 @@ namespace Pixel {
 		m_Registry.emplace<TransformComponent>(m_EntityHandle);
 		m_Registry.emplace<StaticMeshComponent>(m_EntityHandle);
 		m_Registry.get<StaticMeshComponent>(m_EntityHandle).m_Model = m_pModel;
+
+		m_Registry.get<TransformComponent>(m_EntityHandle).Translation = glm::vec3(0.0f, 0.0f, 0.2f);
 		//m_Registry.emplace<MaterialComponent>(m_EntityHandle);
 		//m_Registry.get<MaterialComponent>(m_EntityHandle).m_Materials.push_back(m_pSubMaterial);
 
