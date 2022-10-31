@@ -122,7 +122,6 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 //------material samplers------
 cbuffer CbMaterial : register(b2)
 {
-float4  a;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;
@@ -130,8 +129,8 @@ float ClearCoatRoughness;
 };
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-float2  TexCoordinate15 = float2(0, 0);
-TexCoordinate15 = pin.TexCoord;
-pixelOut.finalColor = float4(TexCoordinate15, 0.0f, 1.0f);
+float4  ConstFloatValue7;
+ConstFloatValue7 = float4(0.800000, 0.000000, 0.000000, 1.000000);
+pixelOut.finalColor = ConstFloatValue7;
 return pixelOut;
 }

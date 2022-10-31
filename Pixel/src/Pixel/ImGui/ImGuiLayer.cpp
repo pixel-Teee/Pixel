@@ -97,7 +97,7 @@ namespace Pixel {
 		Application& app = Application::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
-		m_srvHeap = DescriptorHeap::Create(L"ImGuiLayerSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 1024);
+		m_srvHeap = DescriptorHeap::Create(L"ImGuiLayerSrvHeap", DescriptorHeapType::CBV_UAV_SRV, 2048);
 		
 		std::static_pointer_cast<DirectXDescriptorHeap>(m_srvHeap)->GetComPtrHeap()->SetName(L"Imgui Descriptor Heap");
 

@@ -69,12 +69,18 @@ namespace Pixel {
 		//copy the these thexture's descriptor to descriptor heap
 		m_DirectoryHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
 		m_FileHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(1);
+		//TODO:need to remove this in the future
 		m_MaterialAssetTextureHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(5);
+
+		//temporarily is 256
+		m_MaterialAssertTextureFirstHandle = Application::Get().GetImGuiLayer()->GetSrvHeap()->Alloc(256);
+		m_CurrentMaterialAssertTextureHandleOffset = 0;
 		
 		Device::Get()->CopyDescriptorsSimple(1, m_DirectoryHandle->GetCpuHandle(), m_Directory->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 		Device::Get()->CopyDescriptorsSimple(1, m_FileHandle->GetCpuHandle(), m_File->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
 
 		m_IsOpen = false;
+		m_DelayToLoadImageNextFrame = false;
 		//m_IsOpenTestMaterialEditor = false;
 	}
 
@@ -190,6 +196,8 @@ namespace Pixel {
 
 		ImGui::Columns(CellNumber, 0, false);
 
+		m_CurrentMaterialAssertTextureHandleOffset = 0;//reset this offset
+
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
 		{		
 			const auto& path = directoryEntry.path();
@@ -255,16 +263,44 @@ namespace Pixel {
 					if (!std::filesystem::exists(previewImagePhysicalPath))
 					{
 						m_GenerateThumbNail(pMaterial);
+						m_DelayToLoadImageNextFrame = true;//when complete generate a nhumbnail, to load a image
 					}
 					else
 					{
 						//to load image
 						std::map<std::string, Ref<Texture2D>>& previewImages = AssetManager::GetSingleton().GetMaterialPreviewImages();
-						previewImages[previewImagePhysicalPath] = Texture2D::Create(previewImagePhysicalPath);
+						//check asset manager already load the preview image?
+						if (previewImages.find(previewImagePhysicalPath) == previewImages.end())
+						{
+							previewImages[previewImagePhysicalPath] = Texture2D::Create(previewImagePhysicalPath);
+						}
 					}
+					if (!m_DelayToLoadImageNextFrame)
+					{
+						//------delay to next frame to load image------
+						//paste thumbnail image
+						std::map<std::string, Ref<Texture2D>>& previewImages = AssetManager::GetSingleton().GetMaterialPreviewImages();
+						Ref<Texture2D> previewImage = previewImages[previewImagePhysicalPath];
 
-					//paste thumbnail image
+						++m_CurrentMaterialAssertTextureHandleOffset;
+						uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();
+						/*
+						std::vector<DescriptorHandle> handles;
+						for (uint32_t i = 0; i < 5; ++i)
+						{
+							DescriptorHandle handle = (*m_MaterialAssertTextureFirstHandle) + DescriptorSize;
 
+							handles.push_back(handle);
+						}
+						*/
+
+						DescriptorHandle handle = (*m_MaterialAssertTextureFirstHandle) + DescriptorSize * m_CurrentMaterialAssertTextureHandleOffset;
+						//copy descriptor to descriptor heap
+						Device::Get()->CopyDescriptorsSimple(1, handle.GetCpuHandle(), previewImage->GetCpuDescriptorHandle(), DescriptorHeapType::CBV_UAV_SRV);
+
+						ImGui::ImageButton((ImTextureID)(handle.GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
+						//------delay to next frame to load image------
+					}
 				}
 				else
 					ImGui::ImageButton((ImTextureID)(m_FileHandle->GetGpuHandle()->GetGpuPtr()), { ThumbnailSize, ThumbnailSize }, { 0, 1 }, { 1, 0 });
@@ -450,6 +486,8 @@ namespace Pixel {
 		//{
 		//	m_GraphNodeEditor->OnImGuiRender(m_IsOpenTestMaterialEditor);
 		//}
+
+		m_DelayToLoadImageNextFrame = false;
 	}
 
 	void ContentBrowserPanel::RegisterOpenGraphEditorCallBack(std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> func)

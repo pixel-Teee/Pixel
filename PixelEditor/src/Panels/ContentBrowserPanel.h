@@ -56,6 +56,12 @@ namespace Pixel {
 		Ref<GraphNodeEditor> m_GraphNodeEditor;
 		//------current open test material------
 
+		//------material asset texture preview image handle------
+		Ref<DescriptorHandle> m_MaterialAssertTextureFirstHandle;
+		uint32_t m_CurrentMaterialAssertTextureHandleOffset;
+		bool m_DelayToLoadImageNextFrame;
+		//------material asset texture preview image handle------
+
 		Ref<Framebuffer> m_pFramebuffer;
 
 		std::function<void(const std::string& virtualPath, const std::string& physicalPath, Ref<Material> pMaterial)> m_OpenGraphEditor;
