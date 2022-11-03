@@ -94,7 +94,7 @@ namespace Pixel {
 		//Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRenderingForSimpleScene(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this(), pTestMaterial);
+		Application::Get().GetRenderer()->DeferredRenderingForSimpleScene(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this(), pTestMaterial, ts);
 
 		pContext->Finish(true);
 

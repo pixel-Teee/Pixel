@@ -67,6 +67,7 @@
 #include "Pixel/Renderer/3D/Material/ShaderStringFactory.h"
 
 #include "Pixel/Core/Application.h"
+#include "Pixel/Core/Timestep.h"
 
 #include "stb_image.h"
 #include "stb_image_write.h"
@@ -683,7 +684,7 @@ namespace Pixel {
 	void DirectXRenderer::DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, 
 	std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials,
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene)
+	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene, Timestep& ts)
 	{
 		m_Width = pFrameBuffer->GetSpecification().Width;
 		m_Height = pFrameBuffer->GetSpecification().Height;
@@ -870,7 +871,7 @@ namespace Pixel {
 			GetShader(m_OpaqueItems[i].pStaticMesh, m_OpaqueItems[i].pMaterialInstance);
 			//------first to check the material instance's original material instance have shader?------
 
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass, ts);
 		}
 
 		//draw runtime camera's model
@@ -1125,7 +1126,7 @@ namespace Pixel {
 		//------use for TAA------
 	}
 
-	void DirectXRenderer::DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial)
+	void DirectXRenderer::DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans, std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans, Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial, Timestep& ts)
 	{
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
 
@@ -1282,7 +1283,7 @@ namespace Pixel {
 			//get shader
 			GetShader(m_OpaqueItems[i].pStaticMesh, m_OpaqueItems[i].pMaterialInstance);
 
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass, ts);
 		}
 		
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)
@@ -1416,7 +1417,7 @@ namespace Pixel {
 	std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials,
 	std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
 	Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer,
-	std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial)
+	std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial, Timestep& ts)
 	{
 		//render thumb nail scene
 		Ref<GraphicsContext> pContext = std::static_pointer_cast<GraphicsContext>(pGraphicsContext);
@@ -1574,7 +1575,7 @@ namespace Pixel {
 			//get shader
 			GetShader(m_OpaqueItems[i].pStaticMesh, m_OpaqueItems[i].pMaterialInstance);
 
-			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass);
+			m_OpaqueItems[i].pStaticMesh->Draw(pContext, m_OpaqueItems[i].transform, m_OpaqueItems[i].entityId, m_OpaqueItems[i].pMaterialInstance, tempPass, ts);
 		}
 
 		for (uint32_t i = 0; i < pDirectxFrameBuffer->m_pColorBuffers.size() - 1; ++i)

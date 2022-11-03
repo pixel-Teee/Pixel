@@ -18,6 +18,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Pixel/Core/Timestep.h"
+
 namespace Pixel {
 
 	StaticMesh::StaticMesh()
@@ -491,7 +493,7 @@ namespace Pixel {
 		m_MeshConstant.previousWorld = glm::transpose(transform);
 	}
 
-	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<MaterialInstance> pMaterialInstance, Ref<CbufferGeometryPass> geometryPass)
+	void StaticMesh::Draw(Ref<Context> pContext, const glm::mat4& transform, int32_t entityId, Ref<MaterialInstance> pMaterialInstance, Ref<CbufferGeometryPass> geometryPass, Timestep& ts)
 	{
 		//bind pso and root signature
 		Ref<Material> pOriginalMaterial = pMaterialInstance->GetMaterial();//get original material

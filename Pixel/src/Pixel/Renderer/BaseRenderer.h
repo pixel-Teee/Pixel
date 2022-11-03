@@ -17,6 +17,7 @@ namespace Pixel {
 	class ThumbNailScene;
 	class MaterialTreeComponent;
 	class PipelineLibrary;
+	class Timestep;
 	//renderer interface
 	class BaseRenderer
 	{
@@ -44,7 +45,7 @@ namespace Pixel {
 
 		virtual void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene) = 0;
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene, Timestep& ts) = 0;
 
 		virtual void DeferredRendering(Ref<Context> pGraphicsContext, Camera* pCamera, TransformComponent* pCameraTransformComponent, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
@@ -52,11 +53,11 @@ namespace Pixel {
 
 		virtual void DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial) = 0;
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial, Timestep& ts) = 0;
 
 		virtual void DeferredRenderingForThumbNailScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial) = 0;
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial, Timestep& ts) = 0;
 
 		virtual void RenderPickerBuffer(Ref<Context> pComputeContext, Ref<Framebuffer> pFrameBuffer) = 0;
 

@@ -360,6 +360,8 @@ namespace Pixel {
 
 		pMaterial->CreateConstValueDeclare(temp);
 
+		//add time
+		temp += "float time;\n";
 		//other information
 		temp += "bool HaveNormal;\n";
 

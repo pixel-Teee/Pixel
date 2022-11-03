@@ -599,7 +599,7 @@ namespace Pixel
 			//save the generate numbnail image to disk
 			std::string previewImagePhysicalPath = "assets/materials/preview/" + m_ToGenerateThumbNailMaterial->m_MaterialName + ".jpg";
 			//m_ThumbNailScene->OnUpdateEditorDeferred(m_ThumbNailSceneGeometryFrameBuffer, m_ThumbNailSceneLightFrameBuffer, m_ThumbNailSceneFinalColorFrameBuffer, )
-			m_ThumbNailScene->OnUpdateEditorDeferred(m_ThumbNailSceneCamera, m_ThumbNailSceneGeometryFrameBuffer, m_ThumbNailSceneLightFrameBuffer, m_ThumbNailSceneFinalColorFrameBuffer, m_ToGenerateThumbNailMaterial);
+			m_ThumbNailScene->OnUpdateEditorDeferred(m_ThumbNailSceneCamera, m_ThumbNailSceneGeometryFrameBuffer, m_ThumbNailSceneLightFrameBuffer, m_ThumbNailSceneFinalColorFrameBuffer, m_ToGenerateThumbNailMaterial, ts);
 			//from frame buffer to copy a image to disk
 			Application::Get().GetRenderer()->GenerateThumbNail(m_ThumbNailSceneFinalColorFrameBuffer, pTexture, previewImagePhysicalPath);
 			//Application::Get().GetRenderer()->GenerateThumbNail(m_ThumbNailSceneFinalColorFrameBuffer, );

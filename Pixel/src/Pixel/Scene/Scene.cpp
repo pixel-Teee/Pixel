@@ -761,7 +761,7 @@ namespace Pixel
 		Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys, std::get<1>(OutLineEntity), std::get<0>(OutLineEntity), shared_from_this());
+		Application::Get().GetRenderer()->DeferredRendering(pContext, camera, trans, meshs, materials, lights, lightTrans, pGeoFrameBuffer, pLightFrameBuffer, entityIds, cameras, cameraTransformComponents, cameraEntitys, std::get<1>(OutLineEntity), std::get<0>(OutLineEntity), shared_from_this(), ts);
 
 		for (uint32_t i = 0; i < cameras.size(); ++i)
 		{

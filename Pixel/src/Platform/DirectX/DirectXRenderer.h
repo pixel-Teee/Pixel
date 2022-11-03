@@ -66,15 +66,15 @@ namespace Pixel {
 
 		virtual void DeferredRendering(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 		std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene) override;
+		Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, std::vector<Camera*> pCamera, std::vector<TransformComponent*> cameraTransformant, std::vector<int32_t> cameraEntity, StaticMeshComponent* OutLineMesh, TransformComponent* OutLineMeshTransform, Ref<Scene> scene, Timestep& ts) override;
 
 		virtual void DeferredRenderingForSimpleScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial);
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<SimpleScene> pScene, Ref<Material> pTestMaterial, Timestep& ts);
 
 		virtual void DeferredRenderingForThumbNailScene(Ref<Context> pGraphicsContext, const EditorCamera& camera, std::vector<TransformComponent*> trans,
 			std::vector<StaticMeshComponent*> meshs, std::vector<MaterialTreeComponent*> materials, std::vector<LightComponent*> lights, std::vector<TransformComponent*> lightTrans,
-			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial) override;
+			Ref<Framebuffer> pFrameBuffer, Ref<Framebuffer> pLightFrameBuffer, std::vector<int32_t>& entityIds, Ref<ThumbNailScene> pScene, Ref<Material> pTestMaterial, Timestep& ts) override;
 
 		virtual void GenerateThumbNail(Ref<Framebuffer> pFinalColorBuffer, Ref<Texture2D>& pTexture, const std::string& physicalPath) override;
 

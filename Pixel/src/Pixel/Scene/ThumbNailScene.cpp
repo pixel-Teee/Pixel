@@ -11,6 +11,7 @@
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Core/Application.h"
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "Pixel/Core/Timestep.h"
 
 namespace Pixel {
 	ThumbNailScene::ThumbNailScene()
@@ -29,7 +30,7 @@ namespace Pixel {
 		m_Registry.emplace<TransformComponent>(m_LightEntityHandle);
 		m_Registry.get<LightComponent>(m_LightEntityHandle);
 	}
-	void ThumbNailScene::OnUpdateEditorDeferred(EditorCamera& editorCamera, Ref<Framebuffer>& pGeomFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Ref<Material> pTestMaterial)
+	void ThumbNailScene::OnUpdateEditorDeferred(EditorCamera& editorCamera, Ref<Framebuffer>& pGeomFrameBuffer, Ref<Framebuffer>& pLightFrameBuffer, Ref<Framebuffer>& pFinalFrameBuffer, Ref<Material> pTestMaterial, Timestep& ts)
 	{
 		auto group = m_Registry.group<TransformComponent>(entt::get<StaticMeshComponent, MaterialTreeComponent>);
 
@@ -80,7 +81,7 @@ namespace Pixel {
 		//Application::Get().GetRenderer()->ResetDescriptorHeapOffset();
 
 		Ref<Context> pContext = Device::Get()->GetContextManager()->AllocateContext(CommandListType::Graphics);
-		Application::Get().GetRenderer()->DeferredRenderingForThumbNailScene(pContext, editorCamera, trans, meshs, materials, lights, lightTrans, pGeomFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this(), pTestMaterial);
+		Application::Get().GetRenderer()->DeferredRenderingForThumbNailScene(pContext, editorCamera, trans, meshs, materials, lights, lightTrans, pGeomFrameBuffer, pLightFrameBuffer, entityIds, shared_from_this(), pTestMaterial, ts);
 
 		pContext->Finish(true);
 
