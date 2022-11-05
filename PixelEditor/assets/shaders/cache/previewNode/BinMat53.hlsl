@@ -123,6 +123,7 @@ SamplerState gsamPointWrap : register(s0);//static sampler
 cbuffer CbMaterial : register(b2)
 {
 float4  a;
+float time;
 bool HaveNormal;
 int ShadingModelID;
 float ClearCoat;

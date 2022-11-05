@@ -1,3 +1,4 @@
+#include "../Common/Common.hlsl"
 //------mesh constants------
 cbuffer cbPerObject : register(b0)
 {
@@ -17,50 +18,6 @@ cbuffer cbPass : register(b1)
 	float gHeight;
 };
 
-struct VertexIn
-{
-	float3 PosL : POSITION;
-	float2 TexCoord : TEXCOORD;
-	/*
-	float3 NormalL : NORMAL;
-	float3 TangentL : TANGENT;
-	float3 BinormalL : BINORMAL;
-	*/
-	//int Editor : EDITOR;
-};
-
-struct VertexOut
-{
-	float4 PosH : SV_POSITION;
-	float2 TexCoord : TEXCOORD;
-	/*
-	float3 NormalW : NORMAL;
-	float3 TangentW : TANGENT;
-	float3 BinormalW : BINORMAL;
-	int Editor : EDITOR;
-
-	//------use for TAA------
-	float4 preScreenPosition : POSITION2;
-	float4 nowScreenPosition : POSITION3;
-	//------use for TAA------
-	*/
-};
-
-struct PixelOut
-{
-	float4 finalColor : SV_Target;
-	/*
-	float4 gBufferPosition : SV_Target;
-	
-	float4 gBufferNormal : SV_Target1;
-	float4 gVelocity : SV_Target2;
-	float4 gBufferAlbedo : SV_Target3;
-	float4 gBufferRoughnessMetallicAo : SV_Target4;
-	int gEditor : SV_Target5;
-	*/
-};
-
-/*
 static const float2 Halton_2_3[8] =
 {
 	float2(0.0f, -1.0f / 3.0f),
@@ -72,13 +29,11 @@ static const float2 Halton_2_3[8] =
 	float2(3.0f / 4.0f, 1.0f / 9.0f),
 	float2(-7.0f / 8.0f, 7.0f / 9.0f)
 };
-*/
 
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout = (VertexOut)0.0f;
 
-	/*
 	//------calculate jitter------
 	float deltaWidth = 1.0f / gWidth;
 	float deltaHeight = 1.0f / gHeight;
@@ -99,46 +54,20 @@ VertexOut VS(VertexIn vin)
 	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
 	vout.PosW = posW.xyz;
 
+#if HAVE_NORMAL > 0
 	vout.NormalW = mul(vin.NormalL, (float3x3)transpose(ginvWorld));
+#endif
+
+#if HAVE_TANGENT > 0
 	vout.TangentW = mul(vin.TangentL, (float3x3)transpose(ginvWorld));
+#endif
 	//homogeneous clipping
 	//vout.PosH = mul(posW, gView);
 	vout.PosH = mul(mul(posW, gViewProjection), jitterMat);
 
+#if HAVE_TEXCOORD > 0
 	vout.TexCoord = vin.TexCoord;
-
+#endif
 	vout.Editor = gEditor;
-	*/
-
-	vout.PosH = float4(vin.PosL, 1.0f);//draw quad
-	vout.TexCoord = vin.TexCoord;
-
-
 	return vout;
-}
-
-//------material samplers------
-SamplerState gsamPointWrap : register(s0);//static sampler
-//------material samplers------
-cbuffer CbMaterial : register(b2)
-{
-float4  a;
-float time;
-bool HaveNormal;
-int ShadingModelID;
-float ClearCoat;
-float ClearCoatRoughness;
-};
-PixelOut PS(VertexOut pin){
-PixelOut pixelOut = (PixelOut)(0.0f);
-float2  TexCoordinate14 = float2(0, 0);
-TexCoordinate14 = pin.TexCoord;
-float4  ConstFloatValue101;
-ConstFloatValue101 = float4(12.560000, 12.560000, 0.000000, 1.000000);
-float4  MulInputA22 = float4(TexCoordinate14.x, TexCoordinate14.y, TexCoordinate14.y, TexCoordinate14.y);
-float4  MulInputB23 = ConstFloatValue101;
-float4  MulOutput24 = float4(0, 0, 0, 1);
-MulOutput24 = MulInputA22 * MulInputB23;
-pixelOut.finalColor = MulOutput24;
-return pixelOut;
 }

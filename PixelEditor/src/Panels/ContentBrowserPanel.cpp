@@ -461,6 +461,12 @@ namespace Pixel {
 						m_IsGraphEditorAlive(true);
 						//m_GraphNodeEditor = CreateRef<GraphNodeEditor>(graphNodeEditorPath, materialPhysicalPath, m_pMaterial, m_pFramebuffer);
 					}
+
+					if (AssetManager::GetSingleton().IsInMaterialInstanceAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					{
+						//open material instance editor
+						m_OpenMaterialInstanceEditor(AssetManager::GetSingleton().GetVirtualPath(itemPath));
+					}
 				}
 
 				ImGui::TextWrapped("%s", filenameString.c_str());
@@ -504,6 +510,11 @@ namespace Pixel {
 	void ContentBrowserPanel::RegisterGenerateThumbNail(std::function<void(Ref<Material>pMaterial)> func)
 	{
 		m_GenerateThumbNail = func;
+	}
+
+	void ContentBrowserPanel::RegisterOpenMaterialInstanceEditor(std::function<void(const std::string&)> func)
+	{
+		m_OpenMaterialInstanceEditor = func;
 	}
 
 	void ContentBrowserPanel::CreateMaterialInstance(std::string& virtualPath)

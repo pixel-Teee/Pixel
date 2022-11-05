@@ -68,6 +68,8 @@ namespace Pixel {
 			return m_PhysicalPathToVirtualPathScene[filePath];
 		if (m_VirtualPathToPhysicalPathMaterial.find(filePath) != m_VirtualPathToPhysicalPathMaterial.end())
 			return m_VirtualPathToPhysicalPathMaterial[filePath];
+		if (m_VirtualPathToPhysicalPathMaterialInstance.find(filePath) != m_VirtualPathToPhysicalPathMaterialInstance.end())
+			return m_VirtualPathToPhysicalPathMaterialInstance[filePath];
 		return "";
 	}
 

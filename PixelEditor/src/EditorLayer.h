@@ -10,6 +10,7 @@
 namespace Pixel
 {
 	class ThumbNailScene;
+	class MaterialInstanceEditor;
 	class EditorLayer : public Pixel::Layer
 	{
 	public:
@@ -47,6 +48,8 @@ namespace Pixel
 
 		//virtual path is asset manager
 		void GenerateThumbNail(Ref<Material> pMaterial);
+
+		void CreateMaterialInstanceEditor(const std::string& virtualPath);
 	private:
 		OrthographicCameraController m_CameraController;
 
@@ -140,6 +143,9 @@ namespace Pixel
 
 		std::string m_CurrentThumbNailMaterialVirtualPath;
 		bool m_ToGenerateThumbNail;
+
+		Ref<MaterialInstanceEditor> m_CurrentMaterialInstanceEditor;
+		bool m_IsCurrentMaterialInstanceEditorAlive;
 	};
 }
 

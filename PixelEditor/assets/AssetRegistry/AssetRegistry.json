@@ -1,1 +1,18 @@
-{"Texture":[],"Scene":[],"Model":[{"Model\\Cube":"models\\Cube\\Cube.fbx"},{"Model\\TestSphere":"models\\Sphere\\TestSphere.fbx"}],"Material":[],"TestMaterial":[{"TestMaterial\\BinMat4":"materials\\BinMat4.tmat"},{"TestMaterial\\BinMat5":"materials\\BinMat5.tmat"}],"MaterialInstance":[{"MaterialInstance\\BinMat5":"materials\\BinMat5.imat"},{"MaterialInstance\\BinMat7":"materials\\BinMat7.imat"}]}
+{
+  "Texture": [],
+  "Scene": [],
+  "Model": [
+    { "Model\\Cube": "models\\Cube\\Cube.fbx" },
+    { "Model\\TestSphere": "models\\Sphere\\TestSphere.fbx" }
+  ],
+  "Material": [],
+  "TestMaterial": [
+    { "TestMaterial\\BinMat4": "materials\\BinMat4.tmat" },
+    { "TestMaterial\\BinMat5": "materials\\BinMat5.tmat" },
+    { "TestMaterial\\BinMat7": "materials\\BinMat7.tmat" }
+  ],
+  "MaterialInstance": 
+  [
+    { "MaterialInstance\\BinMat5": "materials\\BinMat5.imat" },
+    { "MaterialInstance\\BinMat7": "materials\\BinMat7.imat" }
+  ]}

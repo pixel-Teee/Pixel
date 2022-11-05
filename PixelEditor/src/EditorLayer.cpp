@@ -14,6 +14,8 @@
 #include "Pixel/Renderer/BaseRenderer.h"
 #include "Pixel/Scene/ThumbNailScene.h"
 #include "Pixel/Renderer/3D/Material/Material.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "GraphNode/MaterialInstanceEditor.h"
 
 #include <chrono>
 
@@ -201,6 +203,7 @@ namespace Pixel
 
 		m_ContentBrowserPanel.RegisterGenerateThumbNail(std::bind(&EditorLayer::GenerateThumbNail, this, std::placeholders::_1));
 	
+		m_ContentBrowserPanel.RegisterOpenMaterialInstanceEditor(std::bind(&EditorLayer::CreateMaterialInstanceEditor, this, std::placeholders::_1));
 		//Set Sky Box
 		//ownership is belgon to Renderer3D
 		//m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
@@ -531,6 +534,13 @@ namespace Pixel
 			m_CurrentGraphNodeEditor->OnImGuiRender(m_IsCurrentGraphNodeEditorAlive);
 		}
 		/*------Graph Node Editor------*/
+
+		/*------material instance editor------*/
+		if (m_CurrentMaterialInstanceEditor != nullptr && m_IsCurrentMaterialInstanceEditorAlive)
+		{
+			m_CurrentMaterialInstanceEditor->OnImGuiRenderer(m_IsCurrentMaterialInstanceEditorAlive);
+		}
+		/*------material instance editor------*/
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -885,6 +895,11 @@ namespace Pixel
 		m_ToGenerateThumbNail = true;
 		m_ToGenerateThumbNailMaterial = pMaterial;
 		m_ThumbNailScene->SetModelMaterial(pMaterial);
+	}
+
+	void EditorLayer::CreateMaterialInstanceEditor(const std::string& virtualPath)
+	{
+		m_CurrentMaterialInstanceEditor = CreateRef<MaterialInstanceEditor>(virtualPath);
 	}
 
 }
