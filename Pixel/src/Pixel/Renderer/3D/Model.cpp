@@ -8,6 +8,10 @@
 #include "Pixel/Scene/Components/TestMaterialComponent.h"
 #include "Pixel/Animation/Bone.h"
 #include "Pixel/Animation/Skeleton.h"
+#include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "Pixel/Renderer/3D/Material/CustomTexture2D.h"
+
+#include <filesystem>
 
 namespace Pixel {
 
@@ -78,6 +82,11 @@ namespace Pixel {
 		return std::make_shared<Model>(path);
 	}
 
+	Ref<Model> Model::Create(const std::string& path, MaterialTreeComponent& materialTreeComponent)
+	{
+		return std::make_shared<Model>(path, materialTreeComponent);
+	}
+
 	void Model::DrawShadowMap(const glm::mat4& transform, Ref<Context> pContext, Ref<Shader> pShader, int32_t entityId)
 	{
 		for (uint32_t i = 0; i < m_Meshes.size(); ++i)
@@ -98,6 +107,8 @@ namespace Pixel {
 			return;
 		}
 
+		m_ModelPath = path;//record model path
+
 		m_directory = path.substr(path.find_last_of("/\\"));
 
 		//read bone hierarchy from aiScene's aiNode
@@ -109,6 +120,48 @@ namespace Pixel {
 		ReadHeirarchyData(scene->mRootNode, pBone);
 
 		ProcessNode(scene->mRootNode, scene);
+	}
+
+	void Model::LoadModel(const std::string& path, MaterialTreeComponent& materialTreeComponent)
+	{
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			PX_CORE_ASSERT("ERROR::ASSIMP::{0}", importer.GetErrorString());
+			return;
+		}
+
+		m_MaterialIndex = 0;
+
+		m_ModelPath = path;
+
+		m_directory = path.substr(path.find_last_of("/\\"));
+
+		//read bone hierarchy from aiScene's aiNode
+		//m_pSkeleton = CreateRef<Skeleton>();
+		//Ref<Bone> pBone = CreateRef<Bone>();
+		//m_pSkeleton->m_BoneArray.push_back(pBone);
+
+		//read heirarchy data
+		//ReadHeirarchyData(scene->mRootNode, pBone);
+
+		ProcessNode(scene->mRootNode, scene, materialTreeComponent);
+	}
+
+	void Model::ProcessNode(aiNode* node, const aiScene* scene, MaterialTreeComponent& materialTreeComponent)
+	{
+		for (uint32_t i = 0; i < node->mNumMeshes; ++i)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			m_Meshes.push_back(ProcessMesh(mesh, scene, materialTreeComponent));
+		}
+
+		for (uint32_t i = 0; i < node->mNumChildren; ++i)
+		{
+			ProcessNode(node->mChildren[i], scene, materialTreeComponent);
+		}
 	}
 
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
@@ -388,6 +441,513 @@ namespace Pixel {
 		//		indices.push_back(face.mIndices[j]);
 		//	}
 		//}
+
+		return staticMesh;
+	}
+
+	Ref<StaticMesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, MaterialTreeComponent& materialTreeComponent)
+	{
+		Ref<StaticMesh> staticMesh = CreateRef<StaticMesh>();
+		staticMesh->m_Name = mesh->mName.C_Str();//assign name
+		std::vector<BufferElement> elements;
+
+		uint32_t bufferSize = 0;
+		//------Allocator Memory------
+		if (mesh->HasPositions())
+		{
+			//position 12 byte
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::POSITION] = new unsigned char[mesh->mNumVertices * 3 * 4];
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::POSITION] = mesh->mNumVertices * 3 * 4;
+			elements.push_back({ ShaderDataType::Float3, "a_Pos", Semantics::POSITION });
+			bufferSize += mesh->mNumVertices * 12;
+		}
+
+		if (mesh->HasTextureCoords(0))
+		{
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::TEXCOORD] = new unsigned char[mesh->mNumVertices * 2 * 4];
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::TEXCOORD] = mesh->mNumVertices * 2 * 4;
+			elements.push_back({ ShaderDataType::Float2, "a_TexCoord", Semantics::TEXCOORD });
+			bufferSize += mesh->mNumVertices * 8;
+		}
+
+		if (mesh->HasNormals())
+		{
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::NORMAL] = new unsigned char[mesh->mNumVertices * 3 * 4];
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::NORMAL] = mesh->mNumVertices * 3 * 4;
+			elements.push_back({ ShaderDataType::Float3, "a_Normal", Semantics::NORMAL });
+			bufferSize += mesh->mNumVertices * 12;
+		}
+
+		if (mesh->HasTangentsAndBitangents())
+		{
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::TANGENT] = new unsigned char[mesh->mNumVertices * 3 * 4];
+			staticMesh->m_DataBuffer[(uint64_t)Semantics::BINORMAL] = new unsigned char[mesh->mNumVertices * 3 * 4];
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::TANGENT] = mesh->mNumVertices * 3 * 4;
+			staticMesh->m_DataBufferSize[(uint64_t)Semantics::BINORMAL] = mesh->mNumVertices * 3 * 4;
+			elements.push_back({ ShaderDataType::Float3, "a_Tangent", Semantics::TANGENT });
+			elements.push_back({ ShaderDataType::Float3, "a_Binormal", Semantics::BINORMAL });
+			bufferSize += mesh->mNumVertices * 24;
+		}
+
+		//if (mesh->HasBones())
+		//{
+		//	staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT] = new unsigned char[mesh->mNumVertices * 4 * 4];//float4
+		//	staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES] = new unsigned char[mesh->mNumVertices * 4 * 4];//int4
+		//	staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDWEIGHT] = mesh->mNumVertices * 4 * 4;
+		//	staticMesh->m_DataBufferSize[(uint64_t)Semantics::BLENDINDICES] = mesh->mNumVertices * 4 * 4;
+		//	elements.push_back({ ShaderDataType::Float4, "a_BlendWeight", Semantics::BLENDWEIGHT });
+		//	elements.push_back({ ShaderDataType::Int4, "a_BlendIndices", Semantics::BLENDINDICES });
+		//	bufferSize += mesh->mNumVertices * 32;
+		//
+		//	memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT], 0, mesh->mNumVertices * 4 * 4);
+		//	memset(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES], 0, mesh->mNumVertices * 4 * 4);
+		//
+		//	//std::vector<glm::ivec4> boneIndices;
+		//	std::vector<Ref<Bone>> tempBones;
+		//	for (int32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+		//	{
+		//		std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+		//
+		//		Ref<Bone> pBone;
+		//		uint32_t index = -1;
+		//		for (size_t i = 0; i < tempBones.size(); ++i)
+		//		{
+		//			if (tempBones[i]->m_Name == boneName)
+		//			{
+		//				pBone = tempBones[i];
+		//				index = i;
+		//				break;
+		//			}
+		//		}
+		//
+		//		if (pBone == nullptr)
+		//		{
+		//			tempBones.push_back(m_pSkeleton->GetBone(boneName));
+		//			index = tempBones.size() - 1;//index
+		//		}
+		//
+		//		aiVertexWeight* weights = mesh->mBones[boneIndex]->mWeights;
+		//		int32_t numWeights = mesh->mBones[boneIndex]->mNumWeights;
+		//
+		//		for (int32_t weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+		//		{
+		//			int32_t vertexId = weights[weightIndex].mVertexId;
+		//			float weight = weights[weightIndex].mWeight;
+		//			
+		//			//set to vertices
+		//			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * weightIndex], &weight, 4);
+		//			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * weightIndex], &index, 4);
+		//			for (int32_t j = 0; j < 4; ++j)
+		//			{
+		//				float* temp = (float*)(&(staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16]));
+		//				if (temp[j] == 0)//blend weight
+		//				{
+		//					memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDWEIGHT][vertexId * 16 + 4 * j], &weight, 4);
+		//					memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BLENDINDICES][vertexId * 16 + 4 * j], &index, 4);
+		//					break;
+		//				}
+		//			}
+		//		}
+		//	}
+		//
+		//	staticMesh->m_AffectBones = tempBones;
+		//	staticMesh->m_FinalMatrices.resize(staticMesh->m_AffectBones.size());//resize
+		//}
+		//------Editor------
+		//staticMesh->m_DataBuffer[(uint64_t)Semantics::Editor] = new unsigned char[mesh->mNumVertices * 4];
+		//staticMesh->m_DataBufferSize[(uint64_t)Semantics::Editor] = mesh->mNumVertices * 4;
+		//elements.push_back({ ShaderDataType::Int, "a_EntityID", Semantics::Editor });
+		//bufferSize += mesh->mNumVertices * 4;
+		//------Editor------
+		//------Allocator Memory------
+
+		//staticMesh->m_VertexBuffer = VertexBuffer::Create(bufferSize);
+
+		int32_t id = -1;
+		for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
+		{
+			if (mesh->HasPositions())
+			{
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::POSITION][i * 12], &mesh->mVertices[i].x, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::POSITION][i * 12 + 4], &mesh->mVertices[i].y, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::POSITION][i * 12 + 8], &mesh->mVertices[i].z, 4);
+			}
+
+			if (mesh->HasTextureCoords(0))
+			{
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::TEXCOORD][i * 8], &mesh->mTextureCoords[0][i].x, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::TEXCOORD][i * 8 + 4], &mesh->mTextureCoords[0][i].y, 4);
+			}
+
+			if (mesh->HasNormals())
+			{
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::NORMAL][i * 12], &mesh->mNormals[i].x, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::NORMAL][i * 12 + 4], &mesh->mNormals[i].y, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::NORMAL][i * 12 + 8], &mesh->mNormals[i].z, 4);
+			}
+
+			if (mesh->HasTangentsAndBitangents())
+			{
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::TANGENT][i * 12], &mesh->mTangents[i].x, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::TANGENT][i * 12 + 4], &mesh->mTangents[i].y, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::TANGENT][i * 12 + 8], &mesh->mTangents[i].z, 4);
+
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BINORMAL][i * 12], &mesh->mNormals[i].x, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BINORMAL][i * 12 + 4], &mesh->mNormals[i].y, 4);
+				memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::BINORMAL][i * 12 + 8], &mesh->mNormals[i].z, 4);
+			}
+
+			//---Editor---
+			//memcpy(&staticMesh->m_DataBuffer[(uint64_t)Semantics::Editor][i * 4], &id, 4);
+			//---Editor---
+		}
+		BufferLayout layout{ elements };
+
+		//Calculate Offset
+		elements = layout.GetElements();
+
+		//------Alternation Copy TO VRM------
+		staticMesh->m_AlternationDataBuffer = new unsigned char[bufferSize];
+		for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
+		{
+			for (uint32_t j = 0; j < elements.size(); ++j)
+			{
+				Semantics semantics = elements[j].m_sematics;
+
+				memcpy(&staticMesh->m_AlternationDataBuffer[i * layout.GetStride() + elements[j].Offset],
+					&staticMesh->m_DataBuffer[(uint64_t)semantics][i * elements[j].Size], elements[j].Size);
+			}
+		}
+		//------Alternation Copy TO VRM------
+
+		staticMesh->m_VertexBuffer = VertexBuffer::Create((float*)staticMesh->m_AlternationDataBuffer, mesh->mNumVertices, layout.GetStride());
+		//staticMesh->m_VertexBuffer->SetData(staticMesh->m_AlternationDataBuffer, bufferSize);
+		staticMesh->m_VertexBuffer->SetLayout(layout);
+		staticMesh->m_AlternationDataBufferSize = bufferSize;
+
+		uint32_t IndexOffset = 0;
+		uint32_t IndexNums = 0;
+		staticMesh->m_Index = new unsigned char[mesh->mNumFaces * 3 * 4];
+		staticMesh->m_IndexSize = mesh->mNumFaces * 3 * 4;
+		for (uint32_t i = 0; i < mesh->mNumFaces; ++i)
+		{
+			aiFace face = mesh->mFaces[i];
+			//one face == one primitive
+			for (uint32_t j = 0; j < face.mNumIndices; ++j)
+			{
+				memcpy(&staticMesh->m_Index[IndexOffset], &face.mIndices[j], sizeof(uint32_t));
+				IndexOffset += sizeof(uint32_t);
+				++IndexNums;
+			}
+		}
+
+		staticMesh->m_IndexBuffer = IndexBuffer::Create((uint32_t*)staticMesh->m_Index, IndexNums);
+
+
+		//------load texture------
+		if (mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+			size_t slashPos = m_ModelPath.find_last_of('/\\');
+
+			std::string prefixPath = m_ModelPath.substr(0, slashPos);
+
+			std::filesystem::path relativePath(prefixPath + "\\" + std::to_string(m_MaterialIndex) + ".imat");
+			
+			++m_MaterialIndex;
+
+			//to absoulte path
+			std::filesystem::path absolutePath = std::filesystem::absolute(relativePath);
+
+			std::filesystem::path assetPrefixPath("assets");
+
+			std::filesystem::path tempRelativePath(relativePath);
+
+			std::filesystem::path tempPath(std::filesystem::relative(tempRelativePath, assetPrefixPath));//get rid of assets prefix
+
+			//create a new material instance
+			//AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(tempPath);
+
+			Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
+
+			std::string materialVirtualPath = "TestMaterial\\Sponza";
+
+			pMaterialInstance->SetMaterial(materialVirtualPath);//set material virtual path
+
+			AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(relativePath), pMaterialInstance);
+
+			AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(relativePath);
+			
+			materialTreeComponent.AddMaterialInstance();
+			materialTreeComponent.m_MaterialPaths.back() = AssetManager::GetSingleton().GetVirtualPath(tempPath.string());
+			materialTreeComponent.m_Materials.back() = pMaterialInstance;
+
+			materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture.resize(3);//resize
+
+			//AssetManager::GetSingleton().AddTextureToAssetRegistry(physicalFilePath);
+			if (material->GetTextureCount(aiTextureType::aiTextureType_BASE_COLOR) > 0)
+			{
+				aiString str;//str is path
+				material->GetTexture(aiTextureType::aiTextureType_BASE_COLOR, 0, &str);
+
+				size_t slashPos = m_ModelPath.find_last_of('/\\');
+
+				std::string prefixPath = m_ModelPath.substr(0, slashPos);
+
+				std::filesystem::path relativePath(prefixPath + "\\" + str.C_Str());
+				//to absoulte path
+				std::filesystem::path absolutePath = std::filesystem::absolute(relativePath);
+
+				std::filesystem::path assetPrefixPath("assets");
+
+				std::filesystem::path tempPath(std::filesystem::relative(relativePath, assetPrefixPath));//get rid of assets
+
+				//check whether it has been added
+				if (!AssetManager::GetSingleton().IsInAssetRegistry(tempPath.string()))
+				{
+					AssetManager::GetSingleton().AddTextureToAssetRegistry(absolutePath.c_str());
+
+					/*
+					//create a material instance to disk
+					Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
+
+					std::string materialVirtualPath = "TestMaterial\\Sponza";
+
+					pMaterialInstance->SetMaterial(materialVirtualPath);
+
+					AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
+
+					AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
+
+					//create material instance
+					materialTreeComponent.m_MaterialPaths;
+					*/
+				}
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[1] = CreateRef<CustomTexture2D>();
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[1]->ConstValueName = "MyAlbedo";//HardCode
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[1]->m_VirtualPath = AssetManager::GetSingleton().GetVirtualPath(tempPath.string());
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[1]->m_pTexture = AssetManager::GetSingleton().GetTexture(materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[1]->m_VirtualPath);
+			}
+			
+			if (material->GetTextureCount(aiTextureType::aiTextureType_NORMALS) > 0)
+			{
+				aiString str;//str is path
+				material->GetTexture(aiTextureType::aiTextureType_NORMALS, 0, &str);
+
+				size_t slashPos = m_ModelPath.find_last_of('/\\');
+
+				std::string prefixPath = m_ModelPath.substr(0, slashPos);
+
+				std::filesystem::path relativePath(prefixPath + "\\" + str.C_Str());
+				//to absoulte path
+				std::filesystem::path absolutePath = std::filesystem::absolute(relativePath);
+
+				std::filesystem::path assetPrefixPath("assets");
+
+				std::filesystem::path tempPath(std::filesystem::relative(relativePath, assetPrefixPath));//get rid of assets
+
+				//check whether it has been added
+				if (!AssetManager::GetSingleton().IsInAssetRegistry(tempPath.string()))
+				{
+					AssetManager::GetSingleton().AddTextureToAssetRegistry(absolutePath.c_str());
+
+					/*
+					//create a material instance to disk
+					Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
+
+					std::string materialVirtualPath = "TestMaterial\\Sponza";
+
+					pMaterialInstance->SetMaterial(materialVirtualPath);
+
+					AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
+
+					AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
+
+					//create material instance
+					materialTreeComponent.m_MaterialPaths;
+					*/
+				}
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[0] = CreateRef<CustomTexture2D>();
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[0]->ConstValueName = "MyNormal";//HardCode
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[0]->m_VirtualPath = AssetManager::GetSingleton().GetVirtualPath(tempPath.string());
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[0]->m_pTexture = AssetManager::GetSingleton().GetTexture(materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[0]->m_VirtualPath);
+			}
+
+			{
+				aiString str;//str is path
+				aiString tempStr;
+				material->GetTexture(aiTextureType_UNKNOWN, 0, &str);
+
+				if (str != tempStr)
+				{
+					size_t slashPos = m_ModelPath.find_last_of('/\\');
+
+					std::string prefixPath = m_ModelPath.substr(0, slashPos);
+
+					std::filesystem::path relativePath(prefixPath + "\\" + str.C_Str());
+					//to absoulte path
+					std::filesystem::path absolutePath = std::filesystem::absolute(relativePath);
+
+					std::filesystem::path assetPrefixPath("assets");
+
+					std::filesystem::path tempPath(std::filesystem::relative(relativePath, assetPrefixPath));//get rid of assets
+
+					//check whether it has been added
+					if (!AssetManager::GetSingleton().IsInAssetRegistry(tempPath.string()))
+					{
+						AssetManager::GetSingleton().AddTextureToAssetRegistry(absolutePath.c_str());
+
+						/*
+						//create a material instance to disk
+						Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
+
+						std::string materialVirtualPath = "TestMaterial\\Sponza";
+
+						pMaterialInstance->SetMaterial(materialVirtualPath);
+
+						AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
+
+						AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
+
+						//create material instance
+						materialTreeComponent.m_MaterialPaths;
+						*/
+					}
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2] = CreateRef<CustomTexture2D>();
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->ConstValueName = "MyMetallicRoughness";//HardCode
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_VirtualPath = AssetManager::GetSingleton().GetVirtualPath(tempPath.string());
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_pTexture = AssetManager::GetSingleton().GetTexture(materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_VirtualPath);
+				}
+			}
+
+			{
+				aiString str;//str is path
+				aiString tempStr;
+				material->GetTexture(aiTextureType_UNKNOWN, 0, &str);
+
+				if (str != tempStr)
+				{
+					size_t slashPos = m_ModelPath.find_last_of('/\\');
+
+					std::string prefixPath = m_ModelPath.substr(0, slashPos);
+
+					std::filesystem::path relativePath(prefixPath + "\\" + str.C_Str());
+					//to absoulte path
+					std::filesystem::path absolutePath = std::filesystem::absolute(relativePath);
+
+					std::filesystem::path assetPrefixPath("assets");
+
+					std::filesystem::path tempPath(std::filesystem::relative(relativePath, assetPrefixPath));//get rid of assets
+
+					//check whether it has been added
+					if (!AssetManager::GetSingleton().IsInAssetRegistry(tempPath.string()))
+					{
+						AssetManager::GetSingleton().AddTextureToAssetRegistry(absolutePath.c_str());
+
+						/*
+						//create a material instance to disk
+						Ref<MaterialInstance> pMaterialInstance = CreateRef<MaterialInstance>();
+
+						std::string materialVirtualPath = "TestMaterial\\Sponza";
+
+						pMaterialInstance->SetMaterial(materialVirtualPath);
+
+						AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
+
+						AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
+
+						//create material instance
+						materialTreeComponent.m_MaterialPaths;
+						*/
+					}
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2] = CreateRef<CustomTexture2D>();
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->ConstValueName = "MyMetallicRoughness";//HardCode
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_VirtualPath = AssetManager::GetSingleton().GetVirtualPath(tempPath.string());
+					materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_pTexture = AssetManager::GetSingleton().GetTexture(materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_VirtualPath);
+				}			
+			}
+
+			if (materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[0]->m_pTexture == nullptr ||
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[1]->m_pTexture == nullptr ||
+				materialTreeComponent.m_Materials.back()->m_PSShaderCustomTexture[2]->m_pTexture == nullptr)
+			{
+				materialTreeComponent.m_Materials.pop_back();
+				materialTreeComponent.m_MaterialPaths.pop_back();//get rid garbage
+			}
+
+			//resave
+			AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(relativePath), pMaterialInstance);
+		}
+		//------load texture------
+
+		//create pso
+		//staticMesh->PsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
+		//staticMesh->PsoIndex = Application::Get().GetRenderer()->CreateDeferredPso(layout);
+		//staticMesh->TransParentPsoIndex = Application::Get().GetRenderer()->CreatePso(layout);
+		//std::vector<Vertex> vertices;
+		//std::vector<uint32_t> indices;
+
+		//for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
+		//{
+		//	Vertex vertex;
+		//	glm::vec3 vector;
+
+		//	if (mesh->HasPositions())
+		//	{		
+		//		vector.x = mesh->mVertices[i].x;
+		//		vector.y = mesh->mVertices[i].y;
+		//		vector.z = mesh->mVertices[i].z;
+		//		vertex.Pos = vector;
+		//	}
+
+		//	if (mesh->HasNormals())
+		//	{
+		//		vector.x = mesh->mNormals[i].x;
+		//		vector.y = mesh->mNormals[i].y;
+		//		vector.z = mesh->mNormals[i].z;
+		//		vertex.Normal = vector;
+		//	}
+		//	
+		//	if (mesh->HasTangentsAndBitangents())
+		//	{
+		//		vector.x = mesh->mTangents[i].x;
+		//		vector.y = mesh->mTangents[i].y;
+		//		vector.z = mesh->mTangents[i].z;
+		//		//vertex.Tangent = vector;
+		//	}
+		//	//tangent
+		//	//vector.x = mesh->mTangents[i].x;
+		//	//vector.y = mesh->mTangents[i].y;
+		//	//vector.z = mesh->mTangents[i].z;
+		//	//vertex.Tangent = vector;
+
+		//	//tex coord
+		//	if (mesh->mTextureCoords[0])
+		//	{
+		//		glm::vec2 vec;
+		//		vec.x = mesh->mTextureCoords[0][i].x;
+		//		vec.y = mesh->mTextureCoords[0][i].y;
+		//		vertex.TexCoord = vec;
+		//	}
+		//	else
+		//		vertex.TexCoord = glm::vec2(0.0f, 0.0f);
+
+		//	vertex.EntityID = -1;
+
+		//	vertices.push_back(vertex);
+		//}
+
+		//for (uint32_t i = 0; i < mesh->mNumFaces; ++i)
+		//{
+		//	aiFace face = mesh->mFaces[i];
+		//	for (uint32_t j = 0; j < face.mNumIndices; ++j)
+		//	{
+		//		indices.push_back(face.mIndices[j]);
+		//	}
+		//}
+		
+		//create material instance 
 
 		return staticMesh;
 	}

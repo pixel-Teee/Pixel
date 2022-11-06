@@ -466,6 +466,7 @@ namespace Pixel {
 			newEntity.AddComponent<MaterialTreeComponent>();
 			rttr::instance obj = newEntity.GetComponent<MaterialTreeComponent>();
 			FromJsonRecursive(obj, object["MaterialTreeComponent"], false);
+			newEntity.GetComponent<MaterialTreeComponent>().PostLoad();
 		}
 	}
 

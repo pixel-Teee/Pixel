@@ -2,6 +2,7 @@
 
 namespace Pixel {
 	class MaterialInstance;
+
 	struct Meta(Enable) MaterialTreeComponent
 	{
 		Meta()
@@ -9,10 +10,13 @@ namespace Pixel {
 
 		MaterialTreeComponent(const MaterialTreeComponent & rhs);
 
+		void PostLoad();
+
 		std::vector<Ref<MaterialInstance>> m_Materials;
 
 		Meta()
 		std::vector<std::string> m_MaterialPaths;
+
 
 		void AddMaterialInstance();
 

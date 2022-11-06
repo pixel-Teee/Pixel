@@ -16,6 +16,12 @@
 #include "Pixel/Renderer/3D/Material/Material.h"
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
 #include "GraphNode/MaterialInstanceEditor.h"
+#include "Pixel/Asset/AssetManager.h"
+#include "Pixel/Scene/Components/MaterialTreeComponent.h"
+#include "Pixel/Renderer/3D/Material/ShaderMainFunction.h"
+#include "Pixel/Renderer/3D/Material/InputNode.h"
+#include "Pixel/Renderer/3D/Material/OutputNode.h"
+#include "Pixel/Renderer/3D/Material/Texture2DShaderFunction.h"
 
 #include <chrono>
 
@@ -132,7 +138,7 @@ namespace Pixel
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
 
-		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 1000.0f);
+		m_EditorCamera = EditorCamera(30.0f, 1.788f, 0.01f, 10000.0f);
 
 		m_SimpleSceneCamera = EditorCamera(45.0f, 1.788f, 0.01f, 60.0f);
 		m_SimpleSceneCamera.SetDistance(3.0f);
@@ -204,6 +210,8 @@ namespace Pixel
 		m_ContentBrowserPanel.RegisterGenerateThumbNail(std::bind(&EditorLayer::GenerateThumbNail, this, std::placeholders::_1));
 	
 		m_ContentBrowserPanel.RegisterOpenMaterialInstanceEditor(std::bind(&EditorLayer::CreateMaterialInstanceEditor, this, std::placeholders::_1));
+
+		m_ContentBrowserPanel.RegisertSmartImportToScene(std::bind(&EditorLayer::SmartImportToScene, this, std::placeholders::_1));
 		//Set Sky Box
 		//ownership is belgon to Renderer3D
 		//m_ActiveScene->SetSkyBox(Renderer3D::GetSkyBox());
@@ -900,6 +908,106 @@ namespace Pixel
 	void EditorLayer::CreateMaterialInstanceEditor(const std::string& virtualPath)
 	{
 		m_CurrentMaterialInstanceEditor = CreateRef<MaterialInstanceEditor>(virtualPath);
+	}
+
+	void EditorLayer::SmartImportToScene(const std::string& modelPhysicalPath)
+	{
+		Entity& newEntity = m_ActiveScene->CreateEntity("Empty Entity");
+
+		
+		//add material tree component
+		MaterialTreeComponent& materialTreeComponent = newEntity.AddComponent<MaterialTreeComponent>();
+
+		/*
+		//extract material name
+		//size_t slashPos = modelPhysicalPath.find_last_of("/\\");
+		std::string materialPhysicalPath;
+		size_t dotPos = modelPhysicalPath.find_last_of('.');
+		if (dotPos == std::string::npos)
+		{
+			materialPhysicalPath = modelPhysicalPath + ".tmat";
+		}
+		else
+		{
+			materialPhysicalPath = modelPhysicalPath.substr(0, dotPos) + ".tmat";
+		}
+
+		//create a pbr material in the disk
+		//std::filesystem::path materialPhysicalPath(g_AssetPath / materialPhysicalPath);
+
+		//std::string materialPhysicalPath = 
+
+		Ref<Material> pMaterial = CreateRef<Material>();
+		//pMaterial->GetMainFunction()->ConstructPutNodeAndSetPutNodeOwner();
+		pMaterial->m_pShaderMainFunction = CreateRef<ShaderMainFunction>();
+		pMaterial->GetMainFunction()->ConstructPutNodeAndSetPutNodeOwner();
+		pMaterial->AddShaderFunction(pMaterial->m_pShaderMainFunction);
+		pMaterial->GetMainFunction()->SetFunctionNodeId(1);
+		pMaterial->GetMainFunction()->GetInputNode(0)->SetPutNodeId(2);
+		pMaterial->GetMainFunction()->GetInputNode(1)->SetPutNodeId(3);
+		pMaterial->GetMainFunction()->GetInputNode(2)->SetPutNodeId(4);
+		pMaterial->GetMainFunction()->GetInputNode(3)->SetPutNodeId(5);
+		pMaterial->GetMainFunction()->GetInputNode(4)->SetPutNodeId(6);
+
+		//extract the material name
+		std::string materialName = AssetManager::extractFileName(materialPhysicalPath);
+
+		pMaterial->SetMaterialName(materialName);
+
+		//create three texture
+		Ref<ShaderFunction> pNormal = CreateRef<Texture2DShaderFunction>("TextureParameter" + std::to_string(0), pMaterial);
+		pNormal->AddToMaterialOwner();
+		pNormal->ConstructPutNodeAndSetPutNodeOwner();
+		pNormal->SetFunctionNodeId(40);//hard code
+		pMaterial->AddShaderFunction(pNormal);
+		//std::static_pointer_cast<Texture2DShaderFunction>(pNormal);
+
+		Ref<InputNode> pInputNode = pMaterial->GetMainFunction()->GetInputNode(ShaderMainFunction::PutNodeType::IN_NORMAL);
+		Ref<OutputNode> pOutputNode = pNormal->GetOutputNode(0);
+		pInputNode->Connection(pOutputNode);//link two nodes
+		pMaterial->GetLinks().push_back(glm::vec2(pInputNode->m_id, pOutputNode->m_id));
+
+		Ref<ShaderFunction> pBaseColor = CreateRef<Texture2DShaderFunction>("TextureParameter" + std::to_string(1), pMaterial);
+		pBaseColor->AddToMaterialOwner();
+		pBaseColor->ConstructPutNodeAndSetPutNodeOwner();
+		pBaseColor->SetFunctionNodeId(41);//hard code
+		pMaterial->AddShaderFunction(pBaseColor);
+
+		pInputNode = pMaterial->GetMainFunction()->GetInputNode(ShaderMainFunction::PutNodeType::IN_ALBEDO);
+		pOutputNode = pBaseColor->GetOutputNode(0);
+		pInputNode->Connection(pOutputNode);//link two nodes
+		pMaterial->GetLinks().push_back(glm::vec2(pInputNode->m_id, pOutputNode->m_id));
+
+		Ref<ShaderFunction> pMetallicRoughness = CreateRef<Texture2DShaderFunction>("TextureParameter" + std::to_string(2), pMaterial);
+		pMetallicRoughness->AddToMaterialOwner();
+		pMetallicRoughness->ConstructPutNodeAndSetPutNodeOwner();
+		pMetallicRoughness->SetFunctionNodeId(42);//hard code
+		pMaterial->AddShaderFunction(pMetallicRoughness);
+
+		pInputNode = pMaterial->GetMainFunction()->GetInputNode(ShaderMainFunction::PutNodeType::IN_METALLIC);
+		pOutputNode = pMetallicRoughness->GetOutputNode(1);
+		pInputNode->Connection(pOutputNode);//link two nodes
+		pMaterial->GetLinks().push_back(glm::vec2(pInputNode->m_id, pOutputNode->m_id));
+
+		pInputNode = pMaterial->GetMainFunction()->GetInputNode(ShaderMainFunction::PutNodeType::IN_ROUGHNESS);
+		pOutputNode = pMetallicRoughness->GetOutputNode(2);
+		pInputNode->Connection(pOutputNode);//link two nodes
+		pMaterial->GetLinks().push_back(glm::vec2(pInputNode->m_id, pOutputNode->m_id));
+
+		std::string tempPath(materialPhysicalPath);
+		std::filesystem::path realPath = g_AssetPath / tempPath;
+
+		AssetManager::GetSingleton().CreateTestMaterial(realPath.string(), pMaterial);
+
+		AssetManager::GetSingleton().AddTestMaterialToAssetRegistry(AssetManager::GetSingleton().to_wsrting(realPath.string()));
+		*/
+		//add static mesh component
+		newEntity.AddComponent<StaticMeshComponent>();
+		
+		newEntity.GetComponent<StaticMeshComponent>().m_Model = AssetManager::GetSingleton().GetModel(AssetManager::GetSingleton().GetVirtualPath(modelPhysicalPath), materialTreeComponent);
+		newEntity.GetComponent<StaticMeshComponent>().path = AssetManager::GetSingleton().GetVirtualPath(modelPhysicalPath);
+
+		materialTreeComponent.PostLoad();
 	}
 
 }

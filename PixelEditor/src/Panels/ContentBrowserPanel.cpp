@@ -33,7 +33,7 @@ namespace Pixel {
 	//once we have projects hub, change this
 	extern const std::filesystem::path g_AssetPath = "assets";
 
-	static std::string extractFileName(const std::string& physicalPath)
+	std::string AssetManager::extractFileName(const std::string& physicalPath)
 	{
 		//std::string result;
 
@@ -150,7 +150,7 @@ namespace Pixel {
 				//pMaterial->SetMaterialName(AssetManager::GetSingleton().GetVirtualPath(AssetManager::GetSingleton().to_string(physicalFilePath)));
 
 				//extract the material name
-				std::string materialName = extractFileName(AssetManager::GetSingleton().to_string(physicalFilePath));
+				std::string materialName = AssetManager::extractFileName(AssetManager::GetSingleton().to_string(physicalFilePath));
 
 				pMaterial->SetMaterialName(materialName);
 
@@ -336,6 +336,17 @@ namespace Pixel {
 				if (ImGui::BeginPopup("##RightClickAsset"))
 				{
 					const std::string& itemPath = relativePath.string();
+
+					if (AssetManager::GetSingleton().IsInModelAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
+					{
+						if (ImGui::MenuItem("SmartBrainImportToScene"))
+						{
+							//------smart brain import to scene------
+							m_SmartImportToScene(itemPath);
+							//------smart brain import to scene------
+						}					
+					}
+
 					if (AssetManager::GetSingleton().IsInTestMaterialAssetRegistry(AssetManager::GetSingleton().GetVirtualPath(itemPath)))
 					{
 						if (ImGui::MenuItem("CreateMaterialInstance"))
@@ -531,6 +542,11 @@ namespace Pixel {
 		AssetManager::GetSingleton().CreateMaterialInstance(AssetManager::GetSingleton().to_string(physicalFilePath), pMaterialInstance);
 
 		AssetManager::GetSingleton().AddMaterialInstanceToAssetRegistry(physicalFilePath);
+	}
+
+	void ContentBrowserPanel::RegisertSmartImportToScene(std::function<void(const std::string&)> func)
+	{
+		m_SmartImportToScene = func;
 	}
 
 	void ContentBrowserPanel::RenderMaterialAssetPanel()

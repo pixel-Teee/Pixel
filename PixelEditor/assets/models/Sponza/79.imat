@@ -1,0 +1,3 @@
+{
+    "Pixel::MaterialInstance":{"type":"Pixel::MaterialInstance","m_PSShaderCustomValue":[],"m_PSShaderCustomTexture":[{"type":"Pixel::CustomTexture2D","ConstValueName":"MyNormal","m_VirtualPath":"Texture\\14170708867020035030"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MyAlbedo","m_VirtualPath":"Texture\\16275776544635328252"},{"type":"Pixel::CustomTexture2D","ConstValueName":"MyMetallicRoughness","m_VirtualPath":"Texture\\1219024358953944284"}],"m_MaterialPath":"TestMaterial\\Sponza"}
+}

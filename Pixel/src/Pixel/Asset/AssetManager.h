@@ -12,6 +12,7 @@ namespace Pixel {
 	struct SubMaterial;
 	class Material;
 	class MaterialInstance;
+	class MaterialTreeComponent;
 	//class ShaderMap::ShaderSet;
 	class AssetManager : public Singleton<AssetManager>
 	{
@@ -47,11 +48,15 @@ namespace Pixel {
 
 		bool IsInTestMaterialAssetRegistry(std::string& virtualPath);
 
+		bool IsInModelAssetRegistry(std::string& virtualPath);
+
 		bool IsInMaterialInstanceAssetRegistry(std::string& virtualPath);
 
 		Ref<Texture2D> GetTexture(const std::string& virtualPath);
 
 		Ref<Model> GetModel(const std::string& modelRegistry);
+
+		Ref<Model> GetModel(const std::string& modelRegistry, MaterialTreeComponent& materialTreeComponent);
 
 		Ref<SubMaterial> GetMaterial(const std::string& virtualPath);
 
@@ -95,6 +100,8 @@ namespace Pixel {
 		std::map<std::string, std::string>& GetTestMaterialAssetRegistry();
 
 		std::map<std::string, std::string>& GetMaterialInstanceAssetRegistry();
+
+		static std::string extractFileName(const std::string& physicalPath);
 	private:
 		std::map<std::string, std::string> m_VirtualPathToPhysicalPathTexture;//asset virtual path <=> asset physical path
 

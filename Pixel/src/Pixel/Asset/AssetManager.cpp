@@ -18,6 +18,7 @@
 #include "Pixel/Scene/Components/MaterialComponent.h"
 #include "Pixel/Scene/SceneSerializer.h"
 #include "Pixel/Renderer/3D/Material/MaterialInstance.h"
+#include "Pixel/Scene/Components/MaterialTreeComponent.h"
 //------my library------
 
 namespace Pixel {
@@ -567,6 +568,13 @@ namespace Pixel {
 		return false;
 	}
 
+	bool AssetManager::IsInModelAssetRegistry(std::string& virtualPath)
+	{
+		if (m_VirtualPathToPhysicalPathModel.find(virtualPath) != m_VirtualPathToPhysicalPathModel.end())
+			return true;
+		return false;
+	}
+
 	Ref<Pixel::Texture2D> AssetManager::GetTexture(const std::string& virtualPath)
 	{
 		//first to query the m_textures
@@ -610,6 +618,32 @@ namespace Pixel {
 
 				//load texture to map
 				m_models[modelRegistry] = Model::Create(g_AssetPath.string() + "\\" + physicalAssetPath);
+			}
+			else
+			{
+				//TODO:open the small window to tell user to fix asset registry
+			}
+			return m_models[modelRegistry];
+		}
+	}
+
+	Ref<Model> AssetManager::GetModel(const std::string& modelRegistry, MaterialTreeComponent& materialTreeComponent)
+	{
+		//first to query the m_Models
+		if (m_models.find(modelRegistry) != m_models.end())
+		{
+			return m_models[modelRegistry];
+		}
+		else
+		{
+			std::string physicalAssetPath;
+			//from the m_textureAssetRegistry get the physical path to load texture
+			if (m_VirtualPathToPhysicalPathModel.find(modelRegistry) != m_VirtualPathToPhysicalPathModel.end())
+			{
+				physicalAssetPath = m_VirtualPathToPhysicalPathModel[modelRegistry];
+
+				//load texture to map
+				m_models[modelRegistry] = Model::Create(g_AssetPath.string() + "\\" + physicalAssetPath, materialTreeComponent);
 			}
 			else
 			{

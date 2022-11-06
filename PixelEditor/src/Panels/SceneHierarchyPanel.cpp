@@ -630,7 +630,10 @@ namespace Pixel
 						for (size_t i = 0; i < meshes.size(); ++i)
 						{
 							ImGui::BulletText(meshes[i]->GetName().c_str());//show name
+							ImGui::SameLine();
+							ImGui::Text("[%d]", i);
 						}
+						ImGui::Text("SubMeshCount%d", meshes.size());
 					}
 				}			
 			}
@@ -706,8 +709,8 @@ namespace Pixel
 				{
 					ImGui::ColorEdit3("Light color", glm::value_ptr(component.color));
 					ImGui::Checkbox("GenerateShadowMap", &component.GenerateShadowMap);
-					ImGui::DragFloat("ShadowMap ViewPort Range", &component.Range, 1.0f, 0.0f, 60.0f, "%.2f");
-					ImGui::DragFloat("ShadowMap Distance", &component.MaxDistance, 1.0f, 0.0f, 500.0f, "%.2f");
+					ImGui::DragFloat("ShadowMap ViewPort Range", &component.Range, 1.0f, 0.0f, 1000.0f, "%.2f");
+					ImGui::DragFloat("ShadowMap Distance", &component.MaxDistance, 1.0f, 0.0f, 5000.0f, "%.2f");
 					ImGui::Checkbox("Display ShadowMap Frustum", &component.DisplayShowdowMapFrustum);
 				}
 				else if(component.lightType == LightType::SpotLight)

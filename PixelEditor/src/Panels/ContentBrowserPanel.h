@@ -29,6 +29,8 @@ namespace Pixel {
 		void RegisterOpenMaterialInstanceEditor(std::function<void(const std::string&)> func);
 
 		void CreateMaterialInstance(std::string& virtualPath);
+
+		void RegisertSmartImportToScene(std::function<void(const std::string&)> func);
 	private:
 		void RenderMaterialAssetPanel();
 
@@ -73,5 +75,7 @@ namespace Pixel {
 		std::function<void(Ref<Material> pMaterial)> m_GenerateThumbNail;
 
 		std::function<void(const std::string&)> m_OpenMaterialInstanceEditor;//open material instance editor
+
+		std::function<void(const std::string&)> m_SmartImportToScene;//smart import to scene
 	};
 }

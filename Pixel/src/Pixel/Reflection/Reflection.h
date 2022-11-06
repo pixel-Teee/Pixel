@@ -18,6 +18,7 @@
 #include "Pixel/Scene/Components/StaticMeshComponent.h"
 #include "Pixel/Scene/Components/MaterialComponent.h"
 #include "Pixel/Scene/Components/TestMaterialComponent.h"
+#include "Pixel/Scene/Components/MaterialTreeComponent.h"
 
 #include "Pixel/Core/UUID.h"
 #include "Pixel/Scene/SceneCamera.h"

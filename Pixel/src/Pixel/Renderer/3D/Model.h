@@ -12,6 +12,7 @@
 namespace Pixel {
 	class Skeleton;
 	class Bone;
+	class MaterialTreeComponent;//material tree component
 	class Model
 	{
 	public:
@@ -19,6 +20,11 @@ namespace Pixel {
 		Model(const std::string& path)
 		{
 			LoadModel(path);
+		}
+
+		Model(const std::string& path, MaterialTreeComponent& materialTreeComponent)
+		{
+			LoadModel(path, materialTreeComponent);
 		}
 
 		void Draw(const glm::mat4& transform, Ref<Shader>& shader, std::vector<Ref<Texture2D>> textures, int entityID, Ref<UniformBuffer> modelUniformBuffer);
@@ -38,6 +44,8 @@ namespace Pixel {
 
 		static Ref<Model> Create(const std::string& path);
 
+		static Ref<Model> Create(const std::string& path, MaterialTreeComponent& materialTreeComponent);
+
 		//read heirarchy data, to construct bone 
 		void ReadHeirarchyData(const aiNode* src, Ref<Bone> parentBone);
 
@@ -45,6 +53,9 @@ namespace Pixel {
 		//the model's every meshes
 		std::vector<Ref<StaticMesh>> m_Meshes;
 		std::string m_directory;
+
+		std::string m_ModelPath;
+		uint32_t m_MaterialIndex;//temp for material name
 
 		std::map<std::string, BoneInfo> m_BoneInfoMap;
 		int32_t m_BoneCounter = 0;
@@ -56,8 +67,13 @@ namespace Pixel {
 
 		//load model and populate vertex information
 		void LoadModel(const std::string& path);
+
+		void LoadModel(const std::string& path, MaterialTreeComponent& materialTreeComponent);
+
 		void ProcessNode(aiNode* node, const aiScene* scene);
+		void ProcessNode(aiNode* node, const aiScene* scene, MaterialTreeComponent& materialTreeComponent);
 		Ref<StaticMesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
+		Ref<StaticMesh> ProcessMesh(aiMesh* mesh, const aiScene* scene, MaterialTreeComponent& materialTreeComponent);
 
 		friend class BaseRenderer;
 		friend class Animation;

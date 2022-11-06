@@ -1318,7 +1318,7 @@ namespace Pixel
 	template<>
 	void Scene::OnComponentAdded<MaterialTreeComponent>(Entity entity, MaterialTreeComponent& component)
 	{
-
+	
 	}
 }
 

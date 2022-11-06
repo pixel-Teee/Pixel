@@ -4028,7 +4028,7 @@ namespace Pixel {
 			//save the shader code to the cache path
 			std::string shaderPath = "assets/shaders/Cache/GeometryPassVertex" + pMaterial->m_MaterialName + ".hlsl";
 
-			PIXEL_CORE_INFO("{0}", shaderCode);
+			//PIXEL_CORE_INFO("{0}", shaderCode);
 
 			//------write to cache path------
 			std::ofstream cache(shaderPath);
@@ -4066,7 +4066,7 @@ namespace Pixel {
 			//save the shader code to cache path
 			std::string shaderPath = "assets/shaders/Cache/GeometryPassPixel" + pMaterial->m_MaterialName + ".hlsl";
 
-			PIXEL_CORE_INFO("{0}", shaderCode);
+			//PIXEL_CORE_INFO("{0}", shaderCode);
 
 			//------write to cache path------
 			std::ofstream cache(shaderPath);

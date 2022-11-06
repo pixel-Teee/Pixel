@@ -131,6 +131,8 @@ float ClearCoatRoughness;
 };
 PixelOut PS(VertexOut pin){
 PixelOut pixelOut = (PixelOut)(0.0f);
-pixelOut.finalColor = a;
+float2  TexCoordinate6 = float2(0, 0);
+TexCoordinate6 = pin.TexCoord;
+pixelOut.finalColor = float4(TexCoordinate6, 0.0f, 1.0f);
 return pixelOut;
 }

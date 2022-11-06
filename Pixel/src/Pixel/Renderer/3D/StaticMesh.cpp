@@ -568,12 +568,23 @@ namespace Pixel {
 		pPixelShader->SetData("CbMaterial.ShadingModelID", &shadingModelId);
 		pPixelShader->SubmitData(pContext);
 
+		//check texture is empty?
+		bool isEmpty = false;
 		for (size_t i = 0; i < pMaterialInstance->m_PSShaderCustomTexture.size(); ++i)
 		{
-			pPixelShader->SetTextureDescriptor(pMaterialInstance->m_PSShaderCustomTexture[i]->ConstValueName, pMaterialInstance->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
+			if (pMaterialInstance->m_PSShaderCustomTexture[i] == nullptr)
+				isEmpty = true;
 		}
 
-		if (pMaterialInstance->m_PSShaderCustomTexture.size() > 0)
+		if (!isEmpty)
+		{
+			for (size_t i = 0; i < pMaterialInstance->m_PSShaderCustomTexture.size(); ++i)
+			{
+				pPixelShader->SetTextureDescriptor(pMaterialInstance->m_PSShaderCustomTexture[i]->ConstValueName, pMaterialInstance->m_PSShaderCustomTexture[i]->m_pTexture->GetHandle());
+			}
+		}	
+
+		if (pMaterialInstance->m_PSShaderCustomTexture.size() > 0 && !isEmpty)
 		{
 			pContext->SetDescriptorHeap(DescriptorHeapType::CBV_UAV_SRV, Application::Get().GetRenderer()->GetDescriptorHeap());//set descriptor heap
 			uint32_t DescriptorSize = Device::Get()->GetDescriptorAllocator((uint32_t)DescriptorHeapType::CBV_UAV_SRV)->GetDescriptorSize();

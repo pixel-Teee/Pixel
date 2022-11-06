@@ -50,6 +50,8 @@ namespace Pixel
 		void GenerateThumbNail(Ref<Material> pMaterial);
 
 		void CreateMaterialInstanceEditor(const std::string& virtualPath);
+
+		void SmartImportToScene(const std::string& modelPhysicalPath);
 	private:
 		OrthographicCameraController m_CameraController;
 
