@@ -4,7 +4,7 @@
 
 namespace Pixel {
 
-	class Animator {
+	class Animator {//animator is animation tree
 	public:
 		
 	};
