@@ -111,6 +111,11 @@ namespace Pixel {
 			{
 				//create model
 				std::wstring physicalFilePath = FileDialogs::OpenFile(L"model(*.fbx)\0*.fbx\0model(*.obj)\0*.obj\0model(*.gltf)\0*.gltf\0model(*.glb)\0*.glb\0", std::filesystem::absolute(m_CurrentDirectory).wstring().c_str());
+
+				//from physicalFilePath to load model, then serialize a custom model file
+
+				//record custom model file path
+				
 				AssetManager::GetSingleton().AddModelToAssetRegistry(AssetManager::GetSingleton().to_string(physicalFilePath));
 			}
 
